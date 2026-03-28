@@ -5,6 +5,7 @@ import type {
   SurfaceMaterialName,
 } from '../types/board-definition';
 import type { GameState } from '../game/game-state';
+import { getDistanceToFlipperSurface } from '../game/flipper-geometry';
 
 export type GameAudioEvent =
   | {
@@ -314,20 +315,8 @@ const getNearbyImpactMaterial = (
 
   for (const [index, flipper] of board.flippers.entries()) {
     const angle = state.flippers[index]?.angle ?? flipper.restingAngle;
-    const tipX = flipper.x + Math.cos(angle) * flipper.length;
-    const tipY = flipper.y + Math.sin(angle) * flipper.length;
 
-    if (
-      getDistanceToSegment(
-        position.x,
-        position.y,
-        flipper.x,
-        flipper.y,
-        tipX,
-        tipY,
-      ) <=
-      radius + flipper.thickness / 2 + 10
-    ) {
+    if (getDistanceToFlipperSurface(position, flipper, angle) <= radius + 10) {
       return flipper.material;
     }
   }

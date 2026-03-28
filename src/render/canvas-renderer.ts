@@ -1,5 +1,9 @@
 import type { EditorSelection } from '../editor/editor-types';
 import { getGuideHandles } from '../editor/table-editor';
+import {
+  getFlipperBaseRadius,
+  getFlipperTipRadius,
+} from '../game/flipper-geometry';
 import { getSurfaceMaterial } from '../game/materials';
 import type { GameState } from '../game/game-state';
 import { getStatusLabel } from '../game/game-loop';
@@ -328,19 +332,14 @@ export class CanvasRenderer {
     angle: number,
     color: string,
   ): void {
-    const radius = flipper.thickness / 2;
+    const baseRadius = getFlipperBaseRadius(flipper);
+    const tipRadius = getFlipperTipRadius(flipper);
 
     context.save();
     context.translate(flipper.x, flipper.y);
     context.rotate(angle);
     context.fillStyle = color;
-    context.beginPath();
-    context.moveTo(0, -radius);
-    context.lineTo(flipper.length - radius, -radius);
-    context.arc(flipper.length - radius, 0, radius, -Math.PI / 2, Math.PI / 2);
-    context.lineTo(0, radius);
-    context.arc(0, 0, radius, Math.PI / 2, -Math.PI / 2);
-    context.closePath();
+    this.traceFlipperPath(context, flipper);
     context.fill();
 
     context.strokeStyle = PALETTE.cream;
@@ -349,7 +348,10 @@ export class CanvasRenderer {
 
     context.fillStyle = PALETTE.cream;
     context.beginPath();
-    context.arc(radius * 0.6, 0, radius * 0.32, 0, Math.PI * 2);
+    context.arc(baseRadius * 0.6, 0, baseRadius * 0.32, 0, Math.PI * 2);
+    context.fill();
+    context.beginPath();
+    context.arc(flipper.length - tipRadius * 0.35, 0, tipRadius * 0.2, 0, Math.PI * 2);
     context.fill();
     context.restore();
   }
@@ -599,22 +601,31 @@ export class CanvasRenderer {
     context: CanvasRenderingContext2D,
     flipper: FlipperDefinition,
   ): void {
-    const angle = flipper.restingAngle;
-    const tipX = flipper.x + Math.cos(angle) * flipper.length;
-    const tipY = flipper.y + Math.sin(angle) * flipper.length;
-
     context.save();
+    context.translate(flipper.x, flipper.y);
+    context.rotate(flipper.restingAngle);
     context.strokeStyle = '#ffd166';
     context.lineWidth = 4;
     context.setLineDash([10, 6]);
-    context.beginPath();
-    context.moveTo(flipper.x, flipper.y);
-    context.lineTo(tipX, tipY);
-    context.stroke();
-    context.beginPath();
-    context.arc(flipper.x, flipper.y, flipper.thickness, 0, Math.PI * 2);
+    this.traceFlipperPath(context, flipper);
     context.stroke();
     context.restore();
+  }
+
+  private traceFlipperPath(
+    context: CanvasRenderingContext2D,
+    flipper: FlipperDefinition,
+  ): void {
+    const baseRadius = getFlipperBaseRadius(flipper);
+    const tipRadius = getFlipperTipRadius(flipper);
+
+    context.beginPath();
+    context.moveTo(0, -baseRadius);
+    context.lineTo(flipper.length, -tipRadius);
+    context.arc(flipper.length, 0, tipRadius, -Math.PI / 2, Math.PI / 2);
+    context.lineTo(0, baseRadius);
+    context.arc(0, 0, baseRadius, Math.PI / 2, -Math.PI / 2);
+    context.closePath();
   }
 
   private drawCircularSelection(

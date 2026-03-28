@@ -7,6 +7,10 @@ import type {
   StandupTargetDefinition,
 } from '../types/board-definition';
 import type { ContactData } from './contact-types';
+import {
+  getFlipperFaceNormal,
+  sampleFlipperProfile,
+} from './flipper-geometry';
 import type {
   DropTargetState,
   FlipperState,
@@ -444,50 +448,29 @@ const applyFlipperCollisionAtAngle = (
     flipper.material,
     board.surfaceMaterials,
   );
-  const endpoints = {
-    start: {
-      x: flipper.x,
-      y: flipper.y,
-    },
-    end: {
-      x: flipper.x + Math.cos(collisionAngle) * flipper.length,
-      y: flipper.y + Math.sin(collisionAngle) * flipper.length,
-    },
-  };
-  const collision = getSegmentCollision(
-    state,
-    endpoints.start,
-    endpoints.end,
-    flipper.thickness,
-    solver,
-  );
+  const collision = sampleFlipperProfile(state.ball.position, flipper, collisionAngle);
+  const overlap = state.ball.radius + collision.radius - collision.distance;
 
-  if (!collision) {
+  if (overlap <= 0) {
     return false;
   }
 
-  const fallbackNormal = {
-    x:
-      flipper.side === 'left'
-        ? Math.sin(collisionAngle)
-        : -Math.sin(collisionAngle),
-    y:
-      flipper.side === 'left'
-        ? -Math.cos(collisionAngle)
-        : Math.cos(collisionAngle),
-  };
+  const fallbackNormal = getFlipperFaceNormal(flipper, collisionAngle);
+  const normal = { ...collision.normal };
 
   if (
-    collision.normal.x * fallbackNormal.x +
-      collision.normal.y * fallbackNormal.y <
-    0
+    normal.x * fallbackNormal.x + normal.y * fallbackNormal.y < 0
   ) {
-    collision.normal.x *= -1;
-    collision.normal.y *= -1;
+    normal.x *= -1;
+    normal.y *= -1;
   }
 
-  const relativeContactX = collision.point.x - flipper.x;
-  const relativeContactY = collision.point.y - flipper.y;
+  const contactPoint = {
+    x: collision.center.x + normal.x * collision.radius,
+    y: collision.center.y + normal.y * collision.radius,
+  };
+  const relativeContactX = contactPoint.x - flipper.x;
+  const relativeContactY = contactPoint.y - flipper.y;
   const contactRadiusSquared =
     relativeContactX * relativeContactX + relativeContactY * relativeContactY;
   const flipperMomentOfInertia =
@@ -495,13 +478,13 @@ const applyFlipperCollisionAtAngle = (
   const surfaceVelocityX = -motion.angularVelocity * relativeContactY;
   const surfaceVelocityY = motion.angularVelocity * relativeContactX;
   const incomingNormalSpeed =
-    (state.ball.linearVelocity.x - surfaceVelocityX) * collision.normal.x +
-    (state.ball.linearVelocity.y - surfaceVelocityY) * collision.normal.y;
+    (state.ball.linearVelocity.x - surfaceVelocityX) * normal.x +
+    (state.ball.linearVelocity.y - surfaceVelocityY) * normal.y;
   const contact: ContactData = {
-    point: collision.point,
-    normal: collision.normal,
-    tangent: getContactTangent(collision.normal),
-    overlap: collision.overlap,
+    point: contactPoint,
+    normal,
+    tangent: getContactTangent(normal),
+    overlap,
     surfaceVelocity: {
       x: surfaceVelocityX,
       y: surfaceVelocityY,
@@ -514,7 +497,7 @@ const applyFlipperCollisionAtAngle = (
     restitutionScale: motion.restitutionScale,
   };
 
-  if (incomingNormalSpeed < 0 || collision.overlap > solver.epsilon) {
+  if (incomingNormalSpeed < 0 || overlap > solver.epsilon) {
     resolveBallContact(state.ball, contact, solver);
   }
 

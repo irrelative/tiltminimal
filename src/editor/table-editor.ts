@@ -6,6 +6,7 @@ import {
   createDefaultSpinner,
   createDefaultStandupTarget,
 } from '../boards/table-library';
+import { getDistanceToFlipperSurface } from '../game/flipper-geometry';
 import type {
   BoardDefinition,
   FlipperSide,
@@ -137,10 +138,7 @@ export const hitTestSelection = (
       continue;
     }
 
-    if (
-      distanceToFlipper(point, flipper) <=
-      flipper.thickness / 2 + SELECTION_PADDING
-    ) {
+    if (getDistanceToFlipperSurface(point, flipper) <= SELECTION_PADDING) {
       return { kind: 'flipper', index };
     }
   }
@@ -794,29 +792,6 @@ const clampPoint = (
   x: clamp(point.x, padding, board.width - padding),
   y: clamp(point.y, padding, board.height - padding),
 });
-
-const distanceToFlipper = (
-  point: Point,
-  flipper: BoardDefinition['flippers'][number],
-): number => {
-  const angle = flipper.restingAngle;
-  const tipX = flipper.x + Math.cos(angle) * flipper.length;
-  const tipY = flipper.y + Math.sin(angle) * flipper.length;
-  const segmentLengthSquared =
-    (tipX - flipper.x) * (tipX - flipper.x) +
-    (tipY - flipper.y) * (tipY - flipper.y);
-  const projection = clamp(
-    ((point.x - flipper.x) * (tipX - flipper.x) +
-      (point.y - flipper.y) * (tipY - flipper.y)) /
-      segmentLengthSquared,
-    0,
-    1,
-  );
-  const closestX = flipper.x + (tipX - flipper.x) * projection;
-  const closestY = flipper.y + (tipY - flipper.y) * projection;
-
-  return Math.hypot(point.x - closestX, point.y - closestY);
-};
 
 const distanceToGuide = (point: Point, guide: GuideDefinition): number => {
   const segmentX = guide.end.x - guide.start.x;

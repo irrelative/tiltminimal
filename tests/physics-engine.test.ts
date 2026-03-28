@@ -4,6 +4,11 @@ import { createBlankTable } from '../src/boards/table-library';
 import { classicTable } from '../src/boards/classic-table';
 import { getFlipperBySide } from '../src/boards/table-library';
 import type { InputState } from '../src/input/keyboard-input';
+import {
+  getFlipperFaceNormal,
+  getFlipperRadiusAt,
+  getFlipperTipRadius,
+} from '../src/game/flipper-geometry';
 import { createInitialGameState } from '../src/game/game-state';
 import { stepGame } from '../src/game/physics-engine';
 import type { FlipperDefinition } from '../src/types/board-definition';
@@ -392,14 +397,11 @@ const placeBallOnFlipperSurface = (
   const segmentY = Math.sin(angle) * flipper.length;
   const surfaceX = flipper.x + segmentX * along;
   const surfaceY = flipper.y + segmentY * along;
-  const normalX =
-    flipper.side === 'left' ? Math.sin(angle) : -Math.sin(angle);
-  const normalY =
-    flipper.side === 'left' ? -Math.cos(angle) : Math.cos(angle);
-  const distance = state.ball.radius + flipper.thickness / 2 - 1;
+  const normal = getFlipperFaceNormal(flipper, angle);
+  const distance = state.ball.radius + getFlipperRadiusAt(flipper, along) - 1;
 
-  state.ball.position.x = surfaceX + normalX * distance;
-  state.ball.position.y = surfaceY + normalY * distance;
+  state.ball.position.x = surfaceX + normal.x * distance;
+  state.ball.position.y = surfaceY + normal.y * distance;
 };
 
 const getFlipperState = (
@@ -437,7 +439,7 @@ const placeBallOnFlipperTip = (
   const tipX = flipper.x + Math.cos(angle) * flipper.length;
   const tipY = flipper.y + Math.sin(angle) * flipper.length;
   const magnitude = Math.hypot(direction.x, direction.y);
-  const distance = state.ball.radius + flipper.thickness / 2 - 1;
+  const distance = state.ball.radius + getFlipperTipRadius(flipper) - 1;
 
   state.ball.position.x = tipX + (direction.x / magnitude) * distance;
   state.ball.position.y = tipY + (direction.y / magnitude) * distance;
