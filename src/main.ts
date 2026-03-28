@@ -77,6 +77,12 @@ const modeTitle = queryRequired<HTMLElement>('#mode-title');
 const modeCopy = queryRequired<HTMLElement>('#mode-copy');
 const playTableSelect = queryRequired<HTMLSelectElement>('#play-table-select');
 const playTableMeta = queryRequired<HTMLElement>('#play-table-meta');
+const playResetBallButton =
+  queryRequired<HTMLButtonElement>('#play-reset-ball');
+const playDebugStatus = queryRequired<HTMLElement>('#play-debug-status');
+const playDebugPosition = queryRequired<HTMLElement>('#play-debug-position');
+const playDebugVelocity = queryRequired<HTMLElement>('#play-debug-velocity');
+const playDebugSpin = queryRequired<HTMLElement>('#play-debug-spin');
 const debugLinkEditor = queryRequired<HTMLAnchorElement>('#debug-link-editor');
 const debugLinkPlay = queryRequired<HTMLAnchorElement>('#debug-link-play');
 
@@ -389,6 +395,10 @@ function bootPlayRoute(): void {
     setActiveTableId(state.activeTableId);
     syncPlayRoutePanel();
     restartStandalonePlay();
+  });
+
+  playResetBallButton.addEventListener('click', () => {
+    state.loop?.resetBall();
   });
 
   syncPlayRoutePanel();
@@ -838,6 +848,22 @@ function restartStandalonePlay(): void {
   state.input = input;
   state.loop = loop;
   modeTitle.textContent = board.name;
+  loop.setOnStateChange((nextState) => {
+    playDebugStatus.textContent = nextState.status;
+    playDebugPosition.textContent = formatVector2(
+      nextState.ball.position.x,
+      nextState.ball.position.y,
+    );
+    playDebugVelocity.textContent = formatVector2(
+      nextState.ball.linearVelocity.x,
+      nextState.ball.linearVelocity.y,
+    );
+    playDebugSpin.textContent = formatVector3(
+      nextState.ball.angularVelocity.x,
+      nextState.ball.angularVelocity.y,
+      nextState.ball.angularVelocity.z,
+    );
+  });
   loop.start();
 }
 
@@ -857,4 +883,12 @@ function syncPlayRoutePanel(): void {
 
   const active = getActiveTable();
   playTableMeta.textContent = `${active.builtIn ? 'Built-in table' : 'Custom or edited table'} · ${active.board.bumpers.length} bumpers · ${active.board.flippers.length} flippers`;
+}
+
+function formatVector2(x: number, y: number): string {
+  return `${Math.round(x)}, ${Math.round(y)}`;
+}
+
+function formatVector3(x: number, y: number, z: number): string {
+  return `${Math.round(x)}, ${Math.round(y)}, ${Math.round(z)}`;
 }

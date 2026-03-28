@@ -291,6 +291,33 @@ body[data-route='play'] .toolbar-main {
   background: rgba(255, 255, 255, 0.04);
 }
 
+.play-debug-stats {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.play-debug-stats div {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.play-debug-stats dt {
+  margin: 0 0 4px;
+  color: var(--cool);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.play-debug-stats dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.96rem;
+  font-weight: 700;
+}
+
 body[data-route='editor'] .play-route-panel {
   display: none;
 }

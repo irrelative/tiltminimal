@@ -121,6 +121,30 @@
               </label>
               <p id="play-table-meta" class="meta-text"></p>
             </section>
+            <section class="play-route-panel" aria-label="Ball debug controls">
+              <p class="eyebrow">Debug</p>
+              <button id="play-reset-ball" type="button" class="accent-button">
+                Reset ball
+              </button>
+              <dl class="play-debug-stats">
+                <div>
+                  <dt>Status</dt>
+                  <dd id="play-debug-status">Waiting</dd>
+                </div>
+                <div>
+                  <dt>Position</dt>
+                  <dd id="play-debug-position">0, 0</dd>
+                </div>
+                <div>
+                  <dt>Velocity</dt>
+                  <dd id="play-debug-velocity">0, 0</dd>
+                </div>
+                <div>
+                  <dt>Spin</dt>
+                  <dd id="play-debug-spin">0, 0, 0</dd>
+                </div>
+              </dl>
+            </section>
             <nav class="debug-menu" aria-label="Debug menu">
               <p class="eyebrow">Debug Menu</p>
               <div class="debug-links">
