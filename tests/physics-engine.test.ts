@@ -14,6 +14,7 @@ const idleInput: InputState = {
   launchPressed: false,
 };
 const leftFlipper = getFlipperBySide(classicTable, 'left');
+const rightFlipper = getFlipperBySide(classicTable, 'right');
 
 describe('stepGame', () => {
   it('keeps the ball locked in the launcher while space is held', () => {
@@ -207,6 +208,25 @@ describe('stepGame', () => {
     expect(next.ball.linearVelocity.y).toBeLessThan(1400);
   });
 
+  it('prevents a fast ball from tunneling through the right flipper', () => {
+    const state = createInitialGameState(classicTable);
+    state.status = 'playing';
+    placeBallOnFlipperSurface(state, rightFlipper, 0.68);
+    state.ball.position.y -= 18;
+    state.ball.linearVelocity.x = 0;
+    state.ball.linearVelocity.y = 1400;
+
+    const next = stepGame(
+      state,
+      classicTable,
+      { ...idleInput, rightPressed: true },
+      1 / 60,
+    );
+
+    expect(next.ball.position.y).toBeLessThan(state.ball.position.y + 20);
+    expect(next.ball.linearVelocity.y).toBeLessThan(1400);
+  });
+
   it('marks the ball drained after it falls below the board', () => {
     const state = createInitialGameState(classicTable);
     state.status = 'playing';
@@ -351,8 +371,10 @@ const placeBallOnFlipperSurface = (
   const segmentY = Math.sin(angle) * flipper.length;
   const surfaceX = flipper.x + segmentX * along;
   const surfaceY = flipper.y + segmentY * along;
-  const normalX = Math.sin(angle);
-  const normalY = -Math.cos(angle);
+  const normalX =
+    flipper.side === 'left' ? Math.sin(angle) : -Math.sin(angle);
+  const normalY =
+    flipper.side === 'left' ? -Math.cos(angle) : Math.cos(angle);
   const distance = state.ball.radius + flipper.thickness / 2 - 1;
 
   state.ball.position.x = surfaceX + normalX * distance;

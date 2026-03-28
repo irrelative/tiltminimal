@@ -496,8 +496,14 @@ const applyFlipperCollisionAtAngle = (
   }
 
   const fallbackNormal = {
-    x: Math.sin(collisionAngle),
-    y: -Math.cos(collisionAngle),
+    x:
+      flipper.side === 'left'
+        ? Math.sin(collisionAngle)
+        : -Math.sin(collisionAngle),
+    y:
+      flipper.side === 'left'
+        ? -Math.cos(collisionAngle)
+        : Math.cos(collisionAngle),
   };
 
   if (
