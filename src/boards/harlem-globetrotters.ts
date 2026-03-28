@@ -13,6 +13,12 @@ export const harlemGlobetrottersTable = createBoardDefinition({
     playfield: 'playfieldWood',
     walls: 'metalGuide',
   },
+  physics: {
+    launch: {
+      minLaunchSpeed: 1150,
+      maxLaunchSpeed: 2400,
+    },
+  },
   bumpers: [
     { x: 315, y: 338, radius: 48, score: 100, material: 'rubberPost' },
     { x: 450, y: 430, radius: 44, score: 100, material: 'rubberPost' },
