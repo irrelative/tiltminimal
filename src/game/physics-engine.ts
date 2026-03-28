@@ -19,6 +19,7 @@ export const stepGame = (
   deltaSeconds: number,
 ): GameState => {
   const dt = Math.min(deltaSeconds, 1 / 30);
+  const flipperDeltaSeconds = Math.max(deltaSeconds, 0);
   const launchChargeDelta = Math.max(deltaSeconds, 0);
   const { flipper, launch, solver } = board.physics;
   const leftFlipper = getFlipperBySide(board, 'left');
@@ -28,14 +29,14 @@ export const stepGame = (
       leftFlipper,
       state.flippers.left,
       input.leftPressed,
-      dt,
+      flipperDeltaSeconds,
       flipper.swingAngularSpeed,
     ),
     right: advanceFlipper(
       rightFlipper,
       state.flippers.right,
       input.rightPressed,
-      dt,
+      flipperDeltaSeconds,
       flipper.swingAngularSpeed,
     ),
   };

@@ -92,21 +92,40 @@ describe('stepGame', () => {
     expect(next.flippers.left.angle).toBeGreaterThan(leftFlipper.activeAngle);
     expect(next.flippers.left.angularVelocity).toBeLessThan(0);
 
-    let fullyRaised = next;
-    for (let frame = 0; frame < 20; frame += 1) {
-      fullyRaised = stepGame(
-        fullyRaised,
-        classicTable,
-        { ...idleInput, leftPressed: true },
-        1 / 60,
-      );
-    }
+    const fullyRaised = stepGame(
+      next,
+      classicTable,
+      { ...idleInput, leftPressed: true },
+      1 / 60,
+    );
+    const settled = stepGame(
+      fullyRaised,
+      classicTable,
+      { ...idleInput, leftPressed: true },
+      1 / 60,
+    );
 
     expect(fullyRaised.flippers.left.angle).toBeCloseTo(
       leftFlipper.activeAngle,
       5,
     );
-    expect(fullyRaised.flippers.left.angularVelocity).toBe(0);
+    expect(settled.flippers.left.angle).toBeCloseTo(leftFlipper.activeAngle, 5);
+    expect(settled.flippers.left.angularVelocity).toBe(0);
+  });
+
+  it('keeps flipper animation at real-time speed on long frames', () => {
+    const state = createInitialGameState(classicTable);
+    state.status = 'playing';
+
+    const next = stepGame(
+      state,
+      classicTable,
+      { ...idleInput, leftPressed: true },
+      1 / 15,
+    );
+
+    expect(next.flippers.left.angle).toBeCloseTo(leftFlipper.activeAngle, 5);
+    expect(next.flippers.left.angularVelocity).toBeLessThan(0);
   });
 
   it('collides against the rounded flipper tip', () => {

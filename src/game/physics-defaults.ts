@@ -65,7 +65,7 @@ export const physicsDefaults = {
       maxLaunchDrift: -260,
     },
     flipper: {
-      swingAngularSpeed: 15,
+      swingAngularSpeed: 30,
       collisionAngleStep: 0.08,
     },
     solver: {
