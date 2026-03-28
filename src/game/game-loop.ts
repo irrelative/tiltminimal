@@ -2,12 +2,14 @@ import type { InputState, KeyboardInput } from '../input/keyboard-input';
 import type { BoardDefinition } from '../types/board-definition';
 import type { CanvasRenderer } from '../render/canvas-renderer';
 import type { GameState } from './game-state';
+import { resetBall } from './game-state';
 import { getLaunchChargeRatio, stepGame } from './physics-engine';
 
 export class GameLoop {
   private animationFrameId = 0;
   private lastFrameTime = 0;
   private running = false;
+  private onStateChange?: (state: GameState) => void;
 
   constructor(
     private state: GameState,
@@ -25,6 +27,7 @@ export class GameLoop {
     this.lastFrameTime = 0;
     this.input.connect();
     this.renderer.render(this.state, this.input.getState());
+    this.emitStateChange();
     this.animationFrameId = window.requestAnimationFrame(this.onFrame);
   }
 
@@ -36,6 +39,16 @@ export class GameLoop {
     window.cancelAnimationFrame(this.animationFrameId);
     this.input.disconnect();
     this.running = false;
+  }
+
+  resetBall(): void {
+    this.state = resetBall(this.state, this.board);
+    this.renderer.render(this.state, this.input.getState());
+    this.emitStateChange();
+  }
+
+  setOnStateChange(listener: (state: GameState) => void): void {
+    this.onStateChange = listener;
   }
 
   private readonly onFrame = (frameTime: number): void => {
@@ -54,8 +67,13 @@ export class GameLoop {
       deltaSeconds,
     );
     this.renderer.render(this.state, this.input.getState());
+    this.emitStateChange();
     this.animationFrameId = window.requestAnimationFrame(this.onFrame);
   };
+
+  private emitStateChange(): void {
+    this.onStateChange?.(this.state);
+  }
 }
 
 export const getStatusLabel = (state: GameState, input: InputState): string => {

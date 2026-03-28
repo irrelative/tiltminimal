@@ -28,6 +28,13 @@ export interface FlipperDefinition extends Point {
   material: SurfaceMaterialName;
 }
 
+export interface GuideDefinition {
+  start: Point;
+  end: Point;
+  thickness: number;
+  material: SurfaceMaterialName;
+}
+
 export interface BoardDefinition {
   name: string;
   width: number;
@@ -41,6 +48,7 @@ export interface BoardDefinition {
     walls: SurfaceMaterialName;
   };
   bumpers: BumperDefinition[];
+  guides: GuideDefinition[];
   flippers: {
     left: FlipperDefinition;
     right: FlipperDefinition;

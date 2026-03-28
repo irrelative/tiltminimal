@@ -23,6 +23,44 @@ export const classicTable: BoardDefinition = {
     { x: 600, y: 420, radius: 44, score: 100, material: 'rubberPost' },
     { x: 450, y: 600, radius: 52, score: 250, material: 'rubberPost' },
   ],
+  guides: [
+    {
+      start: { x: 90, y: 880 },
+      end: { x: 170, y: 1260 },
+      thickness: 14,
+      material: 'metalGuide',
+    },
+    {
+      start: { x: 250, y: 1000 },
+      end: { x: 214, y: 1284 },
+      thickness: 18,
+      material: 'metalGuide',
+    },
+    {
+      start: { x: 220, y: 1088 },
+      end: { x: 362, y: 1144 },
+      thickness: 20,
+      material: 'rubberPost',
+    },
+    {
+      start: { x: 810, y: 880 },
+      end: { x: 730, y: 1260 },
+      thickness: 14,
+      material: 'metalGuide',
+    },
+    {
+      start: { x: 650, y: 1000 },
+      end: { x: 686, y: 1284 },
+      thickness: 18,
+      material: 'metalGuide',
+    },
+    {
+      start: { x: 680, y: 1088 },
+      end: { x: 538, y: 1144 },
+      thickness: 20,
+      material: 'rubberPost',
+    },
+  ],
   flippers: {
     left: {
       x: 270,

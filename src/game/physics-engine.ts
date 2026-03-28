@@ -1,5 +1,9 @@
 import type { InputState } from '../input/keyboard-input';
-import type { BoardDefinition, FlipperDefinition } from '../types/board-definition';
+import type {
+  BoardDefinition,
+  FlipperDefinition,
+  GuideDefinition,
+} from '../types/board-definition';
 import { getSurfaceMaterial } from './materials';
 import type { GameState } from './game-state';
 import { resetBall } from './game-state';
@@ -129,6 +133,7 @@ export const stepGame = (
   next.ball.position.y += next.ball.linearVelocity.y * dt;
 
   resolveWallCollisions(next, board);
+  resolveGuideCollisions(next, board);
   resolveBumperCollisions(next, board);
   resolveFlipperCollisions(next, board, {
     leftJustPressed,
@@ -167,6 +172,66 @@ const resolveWallCollisions = (
     ball.position.y = ball.radius;
     ball.linearVelocity.y =
       Math.abs(ball.linearVelocity.y) * wallMaterial.restitution;
+  }
+};
+
+const resolveGuideCollisions = (
+  state: GameState,
+  board: BoardDefinition,
+): void => {
+  for (const guide of board.guides) {
+    resolveGuideCollision(state, guide);
+  }
+};
+
+const resolveGuideCollision = (
+  state: GameState,
+  guide: GuideDefinition,
+): void => {
+  const guideMaterial = getSurfaceMaterial(guide.material);
+  const segmentX = guide.end.x - guide.start.x;
+  const segmentY = guide.end.y - guide.start.y;
+  const segmentLengthSquared = segmentX * segmentX + segmentY * segmentY;
+  const dx = state.ball.position.x - guide.start.x;
+  const dy = state.ball.position.y - guide.start.y;
+  const projection = clamp(
+    (dx * segmentX + dy * segmentY) / segmentLengthSquared,
+    0,
+    1,
+  );
+  const closestX = guide.start.x + segmentX * projection;
+  const closestY = guide.start.y + segmentY * projection;
+  const offsetX = state.ball.position.x - closestX;
+  const offsetY = state.ball.position.y - closestY;
+  const distance = Math.hypot(offsetX, offsetY) || EPSILON;
+  const overlap = state.ball.radius + guide.thickness / 2 - distance;
+
+  if (overlap <= 0) {
+    return;
+  }
+
+  const fallbackNormalX = -segmentY / (Math.hypot(segmentX, segmentY) || 1);
+  const fallbackNormalY = segmentX / (Math.hypot(segmentX, segmentY) || 1);
+  const normalX =
+    Math.abs(offsetX) > EPSILON || Math.abs(offsetY) > EPSILON
+      ? offsetX / distance
+      : fallbackNormalX;
+  const normalY =
+    Math.abs(offsetX) > EPSILON || Math.abs(offsetY) > EPSILON
+      ? offsetY / distance
+      : fallbackNormalY;
+  const incomingNormalSpeed =
+    state.ball.linearVelocity.x * normalX +
+    state.ball.linearVelocity.y * normalY;
+
+  state.ball.position.x += normalX * overlap;
+  state.ball.position.y += normalY * overlap;
+
+  if (incomingNormalSpeed < 0) {
+    state.ball.linearVelocity.x -=
+      (1 + guideMaterial.restitution) * incomingNormalSpeed * normalX;
+    state.ball.linearVelocity.y -=
+      (1 + guideMaterial.restitution) * incomingNormalSpeed * normalY;
   }
 };
 

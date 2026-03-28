@@ -10,28 +10,60 @@
   </head>
   <body>
     <main class="app-shell">
-      <section class="playfield-frame">
-        <header class="masthead">
-          <button
-            class="masthead-close"
-            type="button"
-            aria-label="Dismiss header"
-          >
-            ×
-          </button>
-          <p class="eyebrow">Pinball Browser</p>
-          <h1>2D-first pinball scaffolding</h1>
-          <p class="lede">
-            Board data, game state, and rendering stay separate so new tables can
-            plug into the same runtime.
+      <section class="workspace">
+        <section class="playfield-frame">
+          <header class="masthead">
+            <button
+              class="masthead-close"
+              type="button"
+              aria-label="Dismiss header"
+            >
+              ×
+            </button>
+            <p class="eyebrow">Pinball Browser</p>
+            <h1>2D-first pinball scaffolding</h1>
+            <p class="lede">
+              Board data, game state, and rendering stay separate so new tables can
+              plug into the same runtime.
+            </p>
+          </header>
+          <canvas
+            id="game"
+            width="900"
+            height="1400"
+            aria-label="Pinball table"
+          ></canvas>
+        </section>
+
+        <aside class="debug-panel" aria-label="Debug controls">
+          <p class="debug-label">Debug</p>
+          <h2>Ball Tools</h2>
+          <p class="debug-copy">
+            If the ball wedges into geometry, use the reset button to return it to
+            the launcher.
           </p>
-        </header>
-        <canvas
-          id="game"
-          width="900"
-          height="1400"
-          aria-label="Pinball table"
-        ></canvas>
+          <button class="debug-button" id="reset-ball" type="button">
+            Reset Ball
+          </button>
+          <dl class="debug-stats">
+            <div>
+              <dt>Status</dt>
+              <dd id="debug-status">Waiting</dd>
+            </div>
+            <div>
+              <dt>Position</dt>
+              <dd id="debug-position">0, 0</dd>
+            </div>
+            <div>
+              <dt>Velocity</dt>
+              <dd id="debug-velocity">0, 0</dd>
+            </div>
+            <div>
+              <dt>Spin</dt>
+              <dd id="debug-spin">0, 0, 0</dd>
+            </div>
+          </dl>
+        </aside>
       </section>
     </main>
     <script type="module" src="/src/main.ts"></script>
