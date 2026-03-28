@@ -84,6 +84,11 @@ export class CanvasRenderer {
     this.drawBounds(context, board);
     this.drawGuides(context, board);
     this.drawBumpers(context, board, state);
+    this.drawStandupTargets(context, board, state);
+    this.drawDropTargets(context, board, state);
+    this.drawSaucers(context, board, state);
+    this.drawSpinners(context, board, state);
+    this.drawRollovers(context, board, state);
 
     for (const flipper of board.flippers) {
       this.drawFlipper(
@@ -202,6 +207,119 @@ export class CanvasRenderer {
     });
 
     context.textAlign = 'start';
+  }
+
+  private drawStandupTargets(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+    state?: GameState,
+  ): void {
+    board.standupTargets.forEach((target, index) => {
+      const lit = Boolean(
+        state && state.standupTargets[index]?.cooldownSeconds > 0,
+      );
+      this.drawOrientedPlate(
+        context,
+        target,
+        target.width,
+        target.height,
+        target.angle,
+        lit ? PALETTE.cream : PALETTE.orange,
+        PALETTE.ink,
+      );
+    });
+  }
+
+  private drawDropTargets(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+    state?: GameState,
+  ): void {
+    board.dropTargets.forEach((target, index) => {
+      const isDown = Boolean(state?.dropTargets[index]?.isDown);
+      const yOffset = isDown ? target.height * 0.6 : 0;
+
+      this.drawOrientedPlate(
+        context,
+        { x: target.x, y: target.y + yOffset },
+        target.width,
+        target.height,
+        target.angle,
+        isDown ? 'rgba(255, 247, 214, 0.45)' : PALETTE.red,
+        PALETTE.cream,
+      );
+    });
+  }
+
+  private drawSaucers(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+    state?: GameState,
+  ): void {
+    board.saucers.forEach((saucer, index) => {
+      const occupied = Boolean(state?.saucers[index]?.occupied);
+
+      context.save();
+      context.fillStyle = occupied ? PALETTE.green : PALETTE.ink;
+      context.beginPath();
+      context.arc(saucer.x, saucer.y, saucer.radius, 0, Math.PI * 2);
+      context.fill();
+      context.fillStyle = occupied ? PALETTE.cream : 'rgba(255, 247, 214, 0.35)';
+      context.beginPath();
+      context.arc(saucer.x, saucer.y, saucer.radius * 0.62, 0, Math.PI * 2);
+      context.fill();
+      context.strokeStyle = PALETTE.skyBlue;
+      context.lineWidth = 5;
+      context.stroke();
+      context.restore();
+    });
+  }
+
+  private drawSpinners(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+    state?: GameState,
+  ): void {
+    board.spinners.forEach((spinner, index) => {
+      const angle = spinner.angle + (state?.spinners[index]?.angle ?? 0);
+
+      this.drawOrientedPlate(
+        context,
+        spinner,
+        spinner.length,
+        spinner.thickness,
+        angle,
+        PALETTE.skyBlue,
+        PALETTE.ink,
+      );
+
+      context.save();
+      context.fillStyle = PALETTE.cream;
+      context.beginPath();
+      context.arc(spinner.x, spinner.y, spinner.thickness * 0.8, 0, Math.PI * 2);
+      context.fill();
+      context.restore();
+    });
+  }
+
+  private drawRollovers(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+    state?: GameState,
+  ): void {
+    board.rollovers.forEach((rollover, index) => {
+      const lit = Boolean(state?.rollovers[index]?.lit);
+
+      context.save();
+      context.fillStyle = lit ? PALETTE.green : 'rgba(255, 247, 214, 0.24)';
+      context.beginPath();
+      context.arc(rollover.x, rollover.y, rollover.radius, 0, Math.PI * 2);
+      context.fill();
+      context.strokeStyle = lit ? PALETTE.cream : PALETTE.outlineBlue;
+      context.lineWidth = 4;
+      context.stroke();
+      context.restore();
+    });
   }
 
   private drawFlipper(
@@ -362,6 +480,64 @@ export class CanvasRenderer {
         this.drawFlipperSelection(context, flipper);
       }
     }
+
+    if (selection.kind === 'standup-target' && selection.index !== undefined) {
+      const target = board.standupTargets[selection.index];
+
+      if (target) {
+        this.drawOrientedSelection(
+          context,
+          target,
+          target.width,
+          target.height,
+          target.angle,
+        );
+      }
+    }
+
+    if (selection.kind === 'drop-target' && selection.index !== undefined) {
+      const target = board.dropTargets[selection.index];
+
+      if (target) {
+        this.drawOrientedSelection(
+          context,
+          target,
+          target.width,
+          target.height,
+          target.angle,
+        );
+      }
+    }
+
+    if (selection.kind === 'saucer' && selection.index !== undefined) {
+      const saucer = board.saucers[selection.index];
+
+      if (saucer) {
+        this.drawCircularSelection(context, saucer, saucer.radius);
+      }
+    }
+
+    if (selection.kind === 'spinner' && selection.index !== undefined) {
+      const spinner = board.spinners[selection.index];
+
+      if (spinner) {
+        this.drawOrientedSelection(
+          context,
+          spinner,
+          spinner.length,
+          spinner.thickness,
+          spinner.angle,
+        );
+      }
+    }
+
+    if (selection.kind === 'rollover' && selection.index !== undefined) {
+      const rollover = board.rollovers[selection.index];
+
+      if (rollover) {
+        this.drawCircularSelection(context, rollover, rollover.radius);
+      }
+    }
   }
 
   private drawBumperSelection(
@@ -441,6 +617,38 @@ export class CanvasRenderer {
     context.restore();
   }
 
+  private drawCircularSelection(
+    context: CanvasRenderingContext2D,
+    center: { x: number; y: number },
+    radius: number,
+  ): void {
+    context.save();
+    context.strokeStyle = '#ffd166';
+    context.lineWidth = 4;
+    context.setLineDash([10, 6]);
+    context.beginPath();
+    context.arc(center.x, center.y, radius + 10, 0, Math.PI * 2);
+    context.stroke();
+    context.restore();
+  }
+
+  private drawOrientedSelection(
+    context: CanvasRenderingContext2D,
+    element: { x: number; y: number },
+    width: number,
+    height: number,
+    angle: number,
+  ): void {
+    context.save();
+    context.translate(element.x, element.y);
+    context.rotate(angle);
+    context.strokeStyle = '#ffd166';
+    context.lineWidth = 4;
+    context.setLineDash([10, 6]);
+    context.strokeRect(-width / 2 - 8, -height / 2 - 8, width + 16, height + 16);
+    context.restore();
+  }
+
   private drawDraft(
     context: CanvasRenderingContext2D,
     draftPosition: { x: number; y: number } | null,
@@ -492,6 +700,28 @@ export class CanvasRenderer {
     context.arc(point.x, point.y, 8, 0, Math.PI * 2);
     context.fill();
     context.stroke();
+  }
+
+  private drawOrientedPlate(
+    context: CanvasRenderingContext2D,
+    element: { x: number; y: number },
+    width: number,
+    height: number,
+    angle: number,
+    fill: string,
+    stroke: string,
+  ): void {
+    context.save();
+    context.translate(element.x, element.y);
+    context.rotate(angle);
+    context.fillStyle = fill;
+    context.strokeStyle = stroke;
+    context.lineWidth = 3;
+    context.beginPath();
+    context.roundRect(-width / 2, -height / 2, width, height, height / 2);
+    context.fill();
+    context.stroke();
+    context.restore();
   }
 }
 

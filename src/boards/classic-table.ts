@@ -18,6 +18,65 @@ export const classicTable = createBoardDefinition({
     { x: 600, y: 420, radius: 44, score: 100, material: 'rubberPost' },
     { x: 450, y: 600, radius: 52, score: 250, material: 'rubberPost' },
   ],
+  standupTargets: [
+    {
+      x: 230,
+      y: 760,
+      width: 60,
+      height: 16,
+      angle: -0.2,
+      score: 50,
+      material: 'rubberPost',
+    },
+    {
+      x: 670,
+      y: 760,
+      width: 60,
+      height: 16,
+      angle: Math.PI + 0.2,
+      score: 50,
+      material: 'rubberPost',
+    },
+  ],
+  dropTargets: [
+    {
+      x: 450,
+      y: 470,
+      width: 54,
+      height: 16,
+      angle: -Math.PI / 2,
+      score: 100,
+      material: 'rubberPost',
+    },
+  ],
+  saucers: [
+    {
+      x: 450,
+      y: 240,
+      radius: 30,
+      score: 500,
+      holdSeconds: 0.5,
+      ejectSpeed: 980,
+      ejectAngle: Math.PI / 2,
+      material: 'metalGuide',
+    },
+  ],
+  spinners: [
+    {
+      x: 450,
+      y: 820,
+      length: 96,
+      thickness: 10,
+      angle: 0,
+      score: 10,
+      material: 'metalGuide',
+    },
+  ],
+  rollovers: [
+    { x: 300, y: 170, radius: 24, score: 25 },
+    { x: 450, y: 150, radius: 24, score: 25 },
+    { x: 600, y: 170, radius: 24, score: 25 },
+  ],
   guides: [
     {
       start: { x: 90, y: 880 },

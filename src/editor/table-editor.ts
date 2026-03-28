@@ -1,4 +1,11 @@
-import { createDefaultFlipper } from '../boards/table-library';
+import {
+  createDefaultDropTarget,
+  createDefaultFlipper,
+  createDefaultRollover,
+  createDefaultSaucer,
+  createDefaultSpinner,
+  createDefaultStandupTarget,
+} from '../boards/table-library';
 import type {
   BoardDefinition,
   FlipperSide,
@@ -24,6 +31,30 @@ export const hitTestSelection = (
     return { kind: 'launch-position' };
   }
 
+  for (let index = board.saucers.length - 1; index >= 0; index -= 1) {
+    const saucer = board.saucers[index];
+
+    if (
+      saucer &&
+      Math.hypot(point.x - saucer.x, point.y - saucer.y) <=
+        saucer.radius + SELECTION_PADDING
+    ) {
+      return { kind: 'saucer', index };
+    }
+  }
+
+  for (let index = board.rollovers.length - 1; index >= 0; index -= 1) {
+    const rollover = board.rollovers[index];
+
+    if (
+      rollover &&
+      Math.hypot(point.x - rollover.x, point.y - rollover.y) <=
+        rollover.radius + SELECTION_PADDING
+    ) {
+      return { kind: 'rollover', index };
+    }
+  }
+
   for (let index = board.guides.length - 1; index >= 0; index -= 1) {
     const guide = board.guides[index];
 
@@ -31,7 +62,10 @@ export const hitTestSelection = (
       continue;
     }
 
-    if (distanceToGuide(point, guide) <= guide.thickness / 2 + SELECTION_PADDING) {
+    if (
+      distanceToGuide(point, guide) <=
+      guide.thickness / 2 + SELECTION_PADDING
+    ) {
       return { kind: 'guide', index };
     }
   }
@@ -43,10 +77,56 @@ export const hitTestSelection = (
       continue;
     }
 
-    const distance = Math.hypot(point.x - bumper.x, point.y - bumper.y);
-
-    if (distance <= bumper.radius + SELECTION_PADDING) {
+    if (
+      Math.hypot(point.x - bumper.x, point.y - bumper.y) <=
+      bumper.radius + SELECTION_PADDING
+    ) {
       return { kind: 'bumper', index };
+    }
+  }
+
+  for (let index = board.standupTargets.length - 1; index >= 0; index -= 1) {
+    const target = board.standupTargets[index];
+
+    if (!target) {
+      continue;
+    }
+
+    if (
+      distanceToOrientedSegment(point, target, target.width, target.angle) <=
+      target.height / 2 + SELECTION_PADDING
+    ) {
+      return { kind: 'standup-target', index };
+    }
+  }
+
+  for (let index = board.dropTargets.length - 1; index >= 0; index -= 1) {
+    const target = board.dropTargets[index];
+
+    if (!target) {
+      continue;
+    }
+
+    if (
+      distanceToOrientedSegment(point, target, target.width, target.angle) <=
+      target.height / 2 + SELECTION_PADDING
+    ) {
+      return { kind: 'drop-target', index };
+    }
+  }
+
+  for (let index = board.spinners.length - 1; index >= 0; index -= 1) {
+    const spinner = board.spinners[index];
+
+    if (!spinner) {
+      continue;
+    }
+
+    if (
+      distanceToOrientedSegment(point, spinner, spinner.length, spinner.angle) <=
+      spinner.thickness / 2 + SELECTION_PADDING
+    ) {
+      return { kind: 'spinner', index };
     }
   }
 
@@ -93,6 +173,107 @@ export const addBumper = (
   };
 };
 
+export const addStandupTarget = (
+  board: BoardDefinition,
+  point: Point,
+): {
+  board: BoardDefinition;
+  selection: EditorSelection;
+} => {
+  const nextTarget = createDefaultStandupTarget(point.x, point.y);
+  const nextBoard = {
+    ...board,
+    standupTargets: [...board.standupTargets, nextTarget],
+  };
+
+  return {
+    board: nextBoard,
+    selection: {
+      kind: 'standup-target',
+      index: nextBoard.standupTargets.length - 1,
+    },
+  };
+};
+
+export const addDropTarget = (
+  board: BoardDefinition,
+  point: Point,
+): {
+  board: BoardDefinition;
+  selection: EditorSelection;
+} => {
+  const nextTarget = createDefaultDropTarget(point.x, point.y);
+  const nextBoard = {
+    ...board,
+    dropTargets: [...board.dropTargets, nextTarget],
+  };
+
+  return {
+    board: nextBoard,
+    selection: {
+      kind: 'drop-target',
+      index: nextBoard.dropTargets.length - 1,
+    },
+  };
+};
+
+export const addSaucer = (
+  board: BoardDefinition,
+  point: Point,
+): {
+  board: BoardDefinition;
+  selection: EditorSelection;
+} => {
+  const nextSaucer = createDefaultSaucer(point.x, point.y);
+  const nextBoard = {
+    ...board,
+    saucers: [...board.saucers, nextSaucer],
+  };
+
+  return {
+    board: nextBoard,
+    selection: { kind: 'saucer', index: nextBoard.saucers.length - 1 },
+  };
+};
+
+export const addSpinner = (
+  board: BoardDefinition,
+  point: Point,
+): {
+  board: BoardDefinition;
+  selection: EditorSelection;
+} => {
+  const nextSpinner = createDefaultSpinner(point.x, point.y);
+  const nextBoard = {
+    ...board,
+    spinners: [...board.spinners, nextSpinner],
+  };
+
+  return {
+    board: nextBoard,
+    selection: { kind: 'spinner', index: nextBoard.spinners.length - 1 },
+  };
+};
+
+export const addRollover = (
+  board: BoardDefinition,
+  point: Point,
+): {
+  board: BoardDefinition;
+  selection: EditorSelection;
+} => {
+  const nextRollover = createDefaultRollover(point.x, point.y);
+  const nextBoard = {
+    ...board,
+    rollovers: [...board.rollovers, nextRollover],
+  };
+
+  return {
+    board: nextBoard,
+    selection: { kind: 'rollover', index: nextBoard.rollovers.length - 1 },
+  };
+};
+
 export const addFlipper = (
   board: BoardDefinition,
   side: FlipperSide,
@@ -132,6 +313,61 @@ export const moveSelection = (
         index === selection.index
           ? { ...bumper, ...clampPoint(board, point, bumper.radius + 24) }
           : bumper,
+      ),
+    };
+  }
+
+  if (selection.kind === 'standup-target' && selection.index !== undefined) {
+    return {
+      ...board,
+      standupTargets: board.standupTargets.map((target, index) =>
+        index === selection.index
+          ? { ...target, ...clampPoint(board, point, target.width / 2 + 24) }
+          : target,
+      ),
+    };
+  }
+
+  if (selection.kind === 'drop-target' && selection.index !== undefined) {
+    return {
+      ...board,
+      dropTargets: board.dropTargets.map((target, index) =>
+        index === selection.index
+          ? { ...target, ...clampPoint(board, point, target.width / 2 + 24) }
+          : target,
+      ),
+    };
+  }
+
+  if (selection.kind === 'saucer' && selection.index !== undefined) {
+    return {
+      ...board,
+      saucers: board.saucers.map((saucer, index) =>
+        index === selection.index
+          ? { ...saucer, ...clampPoint(board, point, saucer.radius + 24) }
+          : saucer,
+      ),
+    };
+  }
+
+  if (selection.kind === 'spinner' && selection.index !== undefined) {
+    return {
+      ...board,
+      spinners: board.spinners.map((spinner, index) =>
+        index === selection.index
+          ? { ...spinner, ...clampPoint(board, point, spinner.length / 2 + 24) }
+          : spinner,
+      ),
+    };
+  }
+
+  if (selection.kind === 'rollover' && selection.index !== undefined) {
+    return {
+      ...board,
+      rollovers: board.rollovers.map((rollover, index) =>
+        index === selection.index
+          ? { ...rollover, ...clampPoint(board, point, rollover.radius + 24) }
+          : rollover,
       ),
     };
   }
@@ -206,6 +442,60 @@ export const deleteSelection = (
     };
   }
 
+  if (selection.kind === 'standup-target' && selection.index !== undefined) {
+    return {
+      board: {
+        ...board,
+        standupTargets: board.standupTargets.filter(
+          (_, index) => index !== selection.index,
+        ),
+      },
+      selection: { kind: 'none' },
+    };
+  }
+
+  if (selection.kind === 'drop-target' && selection.index !== undefined) {
+    return {
+      board: {
+        ...board,
+        dropTargets: board.dropTargets.filter(
+          (_, index) => index !== selection.index,
+        ),
+      },
+      selection: { kind: 'none' },
+    };
+  }
+
+  if (selection.kind === 'saucer' && selection.index !== undefined) {
+    return {
+      board: {
+        ...board,
+        saucers: board.saucers.filter((_, index) => index !== selection.index),
+      },
+      selection: { kind: 'none' },
+    };
+  }
+
+  if (selection.kind === 'spinner' && selection.index !== undefined) {
+    return {
+      board: {
+        ...board,
+        spinners: board.spinners.filter((_, index) => index !== selection.index),
+      },
+      selection: { kind: 'none' },
+    };
+  }
+
+  if (selection.kind === 'rollover' && selection.index !== undefined) {
+    return {
+      board: {
+        ...board,
+        rollovers: board.rollovers.filter((_, index) => index !== selection.index),
+      },
+      selection: { kind: 'none' },
+    };
+  }
+
   if (selection.kind === 'guide' && selection.index !== undefined) {
     return {
       board: {
@@ -220,9 +510,7 @@ export const deleteSelection = (
     return {
       board: {
         ...board,
-        flippers: board.flippers.filter(
-          (_, index) => index !== selection.index,
-        ),
+        flippers: board.flippers.filter((_, index) => index !== selection.index),
       },
       selection: { kind: 'none' },
     };
@@ -267,6 +555,51 @@ export const updateSelectedNumericField = (
               [field]: value,
             }
           : bumper,
+      ),
+    };
+  }
+
+  if (selection.kind === 'standup-target' && selection.index !== undefined) {
+    return {
+      ...board,
+      standupTargets: board.standupTargets.map((target, index) =>
+        index === selection.index ? { ...target, [field]: value } : target,
+      ),
+    };
+  }
+
+  if (selection.kind === 'drop-target' && selection.index !== undefined) {
+    return {
+      ...board,
+      dropTargets: board.dropTargets.map((target, index) =>
+        index === selection.index ? { ...target, [field]: value } : target,
+      ),
+    };
+  }
+
+  if (selection.kind === 'saucer' && selection.index !== undefined) {
+    return {
+      ...board,
+      saucers: board.saucers.map((saucer, index) =>
+        index === selection.index ? { ...saucer, [field]: value } : saucer,
+      ),
+    };
+  }
+
+  if (selection.kind === 'spinner' && selection.index !== undefined) {
+    return {
+      ...board,
+      spinners: board.spinners.map((spinner, index) =>
+        index === selection.index ? { ...spinner, [field]: value } : spinner,
+      ),
+    };
+  }
+
+  if (selection.kind === 'rollover' && selection.index !== undefined) {
+    return {
+      ...board,
+      rollovers: board.rollovers.map((rollover, index) =>
+        index === selection.index ? { ...rollover, [field]: value } : rollover,
       ),
     };
   }
@@ -316,11 +649,17 @@ export const hitTestGuideHandle = (
 ): 'start' | 'end' | 'rotate' | null => {
   const handles = getGuideHandles(guide);
 
-  if (Math.hypot(point.x - handles.start.x, point.y - handles.start.y) <= GUIDE_HANDLE_RADIUS) {
+  if (
+    Math.hypot(point.x - handles.start.x, point.y - handles.start.y) <=
+    GUIDE_HANDLE_RADIUS
+  ) {
     return 'start';
   }
 
-  if (Math.hypot(point.x - handles.end.x, point.y - handles.end.y) <= GUIDE_HANDLE_RADIUS) {
+  if (
+    Math.hypot(point.x - handles.end.x, point.y - handles.end.y) <=
+    GUIDE_HANDLE_RADIUS
+  ) {
     return 'end';
   }
 
@@ -489,13 +828,46 @@ const distanceToGuide = (point: Point, guide: GuideDefinition): number => {
   }
 
   const projection = clamp(
-    ((point.x - guide.start.x) * segmentX + (point.y - guide.start.y) * segmentY) /
+    ((point.x - guide.start.x) * segmentX +
+      (point.y - guide.start.y) * segmentY) /
       segmentLengthSquared,
     0,
     1,
   );
   const closestX = guide.start.x + segmentX * projection;
   const closestY = guide.start.y + segmentY * projection;
+
+  return Math.hypot(point.x - closestX, point.y - closestY);
+};
+
+const distanceToOrientedSegment = (
+  point: Point,
+  element: Point,
+  length: number,
+  angle: number,
+): number => {
+  const halfLength = length / 2;
+  const dx = Math.cos(angle) * halfLength;
+  const dy = Math.sin(angle) * halfLength;
+  const start = {
+    x: element.x - dx,
+    y: element.y - dy,
+  };
+  const end = {
+    x: element.x + dx,
+    y: element.y + dy,
+  };
+  const segmentX = end.x - start.x;
+  const segmentY = end.y - start.y;
+  const segmentLengthSquared = segmentX * segmentX + segmentY * segmentY;
+  const projection = clamp(
+    ((point.x - start.x) * segmentX + (point.y - start.y) * segmentY) /
+      segmentLengthSquared,
+    0,
+    1,
+  );
+  const closestX = start.x + segmentX * projection;
+  const closestY = start.y + segmentY * projection;
 
   return Math.hypot(point.x - closestX, point.y - closestY);
 };

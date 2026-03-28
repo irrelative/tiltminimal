@@ -1,5 +1,15 @@
 export interface EditorSelection {
-  kind: 'bumper' | 'flipper' | 'guide' | 'launch-position' | 'none';
+  kind:
+    | 'bumper'
+    | 'standup-target'
+    | 'drop-target'
+    | 'saucer'
+    | 'spinner'
+    | 'rollover'
+    | 'flipper'
+    | 'guide'
+    | 'launch-position'
+    | 'none';
   index?: number;
 }
 
@@ -12,5 +22,10 @@ export type EditorDragMode =
 export type EditorTool =
   | 'select'
   | 'add-bumper'
+  | 'add-standup-target'
+  | 'add-drop-target'
+  | 'add-saucer'
+  | 'add-spinner'
+  | 'add-rollover'
   | 'add-left-flipper'
   | 'add-right-flipper';

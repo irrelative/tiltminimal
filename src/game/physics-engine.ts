@@ -5,9 +5,18 @@ import type {
   FlipperDefinition,
   GuideDefinition,
   SolverPhysicsDefinition,
+  StandupTargetDefinition,
 } from '../types/board-definition';
 import type { ContactData } from './contact-types';
-import type { FlipperState, GameState } from './game-state';
+import type {
+  DropTargetState,
+  FlipperState,
+  GameState,
+  RolloverState,
+  SaucerState,
+  SpinnerState,
+  StandupTargetState,
+} from './game-state';
 import { resetBall } from './game-state';
 import { getSurfaceMaterial } from './materials';
 import { getContactTangent, resolveBallContact } from './spin-solver';
@@ -147,7 +156,18 @@ export const stepGame = (
       left: flipperFrame.left.next,
       right: flipperFrame.right.next,
     },
+    standupTargets: state.standupTargets.map(cloneStandupTargetState),
+    dropTargets: state.dropTargets.map(cloneDropTargetState),
+    saucers: state.saucers.map(cloneSaucerState),
+    spinners: state.spinners.map(cloneSpinnerState),
+    rollovers: state.rollovers.map(cloneRolloverState),
   };
+
+  advanceElementStates(next, board, dt);
+
+  if (resolveOccupiedSaucer(next, board, dt)) {
+    return next;
+  }
 
   next.ball.linearVelocity.y += board.gravity * dt;
   next.ball.position.x += next.ball.linearVelocity.x * dt;
@@ -155,8 +175,13 @@ export const stepGame = (
 
   resolveWallCollisions(next, board);
   resolveGuideCollisions(next, board, solver);
+  resolveStandupTargetCollisions(next, board, solver);
+  resolveDropTargetCollisions(next, board, solver);
   resolveBumperCollisions(next, board, solver);
   resolveFlipperCollisions(next, board, flipperFrame, solver);
+  resolveSaucerCaptures(next, board);
+  resolveSpinnerInteractions(next, board, solver);
+  resolveRolloverTriggers(next, board);
 
   if (next.ball.position.y - next.ball.radius > board.drainY) {
     return resetBall(next, board);
@@ -219,54 +244,132 @@ const resolveGuideCollision = (
   guide: GuideDefinition,
   solver: SolverPhysicsDefinition,
 ): void => {
+  const collision = getSegmentCollision(
+    state,
+    guide.start,
+    guide.end,
+    guide.thickness,
+    solver,
+  );
+
+  if (!collision) {
+    return;
+  }
+
   const guideMaterial = getSurfaceMaterial(
     guide.material,
     board.surfaceMaterials,
   );
-  const segmentX = guide.end.x - guide.start.x;
-  const segmentY = guide.end.y - guide.start.y;
-  const segmentLengthSquared = segmentX * segmentX + segmentY * segmentY;
-  const dx = state.ball.position.x - guide.start.x;
-  const dy = state.ball.position.y - guide.start.y;
-  const projection = clamp(
-    (dx * segmentX + dy * segmentY) / segmentLengthSquared,
-    0,
-    1,
-  );
-  const closestX = guide.start.x + segmentX * projection;
-  const closestY = guide.start.y + segmentY * projection;
-  const offsetX = state.ball.position.x - closestX;
-  const offsetY = state.ball.position.y - closestY;
-  const distance = Math.hypot(offsetX, offsetY) || solver.epsilon;
-  const overlap = state.ball.radius + guide.thickness / 2 - distance;
-
-  if (overlap <= 0) {
-    return;
-  }
-
-  const fallbackNormalX = -segmentY / (Math.hypot(segmentX, segmentY) || 1);
-  const fallbackNormalY = segmentX / (Math.hypot(segmentX, segmentY) || 1);
-  const normalX =
-    Math.abs(offsetX) > solver.epsilon || Math.abs(offsetY) > solver.epsilon
-      ? offsetX / distance
-      : fallbackNormalX;
-  const normalY =
-    Math.abs(offsetX) > solver.epsilon || Math.abs(offsetY) > solver.epsilon
-      ? offsetY / distance
-      : fallbackNormalY;
   const incomingNormalSpeed =
-    state.ball.linearVelocity.x * normalX +
-    state.ball.linearVelocity.y * normalY;
+    state.ball.linearVelocity.x * collision.normal.x +
+    state.ball.linearVelocity.y * collision.normal.y;
   const contact = createStaticContact(
     guideMaterial,
-    { x: closestX, y: closestY },
-    { x: normalX, y: normalY },
-    overlap,
+    collision.point,
+    collision.normal,
+    collision.overlap,
   );
 
-  if (incomingNormalSpeed < 0 || overlap > solver.epsilon) {
+  if (incomingNormalSpeed < 0 || collision.overlap > solver.epsilon) {
     resolveBallContact(state.ball, contact, solver);
   }
+};
+
+const resolveStandupTargetCollisions = (
+  state: GameState,
+  board: BoardDefinition,
+  solver: SolverPhysicsDefinition,
+): void => {
+  board.standupTargets.forEach((target, index) => {
+    const targetState = state.standupTargets[index];
+
+    if (!targetState) {
+      return;
+    }
+
+    const collision = getOrientedElementCollision(
+      state,
+      target,
+      target.width,
+      target.height,
+      target.angle,
+      solver,
+    );
+
+    if (!collision) {
+      return;
+    }
+
+    const material = getSurfaceMaterial(target.material, board.surfaceMaterials);
+    const incomingNormalSpeed =
+      state.ball.linearVelocity.x * collision.normal.x +
+      state.ball.linearVelocity.y * collision.normal.y;
+
+    if (incomingNormalSpeed < 0 || collision.overlap > solver.epsilon) {
+      resolveBallContact(
+        state.ball,
+        createStaticContact(
+          material,
+          collision.point,
+          collision.normal,
+          collision.overlap,
+        ),
+        solver,
+      );
+    }
+
+    if (targetState.cooldownSeconds <= 0) {
+      state.score += target.score;
+      targetState.cooldownSeconds = 0.12;
+    }
+  });
+};
+
+const resolveDropTargetCollisions = (
+  state: GameState,
+  board: BoardDefinition,
+  solver: SolverPhysicsDefinition,
+): void => {
+  board.dropTargets.forEach((target, index) => {
+    const targetState = state.dropTargets[index];
+
+    if (!targetState || targetState.isDown) {
+      return;
+    }
+
+    const collision = getOrientedElementCollision(
+      state,
+      target,
+      target.width,
+      target.height,
+      target.angle,
+      solver,
+    );
+
+    if (!collision) {
+      return;
+    }
+
+    const material = getSurfaceMaterial(target.material, board.surfaceMaterials);
+    const incomingNormalSpeed =
+      state.ball.linearVelocity.x * collision.normal.x +
+      state.ball.linearVelocity.y * collision.normal.y;
+
+    if (incomingNormalSpeed < 0 || collision.overlap > solver.epsilon) {
+      resolveBallContact(
+        state.ball,
+        createStaticContact(
+          material,
+          collision.point,
+          collision.normal,
+          collision.overlap,
+        ),
+        solver,
+      );
+      state.score += target.score;
+      targetState.isDown = true;
+    }
+  });
 };
 
 const resolveFlipperCollisions = (
@@ -342,40 +445,44 @@ const applyFlipperCollisionAtAngle = (
     flipper.material,
     board.surfaceMaterials,
   );
-  const segmentX = Math.cos(collisionAngle) * flipper.length;
-  const segmentY = Math.sin(collisionAngle) * flipper.length;
-  const segmentLengthSquared = segmentX * segmentX + segmentY * segmentY;
-  const dx = state.ball.position.x - flipper.x;
-  const dy = state.ball.position.y - flipper.y;
-  const projection = clamp(
-    (dx * segmentX + dy * segmentY) / segmentLengthSquared,
-    0,
-    1,
+  const endpoints = {
+    start: {
+      x: flipper.x,
+      y: flipper.y,
+    },
+    end: {
+      x: flipper.x + Math.cos(collisionAngle) * flipper.length,
+      y: flipper.y + Math.sin(collisionAngle) * flipper.length,
+    },
+  };
+  const collision = getSegmentCollision(
+    state,
+    endpoints.start,
+    endpoints.end,
+    flipper.thickness,
+    solver,
   );
-  const closestX = flipper.x + segmentX * projection;
-  const closestY = flipper.y + segmentY * projection;
-  const offsetX = state.ball.position.x - closestX;
-  const offsetY = state.ball.position.y - closestY;
-  const distance = Math.hypot(offsetX, offsetY) || solver.epsilon;
-  const collisionRadius = state.ball.radius + flipper.thickness / 2;
-  const overlap = collisionRadius - distance;
 
-  if (overlap <= 0) {
+  if (!collision) {
     return false;
   }
 
-  const fallbackNormalX = Math.sin(collisionAngle);
-  const fallbackNormalY = -Math.cos(collisionAngle);
-  const normalX =
-    Math.abs(offsetX) > solver.epsilon || Math.abs(offsetY) > solver.epsilon
-      ? offsetX / distance
-      : fallbackNormalX;
-  const normalY =
-    Math.abs(offsetX) > solver.epsilon || Math.abs(offsetY) > solver.epsilon
-      ? offsetY / distance
-      : fallbackNormalY;
-  const relativeContactX = closestX - flipper.x;
-  const relativeContactY = closestY - flipper.y;
+  const fallbackNormal = {
+    x: Math.sin(collisionAngle),
+    y: -Math.cos(collisionAngle),
+  };
+
+  if (
+    collision.normal.x * fallbackNormal.x +
+      collision.normal.y * fallbackNormal.y <
+    0
+  ) {
+    collision.normal.x *= -1;
+    collision.normal.y *= -1;
+  }
+
+  const relativeContactX = collision.point.x - flipper.x;
+  const relativeContactY = collision.point.y - flipper.y;
   const contactRadiusSquared =
     relativeContactX * relativeContactX + relativeContactY * relativeContactY;
   const flipperMomentOfInertia =
@@ -383,19 +490,13 @@ const applyFlipperCollisionAtAngle = (
   const surfaceVelocityX = -motion.angularVelocity * relativeContactY;
   const surfaceVelocityY = motion.angularVelocity * relativeContactX;
   const incomingNormalSpeed =
-    (state.ball.linearVelocity.x - surfaceVelocityX) * normalX +
-    (state.ball.linearVelocity.y - surfaceVelocityY) * normalY;
+    (state.ball.linearVelocity.x - surfaceVelocityX) * collision.normal.x +
+    (state.ball.linearVelocity.y - surfaceVelocityY) * collision.normal.y;
   const contact: ContactData = {
-    point: {
-      x: closestX,
-      y: closestY,
-    },
-    normal: {
-      x: normalX,
-      y: normalY,
-    },
-    tangent: getContactTangent({ x: normalX, y: normalY }),
-    overlap,
+    point: collision.point,
+    normal: collision.normal,
+    tangent: getContactTangent(collision.normal),
+    overlap: collision.overlap,
     surfaceVelocity: {
       x: surfaceVelocityX,
       y: surfaceVelocityY,
@@ -408,7 +509,7 @@ const applyFlipperCollisionAtAngle = (
     restitutionScale: motion.restitutionScale,
   };
 
-  if (incomingNormalSpeed < 0 || overlap > solver.epsilon) {
+  if (incomingNormalSpeed < 0 || collision.overlap > solver.epsilon) {
     resolveBallContact(state.ball, contact, solver);
   }
 
@@ -453,6 +554,104 @@ const resolveBumperCollisions = (
       state.score += bumper.score;
     }
   }
+};
+
+const resolveSaucerCaptures = (
+  state: GameState,
+  board: BoardDefinition,
+): void => {
+  board.saucers.forEach((saucer, index) => {
+    const saucerState = state.saucers[index];
+
+    if (!saucerState || saucerState.occupied) {
+      return;
+    }
+
+    const distance = Math.hypot(
+      state.ball.position.x - saucer.x,
+      state.ball.position.y - saucer.y,
+    );
+
+    if (distance > saucer.radius - state.ball.radius * 0.15) {
+      return;
+    }
+
+    saucerState.occupied = true;
+    saucerState.holdSecondsRemaining = saucer.holdSeconds;
+    state.score += saucer.score;
+    state.ball.position.x = saucer.x;
+    state.ball.position.y = saucer.y;
+    state.ball.linearVelocity.x = 0;
+    state.ball.linearVelocity.y = 0;
+    state.ball.angularVelocity.x = 0;
+    state.ball.angularVelocity.y = 0;
+    state.ball.angularVelocity.z = 0;
+  });
+};
+
+const resolveSpinnerInteractions = (
+  state: GameState,
+  board: BoardDefinition,
+  solver: SolverPhysicsDefinition,
+): void => {
+  board.spinners.forEach((spinner, index) => {
+    const spinnerState = state.spinners[index];
+
+    if (!spinnerState || spinnerState.cooldownSeconds > 0) {
+      return;
+    }
+
+    const collision = getOrientedElementCollision(
+      state,
+      spinner,
+      spinner.length,
+      spinner.thickness,
+      spinner.angle + spinnerState.angle,
+      solver,
+    );
+
+    if (!collision) {
+      return;
+    }
+
+    const crossingSpeed =
+      state.ball.linearVelocity.x * collision.normal.x +
+      state.ball.linearVelocity.y * collision.normal.y;
+
+    if (Math.abs(crossingSpeed) < 60) {
+      return;
+    }
+
+    spinnerState.angularVelocity +=
+      Math.sign(-crossingSpeed) * Math.min(Math.abs(crossingSpeed) / 36, 18);
+    spinnerState.cooldownSeconds = 0.08;
+    state.score += spinner.score;
+  });
+};
+
+const resolveRolloverTriggers = (
+  state: GameState,
+  board: BoardDefinition,
+): void => {
+  board.rollovers.forEach((rollover, index) => {
+    const rolloverState = state.rollovers[index];
+
+    if (!rolloverState || rolloverState.lit) {
+      return;
+    }
+
+    const distance = Math.hypot(
+      state.ball.position.x - rollover.x,
+      state.ball.position.y - rollover.y,
+    );
+
+    if (distance > rollover.radius + state.ball.radius * 0.3) {
+      return;
+    }
+
+    rolloverState.lit = true;
+    state.score += rollover.score;
+  });
 };
 
 const interpolate = (start: number, end: number, ratio: number): number =>
@@ -503,10 +702,7 @@ const getFlipperCollisionAngles = (
   collisionAngleStep: number,
 ): number[] => {
   const delta = motion.next.angle - motion.previousAngle;
-  const samples = Math.max(
-    1,
-    Math.ceil(Math.abs(delta) / collisionAngleStep),
-  );
+  const samples = Math.max(1, Math.ceil(Math.abs(delta) / collisionAngleStep));
   const angles: number[] = [];
 
   for (let index = 0; index <= samples; index += 1) {
@@ -521,6 +717,85 @@ interface FlipperMotionFrame {
   previousAngle: number;
   next: FlipperState;
 }
+
+const advanceElementStates = (
+  state: GameState,
+  board: BoardDefinition,
+  deltaSeconds: number,
+): void => {
+  state.standupTargets.forEach((targetState) => {
+    targetState.cooldownSeconds = Math.max(
+      0,
+      targetState.cooldownSeconds - deltaSeconds,
+    );
+  });
+
+  state.spinners.forEach((spinnerState, index) => {
+    spinnerState.cooldownSeconds = Math.max(
+      0,
+      spinnerState.cooldownSeconds - deltaSeconds,
+    );
+    spinnerState.angle += spinnerState.angularVelocity * deltaSeconds;
+    spinnerState.angularVelocity *= Math.max(0, 1 - deltaSeconds * 7);
+
+    if (Math.abs(spinnerState.angle) > Math.PI * 2) {
+      spinnerState.angle %= Math.PI * 2;
+    }
+
+    if (Math.abs(spinnerState.angularVelocity) < 0.01) {
+      spinnerState.angularVelocity = 0;
+    }
+
+    if (!board.spinners[index]) {
+      spinnerState.angle = 0;
+      spinnerState.angularVelocity = 0;
+      spinnerState.cooldownSeconds = 0;
+    }
+  });
+};
+
+const resolveOccupiedSaucer = (
+  state: GameState,
+  board: BoardDefinition,
+  deltaSeconds: number,
+): boolean => {
+  const occupiedIndex = state.saucers.findIndex((saucer) => saucer.occupied);
+
+  if (occupiedIndex === -1) {
+    return false;
+  }
+
+  const saucer = board.saucers[occupiedIndex];
+  const saucerState = state.saucers[occupiedIndex];
+
+  if (!saucer || !saucerState) {
+    return false;
+  }
+
+  saucerState.holdSecondsRemaining = Math.max(
+    0,
+    saucerState.holdSecondsRemaining - deltaSeconds,
+  );
+  state.ball.position.x = saucer.x;
+  state.ball.position.y = saucer.y;
+  state.ball.linearVelocity.x = 0;
+  state.ball.linearVelocity.y = 0;
+  state.ball.angularVelocity.x = 0;
+  state.ball.angularVelocity.y = 0;
+  state.ball.angularVelocity.z = 0;
+
+  if (saucerState.holdSecondsRemaining === 0) {
+    saucerState.occupied = false;
+    state.ball.position.x =
+      saucer.x + Math.cos(saucer.ejectAngle) * (saucer.radius + state.ball.radius + 4);
+    state.ball.position.y =
+      saucer.y + Math.sin(saucer.ejectAngle) * (saucer.radius + state.ball.radius + 4);
+    state.ball.linearVelocity.x = Math.cos(saucer.ejectAngle) * saucer.ejectSpeed;
+    state.ball.linearVelocity.y = Math.sin(saucer.ejectAngle) * saucer.ejectSpeed;
+  }
+
+  return true;
+};
 
 const createStaticContact = (
   material: ReturnType<typeof getSurfaceMaterial>,
@@ -537,4 +812,132 @@ const createStaticContact = (
     y: 0,
   },
   material,
+});
+
+const getOrientedElementCollision = (
+  state: GameState,
+  element: Pick<StandupTargetDefinition, 'x' | 'y'>,
+  length: number,
+  thickness: number,
+  angle: number,
+  solver: SolverPhysicsDefinition,
+): {
+  point: ContactData['point'];
+  normal: ContactData['normal'];
+  overlap: number;
+} | null => {
+  const endpoints = getSegmentEndpoints(element, angle, length);
+
+  return getSegmentCollision(
+    state,
+    endpoints.start,
+    endpoints.end,
+    thickness,
+    solver,
+  );
+};
+
+const getSegmentCollision = (
+  state: GameState,
+  start: ContactData['point'],
+  end: ContactData['point'],
+  thickness: number,
+  solver: SolverPhysicsDefinition,
+): {
+  point: ContactData['point'];
+  normal: ContactData['normal'];
+  overlap: number;
+} | null => {
+  const segmentX = end.x - start.x;
+  const segmentY = end.y - start.y;
+  const segmentLengthSquared = segmentX * segmentX + segmentY * segmentY;
+
+  if (segmentLengthSquared <= solver.epsilon) {
+    return null;
+  }
+
+  const dx = state.ball.position.x - start.x;
+  const dy = state.ball.position.y - start.y;
+  const projection = clamp(
+    (dx * segmentX + dy * segmentY) / segmentLengthSquared,
+    0,
+    1,
+  );
+  const closestX = start.x + segmentX * projection;
+  const closestY = start.y + segmentY * projection;
+  const offsetX = state.ball.position.x - closestX;
+  const offsetY = state.ball.position.y - closestY;
+  const distance = Math.hypot(offsetX, offsetY) || solver.epsilon;
+  const overlap = state.ball.radius + thickness / 2 - distance;
+
+  if (overlap <= 0) {
+    return null;
+  }
+
+  const segmentLength = Math.sqrt(segmentLengthSquared);
+  const fallbackNormal = {
+    x: -segmentY / segmentLength,
+    y: segmentX / segmentLength,
+  };
+  const normal =
+    Math.abs(offsetX) > solver.epsilon || Math.abs(offsetY) > solver.epsilon
+      ? {
+          x: offsetX / distance,
+          y: offsetY / distance,
+        }
+      : fallbackNormal;
+
+  return {
+    point: { x: closestX, y: closestY },
+    normal,
+    overlap,
+  };
+};
+
+const getSegmentEndpoints = (
+  element: Pick<StandupTargetDefinition, 'x' | 'y'>,
+  angle: number,
+  length: number,
+): {
+  start: ContactData['point'];
+  end: ContactData['point'];
+} => {
+  const halfLength = length / 2;
+  const dx = Math.cos(angle) * halfLength;
+  const dy = Math.sin(angle) * halfLength;
+
+  return {
+    start: {
+      x: element.x - dx,
+      y: element.y - dy,
+    },
+    end: {
+      x: element.x + dx,
+      y: element.y + dy,
+    },
+  };
+};
+
+const cloneStandupTargetState = (
+  state: StandupTargetState,
+): StandupTargetState => ({
+  ...state,
+});
+
+const cloneDropTargetState = (
+  state: DropTargetState,
+): DropTargetState => ({
+  ...state,
+});
+
+const cloneSaucerState = (state: SaucerState): SaucerState => ({
+  ...state,
+});
+
+const cloneSpinnerState = (state: SpinnerState): SpinnerState => ({
+  ...state,
+});
+
+const cloneRolloverState = (state: RolloverState): RolloverState => ({
+  ...state,
 });

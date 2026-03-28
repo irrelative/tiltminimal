@@ -7,7 +7,12 @@ import {
 } from './boards/table-library';
 import {
   addBumper,
+  addDropTarget,
   addFlipper,
+  addRollover,
+  addSaucer,
+  addSpinner,
+  addStandupTarget,
   deleteSelection,
   hitTestGuideHandle,
   hitTestSelection,
@@ -227,12 +232,17 @@ function bootEditorRoute(): void {
       return;
     }
 
+    const normalizedValue =
+      field === 'angle' || field === 'ejectAngle'
+        ? (value * Math.PI) / 180
+        : value;
+
     replaceActiveBoard(
       updateSelectedNumericField(
         getActiveTable().board,
         state.selection,
         field,
-        value,
+        normalizedValue,
       ),
       true,
     );
@@ -267,6 +277,76 @@ function bootEditorRoute(): void {
 
     if (state.tool === 'add-bumper') {
       const result = addBumper(getActiveTable().board, point);
+
+      state.selection = result.selection;
+      state.tool = 'select';
+      state.dragging = true;
+      state.dragMode = 'move-selection';
+      state.dragOffset = { x: 0, y: 0 };
+      state.draftPosition = null;
+      replaceActiveBoard(result.board, false);
+      renderApp();
+      return;
+    }
+
+    if (state.tool === 'add-standup-target') {
+      const result = addStandupTarget(getActiveTable().board, point);
+
+      state.selection = result.selection;
+      state.tool = 'select';
+      state.dragging = true;
+      state.dragMode = 'move-selection';
+      state.dragOffset = { x: 0, y: 0 };
+      state.draftPosition = null;
+      replaceActiveBoard(result.board, false);
+      renderApp();
+      return;
+    }
+
+    if (state.tool === 'add-drop-target') {
+      const result = addDropTarget(getActiveTable().board, point);
+
+      state.selection = result.selection;
+      state.tool = 'select';
+      state.dragging = true;
+      state.dragMode = 'move-selection';
+      state.dragOffset = { x: 0, y: 0 };
+      state.draftPosition = null;
+      replaceActiveBoard(result.board, false);
+      renderApp();
+      return;
+    }
+
+    if (state.tool === 'add-saucer') {
+      const result = addSaucer(getActiveTable().board, point);
+
+      state.selection = result.selection;
+      state.tool = 'select';
+      state.dragging = true;
+      state.dragMode = 'move-selection';
+      state.dragOffset = { x: 0, y: 0 };
+      state.draftPosition = null;
+      replaceActiveBoard(result.board, false);
+      renderApp();
+      return;
+    }
+
+    if (state.tool === 'add-spinner') {
+      const result = addSpinner(getActiveTable().board, point);
+
+      state.selection = result.selection;
+      state.tool = 'select';
+      state.dragging = true;
+      state.dragMode = 'move-selection';
+      state.dragOffset = { x: 0, y: 0 };
+      state.draftPosition = null;
+      replaceActiveBoard(result.board, false);
+      renderApp();
+      return;
+    }
+
+    if (state.tool === 'add-rollover') {
+      const result = addRollover(getActiveTable().board, point);
 
       state.selection = result.selection;
       state.tool = 'select';
@@ -517,7 +597,7 @@ function syncTablePanel(): void {
   const active = getActiveTable();
 
   tableNameInput.value = active.board.name;
-  tableMeta.textContent = `${active.builtIn ? 'Built-in table' : 'Custom table'} · ${active.board.bumpers.length} bumpers · ${active.board.flippers.length} flippers`;
+  tableMeta.textContent = `${active.builtIn ? 'Built-in table' : 'Custom table'} · ${getFeatureCount(active.board)} features`;
   removeTableButton.textContent = active.builtIn ? 'Reset built-in' : 'Delete';
 }
 
@@ -559,6 +639,110 @@ function syncSelectionPanel(): void {
       createNumericField('y', 'Y', bumper.y),
       createNumericField('radius', 'Radius', bumper.radius),
       createNumericField('score', 'Score', bumper.score),
+    );
+    return;
+  }
+
+  if (
+    state.selection.kind === 'standup-target' &&
+    state.selection.index !== undefined
+  ) {
+    const target = active.board.standupTargets[state.selection.index];
+
+    if (!target) {
+      return;
+    }
+
+    selectionLabel.textContent = `Standup target ${state.selection.index + 1}`;
+    selectionFields.append(
+      createNumericField('x', 'X', target.x),
+      createNumericField('y', 'Y', target.y),
+      createNumericField('width', 'Width', target.width),
+      createNumericField('height', 'Height', target.height),
+      createNumericField('angle', 'Angle', radiansToDegrees(target.angle)),
+      createNumericField('score', 'Score', target.score),
+    );
+    return;
+  }
+
+  if (
+    state.selection.kind === 'drop-target' &&
+    state.selection.index !== undefined
+  ) {
+    const target = active.board.dropTargets[state.selection.index];
+
+    if (!target) {
+      return;
+    }
+
+    selectionLabel.textContent = `Drop target ${state.selection.index + 1}`;
+    selectionFields.append(
+      createNumericField('x', 'X', target.x),
+      createNumericField('y', 'Y', target.y),
+      createNumericField('width', 'Width', target.width),
+      createNumericField('height', 'Height', target.height),
+      createNumericField('angle', 'Angle', radiansToDegrees(target.angle)),
+      createNumericField('score', 'Score', target.score),
+    );
+    return;
+  }
+
+  if (state.selection.kind === 'saucer' && state.selection.index !== undefined) {
+    const saucer = active.board.saucers[state.selection.index];
+
+    if (!saucer) {
+      return;
+    }
+
+    selectionLabel.textContent = `Saucer ${state.selection.index + 1}`;
+    selectionFields.append(
+      createNumericField('x', 'X', saucer.x),
+      createNumericField('y', 'Y', saucer.y),
+      createNumericField('radius', 'Radius', saucer.radius),
+      createNumericField('score', 'Score', saucer.score),
+      createNumericField('holdSeconds', 'Hold (s)', saucer.holdSeconds, 0.05),
+      createNumericField('ejectSpeed', 'Eject speed', saucer.ejectSpeed),
+      createNumericField(
+        'ejectAngle',
+        'Eject angle',
+        radiansToDegrees(saucer.ejectAngle),
+      ),
+    );
+    return;
+  }
+
+  if (state.selection.kind === 'spinner' && state.selection.index !== undefined) {
+    const spinner = active.board.spinners[state.selection.index];
+
+    if (!spinner) {
+      return;
+    }
+
+    selectionLabel.textContent = `Spinner ${state.selection.index + 1}`;
+    selectionFields.append(
+      createNumericField('x', 'X', spinner.x),
+      createNumericField('y', 'Y', spinner.y),
+      createNumericField('length', 'Length', spinner.length),
+      createNumericField('thickness', 'Thickness', spinner.thickness),
+      createNumericField('angle', 'Angle', radiansToDegrees(spinner.angle)),
+      createNumericField('score', 'Score', spinner.score),
+    );
+    return;
+  }
+
+  if (state.selection.kind === 'rollover' && state.selection.index !== undefined) {
+    const rollover = active.board.rollovers[state.selection.index];
+
+    if (!rollover) {
+      return;
+    }
+
+    selectionLabel.textContent = `Rollover ${state.selection.index + 1}`;
+    selectionFields.append(
+      createNumericField('x', 'X', rollover.x),
+      createNumericField('y', 'Y', rollover.y),
+      createNumericField('radius', 'Radius', rollover.radius),
+      createNumericField('score', 'Score', rollover.score),
     );
     return;
   }
@@ -815,6 +999,74 @@ function getDragOffset(
     };
   }
 
+  if (
+    selection.kind === 'standup-target' &&
+    selection.index !== undefined
+  ) {
+    const target = board.standupTargets[selection.index];
+
+    if (!target) {
+      return null;
+    }
+
+    return {
+      x: point.x - target.x,
+      y: point.y - target.y,
+    };
+  }
+
+  if (selection.kind === 'drop-target' && selection.index !== undefined) {
+    const target = board.dropTargets[selection.index];
+
+    if (!target) {
+      return null;
+    }
+
+    return {
+      x: point.x - target.x,
+      y: point.y - target.y,
+    };
+  }
+
+  if (selection.kind === 'saucer' && selection.index !== undefined) {
+    const saucer = board.saucers[selection.index];
+
+    if (!saucer) {
+      return null;
+    }
+
+    return {
+      x: point.x - saucer.x,
+      y: point.y - saucer.y,
+    };
+  }
+
+  if (selection.kind === 'spinner' && selection.index !== undefined) {
+    const spinner = board.spinners[selection.index];
+
+    if (!spinner) {
+      return null;
+    }
+
+    return {
+      x: point.x - spinner.x,
+      y: point.y - spinner.y,
+    };
+  }
+
+  if (selection.kind === 'rollover' && selection.index !== undefined) {
+    const rollover = board.rollovers[selection.index];
+
+    if (!rollover) {
+      return null;
+    }
+
+    return {
+      x: point.x - rollover.x,
+      y: point.y - rollover.y,
+    };
+  }
+
   if (selection.kind === 'flipper' && selection.index !== undefined) {
     const flipper = board.flippers[selection.index];
 
@@ -849,6 +1101,7 @@ function createNumericField(
   field: string,
   label: string,
   value: number,
+  step = 1,
 ): HTMLElement {
   const wrapper = document.createElement('label');
   wrapper.className = 'field';
@@ -856,8 +1109,9 @@ function createNumericField(
   labelText.textContent = label;
   const input = document.createElement('input');
   input.type = 'number';
-  input.step = '1';
-  input.value = String(Math.round(value));
+  input.step = String(step);
+  input.value =
+    step >= 1 ? String(Math.round(value)) : String(Number(value.toFixed(2)));
   input.dataset.field = field;
   wrapper.append(labelText, input);
 
@@ -936,7 +1190,24 @@ function syncPlayRoutePanel(): void {
   );
 
   const active = getActiveTable();
-  playTableMeta.textContent = `${active.builtIn ? 'Built-in table' : 'Custom or edited table'} · ${active.board.bumpers.length} bumpers · ${active.board.flippers.length} flippers`;
+  playTableMeta.textContent = `${active.builtIn ? 'Built-in table' : 'Custom or edited table'} · ${getFeatureCount(active.board)} features`;
+}
+
+function getFeatureCount(board: BoardDefinition): number {
+  return (
+    board.bumpers.length +
+    board.standupTargets.length +
+    board.dropTargets.length +
+    board.saucers.length +
+    board.spinners.length +
+    board.rollovers.length +
+    board.guides.length +
+    board.flippers.length
+  );
+}
+
+function radiansToDegrees(angle: number): number {
+  return (angle * 180) / Math.PI;
 }
 
 function formatVector2(x: number, y: number): string {

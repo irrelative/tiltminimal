@@ -41,6 +41,45 @@ describe('hitTestSelection', () => {
     expect(selection.kind).toBe('none');
   });
 
+  it('selects a standup target when clicking near it', () => {
+    const board = createBlankTable();
+    board.standupTargets = [
+      {
+        x: 220,
+        y: 260,
+        width: 60,
+        height: 16,
+        angle: 0,
+        score: 50,
+        material: 'rubberPost',
+      },
+    ];
+
+    const selection = hitTestSelection(board, { x: 220, y: 266 });
+
+    expect(selection).toEqual({ kind: 'standup-target', index: 0 });
+  });
+
+  it('selects a saucer when clicking inside its radius', () => {
+    const board = createBlankTable();
+    board.saucers = [
+      {
+        x: 260,
+        y: 320,
+        radius: 28,
+        score: 500,
+        holdSeconds: 0.4,
+        ejectSpeed: 900,
+        ejectAngle: -Math.PI / 2,
+        material: 'metalGuide',
+      },
+    ];
+
+    const selection = hitTestSelection(board, { x: 268, y: 324 });
+
+    expect(selection).toEqual({ kind: 'saucer', index: 0 });
+  });
+
   it('finds start, end, and rotate handles for a selected guide', () => {
     const guide = {
       start: { x: 120, y: 220 },

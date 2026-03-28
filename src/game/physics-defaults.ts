@@ -134,6 +134,11 @@ export const createBoardDefinition = (
     },
   },
   bumpers: input.bumpers,
+  standupTargets: input.standupTargets ?? [],
+  dropTargets: input.dropTargets ?? [],
+  saucers: input.saucers ?? [],
+  spinners: input.spinners ?? [],
+  rollovers: input.rollovers ?? [],
   guides: input.guides ?? [],
   flippers: input.flippers,
 });

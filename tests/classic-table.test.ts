@@ -10,6 +10,11 @@ describe('classicTable', () => {
     expect(classicTable.ball.mass).toBeGreaterThan(0);
     expect(classicTable.materials.playfield).toBe('playfieldWood');
     expect(classicTable.bumpers).toHaveLength(3);
+    expect(classicTable.standupTargets).toHaveLength(2);
+    expect(classicTable.dropTargets).toHaveLength(1);
+    expect(classicTable.saucers).toHaveLength(1);
+    expect(classicTable.spinners).toHaveLength(1);
+    expect(classicTable.rollovers).toHaveLength(3);
     expect(classicTable.guides).toHaveLength(6);
     expect(classicTable.bumpers[0]?.material).toBe('rubberPost');
     expect(classicTable.flippers).toHaveLength(2);

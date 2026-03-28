@@ -22,6 +22,29 @@ export interface FlipperState {
   angularVelocity: number;
 }
 
+export interface StandupTargetState {
+  cooldownSeconds: number;
+}
+
+export interface DropTargetState {
+  isDown: boolean;
+}
+
+export interface SaucerState {
+  occupied: boolean;
+  holdSecondsRemaining: number;
+}
+
+export interface SpinnerState {
+  angle: number;
+  angularVelocity: number;
+  cooldownSeconds: number;
+}
+
+export interface RolloverState {
+  lit: boolean;
+}
+
 export interface GameState {
   ball: BallState;
   score: number;
@@ -34,6 +57,11 @@ export interface GameState {
     left: FlipperState;
     right: FlipperState;
   };
+  standupTargets: StandupTargetState[];
+  dropTargets: DropTargetState[];
+  saucers: SaucerState[];
+  spinners: SpinnerState[];
+  rollovers: RolloverState[];
 }
 
 export const createInitialGameState = (board: BoardDefinition): GameState => ({
@@ -48,6 +76,11 @@ export const createInitialGameState = (board: BoardDefinition): GameState => ({
     left: createFlipperState(getFlipperBySide(board, 'left')),
     right: createFlipperState(getFlipperBySide(board, 'right')),
   },
+  standupTargets: board.standupTargets.map(createStandupTargetState),
+  dropTargets: board.dropTargets.map(createDropTargetState),
+  saucers: board.saucers.map(createSaucerState),
+  spinners: board.spinners.map(createSpinnerState),
+  rollovers: board.rollovers.map(createRolloverState),
 });
 
 export const resetBall = (
@@ -64,6 +97,11 @@ export const resetBall = (
     left: createFlipperState(getFlipperBySide(board, 'left')),
     right: createFlipperState(getFlipperBySide(board, 'right')),
   },
+  standupTargets: board.standupTargets.map(createStandupTargetState),
+  dropTargets: board.dropTargets.map(createDropTargetState),
+  saucers: board.saucers.map(createSaucerState),
+  spinners: board.spinners.map(createSpinnerState),
+  rollovers: board.rollovers.map(createRolloverState),
 });
 
 export const createBallState = (board: BoardDefinition): BallState => {
@@ -103,4 +141,29 @@ const createFlipperState = (
   engaged: false,
   angle: flipper.restingAngle,
   angularVelocity: 0,
+});
+
+const createStandupTargetState = (): StandupTargetState => ({
+  cooldownSeconds: 0,
+});
+
+const createDropTargetState = (): DropTargetState => ({
+  isDown: false,
+});
+
+const createSaucerState = (): SaucerState => ({
+  occupied: false,
+  holdSecondsRemaining: 0,
+});
+
+const createSpinnerState = (
+  spinner: BoardDefinition['spinners'][number],
+): SpinnerState => ({
+  angle: spinner.angle,
+  angularVelocity: 0,
+  cooldownSeconds: 0,
+});
+
+const createRolloverState = (): RolloverState => ({
+  lit: false,
 });

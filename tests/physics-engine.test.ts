@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { createBlankTable } from '../src/boards/table-library';
 import { classicTable } from '../src/boards/classic-table';
 import { getFlipperBySide } from '../src/boards/table-library';
 import type { InputState } from '../src/input/keyboard-input';
@@ -200,6 +201,124 @@ describe('stepGame', () => {
     expect(next.ball.position.z).toBe(classicTable.ball.radius);
     expect(next.ball.linearVelocity.x).toBe(0);
     expect(next.ball.linearVelocity.y).toBe(0);
+  });
+
+  it('scores when the ball hits a standup target', () => {
+    const board = createBlankTable('Standup Board');
+    board.standupTargets = [
+      {
+        x: 450,
+        y: 400,
+        width: 60,
+        height: 16,
+        angle: 0,
+        score: 75,
+        material: 'rubberPost',
+      },
+    ];
+    const state = createInitialGameState(board);
+    state.status = 'playing';
+    state.ball.position.x = 450;
+    state.ball.position.y = 390;
+    state.ball.linearVelocity.y = 180;
+
+    const next = stepGame(state, board, idleInput, 1 / 60);
+
+    expect(next.score).toBe(75);
+    expect(next.standupTargets[0]?.cooldownSeconds).toBeGreaterThan(0);
+  });
+
+  it('drops a drop target after a hit', () => {
+    const board = createBlankTable('Drop Board');
+    board.dropTargets = [
+      {
+        x: 450,
+        y: 400,
+        width: 54,
+        height: 16,
+        angle: 0,
+        score: 100,
+        material: 'rubberPost',
+      },
+    ];
+    const state = createInitialGameState(board);
+    state.status = 'playing';
+    state.ball.position.x = 450;
+    state.ball.position.y = 390;
+    state.ball.linearVelocity.y = 180;
+
+    const next = stepGame(state, board, idleInput, 1 / 60);
+
+    expect(next.score).toBe(100);
+    expect(next.dropTargets[0]?.isDown).toBe(true);
+  });
+
+  it('captures and ejects the ball from a saucer', () => {
+    const board = createBlankTable('Saucer Board');
+    board.saucers = [
+      {
+        x: 450,
+        y: 400,
+        radius: 30,
+        score: 500,
+        holdSeconds: 0.05,
+        ejectSpeed: 900,
+        ejectAngle: -Math.PI / 2,
+        material: 'metalGuide',
+      },
+    ];
+    const state = createInitialGameState(board);
+    state.status = 'playing';
+    state.ball.position.x = 450;
+    state.ball.position.y = 400;
+
+    const captured = stepGame(state, board, idleInput, 1 / 60);
+    const held = stepGame(captured, board, idleInput, 1 / 30);
+    const ejected = stepGame(held, board, idleInput, 1 / 30);
+
+    expect(captured.saucers[0]?.occupied).toBe(true);
+    expect(captured.score).toBe(500);
+    expect(ejected.saucers[0]?.occupied).toBe(false);
+    expect(ejected.ball.linearVelocity.y).toBeLessThan(0);
+  });
+
+  it('spins and scores when the ball crosses a spinner', () => {
+    const board = createBlankTable('Spinner Board');
+    board.spinners = [
+      {
+        x: 450,
+        y: 400,
+        length: 100,
+        thickness: 10,
+        angle: 0,
+        score: 10,
+        material: 'metalGuide',
+      },
+    ];
+    const state = createInitialGameState(board);
+    state.status = 'playing';
+    state.ball.position.x = 450;
+    state.ball.position.y = 392;
+    state.ball.linearVelocity.y = 220;
+
+    const next = stepGame(state, board, idleInput, 1 / 60);
+
+    expect(next.score).toBe(10);
+    expect(Math.abs(next.spinners[0]?.angularVelocity ?? 0)).toBeGreaterThan(0);
+  });
+
+  it('lights a rollover when the ball crosses it', () => {
+    const board = createBlankTable('Rollover Board');
+    board.rollovers = [{ x: 450, y: 400, radius: 22, score: 25 }];
+    const state = createInitialGameState(board);
+    state.status = 'playing';
+    state.ball.position.x = 450;
+    state.ball.position.y = 400;
+
+    const next = stepGame(state, board, idleInput, 1 / 60);
+
+    expect(next.rollovers[0]?.lit).toBe(true);
+    expect(next.score).toBe(25);
   });
 });
 

@@ -2,8 +2,13 @@ import { classicTable } from './classic-table';
 import { createBoardDefinition } from '../game/physics-defaults';
 import type {
   BoardDefinition,
+  DropTargetDefinition,
   FlipperDefinition,
   FlipperSide,
+  RolloverDefinition,
+  SaucerDefinition,
+  SpinnerDefinition,
+  StandupTargetDefinition,
   SurfaceMaterial,
   SurfaceMaterialName,
 } from '../types/board-definition';
@@ -20,6 +25,11 @@ interface LegacyBoardDefinition
     'flippers' | 'surfaceMaterials' | 'physics' | 'guides'
   > {
   guides?: BoardDefinition['guides'];
+  standupTargets?: BoardDefinition['standupTargets'];
+  dropTargets?: BoardDefinition['dropTargets'];
+  saucers?: BoardDefinition['saucers'];
+  spinners?: BoardDefinition['spinners'];
+  rollovers?: BoardDefinition['rollovers'];
   surfaceMaterials?: Partial<Record<SurfaceMaterialName, Partial<SurfaceMaterial>>>;
   physics?: Partial<BoardDefinition['physics']>;
   flippers:
@@ -44,6 +54,11 @@ export const cloneBoardDefinition = (
     solver: { ...board.physics.solver },
   },
   bumpers: board.bumpers.map((bumper) => ({ ...bumper })),
+  standupTargets: board.standupTargets.map((target) => ({ ...target })),
+  dropTargets: board.dropTargets.map((target) => ({ ...target })),
+  saucers: board.saucers.map((saucer) => ({ ...saucer })),
+  spinners: board.spinners.map((spinner) => ({ ...spinner })),
+  rollovers: board.rollovers.map((rollover) => ({ ...rollover })),
   guides: board.guides.map((guide) => ({
     ...guide,
     start: { ...guide.start },
@@ -90,6 +105,11 @@ export const normalizeBoardDefinition = (
       solver: source.physics?.solver,
     },
     bumpers: source.bumpers ?? [],
+    standupTargets: source.standupTargets ?? [],
+    dropTargets: source.dropTargets ?? [],
+    saucers: source.saucers ?? [],
+    spinners: source.spinners ?? [],
+    rollovers: source.rollovers ?? [],
     guides: source.guides ?? [],
     flippers: flippers.map((flipper) => ({
       ...flipper,
@@ -121,6 +141,11 @@ export const createBlankTable = (name = 'Custom Table'): BoardDefinition =>
       walls: 'metalGuide',
     },
     bumpers: [],
+    standupTargets: [],
+    dropTargets: [],
+    saucers: [],
+    spinners: [],
+    rollovers: [],
     guides: [],
     flippers: [
       createDefaultFlipper('left', 270, 1220),
@@ -141,6 +166,69 @@ export const createDefaultFlipper = (
   restingAngle: side === 'left' ? 0.28 : Math.PI - 0.28,
   activeAngle: side === 'left' ? -0.42 : Math.PI + 0.42,
   material: 'flipperRubber',
+});
+
+export const createDefaultStandupTarget = (
+  x: number,
+  y: number,
+): StandupTargetDefinition => ({
+  x,
+  y,
+  width: 56,
+  height: 16,
+  angle: -Math.PI / 2,
+  score: 50,
+  material: 'rubberPost',
+});
+
+export const createDefaultDropTarget = (
+  x: number,
+  y: number,
+): DropTargetDefinition => ({
+  x,
+  y,
+  width: 54,
+  height: 16,
+  angle: -Math.PI / 2,
+  score: 100,
+  material: 'rubberPost',
+});
+
+export const createDefaultSaucer = (
+  x: number,
+  y: number,
+): SaucerDefinition => ({
+  x,
+  y,
+  radius: 28,
+  score: 500,
+  holdSeconds: 0.45,
+  ejectSpeed: 950,
+  ejectAngle: -Math.PI / 2,
+  material: 'metalGuide',
+});
+
+export const createDefaultSpinner = (
+  x: number,
+  y: number,
+): SpinnerDefinition => ({
+  x,
+  y,
+  length: 86,
+  thickness: 10,
+  angle: -Math.PI / 2,
+  score: 10,
+  material: 'metalGuide',
+});
+
+export const createDefaultRollover = (
+  x: number,
+  y: number,
+): RolloverDefinition => ({
+  x,
+  y,
+  radius: 22,
+  score: 25,
 });
 
 export const createTableId = (): string =>

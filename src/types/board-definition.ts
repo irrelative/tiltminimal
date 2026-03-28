@@ -59,6 +59,44 @@ export interface BumperDefinition extends Point {
   material: SurfaceMaterialName;
 }
 
+export interface StandupTargetDefinition extends Point {
+  width: number;
+  height: number;
+  angle: number;
+  score: number;
+  material: SurfaceMaterialName;
+}
+
+export interface DropTargetDefinition extends Point {
+  width: number;
+  height: number;
+  angle: number;
+  score: number;
+  material: SurfaceMaterialName;
+}
+
+export interface SaucerDefinition extends Point {
+  radius: number;
+  score: number;
+  holdSeconds: number;
+  ejectSpeed: number;
+  ejectAngle: number;
+  material: SurfaceMaterialName;
+}
+
+export interface SpinnerDefinition extends Point {
+  length: number;
+  thickness: number;
+  angle: number;
+  score: number;
+  material: SurfaceMaterialName;
+}
+
+export interface RolloverDefinition extends Point {
+  radius: number;
+  score: number;
+}
+
 export interface FlipperDefinition extends Point {
   side: FlipperSide;
   length: number;
@@ -91,6 +129,11 @@ export interface BoardDefinition {
   surfaceMaterials: Record<SurfaceMaterialName, SurfaceMaterial>;
   physics: PhysicsDefinition;
   bumpers: BumperDefinition[];
+  standupTargets: StandupTargetDefinition[];
+  dropTargets: DropTargetDefinition[];
+  saucers: SaucerDefinition[];
+  spinners: SpinnerDefinition[];
+  rollovers: RolloverDefinition[];
   guides: GuideDefinition[];
   flippers: FlipperDefinition[];
 }
@@ -115,6 +158,11 @@ export interface BoardDefinitionInput {
     solver?: Partial<SolverPhysicsDefinition>;
   };
   bumpers: BumperDefinition[];
+  standupTargets?: StandupTargetDefinition[];
+  dropTargets?: DropTargetDefinition[];
+  saucers?: SaucerDefinition[];
+  spinners?: SpinnerDefinition[];
+  rollovers?: RolloverDefinition[];
   guides?: GuideDefinition[];
   flippers: FlipperDefinition[];
 }

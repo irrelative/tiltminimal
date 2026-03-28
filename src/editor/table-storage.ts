@@ -263,6 +263,11 @@ const serializeBoardDefinition = (
     launchPosition: { ...board.launchPosition },
     materials: { ...board.materials },
     bumpers: board.bumpers.map((bumper) => ({ ...bumper })),
+    standupTargets: board.standupTargets.map((target) => ({ ...target })),
+    dropTargets: board.dropTargets.map((target) => ({ ...target })),
+    saucers: board.saucers.map((saucer) => ({ ...saucer })),
+    spinners: board.spinners.map((spinner) => ({ ...spinner })),
+    rollovers: board.rollovers.map((rollover) => ({ ...rollover })),
     guides: board.guides.map((guide) => ({
       ...guide,
       start: { ...guide.start },
