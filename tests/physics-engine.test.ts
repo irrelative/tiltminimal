@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { createBlankTable } from '../src/boards/table-library';
 import { classicTable } from '../src/boards/classic-table';
@@ -327,13 +327,18 @@ describe('stepGame', () => {
     state.ball.position.x = 450;
     state.ball.position.y = 400;
 
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(1);
+
     const captured = stepGame(state, board, idleInput, 1 / 60);
     const held = stepGame(captured, board, idleInput, 1 / 30);
     const ejected = stepGame(held, board, idleInput, 1 / 30);
 
+    randomSpy.mockRestore();
+
     expect(captured.saucers[0]?.occupied).toBe(true);
     expect(captured.score).toBe(500);
     expect(ejected.saucers[0]?.occupied).toBe(false);
+    expect(ejected.ball.linearVelocity.x).toBeGreaterThan(0);
     expect(ejected.ball.linearVelocity.y).toBeLessThan(0);
   });
 

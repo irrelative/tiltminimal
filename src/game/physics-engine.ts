@@ -21,6 +21,7 @@ import { getSurfaceMaterial } from './materials';
 import { getContactTangent, resolveBallContact } from './spin-solver';
 
 const MAX_SIMULATION_STEP_SECONDS = 1 / 120;
+const SAUCER_EJECT_ANGLE_JITTER = 0.12;
 
 export const stepGame = (
   state: GameState,
@@ -827,12 +828,14 @@ const resolveOccupiedSaucer = (
 
   if (saucerState.holdSecondsRemaining === 0) {
     saucerState.occupied = false;
+    const ejectAngle =
+      saucer.ejectAngle + (Math.random() * 2 - 1) * SAUCER_EJECT_ANGLE_JITTER;
     state.ball.position.x =
-      saucer.x + Math.cos(saucer.ejectAngle) * (saucer.radius + state.ball.radius + 4);
+      saucer.x + Math.cos(ejectAngle) * (saucer.radius + state.ball.radius + 4);
     state.ball.position.y =
-      saucer.y + Math.sin(saucer.ejectAngle) * (saucer.radius + state.ball.radius + 4);
-    state.ball.linearVelocity.x = Math.cos(saucer.ejectAngle) * saucer.ejectSpeed;
-    state.ball.linearVelocity.y = Math.sin(saucer.ejectAngle) * saucer.ejectSpeed;
+      saucer.y + Math.sin(ejectAngle) * (saucer.radius + state.ball.radius + 4);
+    state.ball.linearVelocity.x = Math.cos(ejectAngle) * saucer.ejectSpeed;
+    state.ball.linearVelocity.y = Math.sin(ejectAngle) * saucer.ejectSpeed;
   }
 
   return true;
