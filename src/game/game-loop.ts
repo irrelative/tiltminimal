@@ -76,9 +76,13 @@ export class GameLoop {
   }
 }
 
-export const getStatusLabel = (state: GameState, input: InputState): string => {
+export const getStatusLabel = (
+  state: GameState,
+  input: InputState,
+  board: BoardDefinition,
+): string => {
   if (state.status === 'waiting-launch') {
-    const launchPercent = Math.round(getLaunchChargeRatio(state) * 100);
+    const launchPercent = Math.round(getLaunchChargeRatio(state, board) * 100);
 
     if (input.launchPressed) {
       return `Charging launcher: ${launchPercent}%`;

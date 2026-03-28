@@ -1,4 +1,4 @@
-import type { SurfaceMaterial } from './materials';
+import type { SurfaceMaterial } from '../types/board-definition';
 
 export interface Vector2 {
   x: number;
@@ -20,4 +20,3 @@ export interface ContactImpulseResult {
   relativeNormalSpeed: number;
   relativeTangentSpeed: number;
 }
-

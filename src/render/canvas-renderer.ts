@@ -96,7 +96,10 @@ export class CanvasRenderer {
 
   private drawGuides(context: CanvasRenderingContext2D): void {
     for (const guide of this.board.guides) {
-      const material = getSurfaceMaterial(guide.material);
+      const material = getSurfaceMaterial(
+        guide.material,
+        this.board.surfaceMaterials,
+      );
 
       context.strokeStyle =
         material.name === 'rubberPost' ? PALETTE.orange : PALETTE.skyBlue;
@@ -207,14 +210,18 @@ export class CanvasRenderer {
 
     context.font = '400 20px Georgia, serif';
     context.fillStyle = 'rgba(34, 48, 74, 0.85)';
-    context.fillText(getStatusLabel(state, input), 48, this.board.height - 44);
+    context.fillText(
+      getStatusLabel(state, input, this.board),
+      48,
+      this.board.height - 44,
+    );
   }
 
   private drawLaunchMeter(
     context: CanvasRenderingContext2D,
     state: GameState,
   ): void {
-    const ratio = getLaunchChargeRatio(state);
+    const ratio = getLaunchChargeRatio(state, this.board);
     const meterWidth = 200;
     const meterHeight = 14;
     const x = this.board.width - meterWidth - 48;

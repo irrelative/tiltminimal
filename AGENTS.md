@@ -41,3 +41,8 @@ Test names should describe behavior, for example: `loads bonus lane from board d
 
 ## Commit Guidelines
 There is no existing commit history yet, so use short imperative commit messages such as `Add board schema` or `Separate renderer from game state`. Keep each commit scoped to one logical change so history stays easy to review and revert.
+
+## Commit Workflow
+After each completed logical change, stage the relevant files and create a git commit unless the user explicitly asks not to commit yet.
+Run tests relevant to the change before committing when feasible.
+Use one commit per logical change.

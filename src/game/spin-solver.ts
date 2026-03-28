@@ -1,12 +1,12 @@
 import type { BallState } from './game-state';
 import type { ContactData, ContactImpulseResult, Vector2 } from './contact-types';
-
-const EPSILON = 0.0001;
-const STATIC_SLIP_THRESHOLD = 28;
+import { physicsDefaults } from './physics-defaults';
+import type { SolverPhysicsDefinition } from '../types/board-definition';
 
 export const resolveBallContact = (
   ball: BallState,
   contact: ContactData,
+  solver: SolverPhysicsDefinition = physicsDefaults.tuning.solver,
 ): ContactImpulseResult => {
   ball.position.x += contact.normal.x * contact.overlap;
   ball.position.y += contact.normal.y * contact.overlap;
@@ -25,13 +25,13 @@ export const resolveBallContact = (
   const tangentImpulse = getTangentImpulse(ball, contact, {
     normalImpulse,
     relativeTangentSpeed,
-  });
+  }, solver);
 
-  if (Math.abs(tangentImpulse) > EPSILON) {
+  if (Math.abs(tangentImpulse) > solver.epsilon) {
     applyTangentImpulse(ball, contact, tangentImpulse);
   }
 
-  if (Math.abs(ball.angularVelocity.z) > EPSILON) {
+  if (Math.abs(ball.angularVelocity.z) > solver.epsilon) {
     const spinDampingFactor = Math.max(0, 1 - contact.material.spinDamping * 0.12);
     ball.angularVelocity.z *= spinDampingFactor;
   }
@@ -81,13 +81,14 @@ const getTangentImpulse = (
     normalImpulse: number;
     relativeTangentSpeed: number;
   },
+  solver: SolverPhysicsDefinition,
 ): number => {
-  if (Math.abs(inputs.relativeTangentSpeed) <= EPSILON) {
+  if (Math.abs(inputs.relativeTangentSpeed) <= solver.epsilon) {
     return 0;
   }
 
   const frictionCoefficient =
-    Math.abs(inputs.relativeTangentSpeed) <= STATIC_SLIP_THRESHOLD
+    Math.abs(inputs.relativeTangentSpeed) <= solver.staticSlipThreshold
       ? contact.material.staticFriction
       : contact.material.dynamicFriction;
   const effectiveFriction = frictionCoefficient * contact.material.grip;
@@ -95,7 +96,7 @@ const getTangentImpulse = (
     1 / ball.mass + (ball.radius * ball.radius) / ball.momentOfInertia;
   const desiredImpulse = -inputs.relativeTangentSpeed / tangentialMass;
   const maxImpulse =
-    Math.abs(inputs.normalImpulse) > EPSILON
+    Math.abs(inputs.normalImpulse) > solver.epsilon
       ? Math.abs(inputs.normalImpulse) * effectiveFriction
       : ball.mass * effectiveFriction * 8;
 
@@ -127,4 +128,3 @@ const dot = (left: Vector2, right: Vector2): number =>
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max);
-

@@ -1,15 +1,10 @@
-import type { BoardDefinition } from '../types/board-definition';
+import { createBoardDefinition } from '../game/physics-defaults';
 
-export const classicTable: BoardDefinition = {
+export const classicTable = createBoardDefinition({
   name: 'Classic Table',
   width: 900,
   height: 1400,
-  gravity: 1600,
   drainY: 1425,
-  ball: {
-    radius: 16,
-    mass: 0.08,
-  },
   launchPosition: {
     x: 770,
     y: 1180,
@@ -81,4 +76,4 @@ export const classicTable: BoardDefinition = {
       material: 'flipperRubber',
     },
   },
-};
+});
