@@ -126,7 +126,7 @@ describe('stepGame', () => {
     );
 
     expect(next.flippers.left.angle).toBeCloseTo(leftFlipper.activeAngle, 5);
-    expect(next.flippers.left.angularVelocity).toBeLessThan(0);
+    expect(next.flippers.left.angularVelocity).toBeLessThanOrEqual(0);
   });
 
   it('collides against the rounded flipper tip', () => {
@@ -186,6 +186,25 @@ describe('stepGame', () => {
     expect(Math.abs(next.ball.angularVelocity.z)).toBeGreaterThan(0);
     expect(next.flippers.left.angle).toBeGreaterThan(leftFlipper.activeAngle);
     expect(next.flippers.left.angle).toBeLessThan(leftFlipper.restingAngle);
+  });
+
+  it('prevents a fast ball from tunneling through the left flipper', () => {
+    const state = createInitialGameState(classicTable);
+    state.status = 'playing';
+    placeBallOnFlipperSurface(state, leftFlipper, 0.68);
+    state.ball.position.y -= 18;
+    state.ball.linearVelocity.x = 0;
+    state.ball.linearVelocity.y = 1400;
+
+    const next = stepGame(
+      state,
+      classicTable,
+      { ...idleInput, leftPressed: true },
+      1 / 60,
+    );
+
+    expect(next.ball.position.y).toBeLessThan(state.ball.position.y + 20);
+    expect(next.ball.linearVelocity.y).toBeLessThan(1400);
   });
 
   it('marks the ball drained after it falls below the board', () => {

@@ -21,6 +21,8 @@ import { resetBall } from './game-state';
 import { getSurfaceMaterial } from './materials';
 import { getContactTangent, resolveBallContact } from './spin-solver';
 
+const MAX_SIMULATION_STEP_SECONDS = 1 / 120;
+
 export const stepGame = (
   state: GameState,
   board: BoardDefinition,
@@ -28,29 +30,29 @@ export const stepGame = (
   deltaSeconds: number,
 ): GameState => {
   const dt = Math.min(deltaSeconds, 1 / 30);
-  const flipperDeltaSeconds = Math.max(deltaSeconds, 0);
   const launchChargeDelta = Math.max(deltaSeconds, 0);
-  const { flipper, launch, solver } = board.physics;
-  const leftFlipper = getFlipperBySide(board, 'left');
-  const rightFlipper = getFlipperBySide(board, 'right');
-  const flipperFrame = {
-    left: advanceFlipper(
-      leftFlipper,
-      state.flippers.left,
-      input.leftPressed,
-      flipperDeltaSeconds,
-      flipper.swingAngularSpeed,
-    ),
-    right: advanceFlipper(
-      rightFlipper,
-      state.flippers.right,
-      input.rightPressed,
-      flipperDeltaSeconds,
-      flipper.swingAngularSpeed,
-    ),
-  };
+  const { launch } = board.physics;
 
   if (state.status === 'waiting-launch') {
+    const { flipper } = board.physics;
+    const leftFlipper = getFlipperBySide(board, 'left');
+    const rightFlipper = getFlipperBySide(board, 'right');
+    const flipperFrame = {
+      left: advanceFlipper(
+        leftFlipper,
+        state.flippers.left,
+        input.leftPressed,
+        Math.max(deltaSeconds, 0),
+        flipper.swingAngularSpeed,
+      ),
+      right: advanceFlipper(
+        rightFlipper,
+        state.flippers.right,
+        input.rightPressed,
+        Math.max(deltaSeconds, 0),
+        flipper.swingAngularSpeed,
+      ),
+    };
     const chargeSeconds = input.launchPressed
       ? Math.min(
           state.launcher.chargeSeconds + launchChargeDelta,
@@ -134,6 +136,15 @@ export const stepGame = (
     };
   }
 
+  return stepPlayingState(state, board, input, Math.max(dt, 0));
+};
+
+const stepPlayingState = (
+  state: GameState,
+  board: BoardDefinition,
+  input: InputState,
+  deltaSeconds: number,
+): GameState => {
   const next: GameState = {
     ...state,
     tick: state.tick + 1,
@@ -153,8 +164,8 @@ export const stepGame = (
       chargeSeconds: 0,
     },
     flippers: {
-      left: flipperFrame.left.next,
-      right: flipperFrame.right.next,
+      left: { ...state.flippers.left },
+      right: { ...state.flippers.right },
     },
     standupTargets: state.standupTargets.map(cloneStandupTargetState),
     dropTargets: state.dropTargets.map(cloneDropTargetState),
@@ -162,29 +173,46 @@ export const stepGame = (
     spinners: state.spinners.map(cloneSpinnerState),
     rollovers: state.rollovers.map(cloneRolloverState),
   };
+  const stepCount = Math.max(
+    1,
+    Math.ceil(deltaSeconds / MAX_SIMULATION_STEP_SECONDS),
+  );
+  const stepSeconds = stepCount > 0 ? deltaSeconds / stepCount : 0;
 
-  advanceElementStates(next, board, dt);
+  for (let stepIndex = 0; stepIndex < stepCount; stepIndex += 1) {
+    const flipperFrame = advanceFlipperFrame(
+      next,
+      board,
+      input,
+      stepSeconds,
+    );
 
-  if (resolveOccupiedSaucer(next, board, dt)) {
-    return next;
-  }
+    next.flippers.left = flipperFrame.left.next;
+    next.flippers.right = flipperFrame.right.next;
 
-  next.ball.linearVelocity.y += board.gravity * dt;
-  next.ball.position.x += next.ball.linearVelocity.x * dt;
-  next.ball.position.y += next.ball.linearVelocity.y * dt;
+    advanceElementStates(next, board, stepSeconds);
 
-  resolveWallCollisions(next, board);
-  resolveGuideCollisions(next, board, solver);
-  resolveStandupTargetCollisions(next, board, solver);
-  resolveDropTargetCollisions(next, board, solver);
-  resolveBumperCollisions(next, board, solver);
-  resolveFlipperCollisions(next, board, flipperFrame, solver);
-  resolveSaucerCaptures(next, board);
-  resolveSpinnerInteractions(next, board, solver);
-  resolveRolloverTriggers(next, board);
+    if (resolveOccupiedSaucer(next, board, stepSeconds)) {
+      continue;
+    }
 
-  if (next.ball.position.y - next.ball.radius > board.drainY) {
-    return resetBall(next, board);
+    next.ball.linearVelocity.y += board.gravity * stepSeconds;
+    next.ball.position.x += next.ball.linearVelocity.x * stepSeconds;
+    next.ball.position.y += next.ball.linearVelocity.y * stepSeconds;
+
+    resolveWallCollisions(next, board);
+    resolveGuideCollisions(next, board, board.physics.solver);
+    resolveStandupTargetCollisions(next, board, board.physics.solver);
+    resolveDropTargetCollisions(next, board, board.physics.solver);
+    resolveBumperCollisions(next, board, board.physics.solver);
+    resolveFlipperCollisions(next, board, flipperFrame, board.physics.solver);
+    resolveSaucerCaptures(next, board);
+    resolveSpinnerInteractions(next, board, board.physics.solver);
+    resolveRolloverTriggers(next, board);
+
+    if (next.ball.position.y - next.ball.radius > board.drainY) {
+      return resetBall(next, board);
+    }
   }
 
   return next;
@@ -717,6 +745,36 @@ interface FlipperMotionFrame {
   previousAngle: number;
   next: FlipperState;
 }
+
+const advanceFlipperFrame = (
+  state: GameState,
+  board: BoardDefinition,
+  input: InputState,
+  deltaSeconds: number,
+): {
+  left: FlipperMotionFrame;
+  right: FlipperMotionFrame;
+} => {
+  const leftFlipper = getFlipperBySide(board, 'left');
+  const rightFlipper = getFlipperBySide(board, 'right');
+
+  return {
+    left: advanceFlipper(
+      leftFlipper,
+      state.flippers.left,
+      input.leftPressed,
+      deltaSeconds,
+      board.physics.flipper.swingAngularSpeed,
+    ),
+    right: advanceFlipper(
+      rightFlipper,
+      state.flippers.right,
+      input.rightPressed,
+      deltaSeconds,
+      board.physics.flipper.swingAngularSpeed,
+    ),
+  };
+};
 
 const advanceElementStates = (
   state: GameState,
