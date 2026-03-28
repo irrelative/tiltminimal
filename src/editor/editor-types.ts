@@ -1,5 +1,5 @@
 export interface EditorSelection {
-  kind: 'bumper' | 'flipper' | 'launch-position' | 'none';
+  kind: 'bumper' | 'flipper' | 'guide' | 'launch-position' | 'none';
   index?: number;
 }
 

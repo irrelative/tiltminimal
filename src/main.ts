@@ -499,6 +499,27 @@ function syncSelectionPanel(): void {
   }
 
   if (
+    state.selection.kind === 'guide' &&
+    state.selection.index !== undefined
+  ) {
+    const guide = active.board.guides[state.selection.index];
+
+    if (!guide) {
+      return;
+    }
+
+    selectionLabel.textContent = `Guide ${state.selection.index + 1}`;
+    selectionFields.append(
+      createNumericField('startX', 'Start X', guide.start.x),
+      createNumericField('startY', 'Start Y', guide.start.y),
+      createNumericField('endX', 'End X', guide.end.x),
+      createNumericField('endY', 'End Y', guide.end.y),
+      createNumericField('thickness', 'Thickness', guide.thickness),
+    );
+    return;
+  }
+
+  if (
     state.selection.kind === 'flipper' &&
     state.selection.index !== undefined
   ) {
@@ -717,6 +738,19 @@ function getDragOffset(
     return {
       x: point.x - bumper.x,
       y: point.y - bumper.y,
+    };
+  }
+
+  if (selection.kind === 'guide' && selection.index !== undefined) {
+    const guide = board.guides[selection.index];
+
+    if (!guide) {
+      return null;
+    }
+
+    return {
+      x: point.x - guide.start.x,
+      y: point.y - guide.start.y,
     };
   }
 

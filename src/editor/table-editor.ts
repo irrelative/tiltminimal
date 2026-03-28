@@ -2,6 +2,7 @@ import { createDefaultFlipper } from '../boards/table-library';
 import type {
   BoardDefinition,
   FlipperSide,
+  GuideDefinition,
   Point,
 } from '../types/board-definition';
 import type { EditorSelection } from './editor-types';
@@ -19,6 +20,18 @@ export const hitTestSelection = (
 
   if (launchDistance <= 28) {
     return { kind: 'launch-position' };
+  }
+
+  for (let index = board.guides.length - 1; index >= 0; index -= 1) {
+    const guide = board.guides[index];
+
+    if (!guide) {
+      continue;
+    }
+
+    if (distanceToGuide(point, guide) <= guide.thickness / 2 + SELECTION_PADDING) {
+      return { kind: 'guide', index };
+    }
   }
 
   for (let index = board.bumpers.length - 1; index >= 0; index -= 1) {
@@ -121,6 +134,36 @@ export const moveSelection = (
     };
   }
 
+  if (selection.kind === 'guide' && selection.index !== undefined) {
+    const guide = board.guides[selection.index];
+
+    if (!guide) {
+      return board;
+    }
+
+    const deltaX = point.x - guide.start.x;
+    const deltaY = point.y - guide.start.y;
+    const clampedStart = clampPoint(board, point, guide.thickness / 2 + 24);
+    const clampedEnd = clampPoint(
+      board,
+      { x: guide.end.x + deltaX, y: guide.end.y + deltaY },
+      guide.thickness / 2 + 24,
+    );
+
+    return {
+      ...board,
+      guides: board.guides.map((candidate, index) =>
+        index === selection.index
+          ? {
+              ...candidate,
+              start: clampedStart,
+              end: clampedEnd,
+            }
+          : candidate,
+      ),
+    };
+  }
+
   if (selection.kind === 'flipper' && selection.index !== undefined) {
     const flipper = board.flippers[selection.index];
 
@@ -156,6 +199,16 @@ export const deleteSelection = (
       board: {
         ...board,
         bumpers: board.bumpers.filter((_, index) => index !== selection.index),
+      },
+      selection: { kind: 'none' },
+    };
+  }
+
+  if (selection.kind === 'guide' && selection.index !== undefined) {
+    return {
+      board: {
+        ...board,
+        guides: board.guides.filter((_, index) => index !== selection.index),
       },
       selection: { kind: 'none' },
     };
@@ -216,6 +269,28 @@ export const updateSelectedNumericField = (
     };
   }
 
+  if (selection.kind === 'guide' && selection.index !== undefined) {
+    return {
+      ...board,
+      guides: board.guides.map((guide, index) =>
+        index === selection.index
+          ? {
+              ...guide,
+              ...(field === 'startX'
+                ? { start: { ...guide.start, x: value } }
+                : field === 'startY'
+                  ? { start: { ...guide.start, y: value } }
+                  : field === 'endX'
+                    ? { end: { ...guide.end, x: value } }
+                    : field === 'endY'
+                      ? { end: { ...guide.end, y: value } }
+                      : { [field]: value }),
+            }
+          : guide,
+      ),
+    };
+  }
+
   if (selection.kind === 'flipper' && selection.index !== undefined) {
     return {
       ...board,
@@ -261,6 +336,27 @@ const distanceToFlipper = (
   );
   const closestX = flipper.x + (tipX - flipper.x) * projection;
   const closestY = flipper.y + (tipY - flipper.y) * projection;
+
+  return Math.hypot(point.x - closestX, point.y - closestY);
+};
+
+const distanceToGuide = (point: Point, guide: GuideDefinition): number => {
+  const segmentX = guide.end.x - guide.start.x;
+  const segmentY = guide.end.y - guide.start.y;
+  const segmentLengthSquared = segmentX * segmentX + segmentY * segmentY;
+
+  if (segmentLengthSquared === 0) {
+    return Math.hypot(point.x - guide.start.x, point.y - guide.start.y);
+  }
+
+  const projection = clamp(
+    ((point.x - guide.start.x) * segmentX + (point.y - guide.start.y) * segmentY) /
+      segmentLengthSquared,
+    0,
+    1,
+  );
+  const closestX = guide.start.x + segmentX * projection;
+  const closestY = guide.start.y + segmentY * projection;
 
   return Math.hypot(point.x - closestX, point.y - closestY);
 };

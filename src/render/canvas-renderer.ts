@@ -7,6 +7,7 @@ import type {
   BoardDefinition,
   BumperDefinition,
   FlipperDefinition,
+  GuideDefinition,
 } from '../types/board-definition';
 import type { InputState } from '../input/keyboard-input';
 
@@ -337,6 +338,14 @@ export class CanvasRenderer {
       }
     }
 
+    if (selection.kind === 'guide' && selection.index !== undefined) {
+      const guide = board.guides[selection.index];
+
+      if (guide) {
+        this.drawGuideSelection(context, guide);
+      }
+    }
+
     if (selection.kind === 'flipper' && selection.index !== undefined) {
       const flipper = board.flippers[selection.index];
 
@@ -356,6 +365,30 @@ export class CanvasRenderer {
     context.setLineDash([10, 6]);
     context.beginPath();
     context.arc(bumper.x, bumper.y, bumper.radius + 10, 0, Math.PI * 2);
+    context.stroke();
+    context.restore();
+  }
+
+  private drawGuideSelection(
+    context: CanvasRenderingContext2D,
+    guide: GuideDefinition,
+  ): void {
+    context.save();
+    context.strokeStyle = '#ffd166';
+    context.lineWidth = guide.thickness + 10;
+    context.lineCap = 'round';
+    context.globalAlpha = 0.45;
+    context.beginPath();
+    context.moveTo(guide.start.x, guide.start.y);
+    context.lineTo(guide.end.x, guide.end.y);
+    context.stroke();
+
+    context.globalAlpha = 1;
+    context.setLineDash([10, 6]);
+    context.lineWidth = 4;
+    context.beginPath();
+    context.moveTo(guide.start.x, guide.start.y);
+    context.lineTo(guide.end.x, guide.end.y);
     context.stroke();
     context.restore();
   }
