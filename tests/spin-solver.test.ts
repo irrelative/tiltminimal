@@ -37,19 +37,54 @@ describe('resolveBallContact', () => {
       Math.abs(metalBall.angularVelocity.z),
     );
   });
+
+  it('reduces rebound when the moving surface has finite effective mass', () => {
+    const rigidBall = createBallState(classicTable);
+    rigidBall.linearVelocity.x = 0;
+    rigidBall.linearVelocity.y = 120;
+
+    const finiteMassBall = createBallState(classicTable);
+    finiteMassBall.linearVelocity.x = 0;
+    finiteMassBall.linearVelocity.y = 120;
+
+    resolveBallContact(
+      rigidBall,
+      createContact('flipperRubber', {
+        normal: { x: 0, y: -1 },
+        surfaceVelocity: { x: 0, y: -3000 },
+        restitutionScale: 0.58,
+      }),
+    );
+    resolveBallContact(
+      finiteMassBall,
+      createContact('flipperRubber', {
+        normal: { x: 0, y: -1 },
+        surfaceVelocity: { x: 0, y: -3000 },
+        surfaceEffectiveMass: 0.08,
+        restitutionScale: 0.58,
+      }),
+    );
+
+    expect(Math.abs(finiteMassBall.linearVelocity.y)).toBeLessThan(
+      Math.abs(rigidBall.linearVelocity.y),
+    );
+  });
 });
 
 const createContact = (
   materialName: Parameters<typeof getSurfaceMaterial>[0],
+  overrides: Partial<ContactData> = {},
 ): ContactData => {
-  const normal = { x: 1, y: 0 };
+  const normal = overrides.normal ?? { x: 1, y: 0 };
 
   return {
     point: { x: 100, y: 100 },
     normal,
     tangent: getContactTangent(normal),
-    overlap: 3,
-    surfaceVelocity: { x: 0, y: 0 },
+    overlap: overrides.overlap ?? 3,
+    surfaceVelocity: overrides.surfaceVelocity ?? { x: 0, y: 0 },
     material: getSurfaceMaterial(materialName),
+    surfaceEffectiveMass: overrides.surfaceEffectiveMass,
+    restitutionScale: overrides.restitutionScale,
   };
 };

@@ -12,6 +12,8 @@ export interface ContactData {
   overlap: number;
   surfaceVelocity: Vector2;
   material: SurfaceMaterial;
+  surfaceEffectiveMass?: number;
+  restitutionScale?: number;
 }
 
 export interface ContactImpulseResult {

@@ -315,6 +315,8 @@ const resolveFlipperCollision = (
         angle,
         {
           angularVelocity: motion.next.angularVelocity,
+          bodyMass: board.physics.flipper.bodyMass,
+          restitutionScale: board.physics.flipper.restitutionScale,
         },
         solver,
       )
@@ -331,6 +333,8 @@ const applyFlipperCollisionAtAngle = (
   collisionAngle: number,
   motion: {
     angularVelocity: number;
+    bodyMass: number;
+    restitutionScale: number;
   },
   solver: SolverPhysicsDefinition,
 ): boolean => {
@@ -372,6 +376,10 @@ const applyFlipperCollisionAtAngle = (
       : fallbackNormalY;
   const relativeContactX = closestX - flipper.x;
   const relativeContactY = closestY - flipper.y;
+  const contactRadiusSquared =
+    relativeContactX * relativeContactX + relativeContactY * relativeContactY;
+  const flipperMomentOfInertia =
+    (motion.bodyMass * flipper.length * flipper.length) / 3;
   const surfaceVelocityX = -motion.angularVelocity * relativeContactY;
   const surfaceVelocityY = motion.angularVelocity * relativeContactX;
   const incomingNormalSpeed =
@@ -393,6 +401,11 @@ const applyFlipperCollisionAtAngle = (
       y: surfaceVelocityY,
     },
     material: flipperMaterial,
+    surfaceEffectiveMass:
+      contactRadiusSquared > solver.epsilon
+        ? flipperMomentOfInertia / contactRadiusSquared
+        : Number.POSITIVE_INFINITY,
+    restitutionScale: motion.restitutionScale,
   };
 
   if (incomingNormalSpeed < 0 || overlap > solver.epsilon) {

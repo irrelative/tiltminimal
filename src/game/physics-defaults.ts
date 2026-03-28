@@ -67,6 +67,8 @@ export const physicsDefaults = {
     flipper: {
       swingAngularSpeed: 30,
       collisionAngleStep: 0.08,
+      bodyMass: 0.12,
+      restitutionScale: 0.58,
     },
     solver: {
       epsilon: 0.0001,
@@ -116,6 +118,12 @@ export const createBoardDefinition = (
       collisionAngleStep:
         input.physics?.flipper?.collisionAngleStep ??
         physicsDefaults.tuning.flipper.collisionAngleStep,
+      bodyMass:
+        input.physics?.flipper?.bodyMass ??
+        physicsDefaults.tuning.flipper.bodyMass,
+      restitutionScale:
+        input.physics?.flipper?.restitutionScale ??
+        physicsDefaults.tuning.flipper.restitutionScale,
     },
     solver: {
       epsilon:

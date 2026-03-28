@@ -15,8 +15,18 @@ export const resolveBallContact = (
   let normalImpulse = 0;
 
   if (relativeNormalSpeed < 0) {
+    const inverseSurfaceMass =
+      contact.surfaceEffectiveMass !== undefined &&
+      Number.isFinite(contact.surfaceEffectiveMass) &&
+      contact.surfaceEffectiveMass > solver.epsilon
+        ? 1 / contact.surfaceEffectiveMass
+        : 0;
+    const effectiveRestitution =
+      contact.material.restitution * (contact.restitutionScale ?? 1);
+
     normalImpulse =
-      -(1 + contact.material.restitution) * relativeNormalSpeed * ball.mass;
+      (-(1 + effectiveRestitution) * relativeNormalSpeed) /
+      (1 / ball.mass + inverseSurfaceMass);
 
     applyLinearImpulse(ball, contact.normal, normalImpulse);
   }

@@ -30,6 +30,7 @@ describe('createBoardDefinition', () => {
         },
         flipper: {
           swingAngularSpeed: 4.1,
+          bodyMass: 0.15,
         },
         solver: {
           epsilon: 0.0025,
@@ -54,6 +55,10 @@ describe('createBoardDefinition', () => {
     expect(board.physics.flipper.swingAngularSpeed).toBe(4.1);
     expect(board.physics.flipper.collisionAngleStep).toBe(
       physicsDefaults.tuning.flipper.collisionAngleStep,
+    );
+    expect(board.physics.flipper.bodyMass).toBe(0.15);
+    expect(board.physics.flipper.restitutionScale).toBe(
+      physicsDefaults.tuning.flipper.restitutionScale,
     );
     expect(board.physics.solver.epsilon).toBe(0.0025);
     expect(board.physics.solver.staticSlipThreshold).toBe(

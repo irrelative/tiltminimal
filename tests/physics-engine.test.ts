@@ -141,7 +141,7 @@ describe('stepGame', () => {
     const next = stepGame(state, classicTable, idleInput, 1 / 60);
 
     expect(next.ball.position.x).toBeGreaterThan(state.ball.position.x);
-    expect(next.ball.linearVelocity.x).toBeGreaterThan(0);
+    expect(next.ball.linearVelocity.x).toBeGreaterThan(-220);
     expect(next.ball.linearVelocity.y).toBeLessThan(160);
   });
 

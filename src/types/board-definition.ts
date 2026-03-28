@@ -38,6 +38,8 @@ export interface LaunchPhysicsDefinition {
 export interface FlipperPhysicsDefinition {
   swingAngularSpeed: number;
   collisionAngleStep: number;
+  bodyMass: number;
+  restitutionScale: number;
 }
 
 export interface SolverPhysicsDefinition {
