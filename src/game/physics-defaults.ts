@@ -3,6 +3,7 @@ import type {
   BoardDefinition,
   BoardDefinitionInput,
   PhysicsDefinition,
+  PlungerDefinition,
   SurfaceMaterial,
   SurfaceMaterialName,
 } from '../types/board-definition';
@@ -14,6 +15,12 @@ export const physicsDefaults = {
     radius: 16,
     mass: 0.08,
   } satisfies BallDefinition,
+  plunger: {
+    length: 72,
+    thickness: 24,
+    travel: 124,
+    material: 'metalGuide',
+  } satisfies Omit<PlungerDefinition, 'x' | 'y'>,
   surfaceMaterials: {
     playfieldWood: {
       name: 'playfieldWood',
@@ -57,12 +64,11 @@ export const physicsDefaults = {
     },
   } satisfies Record<SurfaceMaterialName, SurfaceMaterial>,
   tuning: {
-    launch: {
-      maxChargeSeconds: 1.4,
-      minLaunchSpeed: 900,
-      maxLaunchSpeed: 1850,
-      minLaunchDrift: -70,
-      maxLaunchDrift: -260,
+    plunger: {
+      maxPullSeconds: 1.4,
+      minReleaseSpeed: 900,
+      maxReleaseSpeed: 1850,
+      bodyMass: 0.18,
     },
     flipper: {
       swingAngularSpeed: 30,
@@ -91,26 +97,11 @@ export const createBoardDefinition = (
     mass: input.ball?.mass ?? physicsDefaults.ball.mass,
   },
   launchPosition: input.launchPosition,
+  plunger: resolvePlungerDefinition(input),
   materials: input.materials,
   surfaceMaterials: resolveSurfaceMaterials(input.surfaceMaterials),
   physics: {
-    launch: {
-      maxChargeSeconds:
-        input.physics?.launch?.maxChargeSeconds ??
-        physicsDefaults.tuning.launch.maxChargeSeconds,
-      minLaunchSpeed:
-        input.physics?.launch?.minLaunchSpeed ??
-        physicsDefaults.tuning.launch.minLaunchSpeed,
-      maxLaunchSpeed:
-        input.physics?.launch?.maxLaunchSpeed ??
-        physicsDefaults.tuning.launch.maxLaunchSpeed,
-      minLaunchDrift:
-        input.physics?.launch?.minLaunchDrift ??
-        physicsDefaults.tuning.launch.minLaunchDrift,
-      maxLaunchDrift:
-        input.physics?.launch?.maxLaunchDrift ??
-        physicsDefaults.tuning.launch.maxLaunchDrift,
-    },
+    plunger: resolvePlungerPhysics(input),
     flipper: {
       swingAngularSpeed:
         input.physics?.flipper?.swingAngularSpeed ??
@@ -146,10 +137,16 @@ export const createBoardDefinition = (
 const resolveSurfaceMaterials = (
   overrides: BoardDefinitionInput['surfaceMaterials'],
 ): Record<SurfaceMaterialName, SurfaceMaterial> => ({
-  playfieldWood: mergeSurfaceMaterial('playfieldWood', overrides?.playfieldWood),
+  playfieldWood: mergeSurfaceMaterial(
+    'playfieldWood',
+    overrides?.playfieldWood,
+  ),
   metalGuide: mergeSurfaceMaterial('metalGuide', overrides?.metalGuide),
   rubberPost: mergeSurfaceMaterial('rubberPost', overrides?.rubberPost),
-  flipperRubber: mergeSurfaceMaterial('flipperRubber', overrides?.flipperRubber),
+  flipperRubber: mergeSurfaceMaterial(
+    'flipperRubber',
+    overrides?.flipperRubber,
+  ),
 });
 
 const mergeSurfaceMaterial = (
@@ -159,4 +156,48 @@ const mergeSurfaceMaterial = (
   ...physicsDefaults.surfaceMaterials[name],
   ...overrides,
   name,
+});
+
+const resolvePlungerDefinition = (
+  input: BoardDefinitionInput,
+): PlungerDefinition => {
+  const length = input.plunger?.length ?? physicsDefaults.plunger.length;
+  const thickness =
+    input.plunger?.thickness ?? physicsDefaults.plunger.thickness;
+  const ballRadius = input.ball?.radius ?? physicsDefaults.ball.radius;
+  const contactOverlap = 4;
+
+  return {
+    x: input.plunger?.x ?? input.launchPosition.x,
+    y:
+      input.plunger?.y ??
+      input.launchPosition.y +
+        ballRadius +
+        length / 2 +
+        thickness / 2 -
+        contactOverlap,
+    length,
+    thickness,
+    travel: input.plunger?.travel ?? physicsDefaults.plunger.travel,
+    material: input.plunger?.material ?? physicsDefaults.plunger.material,
+  };
+};
+
+const resolvePlungerPhysics = (
+  input: BoardDefinitionInput,
+): PhysicsDefinition['plunger'] => ({
+  maxPullSeconds:
+    input.physics?.plunger?.maxPullSeconds ??
+    input.physics?.launch?.maxChargeSeconds ??
+    physicsDefaults.tuning.plunger.maxPullSeconds,
+  minReleaseSpeed:
+    input.physics?.plunger?.minReleaseSpeed ??
+    input.physics?.launch?.minLaunchSpeed ??
+    physicsDefaults.tuning.plunger.minReleaseSpeed,
+  maxReleaseSpeed:
+    input.physics?.plunger?.maxReleaseSpeed ??
+    input.physics?.launch?.maxLaunchSpeed ??
+    physicsDefaults.tuning.plunger.maxReleaseSpeed,
+  bodyMass:
+    input.physics?.plunger?.bodyMass ?? physicsDefaults.tuning.plunger.bodyMass,
 });

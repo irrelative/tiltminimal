@@ -7,13 +7,11 @@ import {
   getFlipperBaseRadius,
   getFlipperTipRadius,
 } from '../game/flipper-geometry';
-import {
-  isArcGuide,
-} from '../game/guide-geometry';
+import { isArcGuide } from '../game/guide-geometry';
 import { getSurfaceMaterial } from '../game/materials';
 import type { GameState } from '../game/game-state';
 import { getStatusLabel } from '../game/game-loop';
-import { getLaunchChargeRatio } from '../game/physics-engine';
+import { getPlungerPullRatio } from '../game/physics-engine';
 import type {
   BoardDefinition,
   BumperDefinition,
@@ -93,6 +91,7 @@ export class CanvasRenderer {
     this.drawBackground(context, board);
     this.drawBounds(context, board);
     this.drawGuides(context, board);
+    this.drawPlunger(context, board, state);
     this.drawBumpers(context, board, state);
     this.drawStandupTargets(context, board, state);
     this.drawDropTargets(context, board, state);
@@ -104,7 +103,9 @@ export class CanvasRenderer {
       this.drawFlipper(
         context,
         flipper,
-        state ? getRenderedFlipperAngle(state, flipper, index) : flipper.restingAngle,
+        state
+          ? getRenderedFlipperAngle(state, flipper, index)
+          : flipper.restingAngle,
         FLIPPER_COLOR,
       );
     }
@@ -227,6 +228,64 @@ export class CanvasRenderer {
     context.textAlign = 'start';
   }
 
+  private drawPlunger(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+    state?: GameState,
+  ): void {
+    const pullback = state?.plunger.pullback ?? 0;
+    const laneWidth = board.plunger.thickness + 24;
+    const laneHeight = board.plunger.length + board.plunger.travel + 32;
+    const laneTop =
+      board.plunger.y -
+      board.plunger.length / 2 -
+      board.plunger.thickness / 2 -
+      8;
+
+    context.save();
+    context.fillStyle = 'rgba(34, 48, 74, 0.14)';
+    context.strokeStyle = 'rgba(47, 109, 178, 0.45)';
+    context.lineWidth = 3;
+    context.beginPath();
+    context.roundRect(
+      board.plunger.x - laneWidth / 2,
+      laneTop,
+      laneWidth,
+      laneHeight,
+      laneWidth / 2,
+    );
+    context.fill();
+    context.stroke();
+
+    this.drawOrientedPlate(
+      context,
+      {
+        x: board.plunger.x,
+        y: board.plunger.y + pullback,
+      },
+      board.plunger.thickness,
+      board.plunger.length,
+      Math.PI / 2,
+      PALETTE.cream,
+      PALETTE.outlineBlue,
+    );
+
+    context.fillStyle = PALETTE.red;
+    context.beginPath();
+    context.arc(
+      board.plunger.x,
+      board.plunger.y -
+        board.plunger.length / 2 -
+        board.plunger.thickness / 2 +
+        pullback,
+      board.plunger.thickness * 0.32,
+      0,
+      Math.PI * 2,
+    );
+    context.fill();
+    context.restore();
+  }
+
   private drawStandupTargets(
     context: CanvasRenderingContext2D,
     board: BoardDefinition,
@@ -282,7 +341,9 @@ export class CanvasRenderer {
       context.beginPath();
       context.arc(saucer.x, saucer.y, saucer.radius, 0, Math.PI * 2);
       context.fill();
-      context.fillStyle = occupied ? PALETTE.cream : 'rgba(255, 247, 214, 0.35)';
+      context.fillStyle = occupied
+        ? PALETTE.cream
+        : 'rgba(255, 247, 214, 0.35)';
       context.beginPath();
       context.arc(saucer.x, saucer.y, saucer.radius * 0.62, 0, Math.PI * 2);
       context.fill();
@@ -314,7 +375,13 @@ export class CanvasRenderer {
       context.save();
       context.fillStyle = PALETTE.cream;
       context.beginPath();
-      context.arc(spinner.x, spinner.y, spinner.thickness * 0.8, 0, Math.PI * 2);
+      context.arc(
+        spinner.x,
+        spinner.y,
+        spinner.thickness * 0.8,
+        0,
+        Math.PI * 2,
+      );
       context.fill();
       context.restore();
     });
@@ -365,7 +432,13 @@ export class CanvasRenderer {
     context.arc(baseRadius * 0.6, 0, baseRadius * 0.32, 0, Math.PI * 2);
     context.fill();
     context.beginPath();
-    context.arc(flipper.length - tipRadius * 0.35, 0, tipRadius * 0.2, 0, Math.PI * 2);
+    context.arc(
+      flipper.length - tipRadius * 0.35,
+      0,
+      tipRadius * 0.2,
+      0,
+      Math.PI * 2,
+    );
     context.fill();
     context.restore();
   }
@@ -416,7 +489,7 @@ export class CanvasRenderer {
     board: BoardDefinition,
     state: GameState,
   ): void {
-    const ratio = getLaunchChargeRatio(state, board);
+    const ratio = getPlungerPullRatio(state, board);
     const meterWidth = 200;
     const meterHeight = 14;
     const x = board.width - meterWidth - 48;
@@ -434,7 +507,7 @@ export class CanvasRenderer {
 
     context.font = '400 16px Georgia, serif';
     context.fillStyle = PALETTE.ink;
-    context.fillText('Launch', x, y - 10);
+    context.fillText('Plunger', x, y - 10);
   }
 
   private drawLaunchPosition(
@@ -714,7 +787,12 @@ export class CanvasRenderer {
     context.strokeStyle = '#ffd166';
     context.lineWidth = 4;
     context.setLineDash([10, 6]);
-    context.strokeRect(-width / 2 - 8, -height / 2 - 8, width + 16, height + 16);
+    context.strokeRect(
+      -width / 2 - 8,
+      -height / 2 - 8,
+      width + 16,
+      height + 16,
+    );
     context.restore();
 
     context.save();
@@ -808,5 +886,4 @@ const getRenderedFlipperAngle = (
   state: GameState,
   flipper: FlipperDefinition,
   index: number,
-): number =>
-  state.flippers[index]?.angle ?? flipper.restingAngle;
+): number => state.flippers[index]?.angle ?? flipper.restingAngle;

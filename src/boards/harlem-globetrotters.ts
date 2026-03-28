@@ -14,9 +14,9 @@ export const harlemGlobetrottersTable = createBoardDefinition({
     walls: 'metalGuide',
   },
   physics: {
-    launch: {
-      minLaunchSpeed: 1150,
-      maxLaunchSpeed: 2400,
+    plunger: {
+      minReleaseSpeed: 1150,
+      maxReleaseSpeed: 2400,
     },
   },
   bumpers: [

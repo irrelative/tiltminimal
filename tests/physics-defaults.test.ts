@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { createBoardDefinition, physicsDefaults } from '../src/game/physics-defaults';
+import {
+  createBoardDefinition,
+  physicsDefaults,
+} from '../src/game/physics-defaults';
 
 describe('createBoardDefinition', () => {
   it('fills in omitted physics values from the defaults', () => {
@@ -9,9 +12,10 @@ describe('createBoardDefinition', () => {
     expect(board.gravity).toBe(physicsDefaults.gravity);
     expect(board.tableAngle).toBe(physicsDefaults.tableAngle);
     expect(board.ball).toEqual(physicsDefaults.ball);
-    expect(board.physics.launch).toEqual(physicsDefaults.tuning.launch);
+    expect(board.physics.plunger).toEqual(physicsDefaults.tuning.plunger);
     expect(board.physics.flipper).toEqual(physicsDefaults.tuning.flipper);
     expect(board.physics.solver).toEqual(physicsDefaults.tuning.solver);
+    expect(board.plunger.travel).toBe(physicsDefaults.plunger.travel);
     expect(board.surfaceMaterials.flipperRubber).toEqual(
       physicsDefaults.surfaceMaterials.flipperRubber,
     );
@@ -25,8 +29,9 @@ describe('createBoardDefinition', () => {
         radius: 18,
       },
       physics: {
-        launch: {
-          maxChargeSeconds: 2.2,
+        plunger: {
+          maxPullSeconds: 2.2,
+          bodyMass: 0.26,
         },
         flipper: {
           swingAngularSpeed: 4.1,
@@ -48,10 +53,15 @@ describe('createBoardDefinition', () => {
     expect(board.tableAngle).toBe(7.1);
     expect(board.ball.radius).toBe(18);
     expect(board.ball.mass).toBe(physicsDefaults.ball.mass);
-    expect(board.physics.launch.maxChargeSeconds).toBe(2.2);
-    expect(board.physics.launch.maxLaunchSpeed).toBe(
-      physicsDefaults.tuning.launch.maxLaunchSpeed,
+    expect(board.physics.plunger.maxPullSeconds).toBe(2.2);
+    expect(board.physics.plunger.maxReleaseSpeed).toBe(
+      physicsDefaults.tuning.plunger.maxReleaseSpeed,
     );
+    expect(board.physics.plunger.bodyMass).toBe(0.26);
+    expect(board.plunger.length).toBe(physicsDefaults.plunger.length);
+    expect(board.plunger.material).toBe(physicsDefaults.plunger.material);
+    expect(board.plunger.x).toBe(720);
+    expect(board.plunger.y).toBeGreaterThan(board.launchPosition.y);
     expect(board.physics.flipper.swingAngularSpeed).toBe(4.1);
     expect(board.physics.flipper.collisionAngleStep).toBe(
       physicsDefaults.tuning.flipper.collisionAngleStep,

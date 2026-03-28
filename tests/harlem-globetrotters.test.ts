@@ -4,7 +4,6 @@ import { harlemGlobetrottersTable } from '../src/boards/harlem-globetrotters';
 import { BUILT_IN_TABLES, getFlipperBySide } from '../src/boards/table-library';
 import { createInitialGameState } from '../src/game/game-state';
 import { stepGame } from '../src/game/physics-engine';
-import { physicsDefaults } from '../src/game/physics-defaults';
 import type { InputState } from '../src/input/keyboard-input';
 
 const idleInput: InputState = {
@@ -40,16 +39,40 @@ describe('harlemGlobetrottersTable', () => {
       state,
       harlemGlobetrottersTable,
       { ...idleInput, launchPressed: true },
-      harlemGlobetrottersTable.physics.launch.maxChargeSeconds,
+      harlemGlobetrottersTable.physics.plunger.maxPullSeconds,
     );
+    const launched = releaseUntilLaunched(state, harlemGlobetrottersTable);
 
-    const launched = stepGame(state, harlemGlobetrottersTable, idleInput, 1 / 60);
-
-    expect(Math.abs(launched.ball.linearVelocity.y)).toBe(
-      harlemGlobetrottersTable.physics.launch.maxLaunchSpeed,
-    );
     expect(
-      Math.abs(launched.ball.linearVelocity.y),
-    ).toBeGreaterThan(physicsDefaults.tuning.launch.maxLaunchSpeed);
+      harlemGlobetrottersTable.physics.plunger.maxReleaseSpeed,
+    ).toBeGreaterThan(
+      BUILT_IN_TABLES[0]!.board.physics.plunger.maxReleaseSpeed,
+    );
+    expect(launched.status).toBe('playing');
+    expect(launched.ball.linearVelocity.y).toBeLessThan(0);
+    expect(Math.abs(launched.ball.linearVelocity.y)).toBeGreaterThan(
+      physicsFloorForLaunch(),
+    );
   });
 });
+
+const physicsFloorForLaunch = (): number => 150;
+
+const releaseUntilLaunched = (
+  state: ReturnType<typeof createInitialGameState>,
+  board:
+    | typeof harlemGlobetrottersTable
+    | (typeof BUILT_IN_TABLES)[number]['board'],
+) => {
+  let current = state;
+
+  for (let step = 0; step < 45; step += 1) {
+    current = stepGame(current, board, idleInput, 1 / 60);
+
+    if (current.status === 'playing') {
+      return current;
+    }
+  }
+
+  throw new Error('Expected plunger launch.');
+};

@@ -5,7 +5,7 @@ import type { GameAudio } from '../audio/game-audio';
 import { getFrameAudioEvents } from '../audio/game-audio';
 import type { GameState } from './game-state';
 import { resetBall } from './game-state';
-import { getLaunchChargeRatio, stepGame } from './physics-engine';
+import { getPlungerPullRatio, stepGame } from './physics-engine';
 
 export class GameLoop {
   private animationFrameId = 0;
@@ -101,14 +101,18 @@ export const getStatusLabel = (
   board: BoardDefinition,
 ): string => {
   if (state.status === 'waiting-launch') {
-    const launchPercent = Math.round(getLaunchChargeRatio(state, board) * 100);
+    const launchPercent = Math.round(getPlungerPullRatio(state, board) * 100);
 
     if (input.launchPressed) {
-      return `Charging launcher: ${launchPercent}%`;
+      return `Pulling plunger: ${launchPercent}%`;
     }
 
-    return 'Hold Space to charge the launcher. Release to fire the ball.';
+    if (state.plunger.pullback > 0) {
+      return 'Release Space and the plunger will strike the ball.';
+    }
+
+    return 'Hold Space to pull back the plunger. Release to launch.';
   }
 
-  return 'Left Shift / Z / Left Arrow and Right Shift / ? / Right Arrow flip. Space charges the launcher.';
+  return 'Left Shift / Z / Left Arrow and Right Shift / ? / Right Arrow flip. Space controls the plunger.';
 };

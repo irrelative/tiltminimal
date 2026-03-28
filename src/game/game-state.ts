@@ -21,6 +21,11 @@ export interface FlipperState {
   angularVelocity: number;
 }
 
+export interface PlungerState {
+  pullback: number;
+  releaseSpeed: number;
+}
+
 export interface StandupTargetState {
   cooldownSeconds: number;
 }
@@ -49,9 +54,7 @@ export interface GameState {
   score: number;
   tick: number;
   status: 'waiting-launch' | 'playing';
-  launcher: {
-    chargeSeconds: number;
-  };
+  plunger: PlungerState;
   flippers: FlipperState[];
   standupTargets: StandupTargetState[];
   dropTargets: DropTargetState[];
@@ -65,9 +68,7 @@ export const createInitialGameState = (board: BoardDefinition): GameState => ({
   score: 0,
   tick: 0,
   status: 'waiting-launch',
-  launcher: {
-    chargeSeconds: 0,
-  },
+  plunger: createPlungerState(),
   flippers: board.flippers.map(createFlipperState),
   standupTargets: board.standupTargets.map(createStandupTargetState),
   dropTargets: board.dropTargets.map(createDropTargetState),
@@ -83,9 +84,7 @@ export const resetBall = (
   ...state,
   ball: createBallState(board),
   status: 'waiting-launch',
-  launcher: {
-    chargeSeconds: 0,
-  },
+  plunger: createPlungerState(),
   flippers: board.flippers.map(createFlipperState),
   standupTargets: board.standupTargets.map(createStandupTargetState),
   dropTargets: board.dropTargets.map(createDropTargetState),
@@ -131,6 +130,11 @@ const createFlipperState = (
   engaged: false,
   angle: flipper.restingAngle,
   angularVelocity: 0,
+});
+
+const createPlungerState = (): PlungerState => ({
+  pullback: 0,
+  releaseSpeed: 0,
 });
 
 const createStandupTargetState = (): StandupTargetState => ({

@@ -7,15 +7,13 @@ import type {
   StandupTargetDefinition,
 } from '../types/board-definition';
 import type { ContactData } from './contact-types';
-import {
-  getFlipperFaceNormal,
-  sampleFlipperProfile,
-} from './flipper-geometry';
+import { getFlipperFaceNormal, sampleFlipperProfile } from './flipper-geometry';
 import { projectPointToGuide } from './guide-geometry';
 import type {
   DropTargetState,
   FlipperState,
   GameState,
+  PlungerState,
   RolloverState,
   SaucerState,
   SpinnerState,
@@ -35,94 +33,78 @@ export const stepGame = (
   deltaSeconds: number,
 ): GameState => {
   const dt = Math.min(deltaSeconds, 1 / 30);
-  const launchChargeDelta = Math.max(deltaSeconds, 0);
-  const { launch } = board.physics;
 
   if (state.status === 'waiting-launch') {
-    const flipperFrame = advanceFlipperFrame(
+    return stepWaitingLaunchState(
       state,
       board,
       input,
       Math.max(deltaSeconds, 0),
     );
-    const chargeSeconds = input.launchPressed
-      ? Math.min(
-          state.launcher.chargeSeconds + launchChargeDelta,
-          launch.maxChargeSeconds,
-        )
-      : state.launcher.chargeSeconds;
-
-    if (!input.launchPressed && state.launcher.chargeSeconds > 0) {
-      const chargeRatio = chargeSeconds / launch.maxChargeSeconds;
-
-      return {
-        ...state,
-        tick: state.tick + 1,
-        status: 'playing',
-        launcher: {
-          chargeSeconds: 0,
-        },
-        ball: {
-          ...state.ball,
-          position: {
-            ...state.ball.position,
-            x: board.launchPosition.x,
-            y: board.launchPosition.y,
-            z: state.ball.radius,
-          },
-          linearVelocity: {
-            x: interpolate(
-              launch.minLaunchDrift,
-              launch.maxLaunchDrift,
-              chargeRatio,
-            ),
-            y: -interpolate(
-              launch.minLaunchSpeed,
-              launch.maxLaunchSpeed,
-              chargeRatio,
-            ),
-            z: 0,
-          },
-          angularVelocity: {
-            x: 0,
-            y: 0,
-            z: 0,
-          },
-        },
-        flippers: flipperFrame.map((motion) => motion.next),
-      };
-    }
-
-    return {
-      ...state,
-      tick: state.tick + 1,
-      ball: {
-        ...state.ball,
-        position: {
-          ...state.ball.position,
-          x: board.launchPosition.x,
-          y: board.launchPosition.y,
-          z: state.ball.radius,
-        },
-        linearVelocity: {
-          x: 0,
-          y: 0,
-          z: 0,
-        },
-        angularVelocity: {
-          x: 0,
-          y: 0,
-          z: 0,
-        },
-      },
-      launcher: {
-        chargeSeconds,
-      },
-      flippers: flipperFrame.map((motion) => motion.next),
-    };
   }
 
   return stepPlayingState(state, board, input, Math.max(dt, 0));
+};
+
+const stepWaitingLaunchState = (
+  state: GameState,
+  board: BoardDefinition,
+  input: InputState,
+  deltaSeconds: number,
+): GameState => {
+  const plungerFrame = advancePlungerFrame(state, board, input, deltaSeconds);
+  const flipperFrame = advanceFlipperFrame(state, board, input, deltaSeconds);
+  const next: GameState = {
+    ...state,
+    tick: state.tick + 1,
+    status: 'waiting-launch',
+    ball: {
+      ...state.ball,
+      position: {
+        ...state.ball.position,
+        x: board.launchPosition.x,
+        y: board.launchPosition.y,
+        z: state.ball.radius,
+      },
+      linearVelocity: {
+        x: 0,
+        y: 0,
+        z: 0,
+      },
+      angularVelocity: {
+        x: 0,
+        y: 0,
+        z: 0,
+      },
+    },
+    plunger: plungerFrame.next,
+    flippers: flipperFrame.map((motion) => motion.next),
+  };
+
+  if (plungerFrame.surfaceVelocity.y >= 0) {
+    return next;
+  }
+
+  resolvePlungerCollision(next, board, plungerFrame, board.physics.solver);
+
+  if (
+    next.ball.linearVelocity.y < -24 ||
+    next.ball.position.y < board.launchPosition.y - 2
+  ) {
+    next.status = 'playing';
+  } else {
+    next.ball.position.x = board.launchPosition.x;
+    next.ball.position.y = board.launchPosition.y;
+    next.ball.position.z = state.ball.radius;
+    next.ball.linearVelocity.x = 0;
+    next.ball.linearVelocity.y = 0;
+    next.ball.linearVelocity.z = 0;
+    next.ball.angularVelocity.x = 0;
+    next.ball.angularVelocity.y = 0;
+    next.ball.angularVelocity.z = 0;
+  }
+
+  return next;
 };
 
 const stepPlayingState = (
@@ -146,9 +128,7 @@ const stepPlayingState = (
         ...state.ball.angularVelocity,
       },
     },
-    launcher: {
-      chargeSeconds: 0,
-    },
+    plunger: clonePlungerState(state.plunger),
     flippers: board.flippers.map((flipper, index) =>
       cloneFlipperState(getFlipperState(state, flipper, index)),
     ),
@@ -165,13 +145,10 @@ const stepPlayingState = (
   const stepSeconds = stepCount > 0 ? deltaSeconds / stepCount : 0;
 
   for (let stepIndex = 0; stepIndex < stepCount; stepIndex += 1) {
-    const flipperFrame = advanceFlipperFrame(
-      next,
-      board,
-      input,
-      stepSeconds,
-    );
+    const plungerFrame = advancePlungerFrame(next, board, input, stepSeconds);
+    const flipperFrame = advanceFlipperFrame(next, board, input, stepSeconds);
 
+    next.plunger = plungerFrame.next;
     next.flippers = flipperFrame.map((motion) => motion.next);
 
     advanceElementStates(next, board, stepSeconds);
@@ -186,6 +163,7 @@ const stepPlayingState = (
 
     resolveWallCollisions(next, board);
     resolveGuideCollisions(next, board, board.physics.solver);
+    resolvePlungerCollision(next, board, plungerFrame, board.physics.solver);
     resolveStandupTargetCollisions(next, board, board.physics.solver);
     resolveDropTargetCollisions(next, board, board.physics.solver);
     resolveBumperCollisions(next, board, board.physics.solver);
@@ -205,11 +183,15 @@ const stepPlayingState = (
 export const getLaunchChargeRatio = (
   state: GameState,
   board: BoardDefinition,
+): number => getPlungerPullRatio(state, board);
+
+export const getPlungerPullRatio = (
+  state: GameState,
+  board: BoardDefinition,
 ): number =>
-  Math.min(
-    state.launcher.chargeSeconds / board.physics.launch.maxChargeSeconds,
-    1,
-  );
+  board.plunger.travel > 0
+    ? clamp(state.plunger.pullback / board.plunger.travel, 0, 1)
+    : 0;
 
 const resolveWallCollisions = (
   state: GameState,
@@ -282,6 +264,57 @@ const resolveGuideCollision = (
   }
 };
 
+const resolvePlungerCollision = (
+  state: GameState,
+  board: BoardDefinition,
+  motion: PlungerMotionFrame,
+  solver: SolverPhysicsDefinition,
+): void => {
+  const collision = getOrientedElementCollision(
+    state,
+    {
+      x: board.plunger.x,
+      y: board.plunger.y + motion.next.pullback,
+    },
+    board.plunger.length,
+    board.plunger.thickness,
+    Math.PI / 2,
+    solver,
+  );
+
+  if (!collision) {
+    return;
+  }
+
+  const material = getSurfaceMaterial(
+    board.plunger.material,
+    board.surfaceMaterials,
+  );
+  const incomingNormalSpeed =
+    (state.ball.linearVelocity.x - motion.surfaceVelocity.x) *
+      collision.normal.x +
+    (state.ball.linearVelocity.y - motion.surfaceVelocity.y) *
+      collision.normal.y;
+
+  if (incomingNormalSpeed >= 0 && collision.overlap <= solver.epsilon) {
+    return;
+  }
+
+  resolveBallContact(
+    state.ball,
+    {
+      point: collision.point,
+      normal: collision.normal,
+      tangent: getContactTangent(collision.normal),
+      overlap: collision.overlap,
+      surfaceVelocity: motion.surfaceVelocity,
+      material,
+      surfaceEffectiveMass: board.physics.plunger.bodyMass,
+    },
+    solver,
+  );
+};
+
 const resolveStandupTargetCollisions = (
   state: GameState,
   board: BoardDefinition,
@@ -307,7 +340,10 @@ const resolveStandupTargetCollisions = (
       return;
     }
 
-    const material = getSurfaceMaterial(target.material, board.surfaceMaterials);
+    const material = getSurfaceMaterial(
+      target.material,
+      board.surfaceMaterials,
+    );
     const incomingNormalSpeed =
       state.ball.linearVelocity.x * collision.normal.x +
       state.ball.linearVelocity.y * collision.normal.y;
@@ -357,7 +393,10 @@ const resolveDropTargetCollisions = (
       return;
     }
 
-    const material = getSurfaceMaterial(target.material, board.surfaceMaterials);
+    const material = getSurfaceMaterial(
+      target.material,
+      board.surfaceMaterials,
+    );
     const incomingNormalSpeed =
       state.ball.linearVelocity.x * collision.normal.x +
       state.ball.linearVelocity.y * collision.normal.y;
@@ -444,7 +483,11 @@ const applyFlipperCollisionAtAngle = (
     flipper.material,
     board.surfaceMaterials,
   );
-  const collision = sampleFlipperProfile(state.ball.position, flipper, collisionAngle);
+  const collision = sampleFlipperProfile(
+    state.ball.position,
+    flipper,
+    collisionAngle,
+  );
   const overlap = state.ball.radius + collision.radius - collision.distance;
 
   if (overlap <= 0) {
@@ -454,9 +497,7 @@ const applyFlipperCollisionAtAngle = (
   const fallbackNormal = getFlipperFaceNormal(flipper, collisionAngle);
   const normal = { ...collision.normal };
 
-  if (
-    normal.x * fallbackNormal.x + normal.y * fallbackNormal.y < 0
-  ) {
+  if (normal.x * fallbackNormal.x + normal.y * fallbackNormal.y < 0) {
     normal.x *= -1;
     normal.y *= -1;
   }
@@ -644,6 +685,63 @@ const interpolate = (start: number, end: number, ratio: number): number =>
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max);
 
+const advancePlungerFrame = (
+  state: GameState,
+  board: BoardDefinition,
+  input: InputState,
+  deltaSeconds: number,
+): PlungerMotionFrame => {
+  const current = state.plunger;
+  const pullRatio = getPlungerPullRatio(state, board);
+  const pullSpeed =
+    board.physics.plunger.maxPullSeconds > 0
+      ? board.plunger.travel / board.physics.plunger.maxPullSeconds
+      : board.plunger.travel;
+  const armedReleaseSpeed = interpolate(
+    board.physics.plunger.minReleaseSpeed,
+    board.physics.plunger.maxReleaseSpeed,
+    pullRatio,
+  );
+  const releaseSpeed =
+    input.launchPressed || current.pullback <= 0
+      ? armedReleaseSpeed
+      : current.releaseSpeed || armedReleaseSpeed;
+  const nextPullback = input.launchPressed
+    ? moveToward(
+        current.pullback,
+        board.plunger.travel,
+        pullSpeed * deltaSeconds,
+      )
+    : moveToward(current.pullback, 0, releaseSpeed * deltaSeconds);
+  const nextPullRatio =
+    board.plunger.travel > 0
+      ? clamp(nextPullback / board.plunger.travel, 0, 1)
+      : 0;
+
+  return {
+    previousPullback: current.pullback,
+    next: {
+      pullback: nextPullback,
+      releaseSpeed: input.launchPressed
+        ? interpolate(
+            board.physics.plunger.minReleaseSpeed,
+            board.physics.plunger.maxReleaseSpeed,
+            nextPullRatio,
+          )
+        : nextPullback > 0
+          ? releaseSpeed
+          : 0,
+    },
+    surfaceVelocity:
+      deltaSeconds > 0
+        ? {
+            x: 0,
+            y: (nextPullback - current.pullback) / deltaSeconds,
+          }
+        : { x: 0, y: 0 },
+  };
+};
+
 const advanceFlipper = (
   flipper: FlipperDefinition,
   current: FlipperState,
@@ -667,7 +765,11 @@ const advanceFlipper = (
   };
 };
 
-const moveToward = (current: number, target: number, maxStep: number): number => {
+const moveToward = (
+  current: number,
+  target: number,
+  maxStep: number,
+): number => {
   if (maxStep <= 0) {
     return current;
   }
@@ -702,6 +804,12 @@ interface FlipperMotionFrame {
   next: FlipperState;
 }
 
+interface PlungerMotionFrame {
+  previousPullback: number;
+  next: PlungerState;
+  surfaceVelocity: ContactData['surfaceVelocity'];
+}
+
 const advanceFlipperFrame = (
   state: GameState,
   board: BoardDefinition,
@@ -722,8 +830,7 @@ const getFlipperState = (
   state: GameState,
   flipper: FlipperDefinition,
   index: number,
-): FlipperState =>
-  state.flippers[index] ?? createRestingFlipperState(flipper);
+): FlipperState => state.flippers[index] ?? createRestingFlipperState(flipper);
 
 const createRestingFlipperState = (
   flipper: FlipperDefinition,
@@ -737,6 +844,10 @@ const cloneFlipperState = (state: FlipperState): FlipperState => ({
   engaged: state.engaged,
   angle: state.angle,
   angularVelocity: state.angularVelocity,
+});
+
+const clonePlungerState = (state: PlungerState): PlungerState => ({
+  ...state,
 });
 
 const advanceElementStates = (
@@ -947,9 +1058,7 @@ const cloneStandupTargetState = (
   ...state,
 });
 
-const cloneDropTargetState = (
-  state: DropTargetState,
-): DropTargetState => ({
+const cloneDropTargetState = (state: DropTargetState): DropTargetState => ({
   ...state,
 });
 

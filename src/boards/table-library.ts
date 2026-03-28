@@ -9,6 +9,7 @@ import type {
   FlipperDefinition,
   FlipperSide,
   GuideDefinition,
+  LegacyLaunchPhysicsDefinition,
   RolloverDefinition,
   SaucerDefinition,
   SpinnerDefinition,
@@ -23,19 +24,25 @@ export interface TableRecord {
   builtIn: boolean;
 }
 
-interface LegacyBoardDefinition
-  extends Omit<
-    Partial<BoardDefinition>,
-    'flippers' | 'surfaceMaterials' | 'physics' | 'guides'
-  > {
+interface LegacyBoardDefinition extends Omit<
+  Partial<BoardDefinition>,
+  'flippers' | 'surfaceMaterials' | 'physics' | 'guides'
+> {
   guides?: BoardDefinition['guides'];
   standupTargets?: BoardDefinition['standupTargets'];
   dropTargets?: BoardDefinition['dropTargets'];
   saucers?: BoardDefinition['saucers'];
   spinners?: BoardDefinition['spinners'];
   rollovers?: BoardDefinition['rollovers'];
-  surfaceMaterials?: Partial<Record<SurfaceMaterialName, Partial<SurfaceMaterial>>>;
-  physics?: Partial<BoardDefinition['physics']>;
+  surfaceMaterials?: Partial<
+    Record<SurfaceMaterialName, Partial<SurfaceMaterial>>
+  >;
+  physics?: {
+    launch?: Partial<LegacyLaunchPhysicsDefinition>;
+    plunger?: Partial<BoardDefinition['physics']['plunger']>;
+    flipper?: Partial<BoardDefinition['physics']['flipper']>;
+    solver?: Partial<BoardDefinition['physics']['solver']>;
+  };
   flippers:
     | BoardDefinition['flippers']
     | {
@@ -50,10 +57,11 @@ export const cloneBoardDefinition = (
   ...board,
   ball: { ...board.ball },
   launchPosition: { ...board.launchPosition },
+  plunger: { ...board.plunger },
   materials: { ...board.materials },
   surfaceMaterials: cloneSurfaceMaterials(board.surfaceMaterials),
   physics: {
-    launch: { ...board.physics.launch },
+    plunger: { ...board.physics.plunger },
     flipper: { ...board.physics.flipper },
     solver: { ...board.physics.solver },
   },
@@ -92,6 +100,7 @@ export const normalizeBoardDefinition = (
         x: 770,
         y: 1180,
       } satisfies BoardDefinition['launchPosition']),
+    plunger: source.plunger,
     materials:
       source.materials ??
       ({
@@ -101,6 +110,7 @@ export const normalizeBoardDefinition = (
     surfaceMaterials: source.surfaceMaterials,
     physics: {
       launch: source.physics?.launch,
+      plunger: source.physics?.plunger,
       flipper: source.physics?.flipper,
       solver: source.physics?.solver,
     },
@@ -173,10 +183,7 @@ export const createDefaultFlipper = (
   material: 'flipperRubber',
 });
 
-export const createDefaultGuide = (
-  x: number,
-  y: number,
-): GuideDefinition => ({
+export const createDefaultGuide = (x: number, y: number): GuideDefinition => ({
   kind: 'line',
   start: { x: x - 60, y },
   end: { x: x + 60, y },

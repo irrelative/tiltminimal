@@ -8,6 +8,8 @@ describe('classicTable', () => {
     expect(classicTable.height).toBeGreaterThan(0);
     expect(classicTable.ball.radius).toBeGreaterThan(0);
     expect(classicTable.ball.mass).toBeGreaterThan(0);
+    expect(classicTable.plunger.length).toBeGreaterThan(0);
+    expect(classicTable.plunger.travel).toBeGreaterThan(0);
     expect(classicTable.materials.playfield).toBe('playfieldWood');
     expect(classicTable.bumpers).toHaveLength(3);
     expect(classicTable.standupTargets).toHaveLength(2);

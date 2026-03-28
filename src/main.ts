@@ -92,8 +92,11 @@ const selectionLabel = queryRequired<HTMLElement>('#selection-label');
 const selectionFields = queryRequired<HTMLElement>('#selection-fields');
 const deleteSelectionButton =
   queryRequired<HTMLButtonElement>('#delete-selection');
-const tableExportPanel = queryRequired<HTMLDetailsElement>('#table-export-panel');
-const tableExportJson = queryRequired<HTMLTextAreaElement>('#table-export-json');
+const tableExportPanel = queryRequired<HTMLDetailsElement>(
+  '#table-export-panel',
+);
+const tableExportJson =
+  queryRequired<HTMLTextAreaElement>('#table-export-json');
 const copyTableJsonButton =
   queryRequired<HTMLButtonElement>('#copy-table-json');
 const modeTitle = queryRequired<HTMLElement>('#mode-title');
@@ -439,7 +442,10 @@ function bootEditorRoute(): void {
 
     const activeBoard = getActiveTable().board;
 
-    if (state.selection.kind === 'guide' && state.selection.index !== undefined) {
+    if (
+      state.selection.kind === 'guide' &&
+      state.selection.index !== undefined
+    ) {
       const guide = activeBoard.guides[state.selection.index];
       const guideHandle = guide ? hitTestGuideHandle(point, guide) : null;
 
@@ -472,12 +478,7 @@ function bootEditorRoute(): void {
 
       if (
         target &&
-        hitTestOrientedRotateHandle(
-          point,
-          target,
-          target.height,
-          target.angle,
-        )
+        hitTestOrientedRotateHandle(point, target, target.height, target.angle)
       ) {
         state.dragging = true;
         state.dragMode = 'oriented-rotate';
@@ -496,12 +497,7 @@ function bootEditorRoute(): void {
 
       if (
         target &&
-        hitTestOrientedRotateHandle(
-          point,
-          target,
-          target.height,
-          target.angle,
-        )
+        hitTestOrientedRotateHandle(point, target, target.height, target.angle)
       ) {
         state.dragging = true;
         state.dragMode = 'oriented-rotate';
@@ -512,7 +508,10 @@ function bootEditorRoute(): void {
       }
     }
 
-    if (state.selection.kind === 'spinner' && state.selection.index !== undefined) {
+    if (
+      state.selection.kind === 'spinner' &&
+      state.selection.index !== undefined
+    ) {
       const spinner = activeBoard.spinners[state.selection.index];
 
       if (
@@ -536,11 +535,7 @@ function bootEditorRoute(): void {
     state.selection = hitTestSelection(activeBoard, point);
     state.dragging = state.selection.kind !== 'none';
     state.dragMode = state.dragging ? 'move-selection' : null;
-    state.dragOffset = getDragOffset(
-      activeBoard,
-      state.selection,
-      point,
-    );
+    state.dragOffset = getDragOffset(activeBoard, state.selection, point);
     renderApp();
   });
 
@@ -585,7 +580,10 @@ function bootEditorRoute(): void {
           false,
         );
       } else if (state.dragMode === 'oriented-rotate') {
-        replaceActiveBoard(rotateSelection(board, state.selection, point), false);
+        replaceActiveBoard(
+          rotateSelection(board, state.selection, point),
+          false,
+        );
       } else {
         const dragOffset = state.dragOffset ?? { x: 0, y: 0 };
 
@@ -691,7 +689,7 @@ function bootPlayRoute(): void {
   restartStandalonePlay();
 
   modeCopy.textContent =
-    'Use Space to launch. Left Shift / Z / Left Arrow and Right Shift / ? / Right Arrow control the flippers.';
+    'Hold and release Space to work the plunger. Left Shift / Z / Left Arrow and Right Shift / ? / Right Arrow control the flippers.';
   debugLinkEditor.href = '/editor';
   debugLinkEditor.textContent = 'Open editor';
   debugLinkPlay.href = '/';
@@ -846,7 +844,10 @@ function syncSelectionPanel(): void {
     return;
   }
 
-  if (state.selection.kind === 'saucer' && state.selection.index !== undefined) {
+  if (
+    state.selection.kind === 'saucer' &&
+    state.selection.index !== undefined
+  ) {
     const saucer = active.board.saucers[state.selection.index];
 
     if (!saucer) {
@@ -870,7 +871,10 @@ function syncSelectionPanel(): void {
     return;
   }
 
-  if (state.selection.kind === 'spinner' && state.selection.index !== undefined) {
+  if (
+    state.selection.kind === 'spinner' &&
+    state.selection.index !== undefined
+  ) {
     const spinner = active.board.spinners[state.selection.index];
 
     if (!spinner) {
@@ -889,7 +893,10 @@ function syncSelectionPanel(): void {
     return;
   }
 
-  if (state.selection.kind === 'rollover' && state.selection.index !== undefined) {
+  if (
+    state.selection.kind === 'rollover' &&
+    state.selection.index !== undefined
+  ) {
     const rollover = active.board.rollovers[state.selection.index];
 
     if (!rollover) {
@@ -971,7 +978,7 @@ function syncModeCopy(): void {
   if (state.mode === 'play') {
     modeTitle.textContent = 'Playing current table';
     modeCopy.textContent =
-      'Use Space to launch and Left Shift / Z / Left Arrow plus Right Shift / ? / Right Arrow to flip. Press Play Test again or Escape to return to editing.';
+      'Use Space to pull and release the plunger, and Left Shift / Z / Left Arrow plus Right Shift / ? / Right Arrow to flip. Press Play Test again or Escape to return to editing.';
     playToggleButton.textContent = 'Back to editor';
     playToggleButton.classList.add('accent-button');
     return;
@@ -1185,10 +1192,7 @@ function getDragOffset(
         };
   }
 
-  if (
-    selection.kind === 'standup-target' &&
-    selection.index !== undefined
-  ) {
+  if (selection.kind === 'standup-target' && selection.index !== undefined) {
     const target = board.standupTargets[selection.index];
 
     if (!target) {

@@ -10,6 +10,13 @@ export interface BallDefinition {
   mass: number;
 }
 
+export interface PlungerDefinition extends Point {
+  length: number;
+  thickness: number;
+  travel: number;
+  material: SurfaceMaterialName;
+}
+
 export interface SurfaceMaterial {
   name: SurfaceMaterialName;
   restitution: number;
@@ -27,12 +34,19 @@ export type SurfaceMaterialName =
   | 'rubberPost'
   | 'flipperRubber';
 
-export interface LaunchPhysicsDefinition {
+export interface LegacyLaunchPhysicsDefinition {
   maxChargeSeconds: number;
   minLaunchSpeed: number;
   maxLaunchSpeed: number;
   minLaunchDrift: number;
   maxLaunchDrift: number;
+}
+
+export interface PlungerPhysicsDefinition {
+  maxPullSeconds: number;
+  minReleaseSpeed: number;
+  maxReleaseSpeed: number;
+  bodyMass: number;
 }
 
 export interface FlipperPhysicsDefinition {
@@ -48,7 +62,7 @@ export interface SolverPhysicsDefinition {
 }
 
 export interface PhysicsDefinition {
-  launch: LaunchPhysicsDefinition;
+  plunger: PlungerPhysicsDefinition;
   flipper: FlipperPhysicsDefinition;
   solver: SolverPhysicsDefinition;
 }
@@ -135,6 +149,7 @@ export interface BoardDefinition {
   drainY: number;
   ball: BallDefinition;
   launchPosition: Point;
+  plunger: PlungerDefinition;
   materials: {
     playfield: SurfaceMaterialName;
     walls: SurfaceMaterialName;
@@ -160,13 +175,17 @@ export interface BoardDefinitionInput {
   drainY: number;
   ball?: Partial<BallDefinition>;
   launchPosition: Point;
+  plunger?: Partial<PlungerDefinition>;
   materials: {
     playfield: SurfaceMaterialName;
     walls: SurfaceMaterialName;
   };
-  surfaceMaterials?: Partial<Record<SurfaceMaterialName, Partial<SurfaceMaterial>>>;
+  surfaceMaterials?: Partial<
+    Record<SurfaceMaterialName, Partial<SurfaceMaterial>>
+  >;
   physics?: {
-    launch?: Partial<LaunchPhysicsDefinition>;
+    launch?: Partial<LegacyLaunchPhysicsDefinition>;
+    plunger?: Partial<PlungerPhysicsDefinition>;
     flipper?: Partial<FlipperPhysicsDefinition>;
     solver?: Partial<SolverPhysicsDefinition>;
   };

@@ -262,6 +262,7 @@ export const exportBoardDefinition = (
     height: board.height,
     drainY: board.drainY,
     launchPosition: { ...board.launchPosition },
+    plunger: { ...board.plunger },
     materials: { ...board.materials },
     bumpers: board.bumpers.map((bumper) => ({ ...bumper })),
     standupTargets: board.standupTargets.map((target) => ({ ...target })),
@@ -314,18 +315,15 @@ export const exportBoardDefinition = (
 const serializePhysicsOverrides = (
   board: BoardDefinition,
 ): BoardDefinitionInput['physics'] | undefined => {
-  const launch =
-    board.physics.launch.maxChargeSeconds !==
-      physicsDefaults.tuning.launch.maxChargeSeconds ||
-    board.physics.launch.minLaunchSpeed !==
-      physicsDefaults.tuning.launch.minLaunchSpeed ||
-    board.physics.launch.maxLaunchSpeed !==
-      physicsDefaults.tuning.launch.maxLaunchSpeed ||
-    board.physics.launch.minLaunchDrift !==
-      physicsDefaults.tuning.launch.minLaunchDrift ||
-    board.physics.launch.maxLaunchDrift !==
-      physicsDefaults.tuning.launch.maxLaunchDrift
-      ? { ...board.physics.launch }
+  const plunger =
+    board.physics.plunger.maxPullSeconds !==
+      physicsDefaults.tuning.plunger.maxPullSeconds ||
+    board.physics.plunger.minReleaseSpeed !==
+      physicsDefaults.tuning.plunger.minReleaseSpeed ||
+    board.physics.plunger.maxReleaseSpeed !==
+      physicsDefaults.tuning.plunger.maxReleaseSpeed ||
+    board.physics.plunger.bodyMass !== physicsDefaults.tuning.plunger.bodyMass
+      ? { ...board.physics.plunger }
       : undefined;
   const flipper =
     board.physics.flipper.swingAngularSpeed !==
@@ -341,12 +339,12 @@ const serializePhysicsOverrides = (
       ? { ...board.physics.solver }
       : undefined;
 
-  if (!launch && !flipper && !solver) {
+  if (!plunger && !flipper && !solver) {
     return undefined;
   }
 
   return {
-    launch,
+    plunger,
     flipper,
     solver,
   };
@@ -372,9 +370,7 @@ const serializeSurfaceMaterialOverrides = (
       board.surfaceMaterials.flipperRubber,
       physicsDefaults.surfaceMaterials.flipperRubber,
     ),
-  } satisfies Partial<
-    Record<SurfaceMaterialName, Partial<SurfaceMaterial>>
-  >;
+  } satisfies Partial<Record<SurfaceMaterialName, Partial<SurfaceMaterial>>>;
 
   return Object.values(surfaceMaterials).some((value) => value !== undefined)
     ? surfaceMaterials

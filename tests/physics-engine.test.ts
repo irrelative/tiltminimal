@@ -33,7 +33,7 @@ describe('stepGame', () => {
     );
 
     expect(next.status).toBe('waiting-launch');
-    expect(next.launcher.chargeSeconds).toBeGreaterThan(0);
+    expect(next.plunger.pullback).toBeGreaterThan(0);
     expect(next.ball.position.x).toBe(classicTable.launchPosition.x);
     expect(next.ball.position.y).toBe(classicTable.launchPosition.y);
     expect(next.ball.position.z).toBe(classicTable.ball.radius);
@@ -49,7 +49,7 @@ describe('stepGame', () => {
       { ...idleInput, launchPressed: true },
       0.2,
     );
-    const shortLaunch = stepGame(shortCharge, classicTable, idleInput, 1 / 60);
+    const shortLaunch = releaseUntilLaunched(shortCharge, classicTable);
 
     let longCharge = createInitialGameState(classicTable);
     longCharge = stepGame(
@@ -58,16 +58,31 @@ describe('stepGame', () => {
       { ...idleInput, launchPressed: true },
       1.2,
     );
-    const longLaunch = stepGame(longCharge, classicTable, idleInput, 1 / 60);
+    const longLaunch = releaseUntilLaunched(longCharge, classicTable);
 
     expect(shortLaunch.status).toBe('playing');
     expect(longLaunch.status).toBe('playing');
     expect(Math.abs(longLaunch.ball.linearVelocity.y)).toBeGreaterThan(
       Math.abs(shortLaunch.ball.linearVelocity.y),
     );
-    expect(Math.abs(longLaunch.ball.linearVelocity.x)).toBeGreaterThan(
-      Math.abs(shortLaunch.ball.linearVelocity.x),
+    expect(Math.abs(longLaunch.ball.linearVelocity.x)).toBeLessThan(1);
+  });
+
+  it('waits for the plunger to physically reach the ball after release', () => {
+    let charged = createInitialGameState(classicTable);
+    charged = stepGame(
+      charged,
+      classicTable,
+      { ...idleInput, launchPressed: true },
+      0.3,
     );
+
+    const released = stepGame(charged, classicTable, idleInput, 1 / 60);
+
+    expect(released.status).toBe('waiting-launch');
+    expect(released.plunger.pullback).toBeLessThan(charged.plunger.pullback);
+    expect(released.ball.position.y).toBe(classicTable.launchPosition.y);
+    expect(released.ball.linearVelocity.y).toBe(0);
   });
 
   it('bounces the ball off a resting flipper on contact', () => {
@@ -114,10 +129,9 @@ describe('stepGame', () => {
       1 / 60,
     );
 
-    expect(getFlipperState(fullyRaised, classicTable, 'left').angle).toBeCloseTo(
-      leftFlipper.activeAngle,
-      5,
-    );
+    expect(
+      getFlipperState(fullyRaised, classicTable, 'left').angle,
+    ).toBeCloseTo(leftFlipper.activeAngle, 5);
     expect(getFlipperState(settled, classicTable, 'left').angle).toBeCloseTo(
       leftFlipper.activeAngle,
       5,
@@ -261,6 +275,7 @@ describe('stepGame', () => {
     expect(next.ball.position.z).toBe(classicTable.ball.radius);
     expect(next.ball.linearVelocity.x).toBe(0);
     expect(next.ball.linearVelocity.y).toBe(0);
+    expect(next.plunger.pullback).toBe(0);
   });
 
   it('scores when the ball hits a standup target', () => {
@@ -446,20 +461,17 @@ const getFlipperState = (
   side: 'left' | 'right',
   occurrence = 0,
 ) => {
-  const flipperIndex = board.flippers.reduce(
-    (matchIndex, flipper, index) => {
-      if (matchIndex !== -1 || flipper.side !== side) {
-        return matchIndex;
-      }
+  const flipperIndex = board.flippers.reduce((matchIndex, flipper, index) => {
+    if (matchIndex !== -1 || flipper.side !== side) {
+      return matchIndex;
+    }
 
-      const sideIndex = board.flippers
-        .slice(0, index + 1)
-        .filter((candidate) => candidate.side === side).length;
+    const sideIndex = board.flippers
+      .slice(0, index + 1)
+      .filter((candidate) => candidate.side === side).length;
 
-      return sideIndex === occurrence + 1 ? index : -1;
-    },
-    -1,
-  );
+    return sideIndex === occurrence + 1 ? index : -1;
+  }, -1);
 
   expect(flipperIndex).toBeGreaterThanOrEqual(0);
 
@@ -491,4 +503,21 @@ const placeBallOnBumperSurface = (
 
   state.ball.position.x = bumper.x + (normal.x / magnitude) * distance;
   state.ball.position.y = bumper.y + (normal.y / magnitude) * distance;
+};
+
+const releaseUntilLaunched = <TBoard extends typeof classicTable>(
+  state: ReturnType<typeof createInitialGameState>,
+  board: TBoard,
+) => {
+  let current = state;
+
+  for (let step = 0; step < 45; step += 1) {
+    current = stepGame(current, board, idleInput, 1 / 60);
+
+    if (current.status === 'playing') {
+      return current;
+    }
+  }
+
+  throw new Error('Expected plunger launch.');
 };

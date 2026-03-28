@@ -106,7 +106,14 @@ describe('table storage', () => {
               ...createBlankTable('Legacy Table'),
               physics: {
                 launch: {
-                  ...physicsDefaults.tuning.launch,
+                  maxChargeSeconds:
+                    physicsDefaults.tuning.plunger.maxPullSeconds,
+                  minLaunchSpeed:
+                    physicsDefaults.tuning.plunger.minReleaseSpeed,
+                  maxLaunchSpeed:
+                    physicsDefaults.tuning.plunger.maxReleaseSpeed,
+                  minLaunchDrift: -70,
+                  maxLaunchDrift: -260,
                 },
                 flipper: {
                   swingAngularSpeed: 15,
