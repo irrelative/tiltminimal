@@ -126,7 +126,7 @@ export const createBoardDefinition = (
     },
   },
   bumpers: input.bumpers,
-  guides: input.guides,
+  guides: input.guides ?? [],
   flippers: input.flippers,
 });
 

@@ -1,4 +1,5 @@
 import type { BoardDefinition } from '../types/board-definition';
+import { getFlipperBySide } from '../boards/table-library';
 
 export interface Vector3 {
   x: number;
@@ -44,8 +45,8 @@ export const createInitialGameState = (board: BoardDefinition): GameState => ({
     chargeSeconds: 0,
   },
   flippers: {
-    left: createFlipperState(board.flippers.left),
-    right: createFlipperState(board.flippers.right),
+    left: createFlipperState(getFlipperBySide(board, 'left')),
+    right: createFlipperState(getFlipperBySide(board, 'right')),
   },
 });
 
@@ -60,8 +61,8 @@ export const resetBall = (
     chargeSeconds: 0,
   },
   flippers: {
-    left: createFlipperState(board.flippers.left),
-    right: createFlipperState(board.flippers.right),
+    left: createFlipperState(getFlipperBySide(board, 'left')),
+    right: createFlipperState(getFlipperBySide(board, 'right')),
   },
 });
 
@@ -97,7 +98,7 @@ export const getSolidSphereMomentOfInertia = (
 ): number => (2 / 5) * mass * radius * radius;
 
 const createFlipperState = (
-  flipper: BoardDefinition['flippers']['left'],
+  flipper: BoardDefinition['flippers'][number],
 ): FlipperState => ({
   engaged: false,
   angle: flipper.restingAngle,

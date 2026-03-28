@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { classicTable } from '../src/boards/classic-table';
+import { getFlipperBySide } from '../src/boards/table-library';
 import type { InputState } from '../src/input/keyboard-input';
 import { createInitialGameState } from '../src/game/game-state';
 import { stepGame } from '../src/game/physics-engine';
@@ -11,6 +12,7 @@ const idleInput: InputState = {
   rightPressed: false,
   launchPressed: false,
 };
+const leftFlipper = getFlipperBySide(classicTable, 'left');
 
 describe('stepGame', () => {
   it('keeps the ball locked in the launcher while space is held', () => {
@@ -64,7 +66,7 @@ describe('stepGame', () => {
   it('bounces the ball off a resting flipper on contact', () => {
     const state = createInitialGameState(classicTable);
     state.status = 'playing';
-    placeBallOnFlipperSurface(state, classicTable.flippers.left, 0.58);
+    placeBallOnFlipperSurface(state, leftFlipper, 0.58);
     state.ball.linearVelocity.x = 10;
     state.ball.linearVelocity.y = 180;
 
@@ -86,12 +88,8 @@ describe('stepGame', () => {
     );
 
     expect(next.flippers.left.engaged).toBe(true);
-    expect(next.flippers.left.angle).toBeLessThan(
-      classicTable.flippers.left.restingAngle,
-    );
-    expect(next.flippers.left.angle).toBeGreaterThan(
-      classicTable.flippers.left.activeAngle,
-    );
+    expect(next.flippers.left.angle).toBeLessThan(leftFlipper.restingAngle);
+    expect(next.flippers.left.angle).toBeGreaterThan(leftFlipper.activeAngle);
     expect(next.flippers.left.angularVelocity).toBeLessThan(0);
 
     let fullyRaised = next;
@@ -105,7 +103,7 @@ describe('stepGame', () => {
     }
 
     expect(fullyRaised.flippers.left.angle).toBeCloseTo(
-      classicTable.flippers.left.activeAngle,
+      leftFlipper.activeAngle,
       5,
     );
     expect(fullyRaised.flippers.left.angularVelocity).toBe(0);
@@ -114,7 +112,10 @@ describe('stepGame', () => {
   it('collides against the rounded flipper tip', () => {
     const state = createInitialGameState(classicTable);
     state.status = 'playing';
-    placeBallOnFlipperTip(state, classicTable.flippers.left, { x: 0.85, y: -0.55 });
+    placeBallOnFlipperTip(state, leftFlipper, {
+      x: 0.85,
+      y: -0.55,
+    });
     state.ball.linearVelocity.x = -220;
     state.ball.linearVelocity.y = 160;
 
@@ -140,13 +141,13 @@ describe('stepGame', () => {
   it('adds a stronger upward impulse when the left flipper flips into the ball', () => {
     const passiveState = createInitialGameState(classicTable);
     passiveState.status = 'playing';
-    placeBallOnFlipperSurface(passiveState, classicTable.flippers.left, 0.72);
+    placeBallOnFlipperSurface(passiveState, leftFlipper, 0.72);
     passiveState.ball.linearVelocity.x = 0;
     passiveState.ball.linearVelocity.y = 120;
 
     const activeState = createInitialGameState(classicTable);
     activeState.status = 'playing';
-    placeBallOnFlipperSurface(activeState, classicTable.flippers.left, 0.72);
+    placeBallOnFlipperSurface(activeState, leftFlipper, 0.72);
     activeState.ball.linearVelocity.x = 0;
     activeState.ball.linearVelocity.y = 120;
 
@@ -163,12 +164,8 @@ describe('stepGame', () => {
       passive.ball.linearVelocity.y - 100,
     );
     expect(Math.abs(next.ball.angularVelocity.z)).toBeGreaterThan(0);
-    expect(next.flippers.left.angle).toBeGreaterThan(
-      classicTable.flippers.left.activeAngle,
-    );
-    expect(next.flippers.left.angle).toBeLessThan(
-      classicTable.flippers.left.restingAngle,
-    );
+    expect(next.flippers.left.angle).toBeGreaterThan(leftFlipper.activeAngle);
+    expect(next.flippers.left.angle).toBeLessThan(leftFlipper.restingAngle);
   });
 
   it('marks the ball drained after it falls below the board', () => {

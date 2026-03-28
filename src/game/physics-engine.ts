@@ -1,3 +1,4 @@
+import { getFlipperBySide } from '../boards/table-library';
 import type { InputState } from '../input/keyboard-input';
 import type {
   BoardDefinition,
@@ -5,11 +6,11 @@ import type {
   GuideDefinition,
   SolverPhysicsDefinition,
 } from '../types/board-definition';
-import { getContactTangent, resolveBallContact } from './spin-solver';
 import type { ContactData } from './contact-types';
-import { getSurfaceMaterial } from './materials';
 import type { FlipperState, GameState } from './game-state';
 import { resetBall } from './game-state';
+import { getSurfaceMaterial } from './materials';
+import { getContactTangent, resolveBallContact } from './spin-solver';
 
 export const stepGame = (
   state: GameState,
@@ -20,16 +21,18 @@ export const stepGame = (
   const dt = Math.min(deltaSeconds, 1 / 30);
   const launchChargeDelta = Math.max(deltaSeconds, 0);
   const { flipper, launch, solver } = board.physics;
+  const leftFlipper = getFlipperBySide(board, 'left');
+  const rightFlipper = getFlipperBySide(board, 'right');
   const flipperFrame = {
     left: advanceFlipper(
-      board.flippers.left,
+      leftFlipper,
       state.flippers.left,
       input.leftPressed,
       dt,
       flipper.swingAngularSpeed,
     ),
     right: advanceFlipper(
-      board.flippers.right,
+      rightFlipper,
       state.flippers.right,
       input.rightPressed,
       dt,
@@ -164,18 +167,26 @@ export const stepGame = (
 export const getLaunchChargeRatio = (
   state: GameState,
   board: BoardDefinition,
-): number => Math.min(state.launcher.chargeSeconds / board.physics.launch.maxChargeSeconds, 1);
+): number =>
+  Math.min(
+    state.launcher.chargeSeconds / board.physics.launch.maxChargeSeconds,
+    1,
+  );
 
 const resolveWallCollisions = (
   state: GameState,
   board: BoardDefinition,
 ): void => {
   const { ball } = state;
-  const wallMaterial = getSurfaceMaterial(board.materials.walls, board.surfaceMaterials);
+  const wallMaterial = getSurfaceMaterial(
+    board.materials.walls,
+    board.surfaceMaterials,
+  );
 
   if (ball.position.x - ball.radius < 0) {
     ball.position.x = ball.radius;
-    ball.linearVelocity.x = Math.abs(ball.linearVelocity.x) * wallMaterial.restitution;
+    ball.linearVelocity.x =
+      Math.abs(ball.linearVelocity.x) * wallMaterial.restitution;
   }
 
   if (ball.position.x + ball.radius > board.width) {
@@ -207,7 +218,10 @@ const resolveGuideCollision = (
   guide: GuideDefinition,
   solver: SolverPhysicsDefinition,
 ): void => {
-  const guideMaterial = getSurfaceMaterial(guide.material, board.surfaceMaterials);
+  const guideMaterial = getSurfaceMaterial(
+    guide.material,
+    board.surfaceMaterials,
+  );
   const segmentX = guide.end.x - guide.start.x;
   const segmentY = guide.end.y - guide.start.y;
   const segmentLengthSquared = segmentX * segmentX + segmentY * segmentY;
@@ -266,14 +280,14 @@ const resolveFlipperCollisions = (
   resolveFlipperCollision(
     state,
     board,
-    board.flippers.left,
+    getFlipperBySide(board, 'left'),
     flipperFrame.left,
     solver,
   );
   resolveFlipperCollision(
     state,
     board,
-    board.flippers.right,
+    getFlipperBySide(board, 'right'),
     flipperFrame.right,
     solver,
   );
@@ -293,9 +307,16 @@ const resolveFlipperCollision = (
 
   for (const angle of collisionAngles) {
     if (
-      applyFlipperCollisionAtAngle(state, board, flipper, angle, {
-        angularVelocity: motion.next.angularVelocity,
-      }, solver)
+      applyFlipperCollisionAtAngle(
+        state,
+        board,
+        flipper,
+        angle,
+        {
+          angularVelocity: motion.next.angularVelocity,
+        },
+        solver,
+      )
     ) {
       return;
     }
@@ -312,13 +333,12 @@ const applyFlipperCollisionAtAngle = (
   },
   solver: SolverPhysicsDefinition,
 ): boolean => {
-  const angle = collisionAngle;
   const flipperMaterial = getSurfaceMaterial(
     flipper.material,
     board.surfaceMaterials,
   );
-  const segmentX = Math.cos(angle) * flipper.length;
-  const segmentY = Math.sin(angle) * flipper.length;
+  const segmentX = Math.cos(collisionAngle) * flipper.length;
+  const segmentY = Math.sin(collisionAngle) * flipper.length;
   const segmentLengthSquared = segmentX * segmentX + segmentY * segmentY;
   const dx = state.ball.position.x - flipper.x;
   const dy = state.ball.position.y - flipper.y;
@@ -339,19 +359,20 @@ const applyFlipperCollisionAtAngle = (
     return false;
   }
 
-  const fallbackNormalX = Math.sin(angle);
-  const fallbackNormalY = -Math.cos(angle);
-  const normalX = Math.abs(offsetX) > solver.epsilon || Math.abs(offsetY) > solver.epsilon
-    ? offsetX / distance
-    : fallbackNormalX;
-  const normalY = Math.abs(offsetX) > solver.epsilon || Math.abs(offsetY) > solver.epsilon
-    ? offsetY / distance
-    : fallbackNormalY;
-  const flipperAngularVelocity = motion.angularVelocity;
+  const fallbackNormalX = Math.sin(collisionAngle);
+  const fallbackNormalY = -Math.cos(collisionAngle);
+  const normalX =
+    Math.abs(offsetX) > solver.epsilon || Math.abs(offsetY) > solver.epsilon
+      ? offsetX / distance
+      : fallbackNormalX;
+  const normalY =
+    Math.abs(offsetX) > solver.epsilon || Math.abs(offsetY) > solver.epsilon
+      ? offsetY / distance
+      : fallbackNormalY;
   const relativeContactX = closestX - flipper.x;
   const relativeContactY = closestY - flipper.y;
-  const surfaceVelocityX = -flipperAngularVelocity * relativeContactY;
-  const surfaceVelocityY = flipperAngularVelocity * relativeContactX;
+  const surfaceVelocityX = -motion.angularVelocity * relativeContactY;
+  const surfaceVelocityY = motion.angularVelocity * relativeContactX;
   const incomingNormalSpeed =
     (state.ball.linearVelocity.x - surfaceVelocityX) * normalX +
     (state.ball.linearVelocity.y - surfaceVelocityY) * normalY;

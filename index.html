@@ -2,68 +2,147 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pinball Browser</title>
   </head>
   <body>
     <main class="app-shell">
       <section class="workspace">
-        <section class="playfield-frame">
-          <header class="masthead">
-            <button
-              class="masthead-close"
-              type="button"
-              aria-label="Dismiss header"
-            >
-              ×
-            </button>
+        <aside class="control-panel">
+          <header class="panel-header">
             <p class="eyebrow">Pinball Browser</p>
-            <h1>2D-first pinball scaffolding</h1>
+            <h1>Table editor</h1>
             <p class="lede">
-              Board data, game state, and rendering stay separate so new tables can
-              plug into the same runtime.
+              Add, drag, delete, and play-test tables. All edits persist in
+              local storage.
             </p>
           </header>
-          <canvas
-            id="game"
-            width="900"
-            height="1400"
-            aria-label="Pinball table"
-          ></canvas>
-        </section>
 
-        <aside class="debug-panel" aria-label="Debug controls">
-          <p class="debug-label">Debug</p>
-          <h2>Ball Tools</h2>
-          <p class="debug-copy">
-            If the ball wedges into geometry, use the reset button to return it to
-            the launcher.
-          </p>
-          <button class="debug-button" id="reset-ball" type="button">
-            Reset Ball
-          </button>
-          <dl class="debug-stats">
-            <div>
-              <dt>Status</dt>
-              <dd id="debug-status">Waiting</dd>
+          <section class="panel-section">
+            <div class="section-heading">
+              <h2>Tables</h2>
+              <p>
+                Built-ins can be edited locally. Custom tables live only in this
+                browser.
+              </p>
             </div>
-            <div>
-              <dt>Position</dt>
-              <dd id="debug-position">0, 0</dd>
+            <select
+              id="table-select"
+              class="table-select"
+              size="6"
+              aria-label="Saved pinball tables"
+            ></select>
+            <div class="button-row">
+              <button id="new-table" type="button">New</button>
+              <button id="duplicate-table" type="button">Duplicate</button>
             </div>
-            <div>
-              <dt>Velocity</dt>
-              <dd id="debug-velocity">0, 0</dd>
+            <div class="button-row">
+              <button id="play-toggle" type="button" class="accent-button">
+                Play Test
+              </button>
+              <button id="remove-table" type="button">Delete</button>
             </div>
-            <div>
-              <dt>Spin</dt>
-              <dd id="debug-spin">0, 0, 0</dd>
+          </section>
+
+          <section class="panel-section">
+            <div class="section-heading">
+              <h2>Table</h2>
+              <p>Rename the current layout. Changes save locally.</p>
             </div>
-          </dl>
+            <label class="field">
+              <span>Name</span>
+              <input id="table-name" type="text" maxlength="40" />
+            </label>
+            <p id="table-meta" class="meta-text"></p>
+          </section>
+
+          <section class="panel-section">
+            <div class="section-heading">
+              <h2>Tools</h2>
+              <p>Choose a tool, then click the playfield.</p>
+            </div>
+            <div class="tool-grid">
+              <button
+                type="button"
+                data-tool="select"
+                class="tool-button is-active"
+              >
+                Select
+              </button>
+              <button type="button" data-tool="add-bumper" class="tool-button">
+                Add bumper
+              </button>
+              <button
+                type="button"
+                data-tool="add-left-flipper"
+                class="tool-button"
+              >
+                Add left flipper
+              </button>
+              <button
+                type="button"
+                data-tool="add-right-flipper"
+                class="tool-button"
+              >
+                Add right flipper
+              </button>
+            </div>
+          </section>
+
+          <section class="panel-section">
+            <div class="section-heading">
+              <h2>Selection</h2>
+              <p id="selection-label">Nothing selected.</p>
+            </div>
+            <div id="selection-fields" class="field-list"></div>
+            <button id="delete-selection" type="button">
+              Delete selection
+            </button>
+          </section>
         </aside>
+
+        <section class="stage-shell">
+          <header class="stage-toolbar">
+            <div class="toolbar-main">
+              <div>
+                <p class="eyebrow">Workspace</p>
+                <h2 id="mode-title">Editing table</h2>
+              </div>
+              <p id="mode-copy" class="toolbar-copy">
+                Click to select. Drag to move. Press Delete to remove the
+                selected element.
+              </p>
+            </div>
+            <nav class="debug-menu" aria-label="Debug menu">
+              <p class="eyebrow">Debug Menu</p>
+              <div class="debug-links">
+                <a
+                  id="debug-link-editor"
+                  class="debug-link"
+                  href="#debug-board-editor"
+                >
+                  Board editor
+                </a>
+                <a
+                  id="debug-link-play"
+                  class="debug-link"
+                  href="#debug-play-test"
+                >
+                  Play test
+                </a>
+              </div>
+            </nav>
+          </header>
+
+          <section class="playfield-frame">
+            <canvas
+              id="game"
+              width="900"
+              height="1400"
+              aria-label="Pinball table"
+            ></canvas>
+          </section>
+        </section>
       </section>
     </main>
     <script type="module" src="/src/main.ts"></script>

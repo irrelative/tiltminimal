@@ -12,8 +12,9 @@ describe('classicTable', () => {
     expect(classicTable.bumpers).toHaveLength(3);
     expect(classicTable.guides).toHaveLength(6);
     expect(classicTable.bumpers[0]?.material).toBe('rubberPost');
-    expect(classicTable.flippers.left.length).toBeGreaterThan(0);
-    expect(classicTable.flippers.left.material).toBe('flipperRubber');
-    expect(classicTable.flippers.right.length).toBeGreaterThan(0);
+    expect(classicTable.flippers).toHaveLength(2);
+    expect(classicTable.flippers[0]?.length).toBeGreaterThan(0);
+    expect(classicTable.flippers[0]?.material).toBe('flipperRubber');
+    expect(classicTable.flippers[1]?.side).toBe('right');
   });
 });

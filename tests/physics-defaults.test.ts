@@ -85,8 +85,9 @@ const createTestBoard = (
     },
     bumpers: [],
     guides: [],
-    flippers: {
-      left: {
+    flippers: [
+      {
+        side: 'left',
         x: 240,
         y: 1040,
         length: 140,
@@ -95,7 +96,8 @@ const createTestBoard = (
         activeAngle: -0.36,
         material: 'flipperRubber',
       },
-      right: {
+      {
+        side: 'right',
         x: 560,
         y: 1040,
         length: 140,
@@ -104,6 +106,6 @@ const createTestBoard = (
         activeAngle: Math.PI + 0.36,
         material: 'flipperRubber',
       },
-    },
+    ],
     ...overrides,
   });
