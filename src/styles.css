@@ -260,6 +260,20 @@ body[data-route='play'] .stage-shell {
   gap: 8px;
 }
 
+.play-route-panel {
+  min-width: min(100%, 18rem);
+  display: grid;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body[data-route='editor'] .play-route-panel {
+  display: none;
+}
+
 .stage-toolbar h2 {
   font-size: clamp(1.4rem, 2vw, 2rem);
 }
@@ -368,6 +382,10 @@ body[data-route='play'] #game {
   }
 
   .debug-menu {
+    width: 100%;
+  }
+
+  .play-route-panel {
     width: 100%;
   }
 

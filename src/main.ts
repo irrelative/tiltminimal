@@ -75,6 +75,8 @@ const deleteSelectionButton =
   queryRequired<HTMLButtonElement>('#delete-selection');
 const modeTitle = queryRequired<HTMLElement>('#mode-title');
 const modeCopy = queryRequired<HTMLElement>('#mode-copy');
+const playTableSelect = queryRequired<HTMLSelectElement>('#play-table-select');
+const playTableMeta = queryRequired<HTMLElement>('#play-table-meta');
 const debugLinkEditor = queryRequired<HTMLAnchorElement>('#debug-link-editor');
 const debugLinkPlay = queryRequired<HTMLAnchorElement>('#debug-link-play');
 
@@ -380,20 +382,18 @@ function bootEditorRoute(): void {
 }
 
 function bootPlayRoute(): void {
-  const board = cloneBoardDefinition(getActiveTable().board);
-  const input = new KeyboardInput();
-  const loop = new GameLoop(
-    createInitialGameState(board),
-    board,
-    input,
-    renderer,
-  );
-
   state.mode = 'play';
-  state.input = input;
-  state.loop = loop;
 
-  modeTitle.textContent = board.name;
+  playTableSelect.addEventListener('change', () => {
+    state.activeTableId = playTableSelect.value;
+    setActiveTableId(state.activeTableId);
+    syncPlayRoutePanel();
+    restartStandalonePlay();
+  });
+
+  syncPlayRoutePanel();
+  restartStandalonePlay();
+
   modeCopy.textContent =
     'Use Space to launch. Left Shift / Z / Left Arrow and Right Shift / ? / Right Arrow control the flippers.';
   debugLinkEditor.href = '/editor';
@@ -404,8 +404,6 @@ function bootPlayRoute(): void {
   debugLinkEditor.setAttribute('aria-current', 'false');
   debugLinkPlay.classList.add('is-active');
   debugLinkPlay.setAttribute('aria-current', 'page');
-
-  loop.start();
 }
 
 function renderApp(): void {
@@ -823,4 +821,40 @@ function capitalize(value: string): string {
 
 function getAppRoute(pathname: string): AppRoute {
   return pathname === '/editor' || pathname === '/editor/' ? 'editor' : 'play';
+}
+
+function restartStandalonePlay(): void {
+  state.loop?.stop();
+
+  const board = cloneBoardDefinition(getActiveTable().board);
+  const input = new KeyboardInput();
+  const loop = new GameLoop(
+    createInitialGameState(board),
+    board,
+    input,
+    renderer,
+  );
+
+  state.input = input;
+  state.loop = loop;
+  modeTitle.textContent = board.name;
+  loop.start();
+}
+
+function syncPlayRoutePanel(): void {
+  playTableSelect.replaceChildren(
+    ...state.tables.map((table) => {
+      const option = document.createElement('option');
+      option.value = table.id;
+      option.selected = table.id === state.activeTableId;
+      option.textContent = table.builtIn
+        ? `${table.board.name} (built-in)`
+        : `${table.board.name} (edited)`;
+
+      return option;
+    }),
+  );
+
+  const active = getActiveTable();
+  playTableMeta.textContent = `${active.builtIn ? 'Built-in table' : 'Custom or edited table'} · ${active.board.bumpers.length} bumpers · ${active.board.flippers.length} flippers`;
 }
