@@ -1,0 +1,55 @@
+import { describe, expect, it } from 'vitest';
+
+import { classicTable } from '../src/boards/classic-table';
+import type { ContactData } from '../src/game/contact-types';
+import { createBallState } from '../src/game/game-state';
+import { getSurfaceMaterial } from '../src/game/materials';
+import { getContactTangent, resolveBallContact } from '../src/game/spin-solver';
+
+describe('resolveBallContact', () => {
+  it('generates spin from tangential slip', () => {
+    const ball = createBallState(classicTable);
+    ball.linearVelocity.x = -120;
+    ball.linearVelocity.y = 260;
+
+    const contact = createContact('metalGuide');
+
+    const result = resolveBallContact(ball, contact);
+
+    expect(result.normalImpulse).toBeGreaterThan(0);
+    expect(Math.abs(result.tangentImpulse)).toBeGreaterThan(0);
+    expect(Math.abs(ball.angularVelocity.z)).toBeGreaterThan(0);
+  });
+
+  it('lets grippier materials transfer more spin', () => {
+    const metalBall = createBallState(classicTable);
+    metalBall.linearVelocity.x = -120;
+    metalBall.linearVelocity.y = 260;
+
+    const rubberBall = createBallState(classicTable);
+    rubberBall.linearVelocity.x = -120;
+    rubberBall.linearVelocity.y = 260;
+
+    resolveBallContact(metalBall, createContact('metalGuide'));
+    resolveBallContact(rubberBall, createContact('flipperRubber'));
+
+    expect(Math.abs(rubberBall.angularVelocity.z)).toBeGreaterThan(
+      Math.abs(metalBall.angularVelocity.z),
+    );
+  });
+});
+
+const createContact = (
+  materialName: Parameters<typeof getSurfaceMaterial>[0],
+): ContactData => {
+  const normal = { x: 1, y: 0 };
+
+  return {
+    point: { x: 100, y: 100 },
+    normal,
+    tangent: getContactTangent(normal),
+    overlap: 3,
+    surfaceVelocity: { x: 0, y: 0 },
+    material: getSurfaceMaterial(materialName),
+  };
+};
