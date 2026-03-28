@@ -95,6 +95,10 @@ select {
   gap: clamp(14px, 2vw, 24px);
 }
 
+body[data-route='play'] .workspace {
+  grid-template-columns: 1fr;
+}
+
 .control-panel,
 .stage-shell {
   border: 1px solid var(--panel-border);
@@ -109,6 +113,10 @@ select {
   gap: 14px;
   padding: 18px;
   overflow: auto;
+}
+
+body[data-route='play'] .control-panel {
+  display: none;
 }
 
 .panel-header,
@@ -233,6 +241,12 @@ h2 {
   overflow: hidden;
 }
 
+body[data-route='play'] .stage-shell {
+  max-width: 1080px;
+  min-height: calc(100svh - (var(--stage-padding) * 2));
+  margin: 0 auto;
+}
+
 .stage-toolbar {
   display: flex;
   justify-content: space-between;
@@ -323,6 +337,11 @@ h2 {
   border-radius: 18px;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   touch-action: none;
+}
+
+body[data-route='play'] #game {
+  width: min(100%, calc((100svh - 180px) * 0.642857));
+  height: auto;
 }
 
 #delete-selection {

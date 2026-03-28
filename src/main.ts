@@ -29,6 +29,7 @@ import type { BoardDefinition, Point } from './types/board-definition';
 import './styles.css';
 
 type AppMode = 'edit' | 'play';
+type AppRoute = 'editor' | 'play';
 type DebugDestination = 'board-editor' | 'play-test';
 
 const DEBUG_HASHES: Record<DebugDestination, string> = {
@@ -79,11 +80,12 @@ const debugLinkPlay = queryRequired<HTMLAnchorElement>('#debug-link-play');
 
 const renderer = new CanvasRenderer(canvas);
 const loadedState = loadTablesState();
+const appRoute = getAppRoute(window.location.pathname);
 
 const state: AppState = {
   tables: loadedState.tables,
   activeTableId: loadedState.activeTableId,
-  mode: 'edit',
+  mode: appRoute === 'editor' ? 'edit' : 'play',
   tool: 'select',
   selection: { kind: 'none' },
   dragging: false,
@@ -93,267 +95,318 @@ const state: AppState = {
   input: null,
 };
 
-window.addEventListener('hashchange', () => {
-  applyHashNavigation();
-});
+document.body.dataset.route = appRoute;
 
-renderApp();
-applyHashNavigation();
+if (BUILT_IN_TABLES.length === 0) {
+  throw new Error('Expected at least one built-in table.');
+}
 
-tableSelect.addEventListener('change', () => {
-  setAppMode('edit', false);
-  state.activeTableId = tableSelect.value;
-  state.selection = { kind: 'none' };
-  state.tool = 'select';
-  state.draftPosition = null;
-  setActiveTableId(state.activeTableId);
-  renderApp();
-});
+if (appRoute === 'editor') {
+  bootEditorRoute();
+} else {
+  bootPlayRoute();
+}
 
-newTableButton.addEventListener('click', () => {
-  setAppMode('edit', false);
+function bootEditorRoute(): void {
+  debugLinkEditor.href = DEBUG_HASHES['board-editor'];
+  debugLinkEditor.textContent = 'Board editor';
+  debugLinkPlay.href = DEBUG_HASHES['play-test'];
+  debugLinkPlay.textContent = 'Play test';
 
-  const table = createCustomRecord(createBlankTable(nextCustomTableName()));
-  state.tables = [...state.tables, table];
-  state.activeTableId = table.id;
-  state.selection = { kind: 'none' };
-  state.tool = 'select';
-  persistTable(table);
-  renderApp();
-});
-
-duplicateTableButton.addEventListener('click', () => {
-  setAppMode('edit', false);
-
-  const active = getActiveTable();
-  const table = createCustomRecord({
-    ...cloneBoardDefinition(active.board),
-    name: `${active.board.name} Copy`,
+  window.addEventListener('hashchange', () => {
+    applyHashNavigation();
   });
 
-  state.tables = [...state.tables, table];
-  state.activeTableId = table.id;
-  state.selection = { kind: 'none' };
-  state.tool = 'select';
-  persistTable(table);
-  renderApp();
-});
+  tableSelect.addEventListener('change', () => {
+    setAppMode('edit', false);
+    state.activeTableId = tableSelect.value;
+    state.selection = { kind: 'none' };
+    state.tool = 'select';
+    state.draftPosition = null;
+    setActiveTableId(state.activeTableId);
+    renderApp();
+  });
 
-playToggleButton.addEventListener('click', () => {
-  navigateToDebugDestination(
-    state.mode === 'play' ? 'board-editor' : 'play-test',
-  );
-});
+  newTableButton.addEventListener('click', () => {
+    setAppMode('edit', false);
 
-removeTableButton.addEventListener('click', () => {
-  setAppMode('edit', false);
+    const table = createCustomRecord(createBlankTable(nextCustomTableName()));
+    state.tables = [...state.tables, table];
+    state.activeTableId = table.id;
+    state.selection = { kind: 'none' };
+    state.tool = 'select';
+    persistTable(table);
+    renderApp();
+  });
 
-  const active = getActiveTable();
+  duplicateTableButton.addEventListener('click', () => {
+    setAppMode('edit', false);
 
-  if (active.builtIn) {
-    resetBuiltInTable(active.id);
-    reloadTables(active.id);
-    return;
-  }
+    const active = getActiveTable();
+    const table = createCustomRecord({
+      ...cloneBoardDefinition(active.board),
+      name: `${active.board.name} Copy`,
+    });
 
-  deleteCustomTable(active.id);
-  reloadTables();
-});
+    state.tables = [...state.tables, table];
+    state.activeTableId = table.id;
+    state.selection = { kind: 'none' };
+    state.tool = 'select';
+    persistTable(table);
+    renderApp();
+  });
 
-tableNameInput.addEventListener('input', () => {
-  const active = getActiveTable();
-  const name = tableNameInput.value.trim() || active.board.name;
+  playToggleButton.addEventListener('click', () => {
+    navigateToDebugDestination(
+      state.mode === 'play' ? 'board-editor' : 'play-test',
+    );
+  });
 
-  replaceActiveBoard(
-    {
-      ...active.board,
-      name,
-    },
-    true,
-  );
-});
+  removeTableButton.addEventListener('click', () => {
+    setAppMode('edit', false);
 
-selectionFields.addEventListener('input', (event) => {
-  const target = event.target;
+    const active = getActiveTable();
 
-  if (!(target instanceof HTMLInputElement)) {
-    return;
-  }
+    if (active.builtIn) {
+      resetBuiltInTable(active.id);
+      reloadTables(active.id);
+      return;
+    }
 
-  const field = target.dataset.field;
+    deleteCustomTable(active.id);
+    reloadTables();
+  });
 
-  if (!field) {
-    return;
-  }
+  tableNameInput.addEventListener('input', () => {
+    const active = getActiveTable();
+    const name = tableNameInput.value.trim() || active.board.name;
 
-  const value = Number(target.value);
+    replaceActiveBoard(
+      {
+        ...active.board,
+        name,
+      },
+      true,
+    );
+  });
 
-  if (!Number.isFinite(value)) {
-    return;
-  }
+  selectionFields.addEventListener('input', (event) => {
+    const target = event.target;
 
-  replaceActiveBoard(
-    updateSelectedNumericField(
+    if (!(target instanceof HTMLInputElement)) {
+      return;
+    }
+
+    const field = target.dataset.field;
+
+    if (!field) {
+      return;
+    }
+
+    const value = Number(target.value);
+
+    if (!Number.isFinite(value)) {
+      return;
+    }
+
+    replaceActiveBoard(
+      updateSelectedNumericField(
+        getActiveTable().board,
+        state.selection,
+        field,
+        value,
+      ),
+      true,
+    );
+  });
+
+  deleteSelectionButton.addEventListener('click', () => {
+    removeCurrentSelection();
+  });
+
+  document
+    .querySelectorAll<HTMLButtonElement>('.tool-button')
+    .forEach((button) => {
+      button.addEventListener('click', () => {
+        if (state.mode !== 'edit') {
+          navigateToDebugDestination('board-editor');
+        }
+
+        state.tool = button.dataset.tool as EditorTool;
+        state.draftPosition = null;
+        renderApp();
+      });
+    });
+
+  canvas.addEventListener('pointerdown', (event) => {
+    if (state.mode !== 'edit') {
+      return;
+    }
+
+    const point = getBoardPoint(event);
+    canvas.setPointerCapture(event.pointerId);
+
+    if (state.tool === 'add-bumper') {
+      const result = addBumper(getActiveTable().board, point);
+
+      state.selection = result.selection;
+      state.tool = 'select';
+      state.dragging = true;
+      state.dragOffset = { x: 0, y: 0 };
+      state.draftPosition = null;
+      replaceActiveBoard(result.board, false);
+      renderApp();
+      return;
+    }
+
+    if (
+      state.tool === 'add-left-flipper' ||
+      state.tool === 'add-right-flipper'
+    ) {
+      const result = addFlipper(
+        getActiveTable().board,
+        state.tool === 'add-left-flipper' ? 'left' : 'right',
+        point,
+      );
+
+      state.selection = result.selection;
+      state.tool = 'select';
+      state.dragging = true;
+      state.dragOffset = { x: 0, y: 0 };
+      state.draftPosition = null;
+      replaceActiveBoard(result.board, false);
+      renderApp();
+      return;
+    }
+
+    state.selection = hitTestSelection(getActiveTable().board, point);
+    state.dragging = state.selection.kind !== 'none';
+    state.dragOffset = getDragOffset(
       getActiveTable().board,
       state.selection,
-      field,
-      value,
-    ),
-    true,
-  );
-});
+      point,
+    );
+    renderApp();
+  });
 
-deleteSelectionButton.addEventListener('click', () => {
-  removeCurrentSelection();
-});
+  canvas.addEventListener('pointermove', (event) => {
+    if (state.mode !== 'edit') {
+      return;
+    }
 
-document
-  .querySelectorAll<HTMLButtonElement>('.tool-button')
-  .forEach((button) => {
-    button.addEventListener('click', () => {
-      if (state.mode !== 'edit') {
+    const point = getBoardPoint(event);
+
+    if (state.dragging && state.selection.kind !== 'none') {
+      const dragOffset = state.dragOffset ?? { x: 0, y: 0 };
+
+      replaceActiveBoard(
+        moveSelection(getActiveTable().board, state.selection, {
+          x: point.x - dragOffset.x,
+          y: point.y - dragOffset.y,
+        }),
+        false,
+      );
+      renderApp();
+      return;
+    }
+
+    state.draftPosition = state.tool === 'select' ? null : point;
+    renderApp();
+  });
+
+  canvas.addEventListener('pointerup', () => {
+    if (!state.dragging) {
+      return;
+    }
+
+    state.dragging = false;
+    state.dragOffset = null;
+    persistTable(getActiveTable());
+    renderApp();
+  });
+
+  canvas.addEventListener('pointercancel', () => {
+    state.dragging = false;
+    state.dragOffset = null;
+    renderApp();
+  });
+
+  canvas.addEventListener('pointerleave', () => {
+    if (state.dragging) {
+      return;
+    }
+
+    state.draftPosition = null;
+    renderApp();
+  });
+
+  window.addEventListener('keydown', (event) => {
+    if (state.mode !== 'edit') {
+      if (event.key === 'Escape') {
         navigateToDebugDestination('board-editor');
       }
 
-      state.tool = button.dataset.tool as EditorTool;
-      state.draftPosition = null;
-      renderApp();
-    });
-  });
-
-canvas.addEventListener('pointerdown', (event) => {
-  if (state.mode !== 'edit') {
-    return;
-  }
-
-  const point = getBoardPoint(event);
-  canvas.setPointerCapture(event.pointerId);
-
-  if (state.tool === 'add-bumper') {
-    const result = addBumper(getActiveTable().board, point);
-
-    state.selection = result.selection;
-    state.tool = 'select';
-    state.dragging = true;
-    state.dragOffset = { x: 0, y: 0 };
-    state.draftPosition = null;
-    replaceActiveBoard(result.board, false);
-    renderApp();
-    return;
-  }
-
-  if (state.tool === 'add-left-flipper' || state.tool === 'add-right-flipper') {
-    const result = addFlipper(
-      getActiveTable().board,
-      state.tool === 'add-left-flipper' ? 'left' : 'right',
-      point,
-    );
-
-    state.selection = result.selection;
-    state.tool = 'select';
-    state.dragging = true;
-    state.dragOffset = { x: 0, y: 0 };
-    state.draftPosition = null;
-    replaceActiveBoard(result.board, false);
-    renderApp();
-    return;
-  }
-
-  state.selection = hitTestSelection(getActiveTable().board, point);
-  state.dragging = state.selection.kind !== 'none';
-  state.dragOffset = getDragOffset(
-    getActiveTable().board,
-    state.selection,
-    point,
-  );
-  renderApp();
-});
-
-canvas.addEventListener('pointermove', (event) => {
-  if (state.mode !== 'edit') {
-    return;
-  }
-
-  const point = getBoardPoint(event);
-
-  if (state.dragging && state.selection.kind !== 'none') {
-    const dragOffset = state.dragOffset ?? { x: 0, y: 0 };
-
-    replaceActiveBoard(
-      moveSelection(getActiveTable().board, state.selection, {
-        x: point.x - dragOffset.x,
-        y: point.y - dragOffset.y,
-      }),
-      false,
-    );
-    renderApp();
-    return;
-  }
-
-  state.draftPosition = state.tool === 'select' ? null : point;
-  renderApp();
-});
-
-canvas.addEventListener('pointerup', () => {
-  if (!state.dragging) {
-    return;
-  }
-
-  state.dragging = false;
-  state.dragOffset = null;
-  persistTable(getActiveTable());
-  renderApp();
-});
-
-canvas.addEventListener('pointercancel', () => {
-  state.dragging = false;
-  state.dragOffset = null;
-  renderApp();
-});
-
-canvas.addEventListener('pointerleave', () => {
-  if (state.dragging) {
-    return;
-  }
-
-  state.draftPosition = null;
-  renderApp();
-});
-
-window.addEventListener('keydown', (event) => {
-  if (state.mode !== 'edit') {
-    if (event.key === 'Escape') {
-      navigateToDebugDestination('board-editor');
+      return;
     }
 
-    return;
-  }
+    if (event.key === 'Escape') {
+      state.tool = 'select';
+      state.selection = { kind: 'none' };
+      state.draftPosition = null;
+      renderApp();
+      return;
+    }
 
-  if (event.key === 'Escape') {
-    state.tool = 'select';
-    state.selection = { kind: 'none' };
-    state.draftPosition = null;
-    renderApp();
-    return;
-  }
+    if (event.key !== 'Delete' && event.key !== 'Backspace') {
+      return;
+    }
 
-  if (event.key !== 'Delete' && event.key !== 'Backspace') {
-    return;
-  }
+    const activeElement = document.activeElement;
 
-  const activeElement = document.activeElement;
+    if (
+      activeElement instanceof HTMLInputElement ||
+      activeElement instanceof HTMLSelectElement ||
+      activeElement instanceof HTMLTextAreaElement
+    ) {
+      return;
+    }
 
-  if (
-    activeElement instanceof HTMLInputElement ||
-    activeElement instanceof HTMLSelectElement ||
-    activeElement instanceof HTMLTextAreaElement
-  ) {
-    return;
-  }
+    event.preventDefault();
+    removeCurrentSelection();
+  });
 
-  event.preventDefault();
-  removeCurrentSelection();
-});
+  renderApp();
+  applyHashNavigation();
+}
+
+function bootPlayRoute(): void {
+  const board = cloneBoardDefinition(getActiveTable().board);
+  const input = new KeyboardInput();
+  const loop = new GameLoop(
+    createInitialGameState(board),
+    board,
+    input,
+    renderer,
+  );
+
+  state.mode = 'play';
+  state.input = input;
+  state.loop = loop;
+
+  modeTitle.textContent = board.name;
+  modeCopy.textContent =
+    'Use Space to launch. Left Shift / Z / Left Arrow and Right Shift / ? / Right Arrow control the flippers.';
+  debugLinkEditor.href = '/editor';
+  debugLinkEditor.textContent = 'Open editor';
+  debugLinkPlay.href = '/';
+  debugLinkPlay.textContent = 'Game';
+  debugLinkEditor.classList.remove('is-active');
+  debugLinkEditor.setAttribute('aria-current', 'false');
+  debugLinkPlay.classList.add('is-active');
+  debugLinkPlay.setAttribute('aria-current', 'page');
+
+  loop.start();
+}
 
 function renderApp(): void {
   syncTableList();
@@ -734,6 +787,6 @@ function capitalize(value: string): string {
   return `${value.slice(0, 1).toUpperCase()}${value.slice(1)}`;
 }
 
-if (BUILT_IN_TABLES.length === 0) {
-  throw new Error('Expected at least one built-in table.');
+function getAppRoute(pathname: string): AppRoute {
+  return pathname === '/editor' || pathname === '/editor/' ? 'editor' : 'play';
 }
