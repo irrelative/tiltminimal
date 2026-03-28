@@ -8,6 +8,8 @@ import type {
 import type { EditorSelection } from './editor-types';
 
 const SELECTION_PADDING = 14;
+const GUIDE_HANDLE_RADIUS = 16;
+const GUIDE_ROTATE_HANDLE_OFFSET = 42;
 
 export const hitTestSelection = (
   board: BoardDefinition,
@@ -308,6 +310,143 @@ export const updateSelectedNumericField = (
   return board;
 };
 
+export const hitTestGuideHandle = (
+  point: Point,
+  guide: GuideDefinition,
+): 'start' | 'end' | 'rotate' | null => {
+  const handles = getGuideHandles(guide);
+
+  if (Math.hypot(point.x - handles.start.x, point.y - handles.start.y) <= GUIDE_HANDLE_RADIUS) {
+    return 'start';
+  }
+
+  if (Math.hypot(point.x - handles.end.x, point.y - handles.end.y) <= GUIDE_HANDLE_RADIUS) {
+    return 'end';
+  }
+
+  if (
+    Math.hypot(point.x - handles.rotate.x, point.y - handles.rotate.y) <=
+    GUIDE_HANDLE_RADIUS
+  ) {
+    return 'rotate';
+  }
+
+  return null;
+};
+
+export const moveGuideHandle = (
+  board: BoardDefinition,
+  selection: EditorSelection,
+  handle: 'start' | 'end' | 'rotate',
+  point: Point,
+): BoardDefinition => {
+  if (selection.kind !== 'guide' || selection.index === undefined) {
+    return board;
+  }
+
+  const guide = board.guides[selection.index];
+
+  if (!guide) {
+    return board;
+  }
+
+  if (handle === 'start' || handle === 'end') {
+    const nextPoint = clampPoint(board, point, guide.thickness / 2 + 24);
+
+    return {
+      ...board,
+      guides: board.guides.map((candidate, index) =>
+        index === selection.index
+          ? {
+              ...candidate,
+              ...(handle === 'start'
+                ? { start: nextPoint }
+                : { end: nextPoint }),
+            }
+          : candidate,
+      ),
+    };
+  }
+
+  const midpoint = {
+    x: (guide.start.x + guide.end.x) / 2,
+    y: (guide.start.y + guide.end.y) / 2,
+  };
+  const dx = point.x - midpoint.x;
+  const dy = point.y - midpoint.y;
+  const magnitude = Math.hypot(dx, dy);
+
+  if (magnitude < 0.001) {
+    return board;
+  }
+
+  const halfLength = getGuideLength(guide) / 2;
+  const direction = {
+    x: dx / magnitude,
+    y: dy / magnitude,
+  };
+  const nextStart = clampPoint(
+    board,
+    {
+      x: midpoint.x - direction.x * halfLength,
+      y: midpoint.y - direction.y * halfLength,
+    },
+    guide.thickness / 2 + 24,
+  );
+  const nextEnd = clampPoint(
+    board,
+    {
+      x: midpoint.x + direction.x * halfLength,
+      y: midpoint.y + direction.y * halfLength,
+    },
+    guide.thickness / 2 + 24,
+  );
+
+  return {
+    ...board,
+    guides: board.guides.map((candidate, index) =>
+      index === selection.index
+        ? {
+            ...candidate,
+            start: nextStart,
+            end: nextEnd,
+          }
+        : candidate,
+    ),
+  };
+};
+
+export const getGuideHandles = (
+  guide: GuideDefinition,
+): {
+  start: Point;
+  end: Point;
+  rotate: Point;
+} => {
+  const midpoint = {
+    x: (guide.start.x + guide.end.x) / 2,
+    y: (guide.start.y + guide.end.y) / 2,
+  };
+  const length = getGuideLength(guide);
+  const normal =
+    length > 0
+      ? {
+          x: -(guide.end.y - guide.start.y) / length,
+          y: (guide.end.x - guide.start.x) / length,
+        }
+      : { x: 0, y: -1 };
+  const offset = Math.max(GUIDE_ROTATE_HANDLE_OFFSET, guide.thickness + 18);
+
+  return {
+    start: { ...guide.start },
+    end: { ...guide.end },
+    rotate: {
+      x: midpoint.x + normal.x * offset,
+      y: midpoint.y + normal.y * offset,
+    },
+  };
+};
+
 const clampPoint = (
   board: BoardDefinition,
   point: Point,
@@ -360,6 +499,9 @@ const distanceToGuide = (point: Point, guide: GuideDefinition): number => {
 
   return Math.hypot(point.x - closestX, point.y - closestY);
 };
+
+const getGuideLength = (guide: GuideDefinition): number =>
+  Math.hypot(guide.end.x - guide.start.x, guide.end.y - guide.start.y);
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max);

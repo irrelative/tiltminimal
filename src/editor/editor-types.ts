@@ -3,6 +3,12 @@ export interface EditorSelection {
   index?: number;
 }
 
+export type EditorDragMode =
+  | 'move-selection'
+  | 'guide-start'
+  | 'guide-end'
+  | 'guide-rotate';
+
 export type EditorTool =
   | 'select'
   | 'add-bumper'

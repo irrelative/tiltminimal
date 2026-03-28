@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import { createBlankTable } from '../src/boards/table-library';
-import { hitTestSelection } from '../src/editor/table-editor';
+import {
+  getGuideHandles,
+  hitTestGuideHandle,
+  hitTestSelection,
+  moveGuideHandle,
+} from '../src/editor/table-editor';
 
 describe('hitTestSelection', () => {
   it('selects a guide when clicking near its segment', () => {
@@ -34,5 +39,67 @@ describe('hitTestSelection', () => {
     const selection = hitTestSelection(board, { x: 220, y: 320 });
 
     expect(selection.kind).toBe('none');
+  });
+
+  it('finds start, end, and rotate handles for a selected guide', () => {
+    const guide = {
+      start: { x: 120, y: 220 },
+      end: { x: 320, y: 220 },
+      thickness: 20,
+      material: 'metalGuide' as const,
+    };
+    const handles = getGuideHandles(guide);
+
+    expect(hitTestGuideHandle(handles.start, guide)).toBe('start');
+    expect(hitTestGuideHandle(handles.end, guide)).toBe('end');
+    expect(hitTestGuideHandle(handles.rotate, guide)).toBe('rotate');
+  });
+
+  it('moves an individual guide endpoint when dragging a handle', () => {
+    const board = createBlankTable();
+    board.guides = [
+      {
+        start: { x: 120, y: 220 },
+        end: { x: 320, y: 220 },
+        thickness: 20,
+        material: 'metalGuide',
+      },
+    ];
+
+    const next = moveGuideHandle(
+      board,
+      { kind: 'guide', index: 0 },
+      'start',
+      { x: 140, y: 260 },
+    );
+
+    expect(next.guides[0]?.start).toEqual({ x: 140, y: 260 });
+    expect(next.guides[0]?.end).toEqual({ x: 320, y: 220 });
+  });
+
+  it('rotates a guide around its midpoint when dragging the rotate handle', () => {
+    const board = createBlankTable();
+    board.guides = [
+      {
+        start: { x: 120, y: 220 },
+        end: { x: 320, y: 220 },
+        thickness: 20,
+        material: 'metalGuide',
+      },
+    ];
+
+    const next = moveGuideHandle(
+      board,
+      { kind: 'guide', index: 0 },
+      'rotate',
+      { x: 220, y: 320 },
+    );
+    const guide = next.guides[0];
+
+    expect(guide).toBeDefined();
+    expect(guide?.start.x).toBeCloseTo(220, 5);
+    expect(guide?.end.x).toBeCloseTo(220, 5);
+    expect(guide?.start.y).toBeCloseTo(120, 5);
+    expect(guide?.end.y).toBeCloseTo(320, 5);
   });
 });

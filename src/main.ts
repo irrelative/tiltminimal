@@ -9,11 +9,17 @@ import {
   addBumper,
   addFlipper,
   deleteSelection,
+  hitTestGuideHandle,
   hitTestSelection,
+  moveGuideHandle,
   moveSelection,
   updateSelectedNumericField,
 } from './editor/table-editor';
-import type { EditorSelection, EditorTool } from './editor/editor-types';
+import type {
+  EditorDragMode,
+  EditorSelection,
+  EditorTool,
+} from './editor/editor-types';
 import {
   deleteCustomTable,
   loadTablesState,
@@ -45,6 +51,7 @@ interface AppState {
   tool: EditorTool;
   selection: EditorSelection;
   dragging: boolean;
+  dragMode: EditorDragMode | null;
   dragOffset: Point | null;
   draftPosition: Point | null;
   loop: GameLoop | null;
@@ -99,6 +106,7 @@ const state: AppState = {
   tool: 'select',
   selection: { kind: 'none' },
   dragging: false,
+  dragMode: null,
   dragOffset: null,
   draftPosition: null,
   loop: null,
@@ -263,6 +271,7 @@ function bootEditorRoute(): void {
       state.selection = result.selection;
       state.tool = 'select';
       state.dragging = true;
+      state.dragMode = 'move-selection';
       state.dragOffset = { x: 0, y: 0 };
       state.draftPosition = null;
       replaceActiveBoard(result.board, false);
@@ -283,6 +292,7 @@ function bootEditorRoute(): void {
       state.selection = result.selection;
       state.tool = 'select';
       state.dragging = true;
+      state.dragMode = 'move-selection';
       state.dragOffset = { x: 0, y: 0 };
       state.draftPosition = null;
       replaceActiveBoard(result.board, false);
@@ -290,10 +300,32 @@ function bootEditorRoute(): void {
       return;
     }
 
-    state.selection = hitTestSelection(getActiveTable().board, point);
+    const activeBoard = getActiveTable().board;
+
+    if (state.selection.kind === 'guide' && state.selection.index !== undefined) {
+      const guide = activeBoard.guides[state.selection.index];
+      const guideHandle = guide ? hitTestGuideHandle(point, guide) : null;
+
+      if (guideHandle) {
+        state.dragging = true;
+        state.dragMode =
+          guideHandle === 'start'
+            ? 'guide-start'
+            : guideHandle === 'end'
+              ? 'guide-end'
+              : 'guide-rotate';
+        state.dragOffset = null;
+        state.draftPosition = null;
+        renderApp();
+        return;
+      }
+    }
+
+    state.selection = hitTestSelection(activeBoard, point);
     state.dragging = state.selection.kind !== 'none';
+    state.dragMode = state.dragging ? 'move-selection' : null;
     state.dragOffset = getDragOffset(
-      getActiveTable().board,
+      activeBoard,
       state.selection,
       point,
     );
@@ -308,15 +340,35 @@ function bootEditorRoute(): void {
     const point = getBoardPoint(event);
 
     if (state.dragging && state.selection.kind !== 'none') {
-      const dragOffset = state.dragOffset ?? { x: 0, y: 0 };
+      const board = getActiveTable().board;
 
-      replaceActiveBoard(
-        moveSelection(getActiveTable().board, state.selection, {
-          x: point.x - dragOffset.x,
-          y: point.y - dragOffset.y,
-        }),
-        false,
-      );
+      if (state.dragMode === 'guide-start') {
+        replaceActiveBoard(
+          moveGuideHandle(board, state.selection, 'start', point),
+          false,
+        );
+      } else if (state.dragMode === 'guide-end') {
+        replaceActiveBoard(
+          moveGuideHandle(board, state.selection, 'end', point),
+          false,
+        );
+      } else if (state.dragMode === 'guide-rotate') {
+        replaceActiveBoard(
+          moveGuideHandle(board, state.selection, 'rotate', point),
+          false,
+        );
+      } else {
+        const dragOffset = state.dragOffset ?? { x: 0, y: 0 };
+
+        replaceActiveBoard(
+          moveSelection(board, state.selection, {
+            x: point.x - dragOffset.x,
+            y: point.y - dragOffset.y,
+          }),
+          false,
+        );
+      }
+
       renderApp();
       return;
     }
@@ -331,6 +383,7 @@ function bootEditorRoute(): void {
     }
 
     state.dragging = false;
+    state.dragMode = null;
     state.dragOffset = null;
     persistTable(getActiveTable());
     renderApp();
@@ -338,6 +391,7 @@ function bootEditorRoute(): void {
 
   canvas.addEventListener('pointercancel', () => {
     state.dragging = false;
+    state.dragMode = null;
     state.dragOffset = null;
     renderApp();
   });
@@ -669,6 +723,7 @@ function startPlayMode(): void {
   state.tool = 'select';
   state.draftPosition = null;
   state.dragging = false;
+  state.dragMode = null;
   state.dragOffset = null;
   state.input = input;
   state.loop = loop;

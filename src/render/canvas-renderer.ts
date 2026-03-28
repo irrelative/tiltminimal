@@ -1,4 +1,5 @@
 import type { EditorSelection } from '../editor/editor-types';
+import { getGuideHandles } from '../editor/table-editor';
 import { getSurfaceMaterial } from '../game/materials';
 import type { GameState } from '../game/game-state';
 import { getStatusLabel } from '../game/game-loop';
@@ -373,6 +374,12 @@ export class CanvasRenderer {
     context: CanvasRenderingContext2D,
     guide: GuideDefinition,
   ): void {
+    const handles = getGuideHandles(guide);
+    const midpoint = {
+      x: (guide.start.x + guide.end.x) / 2,
+      y: (guide.start.y + guide.end.y) / 2,
+    };
+
     context.save();
     context.strokeStyle = '#ffd166';
     context.lineWidth = guide.thickness + 10;
@@ -390,6 +397,17 @@ export class CanvasRenderer {
     context.moveTo(guide.start.x, guide.start.y);
     context.lineTo(guide.end.x, guide.end.y);
     context.stroke();
+
+    context.setLineDash([]);
+    context.lineWidth = 3;
+    context.beginPath();
+    context.moveTo(midpoint.x, midpoint.y);
+    context.lineTo(handles.rotate.x, handles.rotate.y);
+    context.stroke();
+
+    this.drawEditorHandle(context, handles.start, '#ffd166');
+    this.drawEditorHandle(context, handles.end, '#ffd166');
+    this.drawEditorHandle(context, handles.rotate, '#70d1f4');
     context.restore();
   }
 
@@ -452,6 +470,20 @@ export class CanvasRenderer {
       48,
       122,
     );
+  }
+
+  private drawEditorHandle(
+    context: CanvasRenderingContext2D,
+    point: { x: number; y: number },
+    color: string,
+  ): void {
+    context.fillStyle = color;
+    context.strokeStyle = PALETTE.ink;
+    context.lineWidth = 2;
+    context.beginPath();
+    context.arc(point.x, point.y, 8, 0, Math.PI * 2);
+    context.fill();
+    context.stroke();
   }
 }
 
