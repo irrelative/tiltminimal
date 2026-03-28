@@ -139,7 +139,10 @@ export class CanvasRenderer {
     board: BoardDefinition,
   ): void {
     for (const guide of board.guides) {
-      const material = getSurfaceMaterial(guide.material, board.surfaceMaterials);
+      const material = getSurfaceMaterial(
+        guide.material,
+        board.surfaceMaterials,
+      );
 
       context.strokeStyle =
         material.name === 'rubberPost' ? PALETTE.orange : PALETTE.skyBlue;
@@ -170,7 +173,8 @@ export class CanvasRenderer {
     const bumperColors = [PALETTE.pink, PALETTE.green, PALETTE.skyBlue];
 
     board.bumpers.forEach((bumper, index) => {
-      context.fillStyle = bumperColors[index % bumperColors.length] ?? PALETTE.pink;
+      context.fillStyle =
+        bumperColors[index % bumperColors.length] ?? PALETTE.pink;
       context.beginPath();
       context.arc(bumper.x, bumper.y, bumper.radius, 0, Math.PI * 2);
       context.fill();
@@ -266,7 +270,11 @@ export class CanvasRenderer {
 
     context.font = '400 20px Georgia, serif';
     context.fillStyle = 'rgba(34, 48, 74, 0.85)';
-    context.fillText(getStatusLabel(state, input, board), 48, board.height - 44);
+    context.fillText(
+      getStatusLabel(state, input, board),
+      48,
+      board.height - 44,
+    );
   }
 
   private drawLaunchMeter(
@@ -303,9 +311,9 @@ export class CanvasRenderer {
     context.save();
     context.strokeStyle =
       selection.kind === 'launch-position'
-        ? '#ffd166'
-        : 'rgba(241, 250, 238, 0.7)';
-    context.fillStyle = 'rgba(255, 209, 102, 0.18)';
+        ? 'rgba(0, 0, 0, 0.95)'
+        : 'rgba(0, 0, 0, 0.82)';
+    context.fillStyle = 'rgba(0, 0, 0, 0.12)';
     context.lineWidth = selection.kind === 'launch-position' ? 4 : 2;
     context.beginPath();
     context.arc(
