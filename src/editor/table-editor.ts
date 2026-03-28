@@ -28,6 +28,7 @@ import type { EditorSelection } from './editor-types';
 const SELECTION_PADDING = 14;
 const GUIDE_HANDLE_RADIUS = 16;
 const GUIDE_ROTATE_HANDLE_OFFSET = 42;
+const ORIENTED_ROTATE_HANDLE_OFFSET = 38;
 
 export const hitTestSelection = (
   board: BoardDefinition,
@@ -781,6 +782,60 @@ export const hitTestGuideHandle = (
   return null;
 };
 
+export const hitTestOrientedRotateHandle = (
+  point: Point,
+  element: Point,
+  thickness: number,
+  angle: number,
+): boolean => {
+  const handle = getOrientedRotateHandle(element, thickness, angle);
+
+  return (
+    Math.hypot(point.x - handle.x, point.y - handle.y) <= GUIDE_HANDLE_RADIUS
+  );
+};
+
+export const rotateSelection = (
+  board: BoardDefinition,
+  selection: EditorSelection,
+  point: Point,
+): BoardDefinition => {
+  const nextAngle = getOrientedAngleFromHandlePoint(point, selection, board);
+
+  if (nextAngle === null) {
+    return board;
+  }
+
+  if (selection.kind === 'standup-target' && selection.index !== undefined) {
+    return {
+      ...board,
+      standupTargets: board.standupTargets.map((target, index) =>
+        index === selection.index ? { ...target, angle: nextAngle } : target,
+      ),
+    };
+  }
+
+  if (selection.kind === 'drop-target' && selection.index !== undefined) {
+    return {
+      ...board,
+      dropTargets: board.dropTargets.map((target, index) =>
+        index === selection.index ? { ...target, angle: nextAngle } : target,
+      ),
+    };
+  }
+
+  if (selection.kind === 'spinner' && selection.index !== undefined) {
+    return {
+      ...board,
+      spinners: board.spinners.map((spinner, index) =>
+        index === selection.index ? { ...spinner, angle: nextAngle } : spinner,
+      ),
+    };
+  }
+
+  return board;
+};
+
 export const moveGuideHandle = (
   board: BoardDefinition,
   selection: EditorSelection,
@@ -985,6 +1040,94 @@ const distanceToOrientedSegment = (
   const closestY = start.y + segmentY * projection;
 
   return Math.hypot(point.x - closestX, point.y - closestY);
+};
+
+export const getOrientedRotateHandle = (
+  element: Point,
+  thickness: number,
+  angle: number,
+): Point => {
+  const offset = Math.max(
+    ORIENTED_ROTATE_HANDLE_OFFSET,
+    thickness / 2 + 22,
+  );
+
+  return {
+    x: element.x - Math.sin(angle) * offset,
+    y: element.y + Math.cos(angle) * offset,
+  };
+};
+
+const getOrientedAngleFromHandlePoint = (
+  point: Point,
+  selection: EditorSelection,
+  board: BoardDefinition,
+): number | null => {
+  const element = getSelectedOrientedElement(selection, board);
+
+  if (!element) {
+    return null;
+  }
+
+  const dx = point.x - element.x;
+  const dy = point.y - element.y;
+
+  if (Math.hypot(dx, dy) < 0.001) {
+    return null;
+  }
+
+  return Math.atan2(dy, dx) - Math.PI / 2;
+};
+
+const getSelectedOrientedElement = (
+  selection: EditorSelection,
+  board: BoardDefinition,
+):
+  | { x: number; y: number; length: number; thickness: number; angle: number }
+  | null => {
+  if (selection.kind === 'standup-target' && selection.index !== undefined) {
+    const target = board.standupTargets[selection.index];
+
+    return target
+      ? {
+          x: target.x,
+          y: target.y,
+          length: target.width,
+          thickness: target.height,
+          angle: target.angle,
+        }
+      : null;
+  }
+
+  if (selection.kind === 'drop-target' && selection.index !== undefined) {
+    const target = board.dropTargets[selection.index];
+
+    return target
+      ? {
+          x: target.x,
+          y: target.y,
+          length: target.width,
+          thickness: target.height,
+          angle: target.angle,
+        }
+      : null;
+  }
+
+  if (selection.kind === 'spinner' && selection.index !== undefined) {
+    const spinner = board.spinners[selection.index];
+
+    return spinner
+      ? {
+          x: spinner.x,
+          y: spinner.y,
+          length: spinner.length,
+          thickness: spinner.thickness,
+          angle: spinner.angle,
+        }
+      : null;
+  }
+
+  return null;
 };
 
 const getGuideLength = (guide: GuideDefinition): number =>

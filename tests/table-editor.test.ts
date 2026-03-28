@@ -3,9 +3,12 @@ import { describe, expect, it } from 'vitest';
 import { createBlankTable } from '../src/boards/table-library';
 import {
   getGuideHandles,
+  getOrientedRotateHandle,
   hitTestGuideHandle,
+  hitTestOrientedRotateHandle,
   hitTestSelection,
   moveGuideHandle,
+  rotateSelection,
 } from '../src/editor/table-editor';
 
 describe('hitTestSelection', () => {
@@ -264,5 +267,100 @@ describe('hitTestSelection', () => {
     }
 
     expect(guide.radius).toBeCloseTo(140, 5);
+  });
+
+  it('finds a rotate handle for a standup target', () => {
+    const target = {
+      x: 220,
+      y: 260,
+      width: 60,
+      height: 16,
+      angle: 0,
+      score: 50,
+      material: 'rubberPost' as const,
+    };
+    const handle = getOrientedRotateHandle(
+      target,
+      target.height,
+      target.angle,
+    );
+
+    expect(
+      hitTestOrientedRotateHandle(
+        handle,
+        target,
+        target.height,
+        target.angle,
+      ),
+    ).toBe(true);
+  });
+
+  it('rotates a standup target with the rotate handle drag', () => {
+    const board = createBlankTable();
+    board.standupTargets = [
+      {
+        x: 220,
+        y: 260,
+        width: 60,
+        height: 16,
+        angle: 0,
+        score: 50,
+        material: 'rubberPost',
+      },
+    ];
+
+    const next = rotateSelection(
+      board,
+      { kind: 'standup-target', index: 0 },
+      { x: 260, y: 260 },
+    );
+
+    expect(next.standupTargets[0]?.angle).toBeCloseTo(-Math.PI / 2, 5);
+  });
+
+  it('rotates a spinner with the rotate handle drag', () => {
+    const board = createBlankTable();
+    board.spinners = [
+      {
+        x: 320,
+        y: 280,
+        length: 90,
+        thickness: 10,
+        angle: 0,
+        score: 10,
+        material: 'metalGuide',
+      },
+    ];
+
+    const next = rotateSelection(
+      board,
+      { kind: 'spinner', index: 0 },
+      { x: 320, y: 340 },
+    );
+
+    expect(next.spinners[0]?.angle).toBeCloseTo(0, 5);
+  });
+
+  it('rotates a drop target with the rotate handle drag', () => {
+    const board = createBlankTable();
+    board.dropTargets = [
+      {
+        x: 280,
+        y: 320,
+        width: 54,
+        height: 16,
+        angle: 0,
+        score: 100,
+        material: 'rubberPost',
+      },
+    ];
+
+    const next = rotateSelection(
+      board,
+      { kind: 'drop-target', index: 0 },
+      { x: 280, y: 260 },
+    );
+
+    expect(next.dropTargets[0]?.angle).toBeCloseTo(-Math.PI, 5);
   });
 });

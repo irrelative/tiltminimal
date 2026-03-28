@@ -17,9 +17,11 @@ import {
   addStandupTarget,
   deleteSelection,
   hitTestGuideHandle,
+  hitTestOrientedRotateHandle,
   hitTestSelection,
   moveGuideHandle,
   moveSelection,
+  rotateSelection,
   updateSelectedNumericField,
 } from './editor/table-editor';
 import type {
@@ -441,6 +443,75 @@ function bootEditorRoute(): void {
       }
     }
 
+    if (
+      state.selection.kind === 'standup-target' &&
+      state.selection.index !== undefined
+    ) {
+      const target = activeBoard.standupTargets[state.selection.index];
+
+      if (
+        target &&
+        hitTestOrientedRotateHandle(
+          point,
+          target,
+          target.height,
+          target.angle,
+        )
+      ) {
+        state.dragging = true;
+        state.dragMode = 'oriented-rotate';
+        state.dragOffset = null;
+        state.draftPosition = null;
+        renderApp();
+        return;
+      }
+    }
+
+    if (
+      state.selection.kind === 'drop-target' &&
+      state.selection.index !== undefined
+    ) {
+      const target = activeBoard.dropTargets[state.selection.index];
+
+      if (
+        target &&
+        hitTestOrientedRotateHandle(
+          point,
+          target,
+          target.height,
+          target.angle,
+        )
+      ) {
+        state.dragging = true;
+        state.dragMode = 'oriented-rotate';
+        state.dragOffset = null;
+        state.draftPosition = null;
+        renderApp();
+        return;
+      }
+    }
+
+    if (state.selection.kind === 'spinner' && state.selection.index !== undefined) {
+      const spinner = activeBoard.spinners[state.selection.index];
+
+      if (
+        spinner &&
+        hitTestOrientedRotateHandle(
+          point,
+          spinner,
+          spinner.thickness,
+          spinner.angle,
+        )
+      ) {
+        state.dragging = true;
+        state.dragMode = 'oriented-rotate';
+        state.dragOffset = null;
+        state.draftPosition = null;
+        renderApp();
+        return;
+      }
+    }
+
     state.selection = hitTestSelection(activeBoard, point);
     state.dragging = state.selection.kind !== 'none';
     state.dragMode = state.dragging ? 'move-selection' : null;
@@ -492,6 +563,8 @@ function bootEditorRoute(): void {
           moveGuideHandle(board, state.selection, 'rotate', point),
           false,
         );
+      } else if (state.dragMode === 'oriented-rotate') {
+        replaceActiveBoard(rotateSelection(board, state.selection, point), false);
       } else {
         const dragOffset = state.dragOffset ?? { x: 0, y: 0 };
 

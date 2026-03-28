@@ -15,6 +15,7 @@ export interface EditorSelection {
 
 export type EditorDragMode =
   | 'move-selection'
+  | 'oriented-rotate'
   | 'guide-start'
   | 'guide-end'
   | 'guide-rotate'

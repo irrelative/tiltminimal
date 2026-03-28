@@ -1,5 +1,8 @@
 import type { EditorSelection } from '../editor/editor-types';
-import { getGuideHandles } from '../editor/table-editor';
+import {
+  getGuideHandles,
+  getOrientedRotateHandle,
+} from '../editor/table-editor';
 import {
   getFlipperBaseRadius,
   getFlipperTipRadius,
@@ -703,6 +706,8 @@ export class CanvasRenderer {
     height: number,
     angle: number,
   ): void {
+    const handle = getOrientedRotateHandle(element, height, angle);
+
     context.save();
     context.translate(element.x, element.y);
     context.rotate(angle);
@@ -710,6 +715,16 @@ export class CanvasRenderer {
     context.lineWidth = 4;
     context.setLineDash([10, 6]);
     context.strokeRect(-width / 2 - 8, -height / 2 - 8, width + 16, height + 16);
+    context.restore();
+
+    context.save();
+    context.strokeStyle = '#ffd166';
+    context.lineWidth = 3;
+    context.beginPath();
+    context.moveTo(element.x, element.y);
+    context.lineTo(handle.x, handle.y);
+    context.stroke();
+    this.drawEditorHandle(context, handle, '#70d1f4');
     context.restore();
   }
 
