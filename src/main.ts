@@ -29,6 +29,12 @@ import type { BoardDefinition, Point } from './types/board-definition';
 import './styles.css';
 
 type AppMode = 'edit' | 'play';
+type DebugDestination = 'board-editor' | 'play-test';
+
+const DEBUG_HASHES: Record<DebugDestination, string> = {
+  'board-editor': '#debug-board-editor',
+  'play-test': '#debug-play-test',
+};
 
 interface AppState {
   tables: TableRecord[];
@@ -68,6 +74,8 @@ const deleteSelectionButton =
   queryRequired<HTMLButtonElement>('#delete-selection');
 const modeTitle = queryRequired<HTMLElement>('#mode-title');
 const modeCopy = queryRequired<HTMLElement>('#mode-copy');
+const debugLinkEditor = queryRequired<HTMLAnchorElement>('#debug-link-editor');
+const debugLinkPlay = queryRequired<HTMLAnchorElement>('#debug-link-play');
 
 const renderer = new CanvasRenderer(canvas);
 const loadedState = loadTablesState();
@@ -85,10 +93,15 @@ const state: AppState = {
   input: null,
 };
 
+window.addEventListener('hashchange', () => {
+  applyHashNavigation();
+});
+
 renderApp();
+applyHashNavigation();
 
 tableSelect.addEventListener('change', () => {
-  stopPlayMode();
+  setAppMode('edit', false);
   state.activeTableId = tableSelect.value;
   state.selection = { kind: 'none' };
   state.tool = 'select';
@@ -98,7 +111,7 @@ tableSelect.addEventListener('change', () => {
 });
 
 newTableButton.addEventListener('click', () => {
-  stopPlayMode();
+  setAppMode('edit', false);
 
   const table = createCustomRecord(createBlankTable(nextCustomTableName()));
   state.tables = [...state.tables, table];
@@ -110,7 +123,7 @@ newTableButton.addEventListener('click', () => {
 });
 
 duplicateTableButton.addEventListener('click', () => {
-  stopPlayMode();
+  setAppMode('edit', false);
 
   const active = getActiveTable();
   const table = createCustomRecord({
@@ -127,18 +140,13 @@ duplicateTableButton.addEventListener('click', () => {
 });
 
 playToggleButton.addEventListener('click', () => {
-  if (state.mode === 'play') {
-    stopPlayMode();
-    renderApp();
-    return;
-  }
-
-  startPlayMode();
-  renderApp();
+  navigateToDebugDestination(
+    state.mode === 'play' ? 'board-editor' : 'play-test',
+  );
 });
 
 removeTableButton.addEventListener('click', () => {
-  stopPlayMode();
+  setAppMode('edit', false);
 
   const active = getActiveTable();
 
@@ -204,7 +212,7 @@ document
   .forEach((button) => {
     button.addEventListener('click', () => {
       if (state.mode !== 'edit') {
-        stopPlayMode();
+        navigateToDebugDestination('board-editor');
       }
 
       state.tool = button.dataset.tool as EditorTool;
@@ -315,8 +323,7 @@ canvas.addEventListener('pointerleave', () => {
 window.addEventListener('keydown', (event) => {
   if (state.mode !== 'edit') {
     if (event.key === 'Escape') {
-      stopPlayMode();
-      renderApp();
+      navigateToDebugDestination('board-editor');
     }
 
     return;
@@ -354,6 +361,7 @@ function renderApp(): void {
   syncTablePanel();
   syncSelectionPanel();
   syncModeCopy();
+  syncDebugMenu();
 
   if (state.mode === 'edit') {
     renderer.renderEditor(
@@ -475,6 +483,17 @@ function syncModeCopy(): void {
   playToggleButton.classList.add('accent-button');
 }
 
+function syncDebugMenu(): void {
+  const editorActive = state.mode === 'edit';
+  debugLinkEditor.classList.toggle('is-active', editorActive);
+  debugLinkEditor.setAttribute(
+    'aria-current',
+    editorActive ? 'page' : 'false',
+  );
+  debugLinkPlay.classList.toggle('is-active', !editorActive);
+  debugLinkPlay.setAttribute('aria-current', !editorActive ? 'page' : 'false');
+}
+
 function getActiveTable(): TableRecord {
   const table = state.tables.find(
     (candidate) => candidate.id === state.activeTableId,
@@ -527,6 +546,32 @@ function reloadTables(preferredTableId?: string): void {
   renderApp();
 }
 
+function applyHashNavigation(): void {
+  const destination = getDebugDestinationFromHash(window.location.hash);
+
+  setAppMode(destination === 'play-test' ? 'play' : 'edit', false);
+  renderApp();
+}
+
+function navigateToDebugDestination(destination: DebugDestination): void {
+  const nextHash = DEBUG_HASHES[destination];
+
+  if (window.location.hash === nextHash) {
+    applyHashNavigation();
+    return;
+  }
+
+  window.location.hash = nextHash;
+}
+
+function getDebugDestinationFromHash(hash: string): DebugDestination {
+  if (hash === DEBUG_HASHES['play-test']) {
+    return 'play-test';
+  }
+
+  return 'board-editor';
+}
+
 function startPlayMode(): void {
   stopPlayMode();
 
@@ -555,6 +600,20 @@ function stopPlayMode(): void {
   state.loop = null;
   state.input = null;
   state.mode = 'edit';
+}
+
+function setAppMode(mode: AppMode, renderImmediately: boolean): void {
+  if (mode === 'play') {
+    if (state.mode !== 'play') {
+      startPlayMode();
+    }
+  } else if (state.mode === 'play') {
+    stopPlayMode();
+  }
+
+  if (renderImmediately) {
+    renderApp();
+  }
 }
 
 function removeCurrentSelection(): void {

@@ -103,14 +103,35 @@
 
         <section class="stage-shell">
           <header class="stage-toolbar">
-            <div>
-              <p class="eyebrow">Workspace</p>
-              <h2 id="mode-title">Editing table</h2>
+            <div class="toolbar-main">
+              <div>
+                <p class="eyebrow">Workspace</p>
+                <h2 id="mode-title">Editing table</h2>
+              </div>
+              <p id="mode-copy" class="toolbar-copy">
+                Click to select. Drag to move. Press Delete to remove the
+                selected element.
+              </p>
             </div>
-            <p id="mode-copy" class="toolbar-copy">
-              Click to select. Drag to move. Press Delete to remove the selected
-              element.
-            </p>
+            <nav class="debug-menu" aria-label="Debug menu">
+              <p class="eyebrow">Debug Menu</p>
+              <div class="debug-links">
+                <a
+                  id="debug-link-editor"
+                  class="debug-link"
+                  href="#debug-board-editor"
+                >
+                  Board editor
+                </a>
+                <a
+                  id="debug-link-play"
+                  class="debug-link"
+                  href="#debug-play-test"
+                >
+                  Play test
+                </a>
+              </div>
+            </nav>
           </header>
 
           <section class="playfield-frame">
