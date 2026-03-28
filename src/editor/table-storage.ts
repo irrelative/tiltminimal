@@ -100,7 +100,7 @@ export const upsertTable = (
   nextTables.push({
     id: table.id,
     builtIn: table.builtIn,
-    board: serializeBoardDefinition(table.board),
+    board: exportBoardDefinition(table.board),
   });
 
   writeStorageState(
@@ -253,7 +253,7 @@ const stripLegacyResolvedDefaults = (board: unknown): unknown => {
   return candidate;
 };
 
-const serializeBoardDefinition = (
+export const exportBoardDefinition = (
   board: BoardDefinition,
 ): BoardDefinitionInput => {
   const stored: BoardDefinitionInput = {

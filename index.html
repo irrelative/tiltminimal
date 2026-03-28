@@ -137,6 +137,26 @@
               Delete selection
             </button>
           </section>
+
+          <section class="panel-section">
+            <div class="section-heading">
+              <h2>Export</h2>
+              <p>Copy the current table definition for import elsewhere.</p>
+            </div>
+            <details id="table-export-panel" class="export-panel">
+              <summary>Raw table JSON</summary>
+              <div class="export-panel-body">
+                <textarea
+                  id="table-export-json"
+                  class="export-json"
+                  readonly
+                  spellcheck="false"
+                  aria-label="Raw table JSON export"
+                ></textarea>
+                <button id="copy-table-json" type="button">Copy JSON</button>
+              </div>
+            </details>
+          </section>
         </aside>
 
         <section class="stage-shell">

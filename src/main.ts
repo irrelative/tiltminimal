@@ -31,6 +31,7 @@ import type {
 } from './editor/editor-types';
 import {
   deleteCustomTable,
+  exportBoardDefinition,
   loadTablesState,
   resetBuiltInTable,
   setActiveTableId,
@@ -91,6 +92,10 @@ const selectionLabel = queryRequired<HTMLElement>('#selection-label');
 const selectionFields = queryRequired<HTMLElement>('#selection-fields');
 const deleteSelectionButton =
   queryRequired<HTMLButtonElement>('#delete-selection');
+const tableExportPanel = queryRequired<HTMLDetailsElement>('#table-export-panel');
+const tableExportJson = queryRequired<HTMLTextAreaElement>('#table-export-json');
+const copyTableJsonButton =
+  queryRequired<HTMLButtonElement>('#copy-table-json');
 const modeTitle = queryRequired<HTMLElement>('#mode-title');
 const modeCopy = queryRequired<HTMLElement>('#mode-copy');
 const playTableSelect = queryRequired<HTMLSelectElement>('#play-table-select');
@@ -259,6 +264,22 @@ function bootEditorRoute(): void {
 
   deleteSelectionButton.addEventListener('click', () => {
     removeCurrentSelection();
+  });
+
+  copyTableJsonButton.addEventListener('click', async () => {
+    const json = tableExportJson.value;
+
+    try {
+      await navigator.clipboard.writeText(json);
+      copyTableJsonButton.textContent = 'Copied';
+      window.setTimeout(() => {
+        copyTableJsonButton.textContent = 'Copy JSON';
+      }, 1200);
+    } catch {
+      tableExportPanel.open = true;
+      tableExportJson.focus();
+      tableExportJson.select();
+    }
   });
 
   document
@@ -686,6 +707,7 @@ function renderApp(): void {
   syncToolButtons();
   syncTablePanel();
   syncSelectionPanel();
+  syncExportPanel();
   syncModeCopy();
   syncDebugMenu();
 
@@ -696,6 +718,15 @@ function renderApp(): void {
       state.tool === 'select' ? null : state.draftPosition,
     );
   }
+}
+
+function syncExportPanel(): void {
+  if (state.mode !== 'edit') {
+    return;
+  }
+
+  const exported = exportBoardDefinition(getActiveTable().board);
+  tableExportJson.value = `${JSON.stringify(exported, null, 2)}\n`;
 }
 
 function syncTableList(): void {

@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { BUILT_IN_TABLES, createBlankTable } from '../src/boards/table-library';
 import { physicsDefaults } from '../src/game/physics-defaults';
 import {
+  exportBoardDefinition,
   loadTablesState,
   resetBuiltInTable,
   upsertTable,
@@ -175,5 +176,15 @@ describe('table storage', () => {
     };
 
     expect(stored.tables?.[0]?.board?.physics).toBeUndefined();
+  });
+
+  it('exports sparse table JSON suitable for copy and import', () => {
+    const board = createBlankTable('Export Table');
+    const exported = exportBoardDefinition(board);
+
+    expect(exported.name).toBe('Export Table');
+    expect(exported.physics).toBeUndefined();
+    expect(exported.surfaceMaterials).toBeUndefined();
+    expect(exported.flippers).toHaveLength(2);
   });
 });

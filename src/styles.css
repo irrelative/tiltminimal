@@ -41,7 +41,9 @@ body {
 
 button,
 input,
-select {
+select,
+textarea,
+summary {
   font: inherit;
 }
 
@@ -74,7 +76,8 @@ button:active {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 12px;
@@ -231,6 +234,52 @@ h2 {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
+}
+
+.export-panel {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.export-panel summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 12px 14px;
+  color: var(--text);
+}
+
+.export-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.export-panel summary::after {
+  content: '+';
+  float: right;
+  color: var(--cool);
+}
+
+.export-panel[open] summary::after {
+  content: '−';
+}
+
+.export-panel-body {
+  display: grid;
+  gap: 10px;
+  padding: 0 14px 14px;
+}
+
+.export-json {
+  min-height: 220px;
+  resize: vertical;
+  font-family:
+    'SFMono-Regular',
+    'Consolas',
+    'Liberation Mono',
+    monospace;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  white-space: pre;
 }
 
 .stage-shell {
