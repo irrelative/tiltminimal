@@ -68,7 +68,7 @@ export const physicsDefaults = {
       swingAngularSpeed: 30,
       collisionAngleStep: 0.08,
       bodyMass: 0.12,
-      restitutionScale: 0.58,
+      restitutionScale: 0.7,
     },
     solver: {
       epsilon: 0.0001,
