@@ -385,6 +385,42 @@ describe('stepGame', () => {
     expect(next.rollovers[0]?.lit).toBe(true);
     expect(next.score).toBe(25);
   });
+
+  it('bounces off a curved guide', () => {
+    const board = createBlankTable('Curved Guide Board');
+    board.guides = [
+      {
+        kind: 'arc',
+        center: { x: 450, y: 400 },
+        radius: 110,
+        startAngle: Math.PI,
+        endAngle: Math.PI * 1.5,
+        thickness: 18,
+        material: 'metalGuide',
+      },
+    ];
+    const state = createInitialGameState(board);
+    state.status = 'playing';
+
+    const curvedGuide = board.guides[0];
+    if (!curvedGuide || curvedGuide.kind !== 'arc') {
+      throw new Error('Expected curved guide.');
+    }
+
+    const angle = Math.PI * 1.25;
+    const guideRadius = curvedGuide.radius;
+    const travelRadius =
+      guideRadius + state.ball.radius + curvedGuide.thickness / 2 - 1;
+    state.ball.position.x = 450 + Math.cos(angle) * travelRadius;
+    state.ball.position.y = 400 + Math.sin(angle) * travelRadius;
+    state.ball.linearVelocity.x = 140;
+    state.ball.linearVelocity.y = 140;
+
+    const next = stepGame(state, board, idleInput, 1 / 60);
+
+    expect(next.ball.position.x).toBeLessThan(state.ball.position.x + 4);
+    expect(next.ball.position.y).toBeLessThan(state.ball.position.y + 4);
+  });
 });
 
 const placeBallOnFlipperSurface = (

@@ -1,4 +1,6 @@
 import {
+  createDefaultCurvedGuide,
+  createDefaultGuide,
   createDefaultDropTarget,
   createDefaultFlipper,
   createDefaultRollover,
@@ -7,6 +9,7 @@ import {
   createDefaultStandupTarget,
 } from '../boards/table-library';
 import { getDistanceToFlipperSurface } from '../game/flipper-geometry';
+import { getGuideDistance, isArcGuide } from '../game/guide-geometry';
 import type {
   BoardDefinition,
   FlipperSide,
@@ -64,7 +67,7 @@ export const hitTestSelection = (
     }
 
     if (
-      distanceToGuide(point, guide) <=
+      getGuideDistance(point, guide) <=
       guide.thickness / 2 + SELECTION_PADDING
     ) {
       return { kind: 'guide', index };
@@ -168,6 +171,44 @@ export const addBumper = (
   return {
     board: nextBoard,
     selection: { kind: 'bumper', index: nextBoard.bumpers.length - 1 },
+  };
+};
+
+export const addGuide = (
+  board: BoardDefinition,
+  point: Point,
+): {
+  board: BoardDefinition;
+  selection: EditorSelection;
+} => {
+  const nextGuide = createDefaultGuide(point.x, point.y);
+  const nextBoard = {
+    ...board,
+    guides: [...board.guides, nextGuide],
+  };
+
+  return {
+    board: nextBoard,
+    selection: { kind: 'guide', index: nextBoard.guides.length - 1 },
+  };
+};
+
+export const addCurvedGuide = (
+  board: BoardDefinition,
+  point: Point,
+): {
+  board: BoardDefinition;
+  selection: EditorSelection;
+} => {
+  const nextGuide = createDefaultCurvedGuide(point.x, point.y);
+  const nextBoard = {
+    ...board,
+    guides: [...board.guides, nextGuide],
+  };
+
+  return {
+    board: nextBoard,
+    selection: { kind: 'guide', index: nextBoard.guides.length - 1 },
   };
 };
 
@@ -375,6 +416,24 @@ export const moveSelection = (
 
     if (!guide) {
       return board;
+    }
+
+    if (isArcGuide(guide)) {
+      return {
+        ...board,
+        guides: board.guides.map((candidate, index) =>
+          index === selection.index
+            ? {
+                ...candidate,
+                center: clampPoint(
+                  board,
+                  point,
+                  guide.radius + guide.thickness / 2 + 24,
+                ),
+              }
+            : candidate,
+        ),
+      };
     }
 
     const deltaX = point.x - guide.start.x;
@@ -607,18 +666,27 @@ export const updateSelectedNumericField = (
       ...board,
       guides: board.guides.map((guide, index) =>
         index === selection.index
-          ? {
-              ...guide,
-              ...(field === 'startX'
-                ? { start: { ...guide.start, x: value } }
-                : field === 'startY'
-                  ? { start: { ...guide.start, y: value } }
-                  : field === 'endX'
-                    ? { end: { ...guide.end, x: value } }
-                    : field === 'endY'
-                      ? { end: { ...guide.end, y: value } }
-                      : { [field]: value }),
-            }
+          ? isArcGuide(guide)
+            ? {
+                ...guide,
+                ...(field === 'centerX'
+                  ? { center: { ...guide.center, x: value } }
+                  : field === 'centerY'
+                    ? { center: { ...guide.center, y: value } }
+                    : { [field]: value }),
+              }
+            : {
+                ...guide,
+                ...(field === 'startX'
+                  ? { start: { ...guide.start, x: value } }
+                  : field === 'startY'
+                    ? { start: { ...guide.start, y: value } }
+                    : field === 'endX'
+                      ? { end: { ...guide.end, x: value } }
+                      : field === 'endY'
+                        ? { end: { ...guide.end, y: value } }
+                        : { [field]: value }),
+              }
           : guide,
       ),
     };
@@ -645,7 +713,15 @@ export const hitTestGuideHandle = (
   point: Point,
   guide: GuideDefinition,
 ): 'start' | 'end' | 'rotate' | null => {
+  if (isArcGuide(guide)) {
+    return null;
+  }
+
   const handles = getGuideHandles(guide);
+
+  if (!handles) {
+    return null;
+  }
 
   if (
     Math.hypot(point.x - handles.start.x, point.y - handles.start.y) <=
@@ -683,7 +759,7 @@ export const moveGuideHandle = (
 
   const guide = board.guides[selection.index];
 
-  if (!guide) {
+  if (!guide || isArcGuide(guide)) {
     return board;
   }
 
@@ -759,7 +835,11 @@ export const getGuideHandles = (
   start: Point;
   end: Point;
   rotate: Point;
-} => {
+} | null => {
+  if (isArcGuide(guide)) {
+    return null;
+  }
+
   const midpoint = {
     x: (guide.start.x + guide.end.x) / 2,
     y: (guide.start.y + guide.end.y) / 2,
@@ -792,28 +872,6 @@ const clampPoint = (
   x: clamp(point.x, padding, board.width - padding),
   y: clamp(point.y, padding, board.height - padding),
 });
-
-const distanceToGuide = (point: Point, guide: GuideDefinition): number => {
-  const segmentX = guide.end.x - guide.start.x;
-  const segmentY = guide.end.y - guide.start.y;
-  const segmentLengthSquared = segmentX * segmentX + segmentY * segmentY;
-
-  if (segmentLengthSquared === 0) {
-    return Math.hypot(point.x - guide.start.x, point.y - guide.start.y);
-  }
-
-  const projection = clamp(
-    ((point.x - guide.start.x) * segmentX +
-      (point.y - guide.start.y) * segmentY) /
-      segmentLengthSquared,
-    0,
-    1,
-  );
-  const closestX = guide.start.x + segmentX * projection;
-  const closestY = guide.start.y + segmentY * projection;
-
-  return Math.hypot(point.x - closestX, point.y - closestY);
-};
 
 const distanceToOrientedSegment = (
   point: Point,
@@ -848,7 +906,15 @@ const distanceToOrientedSegment = (
 };
 
 const getGuideLength = (guide: GuideDefinition): number =>
-  Math.hypot(guide.end.x - guide.start.x, guide.end.y - guide.start.y);
+  isArcGuide(guide)
+    ? guide.radius * getArcGuideSweep(guide)
+    : Math.hypot(guide.end.x - guide.start.x, guide.end.y - guide.start.y);
+
+const getArcGuideSweep = (guide: Extract<GuideDefinition, { kind: 'arc' }>): number => {
+  const sweep = ((guide.endAngle - guide.startAngle) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+
+  return sweep === 0 ? Math.PI * 2 : sweep;
+};
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max);

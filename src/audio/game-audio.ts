@@ -6,6 +6,7 @@ import type {
 } from '../types/board-definition';
 import type { GameState } from '../game/game-state';
 import { getDistanceToFlipperSurface } from '../game/flipper-geometry';
+import { getGuideDistance } from '../game/guide-geometry';
 
 export type GameAudioEvent =
   | {
@@ -298,17 +299,7 @@ const getNearbyImpactMaterial = (
   }
 
   for (const guide of board.guides) {
-    if (
-      getDistanceToSegment(
-        position.x,
-        position.y,
-        guide.start.x,
-        guide.start.y,
-        guide.end.x,
-        guide.end.y,
-      ) <=
-      radius + guide.thickness / 2 + 10
-    ) {
+    if (getGuideDistance(position, guide) <= radius + guide.thickness / 2 + 10) {
       return guide.material;
     }
   }
@@ -348,33 +339,6 @@ const getBounceWaveform = (material: SurfaceMaterialName): OscillatorType => {
     case 'playfieldWood':
       return 'triangle';
   }
-};
-
-const getDistanceToSegment = (
-  px: number,
-  py: number,
-  ax: number,
-  ay: number,
-  bx: number,
-  by: number,
-): number => {
-  const abx = bx - ax;
-  const aby = by - ay;
-  const lengthSquared = abx * abx + aby * aby;
-
-  if (lengthSquared === 0) {
-    return Math.hypot(px - ax, py - ay);
-  }
-
-  const projection = clamp(
-    ((px - ax) * abx + (py - ay) * aby) / lengthSquared,
-    0,
-    1,
-  );
-  const closestX = ax + abx * projection;
-  const closestY = ay + aby * projection;
-
-  return Math.hypot(px - closestX, py - closestY);
 };
 
 const getStereoPan = (x: number, width: number): number =>

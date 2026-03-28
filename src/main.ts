@@ -7,8 +7,10 @@ import {
 } from './boards/table-library';
 import {
   addBumper,
+  addCurvedGuide,
   addDropTarget,
   addFlipper,
+  addGuide,
   addRollover,
   addSaucer,
   addSpinner,
@@ -38,6 +40,7 @@ import { createInitialGameState } from './game/game-state';
 import { KeyboardInput } from './input/keyboard-input';
 import { CanvasRenderer } from './render/canvas-renderer';
 import type { BoardDefinition, Point } from './types/board-definition';
+import { isArcGuide } from './game/guide-geometry';
 import './styles.css';
 
 type AppMode = 'edit' | 'play';
@@ -233,7 +236,10 @@ function bootEditorRoute(): void {
     }
 
     const normalizedValue =
-      field === 'angle' || field === 'ejectAngle'
+      field === 'angle' ||
+      field === 'ejectAngle' ||
+      field === 'startAngle' ||
+      field === 'endAngle'
         ? (value * Math.PI) / 180
         : value;
 
@@ -277,6 +283,34 @@ function bootEditorRoute(): void {
 
     if (state.tool === 'add-bumper') {
       const result = addBumper(getActiveTable().board, point);
+
+      state.selection = result.selection;
+      state.tool = 'select';
+      state.dragging = true;
+      state.dragMode = 'move-selection';
+      state.dragOffset = { x: 0, y: 0 };
+      state.draftPosition = null;
+      replaceActiveBoard(result.board, false);
+      renderApp();
+      return;
+    }
+
+    if (state.tool === 'add-guide') {
+      const result = addGuide(getActiveTable().board, point);
+
+      state.selection = result.selection;
+      state.tool = 'select';
+      state.dragging = true;
+      state.dragMode = 'move-selection';
+      state.dragOffset = { x: 0, y: 0 };
+      state.draftPosition = null;
+      replaceActiveBoard(result.board, false);
+      renderApp();
+      return;
+    }
+
+    if (state.tool === 'add-curved-guide') {
+      const result = addCurvedGuide(getActiveTable().board, point);
 
       state.selection = result.selection;
       state.tool = 'select';
@@ -754,14 +788,36 @@ function syncSelectionPanel(): void {
       return;
     }
 
-    selectionLabel.textContent = `Guide ${state.selection.index + 1}`;
-    selectionFields.append(
-      createNumericField('startX', 'Start X', guide.start.x),
-      createNumericField('startY', 'Start Y', guide.start.y),
-      createNumericField('endX', 'End X', guide.end.x),
-      createNumericField('endY', 'End Y', guide.end.y),
-      createNumericField('thickness', 'Thickness', guide.thickness),
-    );
+    selectionLabel.textContent = isArcGuide(guide)
+      ? `Curved guide ${state.selection.index + 1}`
+      : `Guide ${state.selection.index + 1}`;
+
+    if (isArcGuide(guide)) {
+      selectionFields.append(
+        createNumericField('centerX', 'Center X', guide.center.x),
+        createNumericField('centerY', 'Center Y', guide.center.y),
+        createNumericField('radius', 'Radius', guide.radius),
+        createNumericField(
+          'startAngle',
+          'Start Angle',
+          radiansToDegrees(guide.startAngle),
+        ),
+        createNumericField(
+          'endAngle',
+          'End Angle',
+          radiansToDegrees(guide.endAngle),
+        ),
+        createNumericField('thickness', 'Thickness', guide.thickness),
+      );
+    } else {
+      selectionFields.append(
+        createNumericField('startX', 'Start X', guide.start.x),
+        createNumericField('startY', 'Start Y', guide.start.y),
+        createNumericField('endX', 'End X', guide.end.x),
+        createNumericField('endY', 'End Y', guide.end.y),
+        createNumericField('thickness', 'Thickness', guide.thickness),
+      );
+    }
     return;
   }
 
@@ -993,10 +1049,15 @@ function getDragOffset(
       return null;
     }
 
-    return {
-      x: point.x - guide.start.x,
-      y: point.y - guide.start.y,
-    };
+    return isArcGuide(guide)
+      ? {
+          x: point.x - guide.center.x,
+          y: point.y - guide.center.y,
+        }
+      : {
+          x: point.x - guide.start.x,
+          y: point.y - guide.start.y,
+        };
   }
 
   if (

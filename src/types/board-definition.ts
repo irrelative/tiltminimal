@@ -106,12 +106,25 @@ export interface FlipperDefinition extends Point {
   material: SurfaceMaterialName;
 }
 
-export interface GuideDefinition {
+export interface LineGuideDefinition {
+  kind?: 'line';
   start: Point;
   end: Point;
   thickness: number;
   material: SurfaceMaterialName;
 }
+
+export interface ArcGuideDefinition {
+  kind: 'arc';
+  center: Point;
+  radius: number;
+  startAngle: number;
+  endAngle: number;
+  thickness: number;
+  material: SurfaceMaterialName;
+}
+
+export type GuideDefinition = LineGuideDefinition | ArcGuideDefinition;
 
 export interface BoardDefinition {
   name: string;

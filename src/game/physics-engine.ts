@@ -11,6 +11,7 @@ import {
   getFlipperFaceNormal,
   sampleFlipperProfile,
 } from './flipper-geometry';
+import { projectPointToGuide } from './guide-geometry';
 import type {
   DropTargetState,
   FlipperState,
@@ -255,15 +256,10 @@ const resolveGuideCollision = (
   guide: GuideDefinition,
   solver: SolverPhysicsDefinition,
 ): void => {
-  const collision = getSegmentCollision(
-    state,
-    guide.start,
-    guide.end,
-    guide.thickness,
-    solver,
-  );
+  const projection = projectPointToGuide(state.ball.position, guide);
+  const overlap = state.ball.radius + guide.thickness / 2 - projection.distance;
 
-  if (!collision) {
+  if (overlap <= 0) {
     return;
   }
 
@@ -272,16 +268,16 @@ const resolveGuideCollision = (
     board.surfaceMaterials,
   );
   const incomingNormalSpeed =
-    state.ball.linearVelocity.x * collision.normal.x +
-    state.ball.linearVelocity.y * collision.normal.y;
+    state.ball.linearVelocity.x * projection.normal.x +
+    state.ball.linearVelocity.y * projection.normal.y;
   const contact = createStaticContact(
     guideMaterial,
-    collision.point,
-    collision.normal,
-    collision.overlap,
+    projection.point,
+    projection.normal,
+    overlap,
   );
 
-  if (incomingNormalSpeed < 0 || collision.overlap > solver.epsilon) {
+  if (incomingNormalSpeed < 0 || overlap > solver.epsilon) {
     resolveBallContact(state.ball, contact, solver);
   }
 };

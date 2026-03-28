@@ -1,11 +1,14 @@
 import { classicTable } from './classic-table';
 import { harlemGlobetrottersTable } from './harlem-globetrotters';
+import { cloneGuide, normalizeGuide } from '../game/guide-geometry';
 import { createBoardDefinition } from '../game/physics-defaults';
 import type {
+  ArcGuideDefinition,
   BoardDefinition,
   DropTargetDefinition,
   FlipperDefinition,
   FlipperSide,
+  GuideDefinition,
   RolloverDefinition,
   SaucerDefinition,
   SpinnerDefinition,
@@ -60,11 +63,7 @@ export const cloneBoardDefinition = (
   saucers: board.saucers.map((saucer) => ({ ...saucer })),
   spinners: board.spinners.map((spinner) => ({ ...spinner })),
   rollovers: board.rollovers.map((rollover) => ({ ...rollover })),
-  guides: board.guides.map((guide) => ({
-    ...guide,
-    start: { ...guide.start },
-    end: { ...guide.end },
-  })),
+  guides: board.guides.map(cloneGuide),
   flippers: board.flippers.map((flipper) => ({ ...flipper })),
 });
 
@@ -111,7 +110,7 @@ export const normalizeBoardDefinition = (
     saucers: source.saucers ?? [],
     spinners: source.spinners ?? [],
     rollovers: source.rollovers ?? [],
-    guides: source.guides ?? [],
+    guides: (source.guides ?? []).map(normalizeGuide),
     flippers: flippers.map((flipper) => ({
       ...flipper,
       side: flipper.side === 'right' ? 'right' : 'left',
@@ -172,6 +171,30 @@ export const createDefaultFlipper = (
   restingAngle: side === 'left' ? 0.28 : Math.PI - 0.28,
   activeAngle: side === 'left' ? -0.42 : Math.PI + 0.42,
   material: 'flipperRubber',
+});
+
+export const createDefaultGuide = (
+  x: number,
+  y: number,
+): GuideDefinition => ({
+  kind: 'line',
+  start: { x: x - 60, y },
+  end: { x: x + 60, y },
+  thickness: 18,
+  material: 'metalGuide',
+});
+
+export const createDefaultCurvedGuide = (
+  x: number,
+  y: number,
+): ArcGuideDefinition => ({
+  kind: 'arc',
+  center: { x, y },
+  radius: 80,
+  startAngle: Math.PI * 0.85,
+  endAngle: Math.PI * 1.85,
+  thickness: 18,
+  material: 'metalGuide',
 });
 
 export const createDefaultStandupTarget = (

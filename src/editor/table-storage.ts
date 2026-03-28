@@ -4,6 +4,7 @@ import {
   normalizeBoardDefinition,
   type TableRecord,
 } from '../boards/table-library';
+import { cloneGuide } from '../game/guide-geometry';
 import { physicsDefaults } from '../game/physics-defaults';
 import type {
   BoardDefinition,
@@ -268,11 +269,7 @@ const serializeBoardDefinition = (
     saucers: board.saucers.map((saucer) => ({ ...saucer })),
     spinners: board.spinners.map((spinner) => ({ ...spinner })),
     rollovers: board.rollovers.map((rollover) => ({ ...rollover })),
-    guides: board.guides.map((guide) => ({
-      ...guide,
-      start: { ...guide.start },
-      end: { ...guide.end },
-    })),
+    guides: board.guides.map(cloneGuide),
     flippers: board.flippers.map((flipper) => ({ ...flipper })),
   };
 

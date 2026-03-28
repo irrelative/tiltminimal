@@ -4,6 +4,9 @@ import {
   getFlipperBaseRadius,
   getFlipperTipRadius,
 } from '../game/flipper-geometry';
+import {
+  isArcGuide,
+} from '../game/guide-geometry';
 import { getSurfaceMaterial } from '../game/materials';
 import type { GameState } from '../game/game-state';
 import { getStatusLabel } from '../game/game-loop';
@@ -157,9 +160,13 @@ export class CanvasRenderer {
         material.name === 'rubberPost' ? PALETTE.orange : PALETTE.skyBlue;
       context.lineWidth = guide.thickness;
       context.lineCap = 'round';
-      context.beginPath();
-      context.moveTo(guide.start.x, guide.start.y);
-      context.lineTo(guide.end.x, guide.end.y);
+      if (isArcGuide(guide)) {
+        this.traceArcGuide(context, guide);
+      } else {
+        context.beginPath();
+        context.moveTo(guide.start.x, guide.start.y);
+        context.lineTo(guide.end.x, guide.end.y);
+      }
       context.stroke();
 
       context.strokeStyle =
@@ -167,9 +174,13 @@ export class CanvasRenderer {
           ? 'rgba(233, 79, 55, 0.85)'
           : PALETTE.outlineBlue;
       context.lineWidth = Math.max(guide.thickness - 8, 4);
-      context.beginPath();
-      context.moveTo(guide.start.x, guide.start.y);
-      context.lineTo(guide.end.x, guide.end.y);
+      if (isArcGuide(guide)) {
+        this.traceArcGuide(context, guide);
+      } else {
+        context.beginPath();
+        context.moveTo(guide.start.x, guide.start.y);
+        context.lineTo(guide.end.x, guide.end.y);
+      }
       context.stroke();
     }
   }
@@ -560,7 +571,26 @@ export class CanvasRenderer {
     context: CanvasRenderingContext2D,
     guide: GuideDefinition,
   ): void {
+    if (isArcGuide(guide)) {
+      context.save();
+      context.strokeStyle = '#ffd166';
+      context.lineWidth = guide.thickness + 10;
+      context.globalAlpha = 0.45;
+      this.traceArcGuide(context, guide);
+      context.stroke();
+      context.globalAlpha = 1;
+      context.setLineDash([10, 6]);
+      context.lineWidth = 4;
+      this.traceArcGuide(context, guide);
+      context.stroke();
+      context.restore();
+      return;
+    }
+
     const handles = getGuideHandles(guide);
+    if (!handles) {
+      return;
+    }
     const midpoint = {
       x: (guide.start.x + guide.end.x) / 2,
       y: (guide.start.y + guide.end.y) / 2,
@@ -626,6 +656,21 @@ export class CanvasRenderer {
     context.lineTo(0, baseRadius);
     context.arc(0, 0, baseRadius, Math.PI / 2, -Math.PI / 2);
     context.closePath();
+  }
+
+  private traceArcGuide(
+    context: CanvasRenderingContext2D,
+    guide: Extract<GuideDefinition, { kind: 'arc' }>,
+  ): void {
+    const start = guide.startAngle;
+    let end = guide.endAngle;
+
+    while (end <= start) {
+      end += Math.PI * 2;
+    }
+
+    context.beginPath();
+    context.arc(guide.center.x, guide.center.y, guide.radius, start, end);
   }
 
   private drawCircularSelection(

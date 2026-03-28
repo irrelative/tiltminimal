@@ -21,6 +21,8 @@ export type EditorDragMode =
 
 export type EditorTool =
   | 'select'
+  | 'add-guide'
+  | 'add-curved-guide'
   | 'add-bumper'
   | 'add-standup-target'
   | 'add-drop-target'

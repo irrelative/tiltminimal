@@ -41,6 +41,25 @@ describe('hitTestSelection', () => {
     expect(selection.kind).toBe('none');
   });
 
+  it('selects a curved guide when clicking near its arc', () => {
+    const board = createBlankTable();
+    board.guides = [
+      {
+        kind: 'arc',
+        center: { x: 260, y: 280 },
+        radius: 90,
+        startAngle: Math.PI,
+        endAngle: Math.PI * 1.5,
+        thickness: 20,
+        material: 'metalGuide',
+      },
+    ];
+
+    const selection = hitTestSelection(board, { x: 194, y: 214 });
+
+    expect(selection).toEqual({ kind: 'guide', index: 0 });
+  });
+
   it('selects a standup target when clicking near it', () => {
     const board = createBlankTable();
     board.standupTargets = [
@@ -82,12 +101,18 @@ describe('hitTestSelection', () => {
 
   it('finds start, end, and rotate handles for a selected guide', () => {
     const guide = {
+      kind: 'line' as const,
       start: { x: 120, y: 220 },
       end: { x: 320, y: 220 },
       thickness: 20,
       material: 'metalGuide' as const,
     };
     const handles = getGuideHandles(guide);
+
+    expect(handles).not.toBeNull();
+    if (!handles) {
+      throw new Error('Expected line guide handles.');
+    }
 
     expect(hitTestGuideHandle(handles.start, guide)).toBe('start');
     expect(hitTestGuideHandle(handles.end, guide)).toBe('end');
@@ -98,6 +123,7 @@ describe('hitTestSelection', () => {
     const board = createBlankTable();
     board.guides = [
       {
+        kind: 'line',
         start: { x: 120, y: 220 },
         end: { x: 320, y: 220 },
         thickness: 20,
@@ -112,14 +138,23 @@ describe('hitTestSelection', () => {
       { x: 140, y: 260 },
     );
 
-    expect(next.guides[0]?.start).toEqual({ x: 140, y: 260 });
-    expect(next.guides[0]?.end).toEqual({ x: 320, y: 220 });
+    const guide = next.guides[0];
+
+    expect(guide).toBeDefined();
+    expect(guide?.kind).toBe('line');
+    if (!guide || guide.kind === 'arc') {
+      throw new Error('Expected line guide.');
+    }
+
+    expect(guide.start).toEqual({ x: 140, y: 260 });
+    expect(guide.end).toEqual({ x: 320, y: 220 });
   });
 
   it('rotates a guide around its midpoint when dragging the rotate handle', () => {
     const board = createBlankTable();
     board.guides = [
       {
+        kind: 'line',
         start: { x: 120, y: 220 },
         end: { x: 320, y: 220 },
         thickness: 20,
@@ -136,9 +171,14 @@ describe('hitTestSelection', () => {
     const guide = next.guides[0];
 
     expect(guide).toBeDefined();
-    expect(guide?.start.x).toBeCloseTo(220, 5);
-    expect(guide?.end.x).toBeCloseTo(220, 5);
-    expect(guide?.start.y).toBeCloseTo(120, 5);
-    expect(guide?.end.y).toBeCloseTo(320, 5);
+    expect(guide?.kind).toBe('line');
+    if (!guide || guide.kind === 'arc') {
+      throw new Error('Expected line guide.');
+    }
+
+    expect(guide.start.x).toBeCloseTo(220, 5);
+    expect(guide.end.x).toBeCloseTo(220, 5);
+    expect(guide.start.y).toBeCloseTo(120, 5);
+    expect(guide.end.y).toBeCloseTo(320, 5);
   });
 });
