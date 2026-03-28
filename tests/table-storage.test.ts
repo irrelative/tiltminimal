@@ -3,6 +3,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { BUILT_IN_TABLES, createBlankTable } from '../src/boards/table-library';
+import { physicsDefaults } from '../src/game/physics-defaults';
 import {
   loadTablesState,
   resetBuiltInTable,
@@ -91,6 +92,44 @@ describe('table storage', () => {
     expect(legacy?.board.flippers[1]?.side).toBe('right');
   });
 
+  it('drops legacy resolved physics so current defaults apply on load', () => {
+    window.localStorage.setItem(
+      'pball-web.tables.v1',
+      JSON.stringify({
+        activeTableId: 'legacy-table',
+        tables: [
+          {
+            id: 'legacy-table',
+            builtIn: false,
+            board: {
+              ...createBlankTable('Legacy Table'),
+              physics: {
+                launch: {
+                  ...physicsDefaults.tuning.launch,
+                },
+                flipper: {
+                  swingAngularSpeed: 15,
+                  collisionAngleStep:
+                    physicsDefaults.tuning.flipper.collisionAngleStep,
+                },
+                solver: {
+                  ...physicsDefaults.tuning.solver,
+                },
+              },
+            },
+          },
+        ],
+      }),
+    );
+
+    const state = loadTablesState(window.localStorage);
+    const legacy = state.tables.find((table) => table.id === 'legacy-table');
+
+    expect(legacy?.board.physics.flipper.swingAngularSpeed).toBe(
+      physicsDefaults.tuning.flipper.swingAngularSpeed,
+    );
+  });
+
   it('restores the built-in table after reset', () => {
     const table = BUILT_IN_TABLES[0];
 
@@ -116,5 +155,25 @@ describe('table storage', () => {
     expect(
       state.tables.find((entry) => entry.id === table.id)?.board.name,
     ).toBe(table.board.name);
+  });
+
+  it('stores only explicit physics overrides for new records', () => {
+    const table = {
+      id: 'custom-table',
+      builtIn: false,
+      board: createBlankTable('Custom Table'),
+    };
+
+    upsertTable(table, window.localStorage);
+
+    const raw = window.localStorage.getItem('pball-web.tables.v2');
+
+    expect(raw).toBeTruthy();
+
+    const stored = JSON.parse(raw ?? '{}') as {
+      tables?: Array<{ board?: { physics?: unknown } }>;
+    };
+
+    expect(stored.tables?.[0]?.board?.physics).toBeUndefined();
   });
 });

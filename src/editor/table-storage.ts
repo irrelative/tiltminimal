@@ -4,8 +4,16 @@ import {
   normalizeBoardDefinition,
   type TableRecord,
 } from '../boards/table-library';
+import { physicsDefaults } from '../game/physics-defaults';
+import type {
+  BoardDefinition,
+  BoardDefinitionInput,
+  SurfaceMaterial,
+  SurfaceMaterialName,
+} from '../types/board-definition';
 
-const STORAGE_KEY = 'pball-web.tables.v1';
+const STORAGE_KEY = 'pball-web.tables.v2';
+const LEGACY_STORAGE_KEY = 'pball-web.tables.v1';
 
 interface StoredTableRecord {
   id: string;
@@ -91,7 +99,7 @@ export const upsertTable = (
   nextTables.push({
     id: table.id,
     builtIn: table.builtIn,
-    board: cloneBoardDefinition(table.board),
+    board: serializeBoardDefinition(table.board),
   });
 
   writeStorageState(
@@ -159,10 +167,7 @@ const parseStorageState = (storage: Storage): StoredTablesState => {
   const raw = storage.getItem(STORAGE_KEY);
 
   if (!raw) {
-    return {
-      activeTableId: null,
-      tables: [],
-    };
+    return parseLegacyStorageState(storage);
   }
 
   try {
@@ -174,10 +179,7 @@ const parseStorageState = (storage: Storage): StoredTablesState => {
       tables: Array.isArray(parsed.tables) ? parsed.tables : [],
     };
   } catch {
-    return {
-      activeTableId: null,
-      tables: [],
-    };
+    return parseLegacyStorageState(storage);
   }
 };
 
@@ -186,6 +188,7 @@ const writeStorageState = (
   storage: Storage,
 ): void => {
   storage.setItem(STORAGE_KEY, JSON.stringify(state));
+  storage.removeItem(LEGACY_STORAGE_KEY);
 };
 
 const isStoredTableRecord = (value: unknown): value is StoredTableRecord => {
@@ -200,4 +203,215 @@ const isStoredTableRecord = (value: unknown): value is StoredTableRecord => {
     typeof candidate.builtIn === 'boolean' &&
     candidate.board !== undefined
   );
+};
+
+const parseLegacyStorageState = (storage: Storage): StoredTablesState => {
+  const raw = storage.getItem(LEGACY_STORAGE_KEY);
+
+  if (!raw) {
+    return {
+      activeTableId: null,
+      tables: [],
+    };
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<StoredTablesState>;
+
+    return {
+      activeTableId:
+        typeof parsed.activeTableId === 'string' ? parsed.activeTableId : null,
+      tables: Array.isArray(parsed.tables)
+        ? parsed.tables.map((entry) =>
+            isStoredTableRecord(entry)
+              ? {
+                  ...entry,
+                  board: stripLegacyResolvedDefaults(entry.board),
+                }
+              : entry,
+          )
+        : [],
+    };
+  } catch {
+    return {
+      activeTableId: null,
+      tables: [],
+    };
+  }
+};
+
+const stripLegacyResolvedDefaults = (board: unknown): unknown => {
+  if (!board || typeof board !== 'object') {
+    return board;
+  }
+
+  const candidate = { ...(board as Record<string, unknown>) };
+  delete candidate.physics;
+  delete candidate.surfaceMaterials;
+
+  return candidate;
+};
+
+const serializeBoardDefinition = (
+  board: BoardDefinition,
+): BoardDefinitionInput => {
+  const stored: BoardDefinitionInput = {
+    name: board.name,
+    width: board.width,
+    height: board.height,
+    drainY: board.drainY,
+    launchPosition: { ...board.launchPosition },
+    materials: { ...board.materials },
+    bumpers: board.bumpers.map((bumper) => ({ ...bumper })),
+    guides: board.guides.map((guide) => ({
+      ...guide,
+      start: { ...guide.start },
+      end: { ...guide.end },
+    })),
+    flippers: board.flippers.map((flipper) => ({ ...flipper })),
+  };
+
+  if (board.gravity !== physicsDefaults.gravity) {
+    stored.gravity = board.gravity;
+  }
+
+  if (board.tableAngle !== physicsDefaults.tableAngle) {
+    stored.tableAngle = board.tableAngle;
+  }
+
+  if (
+    board.ball.radius !== physicsDefaults.ball.radius ||
+    board.ball.mass !== physicsDefaults.ball.mass
+  ) {
+    stored.ball = {};
+
+    if (board.ball.radius !== physicsDefaults.ball.radius) {
+      stored.ball.radius = board.ball.radius;
+    }
+
+    if (board.ball.mass !== physicsDefaults.ball.mass) {
+      stored.ball.mass = board.ball.mass;
+    }
+  }
+
+  const physics = serializePhysicsOverrides(board);
+
+  if (physics) {
+    stored.physics = physics;
+  }
+
+  const surfaceMaterials = serializeSurfaceMaterialOverrides(board);
+
+  if (surfaceMaterials) {
+    stored.surfaceMaterials = surfaceMaterials;
+  }
+
+  return stored;
+};
+
+const serializePhysicsOverrides = (
+  board: BoardDefinition,
+): BoardDefinitionInput['physics'] | undefined => {
+  const launch =
+    board.physics.launch.maxChargeSeconds !==
+      physicsDefaults.tuning.launch.maxChargeSeconds ||
+    board.physics.launch.minLaunchSpeed !==
+      physicsDefaults.tuning.launch.minLaunchSpeed ||
+    board.physics.launch.maxLaunchSpeed !==
+      physicsDefaults.tuning.launch.maxLaunchSpeed ||
+    board.physics.launch.minLaunchDrift !==
+      physicsDefaults.tuning.launch.minLaunchDrift ||
+    board.physics.launch.maxLaunchDrift !==
+      physicsDefaults.tuning.launch.maxLaunchDrift
+      ? { ...board.physics.launch }
+      : undefined;
+  const flipper =
+    board.physics.flipper.swingAngularSpeed !==
+      physicsDefaults.tuning.flipper.swingAngularSpeed ||
+    board.physics.flipper.collisionAngleStep !==
+      physicsDefaults.tuning.flipper.collisionAngleStep
+      ? { ...board.physics.flipper }
+      : undefined;
+  const solver =
+    board.physics.solver.epsilon !== physicsDefaults.tuning.solver.epsilon ||
+    board.physics.solver.staticSlipThreshold !==
+      physicsDefaults.tuning.solver.staticSlipThreshold
+      ? { ...board.physics.solver }
+      : undefined;
+
+  if (!launch && !flipper && !solver) {
+    return undefined;
+  }
+
+  return {
+    launch,
+    flipper,
+    solver,
+  };
+};
+
+const serializeSurfaceMaterialOverrides = (
+  board: BoardDefinition,
+): BoardDefinitionInput['surfaceMaterials'] | undefined => {
+  const surfaceMaterials = {
+    playfieldWood: serializeSurfaceMaterial(
+      board.surfaceMaterials.playfieldWood,
+      physicsDefaults.surfaceMaterials.playfieldWood,
+    ),
+    metalGuide: serializeSurfaceMaterial(
+      board.surfaceMaterials.metalGuide,
+      physicsDefaults.surfaceMaterials.metalGuide,
+    ),
+    rubberPost: serializeSurfaceMaterial(
+      board.surfaceMaterials.rubberPost,
+      physicsDefaults.surfaceMaterials.rubberPost,
+    ),
+    flipperRubber: serializeSurfaceMaterial(
+      board.surfaceMaterials.flipperRubber,
+      physicsDefaults.surfaceMaterials.flipperRubber,
+    ),
+  } satisfies Partial<
+    Record<SurfaceMaterialName, Partial<SurfaceMaterial>>
+  >;
+
+  return Object.values(surfaceMaterials).some((value) => value !== undefined)
+    ? surfaceMaterials
+    : undefined;
+};
+
+const serializeSurfaceMaterial = (
+  material: SurfaceMaterial,
+  defaults: SurfaceMaterial,
+): Partial<SurfaceMaterial> | undefined => {
+  const overrides: Partial<SurfaceMaterial> = {};
+
+  if (material.restitution !== defaults.restitution) {
+    overrides.restitution = material.restitution;
+  }
+
+  if (material.staticFriction !== defaults.staticFriction) {
+    overrides.staticFriction = material.staticFriction;
+  }
+
+  if (material.dynamicFriction !== defaults.dynamicFriction) {
+    overrides.dynamicFriction = material.dynamicFriction;
+  }
+
+  if (material.rollingResistance !== defaults.rollingResistance) {
+    overrides.rollingResistance = material.rollingResistance;
+  }
+
+  if (material.spinDamping !== defaults.spinDamping) {
+    overrides.spinDamping = material.spinDamping;
+  }
+
+  if (material.compliance !== defaults.compliance) {
+    overrides.compliance = material.compliance;
+  }
+
+  if (material.grip !== defaults.grip) {
+    overrides.grip = material.grip;
+  }
+
+  return Object.keys(overrides).length > 0 ? overrides : undefined;
 };
