@@ -21,6 +21,7 @@ import {
   setActiveTableId,
   upsertTable,
 } from './editor/table-storage';
+import { GameAudio } from './audio/game-audio';
 import { GameLoop } from './game/game-loop';
 import { createInitialGameState } from './game/game-state';
 import { KeyboardInput } from './input/keyboard-input';
@@ -87,6 +88,7 @@ const debugLinkEditor = queryRequired<HTMLAnchorElement>('#debug-link-editor');
 const debugLinkPlay = queryRequired<HTMLAnchorElement>('#debug-link-play');
 
 const renderer = new CanvasRenderer(canvas);
+const gameAudio = new GameAudio();
 const loadedState = loadTablesState();
 const appRoute = getAppRoute(window.location.pathname);
 
@@ -506,10 +508,7 @@ function syncSelectionPanel(): void {
     return;
   }
 
-  if (
-    state.selection.kind === 'guide' &&
-    state.selection.index !== undefined
-  ) {
+  if (state.selection.kind === 'guide' && state.selection.index !== undefined) {
     const guide = active.board.guides[state.selection.index];
 
     if (!guide) {
@@ -568,10 +567,7 @@ function syncModeCopy(): void {
 function syncDebugMenu(): void {
   const editorActive = state.mode === 'edit';
   debugLinkEditor.classList.toggle('is-active', editorActive);
-  debugLinkEditor.setAttribute(
-    'aria-current',
-    editorActive ? 'page' : 'false',
-  );
+  debugLinkEditor.setAttribute('aria-current', editorActive ? 'page' : 'false');
   debugLinkPlay.classList.toggle('is-active', !editorActive);
   debugLinkPlay.setAttribute('aria-current', !editorActive ? 'page' : 'false');
 }
@@ -664,6 +660,7 @@ function startPlayMode(): void {
     board,
     input,
     renderer,
+    gameAudio,
   );
 
   state.mode = 'play';
@@ -843,6 +840,7 @@ function restartStandalonePlay(): void {
     board,
     input,
     renderer,
+    gameAudio,
   );
 
   state.input = input;

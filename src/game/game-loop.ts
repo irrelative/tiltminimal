@@ -1,6 +1,8 @@
 import type { InputState, KeyboardInput } from '../input/keyboard-input';
 import type { BoardDefinition } from '../types/board-definition';
 import type { CanvasRenderer } from '../render/canvas-renderer';
+import type { GameAudio } from '../audio/game-audio';
+import { getFrameAudioEvents } from '../audio/game-audio';
 import type { GameState } from './game-state';
 import { resetBall } from './game-state';
 import { getLaunchChargeRatio, stepGame } from './physics-engine';
@@ -10,13 +12,17 @@ export class GameLoop {
   private lastFrameTime = 0;
   private running = false;
   private onStateChange?: (state: GameState) => void;
+  private lastInputState: InputState;
 
   constructor(
     private state: GameState,
     private readonly board: BoardDefinition,
     private readonly input: KeyboardInput,
     private readonly renderer: CanvasRenderer,
-  ) {}
+    private readonly audio?: GameAudio,
+  ) {
+    this.lastInputState = this.input.getState();
+  }
 
   start(): void {
     if (this.running) {
@@ -25,7 +31,9 @@ export class GameLoop {
 
     this.running = true;
     this.lastFrameTime = 0;
+    this.lastInputState = this.input.getState();
     this.input.connect();
+    this.audio?.connect();
     this.renderer.renderGame(this.board, this.state, this.input.getState());
     this.emitStateChange();
     this.animationFrameId = window.requestAnimationFrame(this.onFrame);
@@ -38,6 +46,7 @@ export class GameLoop {
 
     window.cancelAnimationFrame(this.animationFrameId);
     this.input.disconnect();
+    this.audio?.disconnect();
     this.running = false;
   }
 
@@ -61,14 +70,22 @@ export class GameLoop {
         ? 1 / 60
         : (frameTime - this.lastFrameTime) / 1000;
     this.lastFrameTime = frameTime;
+    const input = this.input.getState();
+    const previousState = this.state;
 
-    this.state = stepGame(
-      this.state,
-      this.board,
-      this.input.getState(),
-      deltaSeconds,
+    this.state = stepGame(previousState, this.board, input, deltaSeconds);
+    this.audio?.playEvents(
+      getFrameAudioEvents(
+        previousState,
+        this.state,
+        this.lastInputState,
+        input,
+        this.board,
+        deltaSeconds,
+      ),
     );
-    this.renderer.renderGame(this.board, this.state, this.input.getState());
+    this.lastInputState = input;
+    this.renderer.renderGame(this.board, this.state, input);
     this.emitStateChange();
     this.animationFrameId = window.requestAnimationFrame(this.onFrame);
   };
