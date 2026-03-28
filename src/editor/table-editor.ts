@@ -9,7 +9,14 @@ import {
   createDefaultStandupTarget,
 } from '../boards/table-library';
 import { getDistanceToFlipperSurface } from '../game/flipper-geometry';
-import { getGuideDistance, isArcGuide } from '../game/guide-geometry';
+import {
+  getArcGuideMidAngle,
+  getArcGuidePoint,
+  getArcGuideSweep,
+  getGuideDistance,
+  isArcGuide,
+  normalizeWrappedAngle,
+} from '../game/guide-geometry';
 import type {
   BoardDefinition,
   FlipperSide,
@@ -712,8 +719,35 @@ export const updateSelectedNumericField = (
 export const hitTestGuideHandle = (
   point: Point,
   guide: GuideDefinition,
-): 'start' | 'end' | 'rotate' | null => {
+): 'start' | 'end' | 'rotate' | 'arc-start' | 'arc-end' | 'arc-radius' | null => {
   if (isArcGuide(guide)) {
+    const handles = getGuideHandles(guide);
+
+    if (!handles) {
+      return null;
+    }
+
+    if (
+      Math.hypot(point.x - handles.start.x, point.y - handles.start.y) <=
+      GUIDE_HANDLE_RADIUS
+    ) {
+      return 'arc-start';
+    }
+
+    if (
+      Math.hypot(point.x - handles.end.x, point.y - handles.end.y) <=
+      GUIDE_HANDLE_RADIUS
+    ) {
+      return 'arc-end';
+    }
+
+    if (
+      Math.hypot(point.x - handles.rotate.x, point.y - handles.rotate.y) <=
+      GUIDE_HANDLE_RADIUS
+    ) {
+      return 'arc-radius';
+    }
+
     return null;
   }
 
@@ -750,7 +784,7 @@ export const hitTestGuideHandle = (
 export const moveGuideHandle = (
   board: BoardDefinition,
   selection: EditorSelection,
-  handle: 'start' | 'end' | 'rotate',
+  handle: 'start' | 'end' | 'rotate' | 'arc-start' | 'arc-end' | 'arc-radius',
   point: Point,
 ): BoardDefinition => {
   if (selection.kind !== 'guide' || selection.index === undefined) {
@@ -759,7 +793,51 @@ export const moveGuideHandle = (
 
   const guide = board.guides[selection.index];
 
-  if (!guide || isArcGuide(guide)) {
+  if (!guide) {
+    return board;
+  }
+
+  if (isArcGuide(guide)) {
+    if (handle === 'arc-radius') {
+      const nextRadius = clamp(
+        Math.hypot(point.x - guide.center.x, point.y - guide.center.y),
+        guide.thickness / 2 + 12,
+        Math.max(board.width, board.height),
+      );
+
+      return {
+        ...board,
+        guides: board.guides.map((candidate, index) =>
+          index === selection.index
+            ? {
+                ...candidate,
+                radius: nextRadius,
+              }
+            : candidate,
+        ),
+      };
+    }
+
+    if (handle === 'arc-start' || handle === 'arc-end') {
+      const nextAngle = normalizeWrappedAngle(
+        Math.atan2(point.y - guide.center.y, point.x - guide.center.x),
+      );
+
+      return {
+        ...board,
+        guides: board.guides.map((candidate, index) =>
+          index === selection.index
+            ? {
+                ...candidate,
+                ...(handle === 'arc-start'
+                  ? { startAngle: nextAngle }
+                  : { endAngle: nextAngle }),
+              }
+            : candidate,
+        ),
+      };
+    }
+
     return board;
   }
 
@@ -837,7 +915,11 @@ export const getGuideHandles = (
   rotate: Point;
 } | null => {
   if (isArcGuide(guide)) {
-    return null;
+    return {
+      start: getArcGuidePoint(guide, guide.startAngle),
+      end: getArcGuidePoint(guide, guide.endAngle),
+      rotate: getArcGuidePoint(guide, getArcGuideMidAngle(guide)),
+    };
   }
 
   const midpoint = {
@@ -909,12 +991,6 @@ const getGuideLength = (guide: GuideDefinition): number =>
   isArcGuide(guide)
     ? guide.radius * getArcGuideSweep(guide)
     : Math.hypot(guide.end.x - guide.start.x, guide.end.y - guide.start.y);
-
-const getArcGuideSweep = (guide: Extract<GuideDefinition, { kind: 'arc' }>): number => {
-  const sweep = ((guide.endAngle - guide.startAngle) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
-
-  return sweep === 0 ? Math.PI * 2 : sweep;
-};
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max);

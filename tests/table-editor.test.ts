@@ -119,6 +119,28 @@ describe('hitTestSelection', () => {
     expect(hitTestGuideHandle(handles.rotate, guide)).toBe('rotate');
   });
 
+  it('finds curved guide start, end, and radius handles', () => {
+    const guide = {
+      kind: 'arc' as const,
+      center: { x: 260, y: 280 },
+      radius: 90,
+      startAngle: Math.PI,
+      endAngle: Math.PI * 1.5,
+      thickness: 20,
+      material: 'metalGuide' as const,
+    };
+    const handles = getGuideHandles(guide);
+
+    expect(handles).not.toBeNull();
+    if (!handles) {
+      throw new Error('Expected curved guide handles.');
+    }
+
+    expect(hitTestGuideHandle(handles.start, guide)).toBe('arc-start');
+    expect(hitTestGuideHandle(handles.end, guide)).toBe('arc-end');
+    expect(hitTestGuideHandle(handles.rotate, guide)).toBe('arc-radius');
+  });
+
   it('moves an individual guide endpoint when dragging a handle', () => {
     const board = createBlankTable();
     board.guides = [
@@ -180,5 +202,67 @@ describe('hitTestSelection', () => {
     expect(guide.end.x).toBeCloseTo(220, 5);
     expect(guide.start.y).toBeCloseTo(120, 5);
     expect(guide.end.y).toBeCloseTo(320, 5);
+  });
+
+  it('moves a curved guide start handle by updating start angle', () => {
+    const board = createBlankTable();
+    board.guides = [
+      {
+        kind: 'arc',
+        center: { x: 260, y: 280 },
+        radius: 90,
+        startAngle: Math.PI,
+        endAngle: Math.PI * 1.5,
+        thickness: 20,
+        material: 'metalGuide',
+      },
+    ];
+
+    const next = moveGuideHandle(
+      board,
+      { kind: 'guide', index: 0 },
+      'arc-start',
+      { x: 260, y: 190 },
+    );
+    const guide = next.guides[0];
+
+    expect(guide).toBeDefined();
+    expect(guide?.kind).toBe('arc');
+    if (!guide || guide.kind !== 'arc') {
+      throw new Error('Expected arc guide.');
+    }
+
+    expect(guide.startAngle).toBeCloseTo(Math.PI * 1.5, 5);
+  });
+
+  it('moves a curved guide radius handle by updating radius', () => {
+    const board = createBlankTable();
+    board.guides = [
+      {
+        kind: 'arc',
+        center: { x: 260, y: 280 },
+        radius: 90,
+        startAngle: Math.PI,
+        endAngle: Math.PI * 1.5,
+        thickness: 20,
+        material: 'metalGuide',
+      },
+    ];
+
+    const next = moveGuideHandle(
+      board,
+      { kind: 'guide', index: 0 },
+      'arc-radius',
+      { x: 260, y: 140 },
+    );
+    const guide = next.guides[0];
+
+    expect(guide).toBeDefined();
+    expect(guide?.kind).toBe('arc');
+    if (!guide || guide.kind !== 'arc') {
+      throw new Error('Expected arc guide.');
+    }
+
+    expect(guide.radius).toBeCloseTo(140, 5);
   });
 });

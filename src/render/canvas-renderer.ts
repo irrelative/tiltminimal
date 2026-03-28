@@ -572,6 +572,8 @@ export class CanvasRenderer {
     guide: GuideDefinition,
   ): void {
     if (isArcGuide(guide)) {
+      const handles = getGuideHandles(guide);
+
       context.save();
       context.strokeStyle = '#ffd166';
       context.lineWidth = guide.thickness + 10;
@@ -583,6 +585,12 @@ export class CanvasRenderer {
       context.lineWidth = 4;
       this.traceArcGuide(context, guide);
       context.stroke();
+      if (handles) {
+        context.setLineDash([]);
+        this.drawEditorHandle(context, handles.start, '#ffd166');
+        this.drawEditorHandle(context, handles.end, '#ffd166');
+        this.drawEditorHandle(context, handles.rotate, '#70d1f4');
+      }
       context.restore();
       return;
     }

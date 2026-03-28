@@ -427,7 +427,13 @@ function bootEditorRoute(): void {
             ? 'guide-start'
             : guideHandle === 'end'
               ? 'guide-end'
-              : 'guide-rotate';
+              : guideHandle === 'arc-start'
+                ? 'guide-arc-start'
+                : guideHandle === 'arc-end'
+                  ? 'guide-arc-end'
+                  : guideHandle === 'arc-radius'
+                    ? 'guide-arc-radius'
+                    : 'guide-rotate';
         state.dragOffset = null;
         state.draftPosition = null;
         renderApp();
@@ -464,6 +470,21 @@ function bootEditorRoute(): void {
       } else if (state.dragMode === 'guide-end') {
         replaceActiveBoard(
           moveGuideHandle(board, state.selection, 'end', point),
+          false,
+        );
+      } else if (state.dragMode === 'guide-arc-start') {
+        replaceActiveBoard(
+          moveGuideHandle(board, state.selection, 'arc-start', point),
+          false,
+        );
+      } else if (state.dragMode === 'guide-arc-end') {
+        replaceActiveBoard(
+          moveGuideHandle(board, state.selection, 'arc-end', point),
+          false,
+        );
+      } else if (state.dragMode === 'guide-arc-radius') {
+        replaceActiveBoard(
+          moveGuideHandle(board, state.selection, 'arc-radius', point),
           false,
         );
       } else if (state.dragMode === 'guide-rotate') {

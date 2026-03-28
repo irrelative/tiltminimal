@@ -41,6 +41,15 @@ export const getArcGuidePoint = (
   y: guide.center.y + Math.sin(angle) * guide.radius,
 });
 
+export const getArcGuideSweep = (guide: ArcGuideDefinition): number => {
+  const sweep = normalizeAngle(guide.endAngle - guide.startAngle);
+
+  return sweep === 0 ? Math.PI * 2 : sweep;
+};
+
+export const getArcGuideMidAngle = (guide: ArcGuideDefinition): number =>
+  normalizeWrappedAngle(guide.startAngle + getArcGuideSweep(guide) / 2);
+
 export const projectPointToGuide = (
   point: Point,
   guide: GuideDefinition,
@@ -171,7 +180,7 @@ const clampAngleToArc = (
   guide: ArcGuideDefinition,
 ): number => {
   const start = normalizeAngle(guide.startAngle);
-  const sweep = getArcSweep(guide);
+  const sweep = getArcGuideSweep(guide);
   const delta = normalizeAngle(angle - start);
 
   if (delta <= sweep) {
@@ -182,16 +191,12 @@ const clampAngleToArc = (
   return delta - sweep <= (Math.PI * 2 - delta) ? end : start;
 };
 
-const getArcSweep = (guide: ArcGuideDefinition): number => {
-  const sweep = normalizeAngle(guide.endAngle - guide.startAngle);
-
-  return sweep === 0 ? Math.PI * 2 : sweep;
-};
-
-const normalizeAngle = (angle: number): number => {
+export const normalizeWrappedAngle = (angle: number): number => {
   const fullTurn = Math.PI * 2;
   return ((angle % fullTurn) + fullTurn) % fullTurn;
 };
+
+const normalizeAngle = (angle: number): number => normalizeWrappedAngle(angle);
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max);

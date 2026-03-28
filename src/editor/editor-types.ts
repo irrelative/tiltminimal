@@ -17,7 +17,10 @@ export type EditorDragMode =
   | 'move-selection'
   | 'guide-start'
   | 'guide-end'
-  | 'guide-rotate';
+  | 'guide-rotate'
+  | 'guide-arc-start'
+  | 'guide-arc-end'
+  | 'guide-arc-radius';
 
 export type EditorTool =
   | 'select'
