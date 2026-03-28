@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Pinball Browser</title>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="playfield-frame">
+        <header class="masthead">
+          <button
+            class="masthead-close"
+            type="button"
+            aria-label="Dismiss header"
+          >
+            ×
+          </button>
+          <p class="eyebrow">Pinball Browser</p>
+          <h1>2D-first pinball scaffolding</h1>
+          <p class="lede">
+            Board data, game state, and rendering stay separate so new tables can
+            plug into the same runtime.
+          </p>
+        </header>
+        <canvas
+          id="game"
+          width="900"
+          height="1400"
+          aria-label="Pinball table"
+        ></canvas>
+      </section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

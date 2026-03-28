@@ -1,0 +1,132 @@
+:root {
+  --stage-padding: clamp(10px, 1.8vw, 24px);
+  --frame-radius: 20px;
+  --viewport-width: calc(100vw - (var(--stage-padding) * 2));
+  --viewport-height: calc(100svh - (var(--stage-padding) * 2));
+  color: #f1faee;
+  background:
+    radial-gradient(circle at top, rgba(123, 223, 242, 0.2), transparent 35%),
+    linear-gradient(180deg, #06111a 0%, #081b29 45%, #050b11 100%);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  overflow: hidden;
+}
+
+.app-shell {
+  min-height: 100svh;
+  padding: var(--stage-padding);
+  display: grid;
+  place-items: center;
+}
+
+.playfield-frame {
+  position: relative;
+  width: min(var(--viewport-width), calc(var(--viewport-height) * 0.642857));
+  height: min(var(--viewport-height), calc(var(--viewport-width) * 1.555556));
+  aspect-ratio: 9 / 14;
+  padding: clamp(8px, 1vw, 12px);
+  border: 1px solid rgba(123, 223, 242, 0.26);
+  border-radius: var(--frame-radius);
+  background: rgba(4, 12, 20, 0.58);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.masthead {
+  position: absolute;
+  z-index: 1;
+  top: clamp(18px, 2.4vw, 28px);
+  left: clamp(18px, 2.4vw, 28px);
+  right: clamp(18px, 2.4vw, 28px);
+  max-width: min(72%, 34rem);
+  padding: clamp(12px, 1.8vw, 18px);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(6, 17, 26, 0.88), rgba(6, 17, 26, 0.55));
+  backdrop-filter: blur(8px);
+}
+
+.masthead[hidden] {
+  display: none;
+}
+
+.masthead-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.12);
+  color: #f1faee;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.masthead-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.masthead-close:focus-visible {
+  outline: 2px solid #7bdff2;
+  outline-offset: 2px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #7bdff2;
+  font-size: clamp(0.72rem, 1vw, 0.88rem);
+}
+
+.masthead h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.8rem);
+  line-height: 0.95;
+}
+
+.lede {
+  margin: 10px 0 0;
+  color: rgba(241, 250, 238, 0.82);
+  font-size: clamp(0.85rem, 1.25vw, 1rem);
+  line-height: 1.35;
+}
+
+#game {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+}
+
+@media (max-width: 640px) {
+  .masthead {
+    max-width: calc(100% - 24px);
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    padding: 10px 12px;
+  }
+
+  .masthead h1 {
+    font-size: 1.25rem;
+  }
+
+  .lede {
+    font-size: 0.74rem;
+    line-height: 1.25;
+  }
+}
