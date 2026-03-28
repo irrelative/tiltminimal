@@ -4,8 +4,10 @@ import type {
   FlipperDefinition,
   GuideDefinition,
 } from '../types/board-definition';
+import { getContactTangent, resolveBallContact } from './spin-solver';
+import type { ContactData } from './contact-types';
 import { getSurfaceMaterial } from './materials';
-import type { GameState } from './game-state';
+import type { FlipperState, GameState } from './game-state';
 import { resetBall } from './game-state';
 
 const MAX_LAUNCH_CHARGE_SECONDS = 1.4;
@@ -14,6 +16,7 @@ const MAX_LAUNCH_SPEED = 1850;
 const MIN_LAUNCH_DRIFT = -70;
 const MAX_LAUNCH_DRIFT = -260;
 const FLIPPER_SWING_ANGULAR_SPEED = 3.2;
+const FLIPPER_COLLISION_ANGLE_STEP = 0.08;
 const EPSILON = 0.0001;
 
 export const stepGame = (
@@ -24,6 +27,20 @@ export const stepGame = (
 ): GameState => {
   const dt = Math.min(deltaSeconds, 1 / 30);
   const launchChargeDelta = Math.max(deltaSeconds, 0);
+  const flipperFrame = {
+    left: advanceFlipper(
+      board.flippers.left,
+      state.flippers.left,
+      input.leftPressed,
+      dt,
+    ),
+    right: advanceFlipper(
+      board.flippers.right,
+      state.flippers.right,
+      input.rightPressed,
+      dt,
+    ),
+  };
 
   if (state.status === 'waiting-launch') {
     const chargeSeconds = input.launchPressed
@@ -63,8 +80,8 @@ export const stepGame = (
           },
         },
         flippers: {
-          leftEngaged: input.leftPressed,
-          rightEngaged: input.rightPressed,
+          left: flipperFrame.left.next,
+          right: flipperFrame.right.next,
         },
       };
     }
@@ -95,8 +112,8 @@ export const stepGame = (
         chargeSeconds,
       },
       flippers: {
-        leftEngaged: input.leftPressed,
-        rightEngaged: input.rightPressed,
+        left: flipperFrame.left.next,
+        right: flipperFrame.right.next,
       },
     };
   }
@@ -120,13 +137,10 @@ export const stepGame = (
       chargeSeconds: 0,
     },
     flippers: {
-      leftEngaged: input.leftPressed,
-      rightEngaged: input.rightPressed,
+      left: flipperFrame.left.next,
+      right: flipperFrame.right.next,
     },
   };
-
-  const leftJustPressed = input.leftPressed && !state.flippers.leftEngaged;
-  const rightJustPressed = input.rightPressed && !state.flippers.rightEngaged;
 
   next.ball.linearVelocity.y += board.gravity * dt;
   next.ball.position.x += next.ball.linearVelocity.x * dt;
@@ -135,10 +149,7 @@ export const stepGame = (
   resolveWallCollisions(next, board);
   resolveGuideCollisions(next, board);
   resolveBumperCollisions(next, board);
-  resolveFlipperCollisions(next, board, {
-    leftJustPressed,
-    rightJustPressed,
-  });
+  resolveFlipperCollisions(next, board, flipperFrame);
 
   if (next.ball.position.y - next.ball.radius > board.drainY) {
     return resetBall(next, board);
@@ -223,55 +234,49 @@ const resolveGuideCollision = (
   const incomingNormalSpeed =
     state.ball.linearVelocity.x * normalX +
     state.ball.linearVelocity.y * normalY;
+  const contact = createStaticContact(
+    guideMaterial,
+    { x: closestX, y: closestY },
+    { x: normalX, y: normalY },
+    overlap,
+  );
 
-  state.ball.position.x += normalX * overlap;
-  state.ball.position.y += normalY * overlap;
-
-  if (incomingNormalSpeed < 0) {
-    state.ball.linearVelocity.x -=
-      (1 + guideMaterial.restitution) * incomingNormalSpeed * normalX;
-    state.ball.linearVelocity.y -=
-      (1 + guideMaterial.restitution) * incomingNormalSpeed * normalY;
+  if (incomingNormalSpeed < 0 || overlap > EPSILON) {
+    resolveBallContact(state.ball, contact);
   }
 };
 
 const resolveFlipperCollisions = (
   state: GameState,
   board: BoardDefinition,
-  activation: {
-    leftJustPressed: boolean;
-    rightJustPressed: boolean;
+  flipperFrame: {
+    left: FlipperMotionFrame;
+    right: FlipperMotionFrame;
   },
 ): void => {
   resolveFlipperCollision(
     state,
     board.flippers.left,
-    state.flippers.leftEngaged,
-    activation.leftJustPressed,
+    flipperFrame.left,
   );
   resolveFlipperCollision(
     state,
     board.flippers.right,
-    state.flippers.rightEngaged,
-    activation.rightJustPressed,
+    flipperFrame.right,
   );
 };
 
 const resolveFlipperCollision = (
   state: GameState,
   flipper: FlipperDefinition,
-  engaged: boolean,
-  justPressed: boolean,
+  motion: FlipperMotionFrame,
 ): void => {
-  const activeAngle = engaged ? flipper.activeAngle : flipper.restingAngle;
-  const collisionAngles = justPressed
-    ? [flipper.restingAngle, flipper.activeAngle]
-    : [activeAngle];
+  const collisionAngles = getFlipperCollisionAngles(motion);
 
   for (const angle of collisionAngles) {
     if (
       applyFlipperCollisionAtAngle(state, flipper, angle, {
-        justPressed,
+        angularVelocity: motion.next.angularVelocity,
       })
     ) {
       return;
@@ -284,7 +289,7 @@ const applyFlipperCollisionAtAngle = (
   flipper: FlipperDefinition,
   collisionAngle: number,
   motion: {
-    justPressed: boolean;
+    angularVelocity: number;
   },
 ): boolean => {
   const angle = collisionAngle;
@@ -319,7 +324,7 @@ const applyFlipperCollisionAtAngle = (
   const normalY = Math.abs(offsetX) > EPSILON || Math.abs(offsetY) > EPSILON
     ? offsetY / distance
     : fallbackNormalY;
-  const flipperAngularVelocity = getFlipperAngularVelocity(flipper, motion);
+  const flipperAngularVelocity = motion.angularVelocity;
   const relativeContactX = closestX - flipper.x;
   const relativeContactY = closestY - flipper.y;
   const surfaceVelocityX = -flipperAngularVelocity * relativeContactY;
@@ -327,15 +332,26 @@ const applyFlipperCollisionAtAngle = (
   const incomingNormalSpeed =
     (state.ball.linearVelocity.x - surfaceVelocityX) * normalX +
     (state.ball.linearVelocity.y - surfaceVelocityY) * normalY;
+  const contact: ContactData = {
+    point: {
+      x: closestX,
+      y: closestY,
+    },
+    normal: {
+      x: normalX,
+      y: normalY,
+    },
+    tangent: getContactTangent({ x: normalX, y: normalY }),
+    overlap,
+    surfaceVelocity: {
+      x: surfaceVelocityX,
+      y: surfaceVelocityY,
+    },
+    material: flipperMaterial,
+  };
 
-  state.ball.position.x += normalX * overlap;
-  state.ball.position.y += normalY * overlap;
-
-  if (incomingNormalSpeed < 0) {
-    state.ball.linearVelocity.x -=
-      (1 + flipperMaterial.restitution) * incomingNormalSpeed * normalX;
-    state.ball.linearVelocity.y -=
-      (1 + flipperMaterial.restitution) * incomingNormalSpeed * normalY;
+  if (incomingNormalSpeed < 0 || overlap > EPSILON) {
+    resolveBallContact(state.ball, contact);
   }
 
   return true;
@@ -360,15 +376,18 @@ const resolveBumperCollisions = (
     const ny = dy / distance;
     const approachSpeed =
       state.ball.linearVelocity.x * nx + state.ball.linearVelocity.y * ny;
+    const contact = createStaticContact(
+      bumperMaterial,
+      {
+        x: bumper.x + nx * bumper.radius,
+        y: bumper.y + ny * bumper.radius,
+      },
+      { x: nx, y: ny },
+      overlap,
+    );
 
-    state.ball.position.x += nx * overlap;
-    state.ball.position.y += ny * overlap;
-
-    if (approachSpeed < 0) {
-      state.ball.linearVelocity.x -=
-        (1 + bumperMaterial.restitution) * approachSpeed * nx;
-      state.ball.linearVelocity.y -=
-        (1 + bumperMaterial.restitution) * approachSpeed * ny;
+    if (approachSpeed < 0 || overlap > EPSILON) {
+      resolveBallContact(state.ball, contact);
       state.score += bumper.score;
     }
   }
@@ -380,16 +399,76 @@ const interpolate = (start: number, end: number, ratio: number): number =>
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max);
 
-const getFlipperAngularVelocity = (
+const advanceFlipper = (
   flipper: FlipperDefinition,
-  motion: {
-    justPressed: boolean;
-  },
-): number => {
-  if (!motion.justPressed) {
-    return 0;
+  current: FlipperState,
+  engaged: boolean,
+  deltaSeconds: number,
+): FlipperMotionFrame => {
+  const targetAngle = engaged ? flipper.activeAngle : flipper.restingAngle;
+  const maxStep = FLIPPER_SWING_ANGULAR_SPEED * deltaSeconds;
+  const angle = moveToward(current.angle, targetAngle, maxStep);
+  const angularVelocity =
+    deltaSeconds > 0 ? (angle - current.angle) / deltaSeconds : 0;
+
+  return {
+    previousAngle: current.angle,
+    next: {
+      engaged,
+      angle,
+      angularVelocity,
+    },
+  };
+};
+
+const moveToward = (current: number, target: number, maxStep: number): number => {
+  if (maxStep <= 0) {
+    return current;
   }
 
-  const sweepDirection = Math.sign(flipper.activeAngle - flipper.restingAngle) || 1;
-  return FLIPPER_SWING_ANGULAR_SPEED * sweepDirection;
+  const delta = target - current;
+
+  if (Math.abs(delta) <= maxStep) {
+    return target;
+  }
+
+  return current + Math.sign(delta) * maxStep;
 };
+
+const getFlipperCollisionAngles = (motion: FlipperMotionFrame): number[] => {
+  const delta = motion.next.angle - motion.previousAngle;
+  const samples = Math.max(
+    1,
+    Math.ceil(Math.abs(delta) / FLIPPER_COLLISION_ANGLE_STEP),
+  );
+  const angles: number[] = [];
+
+  for (let index = 0; index <= samples; index += 1) {
+    const ratio = index / samples;
+    angles.push(interpolate(motion.previousAngle, motion.next.angle, ratio));
+  }
+
+  return angles;
+};
+
+interface FlipperMotionFrame {
+  previousAngle: number;
+  next: FlipperState;
+}
+
+const createStaticContact = (
+  material: ReturnType<typeof getSurfaceMaterial>,
+  point: ContactData['point'],
+  normal: ContactData['normal'],
+  overlap: number,
+): ContactData => ({
+  point,
+  normal,
+  tangent: getContactTangent(normal),
+  overlap,
+  surfaceVelocity: {
+    x: 0,
+    y: 0,
+  },
+  material,
+});

@@ -87,5 +87,5 @@ export const getStatusLabel = (state: GameState, input: InputState): string => {
     return 'Hold Space to charge the launcher. Release to fire the ball.';
   }
 
-  return 'Z / Left Arrow and / / Right Arrow flip. Space charges the launcher.';
+  return 'Left Shift / Z / Left Arrow and Right Shift / ? / Right Arrow flip. Space charges the launcher.';
 };

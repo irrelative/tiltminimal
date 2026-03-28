@@ -15,6 +15,12 @@ export interface BallState {
   momentOfInertia: number;
 }
 
+export interface FlipperState {
+  engaged: boolean;
+  angle: number;
+  angularVelocity: number;
+}
+
 export interface GameState {
   ball: BallState;
   score: number;
@@ -24,8 +30,8 @@ export interface GameState {
     chargeSeconds: number;
   };
   flippers: {
-    leftEngaged: boolean;
-    rightEngaged: boolean;
+    left: FlipperState;
+    right: FlipperState;
   };
 }
 
@@ -38,8 +44,8 @@ export const createInitialGameState = (board: BoardDefinition): GameState => ({
     chargeSeconds: 0,
   },
   flippers: {
-    leftEngaged: false,
-    rightEngaged: false,
+    left: createFlipperState(board.flippers.left),
+    right: createFlipperState(board.flippers.right),
   },
 });
 
@@ -54,8 +60,8 @@ export const resetBall = (
     chargeSeconds: 0,
   },
   flippers: {
-    leftEngaged: false,
-    rightEngaged: false,
+    left: createFlipperState(board.flippers.left),
+    right: createFlipperState(board.flippers.right),
   },
 });
 
@@ -89,3 +95,11 @@ export const getSolidSphereMomentOfInertia = (
   mass: number,
   radius: number,
 ): number => (2 / 5) * mass * radius * radius;
+
+const createFlipperState = (
+  flipper: BoardDefinition['flippers']['left'],
+): FlipperState => ({
+  engaged: false,
+  angle: flipper.restingAngle,
+  angularVelocity: 0,
+});

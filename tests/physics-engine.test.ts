@@ -74,6 +74,43 @@ describe('stepGame', () => {
     expect(next.ball.linearVelocity.y).toBeLessThan(180);
   });
 
+  it('animates the left flipper through intermediate angles before reaching full extension', () => {
+    const state = createInitialGameState(classicTable);
+    state.status = 'playing';
+
+    const next = stepGame(
+      state,
+      classicTable,
+      { ...idleInput, leftPressed: true },
+      1 / 60,
+    );
+
+    expect(next.flippers.left.engaged).toBe(true);
+    expect(next.flippers.left.angle).toBeLessThan(
+      classicTable.flippers.left.restingAngle,
+    );
+    expect(next.flippers.left.angle).toBeGreaterThan(
+      classicTable.flippers.left.activeAngle,
+    );
+    expect(next.flippers.left.angularVelocity).toBeLessThan(0);
+
+    let fullyRaised = next;
+    for (let frame = 0; frame < 20; frame += 1) {
+      fullyRaised = stepGame(
+        fullyRaised,
+        classicTable,
+        { ...idleInput, leftPressed: true },
+        1 / 60,
+      );
+    }
+
+    expect(fullyRaised.flippers.left.angle).toBeCloseTo(
+      classicTable.flippers.left.activeAngle,
+      5,
+    );
+    expect(fullyRaised.flippers.left.angularVelocity).toBe(0);
+  });
+
   it('collides against the rounded flipper tip', () => {
     const state = createInitialGameState(classicTable);
     state.status = 'playing';
@@ -86,6 +123,18 @@ describe('stepGame', () => {
     expect(next.ball.position.x).toBeGreaterThan(state.ball.position.x);
     expect(next.ball.linearVelocity.x).toBeGreaterThan(0);
     expect(next.ball.linearVelocity.y).toBeLessThan(160);
+  });
+
+  it('transfers tangential slip into spin on bumper contact', () => {
+    const state = createInitialGameState(classicTable);
+    state.status = 'playing';
+    placeBallOnBumperSurface(state, classicTable.bumpers[0]!, { x: 1, y: 0 });
+    state.ball.linearVelocity.x = -120;
+    state.ball.linearVelocity.y = 220;
+
+    const next = stepGame(state, classicTable, idleInput, 1 / 60);
+
+    expect(Math.abs(next.ball.angularVelocity.z)).toBeGreaterThan(0);
   });
 
   it('adds a stronger upward impulse when the left flipper flips into the ball', () => {
@@ -112,6 +161,13 @@ describe('stepGame', () => {
     expect(next.ball.linearVelocity.y).toBeLessThan(-100);
     expect(next.ball.linearVelocity.y).toBeLessThan(
       passive.ball.linearVelocity.y - 100,
+    );
+    expect(Math.abs(next.ball.angularVelocity.z)).toBeGreaterThan(0);
+    expect(next.flippers.left.angle).toBeGreaterThan(
+      classicTable.flippers.left.activeAngle,
+    );
+    expect(next.flippers.left.angle).toBeLessThan(
+      classicTable.flippers.left.restingAngle,
     );
   });
 
@@ -162,4 +218,16 @@ const placeBallOnFlipperTip = (
 
   state.ball.position.x = tipX + (direction.x / magnitude) * distance;
   state.ball.position.y = tipY + (direction.y / magnitude) * distance;
+};
+
+const placeBallOnBumperSurface = (
+  state: ReturnType<typeof createInitialGameState>,
+  bumper: (typeof classicTable.bumpers)[number],
+  normal: { x: number; y: number },
+): void => {
+  const magnitude = Math.hypot(normal.x, normal.y);
+  const distance = state.ball.radius + bumper.radius - 1;
+
+  state.ball.position.x = bumper.x + (normal.x / magnitude) * distance;
+  state.ball.position.y = bumper.y + (normal.y / magnitude) * distance;
 };

@@ -7,8 +7,8 @@
   --viewport-height: calc(100svh - (var(--stage-padding) * 2));
   color: #22304a;
   background:
-    radial-gradient(circle at top, rgba(255, 255, 255, 0.42), transparent 34%),
-    linear-gradient(180deg, #ffe76a 0%, #fed41d 42%, #f6be0f 100%);
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.38), transparent 34%),
+    linear-gradient(180deg, #edf1f5 0%, #d8e0e8 48%, #c5ced9 100%);
   font-family: Georgia, 'Times New Roman', serif;
 }
 

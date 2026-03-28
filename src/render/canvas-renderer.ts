@@ -48,13 +48,13 @@ export class CanvasRenderer {
     this.drawFlipper(
       context,
       this.board.flippers.left,
-      state.flippers.leftEngaged,
+      state.flippers.left.angle,
       FLIPPER_COLOR,
     );
     this.drawFlipper(
       context,
       this.board.flippers.right,
-      state.flippers.rightEngaged,
+      state.flippers.right.angle,
       FLIPPER_COLOR,
     );
     this.drawBall(context, state);
@@ -145,14 +145,14 @@ export class CanvasRenderer {
   private drawFlipper(
     context: CanvasRenderingContext2D,
     flipper: FlipperDefinition,
-    engaged: boolean,
+    angle: number,
     color: string,
   ): void {
     const radius = flipper.thickness / 2;
 
     context.save();
     context.translate(flipper.x, flipper.y);
-    context.rotate(engaged ? flipper.activeAngle : flipper.restingAngle);
+    context.rotate(angle);
     context.fillStyle = color;
     context.beginPath();
     context.moveTo(0, -radius);
