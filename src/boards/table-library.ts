@@ -1,4 +1,5 @@
 import { classicTable } from './classic-table';
+import { harlemGlobetrottersTable } from './harlem-globetrotters';
 import { createBoardDefinition } from '../game/physics-defaults';
 import type {
   BoardDefinition,
@@ -122,6 +123,11 @@ export const BUILT_IN_TABLES: TableRecord[] = [
   {
     id: 'classic-table',
     board: normalizeBoardDefinition(classicTable),
+    builtIn: true,
+  },
+  {
+    id: 'harlem-globetrotters',
+    board: normalizeBoardDefinition(harlemGlobetrottersTable),
     builtIn: true,
   },
 ];
