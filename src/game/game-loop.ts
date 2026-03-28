@@ -24,7 +24,7 @@ export class GameLoop {
     this.running = true;
     this.lastFrameTime = 0;
     this.input.connect();
-    this.renderer.render(this.state, this.input.getState());
+    this.renderer.renderGame(this.board, this.state, this.input.getState());
     this.animationFrameId = window.requestAnimationFrame(this.onFrame);
   }
 
@@ -44,7 +44,9 @@ export class GameLoop {
     }
 
     const deltaSeconds =
-      this.lastFrameTime === 0 ? 1 / 60 : (frameTime - this.lastFrameTime) / 1000;
+      this.lastFrameTime === 0
+        ? 1 / 60
+        : (frameTime - this.lastFrameTime) / 1000;
     this.lastFrameTime = frameTime;
 
     this.state = stepGame(
@@ -53,7 +55,7 @@ export class GameLoop {
       this.input.getState(),
       deltaSeconds,
     );
-    this.renderer.render(this.state, this.input.getState());
+    this.renderer.renderGame(this.board, this.state, this.input.getState());
     this.animationFrameId = window.requestAnimationFrame(this.onFrame);
   };
 }

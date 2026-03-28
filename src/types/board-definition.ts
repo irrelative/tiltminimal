@@ -3,6 +3,8 @@ export interface Point {
   y: number;
 }
 
+export type FlipperSide = 'left' | 'right';
+
 export interface BallDefinition {
   radius: number;
   mass: number;
@@ -21,6 +23,7 @@ export interface BumperDefinition extends Point {
 }
 
 export interface FlipperDefinition extends Point {
+  side: FlipperSide;
   length: number;
   thickness: number;
   restingAngle: number;
@@ -41,8 +44,5 @@ export interface BoardDefinition {
     walls: SurfaceMaterialName;
   };
   bumpers: BumperDefinition[];
-  flippers: {
-    left: FlipperDefinition;
-    right: FlipperDefinition;
-  };
+  flippers: FlipperDefinition[];
 }

@@ -1,73 +1,119 @@
 import type { InputState } from '../input/keyboard-input';
-import type { BoardDefinition, FlipperDefinition } from '../types/board-definition';
+import type {
+  BoardDefinition,
+  BumperDefinition,
+  FlipperDefinition,
+} from '../types/board-definition';
 import type { GameState } from '../game/game-state';
 import { getStatusLabel } from '../game/game-loop';
 import { getLaunchChargeRatio } from '../game/physics-engine';
+import type { EditorSelection } from '../editor/editor-types';
 
 const FLIPPER_COLOR = '#ff9f1c';
 
 export class CanvasRenderer {
-  constructor(
-    private readonly canvas: HTMLCanvasElement,
-    private readonly board: BoardDefinition,
-  ) {
-    this.canvas.width = board.width;
-    this.canvas.height = board.height;
-  }
+  constructor(private readonly canvas: HTMLCanvasElement) {}
 
-  render(state: GameState, input: InputState): void {
+  renderGame(
+    board: BoardDefinition,
+    state: GameState,
+    input: InputState,
+  ): void {
     const context = this.canvas.getContext('2d');
 
     if (!context) {
       throw new Error('2D canvas context is unavailable.');
     }
 
-    context.clearRect(0, 0, this.board.width, this.board.height);
+    this.syncCanvasSize(board);
+    context.clearRect(0, 0, board.width, board.height);
 
-    this.drawBackground(context);
-    this.drawBounds(context);
-    this.drawBumpers(context);
-    this.drawFlipper(
-      context,
-      this.board.flippers.left,
-      state.flippers.leftEngaged,
-      FLIPPER_COLOR,
-    );
-    this.drawFlipper(
-      context,
-      this.board.flippers.right,
-      state.flippers.rightEngaged,
-      FLIPPER_COLOR,
-    );
+    this.drawBoard(context, board, state);
     this.drawBall(context, state);
-    this.drawHud(context, state, input);
+    this.drawHud(context, board, state, input);
   }
 
-  private drawBackground(context: CanvasRenderingContext2D): void {
-    const gradient = context.createLinearGradient(0, 0, 0, this.board.height);
+  renderEditor(
+    board: BoardDefinition,
+    selection: EditorSelection,
+    draftPosition: { x: number; y: number } | null,
+  ): void {
+    const context = this.canvas.getContext('2d');
+
+    if (!context) {
+      throw new Error('2D canvas context is unavailable.');
+    }
+
+    this.syncCanvasSize(board);
+    context.clearRect(0, 0, board.width, board.height);
+
+    this.drawBoard(context, board);
+    this.drawLaunchPosition(context, board, selection);
+    this.drawEditorSelection(context, board, selection);
+    this.drawDraft(context, draftPosition);
+    this.drawEditorHud(context, board);
+  }
+
+  private syncCanvasSize(board: BoardDefinition): void {
+    this.canvas.width = board.width;
+    this.canvas.height = board.height;
+  }
+
+  private drawBoard(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+    state?: GameState,
+  ): void {
+    this.drawBackground(context, board);
+    this.drawBounds(context, board);
+    this.drawBumpers(context, board, state);
+
+    for (const flipper of board.flippers) {
+      const engaged = state
+        ? flipper.side === 'left'
+          ? state.flippers.leftEngaged
+          : state.flippers.rightEngaged
+        : false;
+
+      this.drawFlipper(context, flipper, engaged, FLIPPER_COLOR);
+    }
+  }
+
+  private drawBackground(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+  ): void {
+    const gradient = context.createLinearGradient(0, 0, 0, board.height);
     gradient.addColorStop(0, '#0c1f33');
     gradient.addColorStop(0.5, '#102f4c');
     gradient.addColorStop(1, '#09141f');
 
     context.fillStyle = gradient;
-    context.fillRect(0, 0, this.board.width, this.board.height);
+    context.fillRect(0, 0, board.width, board.height);
   }
 
-  private drawBounds(context: CanvasRenderingContext2D): void {
+  private drawBounds(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+  ): void {
     context.strokeStyle = '#8ecae6';
     context.lineWidth = 8;
-    context.strokeRect(24, 24, this.board.width - 48, this.board.height - 48);
+    context.strokeRect(24, 24, board.width - 48, board.height - 48);
 
     context.strokeStyle = 'rgba(255, 255, 255, 0.15)';
     context.lineWidth = 2;
     context.beginPath();
-    context.moveTo(this.board.width / 2, 24);
-    context.lineTo(this.board.width / 2, this.board.height - 180);
+    context.moveTo(board.width / 2, 24);
+    context.lineTo(board.width / 2, board.height - 180);
     context.stroke();
   }
 
-  private drawBumpers(context: CanvasRenderingContext2D): void {
-    for (const bumper of this.board.bumpers) {
+  private drawBumpers(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+    state?: GameState,
+  ): void {
+    for (const bumper of board.bumpers) {
       context.fillStyle = '#7bdff2';
       context.beginPath();
       context.arc(bumper.x, bumper.y, bumper.radius, 0, Math.PI * 2);
@@ -77,7 +123,16 @@ export class CanvasRenderer {
       context.beginPath();
       context.arc(bumper.x, bumper.y, bumper.radius * 0.45, 0, Math.PI * 2);
       context.fill();
+
+      if (state) {
+        context.font = '600 20px Georgia, serif';
+        context.textAlign = 'center';
+        context.fillStyle = 'rgba(241, 250, 238, 0.9)';
+        context.fillText(String(bumper.score), bumper.x, bumper.y + 8);
+      }
     }
+
+    context.textAlign = 'start';
   }
 
   private drawFlipper(
@@ -118,31 +173,33 @@ export class CanvasRenderer {
 
   private drawHud(
     context: CanvasRenderingContext2D,
+    board: BoardDefinition,
     state: GameState,
     input: InputState,
   ): void {
     context.fillStyle = '#f1faee';
     context.font = '600 28px Georgia, serif';
-    context.fillText(this.board.name, 48, 64);
+    context.fillText(board.name, 48, 64);
     context.fillText(`Score ${state.score}`, 48, 104);
 
     if (state.status === 'waiting-launch') {
-      this.drawLaunchMeter(context, state);
+      this.drawLaunchMeter(context, board, state);
     }
 
     context.font = '400 20px Georgia, serif';
     context.fillStyle = 'rgba(241, 250, 238, 0.85)';
-    context.fillText(getStatusLabel(state, input), 48, this.board.height - 44);
+    context.fillText(getStatusLabel(state, input), 48, board.height - 44);
   }
 
   private drawLaunchMeter(
     context: CanvasRenderingContext2D,
+    board: BoardDefinition,
     state: GameState,
   ): void {
     const ratio = getLaunchChargeRatio(state);
     const meterWidth = 200;
     const meterHeight = 14;
-    const x = this.board.width - meterWidth - 48;
+    const x = board.width - meterWidth - 48;
     const y = 54;
 
     context.fillStyle = 'rgba(255, 255, 255, 0.12)';
@@ -158,5 +215,133 @@ export class CanvasRenderer {
     context.font = '400 16px Georgia, serif';
     context.fillStyle = 'rgba(241, 250, 238, 0.85)';
     context.fillText('Launch', x, y - 10);
+  }
+
+  private drawLaunchPosition(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+    selection: EditorSelection,
+  ): void {
+    context.save();
+    context.strokeStyle =
+      selection.kind === 'launch-position'
+        ? '#ffd166'
+        : 'rgba(241, 250, 238, 0.7)';
+    context.fillStyle = 'rgba(255, 209, 102, 0.18)';
+    context.lineWidth = selection.kind === 'launch-position' ? 4 : 2;
+    context.beginPath();
+    context.arc(
+      board.launchPosition.x,
+      board.launchPosition.y,
+      26,
+      0,
+      Math.PI * 2,
+    );
+    context.fill();
+    context.stroke();
+    context.beginPath();
+    context.moveTo(board.launchPosition.x - 14, board.launchPosition.y);
+    context.lineTo(board.launchPosition.x + 14, board.launchPosition.y);
+    context.moveTo(board.launchPosition.x, board.launchPosition.y - 14);
+    context.lineTo(board.launchPosition.x, board.launchPosition.y + 14);
+    context.stroke();
+    context.restore();
+  }
+
+  private drawEditorSelection(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+    selection: EditorSelection,
+  ): void {
+    if (selection.kind === 'bumper' && selection.index !== undefined) {
+      const bumper = board.bumpers[selection.index];
+
+      if (bumper) {
+        this.drawBumperSelection(context, bumper);
+      }
+    }
+
+    if (selection.kind === 'flipper' && selection.index !== undefined) {
+      const flipper = board.flippers[selection.index];
+
+      if (flipper) {
+        this.drawFlipperSelection(context, flipper);
+      }
+    }
+  }
+
+  private drawBumperSelection(
+    context: CanvasRenderingContext2D,
+    bumper: BumperDefinition,
+  ): void {
+    context.save();
+    context.strokeStyle = '#ffd166';
+    context.lineWidth = 4;
+    context.setLineDash([10, 6]);
+    context.beginPath();
+    context.arc(bumper.x, bumper.y, bumper.radius + 10, 0, Math.PI * 2);
+    context.stroke();
+    context.restore();
+  }
+
+  private drawFlipperSelection(
+    context: CanvasRenderingContext2D,
+    flipper: FlipperDefinition,
+  ): void {
+    const angle = flipper.restingAngle;
+    const tipX = flipper.x + Math.cos(angle) * flipper.length;
+    const tipY = flipper.y + Math.sin(angle) * flipper.length;
+
+    context.save();
+    context.strokeStyle = '#ffd166';
+    context.lineWidth = 4;
+    context.setLineDash([10, 6]);
+    context.beginPath();
+    context.moveTo(flipper.x, flipper.y);
+    context.lineTo(tipX, tipY);
+    context.stroke();
+    context.beginPath();
+    context.arc(flipper.x, flipper.y, flipper.thickness, 0, Math.PI * 2);
+    context.stroke();
+    context.restore();
+  }
+
+  private drawDraft(
+    context: CanvasRenderingContext2D,
+    draftPosition: { x: number; y: number } | null,
+  ): void {
+    if (!draftPosition) {
+      return;
+    }
+
+    context.save();
+    context.strokeStyle = 'rgba(255, 209, 102, 0.85)';
+    context.lineWidth = 2;
+    context.setLineDash([6, 6]);
+    context.beginPath();
+    context.arc(draftPosition.x, draftPosition.y, 40, 0, Math.PI * 2);
+    context.stroke();
+    context.restore();
+  }
+
+  private drawEditorHud(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+  ): void {
+    context.fillStyle = 'rgba(241, 250, 238, 0.92)';
+    context.font = '600 28px Georgia, serif';
+    context.fillText(`${board.name} Editor`, 48, 64);
+    context.font = '400 18px Georgia, serif';
+    context.fillStyle = 'rgba(241, 250, 238, 0.82)';
+    context.fillText(
+      'Drag elements to reposition. Delete removes the selection.',
+      48,
+      96,
+    );
+    context.fillText(
+      'Play Test runs the current saved layout through the same physics loop.',
+      48,
+      122,
+    );
   }
 }

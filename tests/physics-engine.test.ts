@@ -64,7 +64,7 @@ describe('stepGame', () => {
   it('bounces the ball off a resting flipper on contact', () => {
     const state = createInitialGameState(classicTable);
     state.status = 'playing';
-    placeBallOnFlipperSurface(state, classicTable.flippers.left, 0.58);
+    placeBallOnFlipperSurface(state, classicTable.flippers[0]!, 0.58);
     state.ball.linearVelocity.x = 10;
     state.ball.linearVelocity.y = 180;
 
@@ -77,7 +77,10 @@ describe('stepGame', () => {
   it('collides against the rounded flipper tip', () => {
     const state = createInitialGameState(classicTable);
     state.status = 'playing';
-    placeBallOnFlipperTip(state, classicTable.flippers.left, { x: 0.85, y: -0.55 });
+    placeBallOnFlipperTip(state, classicTable.flippers[0]!, {
+      x: 0.85,
+      y: -0.55,
+    });
     state.ball.linearVelocity.x = -220;
     state.ball.linearVelocity.y = 160;
 
@@ -91,13 +94,13 @@ describe('stepGame', () => {
   it('adds a stronger upward impulse when the left flipper flips into the ball', () => {
     const passiveState = createInitialGameState(classicTable);
     passiveState.status = 'playing';
-    placeBallOnFlipperSurface(passiveState, classicTable.flippers.left, 0.72);
+    placeBallOnFlipperSurface(passiveState, classicTable.flippers[0]!, 0.72);
     passiveState.ball.linearVelocity.x = 0;
     passiveState.ball.linearVelocity.y = 120;
 
     const activeState = createInitialGameState(classicTable);
     activeState.status = 'playing';
-    placeBallOnFlipperSurface(activeState, classicTable.flippers.left, 0.72);
+    placeBallOnFlipperSurface(activeState, classicTable.flippers[0]!, 0.72);
     activeState.ball.linearVelocity.x = 0;
     activeState.ball.linearVelocity.y = 120;
 

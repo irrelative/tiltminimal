@@ -23,8 +23,9 @@ export const classicTable: BoardDefinition = {
     { x: 600, y: 420, radius: 44, score: 100, material: 'rubberPost' },
     { x: 450, y: 600, radius: 52, score: 250, material: 'rubberPost' },
   ],
-  flippers: {
-    left: {
+  flippers: [
+    {
+      side: 'left',
       x: 270,
       y: 1220,
       length: 150,
@@ -33,7 +34,8 @@ export const classicTable: BoardDefinition = {
       activeAngle: -0.42,
       material: 'flipperRubber',
     },
-    right: {
+    {
+      side: 'right',
       x: 630,
       y: 1220,
       length: 150,
@@ -42,5 +44,5 @@ export const classicTable: BoardDefinition = {
       activeAngle: Math.PI + 0.42,
       material: 'flipperRubber',
     },
-  },
+  ],
 };

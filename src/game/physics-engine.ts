@@ -1,5 +1,8 @@
 import type { InputState } from '../input/keyboard-input';
-import type { BoardDefinition, FlipperDefinition } from '../types/board-definition';
+import type {
+  BoardDefinition,
+  FlipperDefinition,
+} from '../types/board-definition';
 import { getSurfaceMaterial } from './materials';
 import type { GameState } from './game-state';
 import { resetBall } from './game-state';
@@ -154,7 +157,8 @@ const resolveWallCollisions = (
 
   if (ball.position.x - ball.radius < 0) {
     ball.position.x = ball.radius;
-    ball.linearVelocity.x = Math.abs(ball.linearVelocity.x) * wallMaterial.restitution;
+    ball.linearVelocity.x =
+      Math.abs(ball.linearVelocity.x) * wallMaterial.restitution;
   }
 
   if (ball.position.x + ball.radius > board.width) {
@@ -178,18 +182,18 @@ const resolveFlipperCollisions = (
     rightJustPressed: boolean;
   },
 ): void => {
-  resolveFlipperCollision(
-    state,
-    board.flippers.left,
-    state.flippers.leftEngaged,
-    activation.leftJustPressed,
-  );
-  resolveFlipperCollision(
-    state,
-    board.flippers.right,
-    state.flippers.rightEngaged,
-    activation.rightJustPressed,
-  );
+  for (const flipper of board.flippers) {
+    const engaged =
+      flipper.side === 'left'
+        ? state.flippers.leftEngaged
+        : state.flippers.rightEngaged;
+    const justPressed =
+      flipper.side === 'left'
+        ? activation.leftJustPressed
+        : activation.rightJustPressed;
+
+    resolveFlipperCollision(state, flipper, engaged, justPressed);
+  }
 };
 
 const resolveFlipperCollision = (
@@ -248,12 +252,14 @@ const applyFlipperCollisionAtAngle = (
 
   const fallbackNormalX = Math.sin(angle);
   const fallbackNormalY = -Math.cos(angle);
-  const normalX = Math.abs(offsetX) > EPSILON || Math.abs(offsetY) > EPSILON
-    ? offsetX / distance
-    : fallbackNormalX;
-  const normalY = Math.abs(offsetX) > EPSILON || Math.abs(offsetY) > EPSILON
-    ? offsetY / distance
-    : fallbackNormalY;
+  const normalX =
+    Math.abs(offsetX) > EPSILON || Math.abs(offsetY) > EPSILON
+      ? offsetX / distance
+      : fallbackNormalX;
+  const normalY =
+    Math.abs(offsetX) > EPSILON || Math.abs(offsetY) > EPSILON
+      ? offsetY / distance
+      : fallbackNormalY;
   const flipperAngularVelocity = getFlipperAngularVelocity(flipper, motion);
   const relativeContactX = closestX - flipper.x;
   const relativeContactY = closestY - flipper.y;
@@ -325,6 +331,7 @@ const getFlipperAngularVelocity = (
     return 0;
   }
 
-  const sweepDirection = Math.sign(flipper.activeAngle - flipper.restingAngle) || 1;
+  const sweepDirection =
+    Math.sign(flipper.activeAngle - flipper.restingAngle) || 1;
   return FLIPPER_SWING_ANGULAR_SPEED * sweepDirection;
 };
