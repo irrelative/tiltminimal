@@ -1,4 +1,3 @@
-import { getFlipperBySide } from '../boards/table-library';
 import type { InputState } from '../input/keyboard-input';
 import type {
   BoardDefinition,
@@ -34,25 +33,12 @@ export const stepGame = (
   const { launch } = board.physics;
 
   if (state.status === 'waiting-launch') {
-    const { flipper } = board.physics;
-    const leftFlipper = getFlipperBySide(board, 'left');
-    const rightFlipper = getFlipperBySide(board, 'right');
-    const flipperFrame = {
-      left: advanceFlipper(
-        leftFlipper,
-        state.flippers.left,
-        input.leftPressed,
-        Math.max(deltaSeconds, 0),
-        flipper.swingAngularSpeed,
-      ),
-      right: advanceFlipper(
-        rightFlipper,
-        state.flippers.right,
-        input.rightPressed,
-        Math.max(deltaSeconds, 0),
-        flipper.swingAngularSpeed,
-      ),
-    };
+    const flipperFrame = advanceFlipperFrame(
+      state,
+      board,
+      input,
+      Math.max(deltaSeconds, 0),
+    );
     const chargeSeconds = input.launchPressed
       ? Math.min(
           state.launcher.chargeSeconds + launchChargeDelta,
@@ -97,10 +83,7 @@ export const stepGame = (
             z: 0,
           },
         },
-        flippers: {
-          left: flipperFrame.left.next,
-          right: flipperFrame.right.next,
-        },
+        flippers: flipperFrame.map((motion) => motion.next),
       };
     }
 
@@ -129,10 +112,7 @@ export const stepGame = (
       launcher: {
         chargeSeconds,
       },
-      flippers: {
-        left: flipperFrame.left.next,
-        right: flipperFrame.right.next,
-      },
+      flippers: flipperFrame.map((motion) => motion.next),
     };
   }
 
@@ -163,10 +143,9 @@ const stepPlayingState = (
     launcher: {
       chargeSeconds: 0,
     },
-    flippers: {
-      left: { ...state.flippers.left },
-      right: { ...state.flippers.right },
-    },
+    flippers: board.flippers.map((flipper, index) =>
+      cloneFlipperState(getFlipperState(state, flipper, index)),
+    ),
     standupTargets: state.standupTargets.map(cloneStandupTargetState),
     dropTargets: state.dropTargets.map(cloneDropTargetState),
     saucers: state.saucers.map(cloneSaucerState),
@@ -187,8 +166,7 @@ const stepPlayingState = (
       stepSeconds,
     );
 
-    next.flippers.left = flipperFrame.left.next;
-    next.flippers.right = flipperFrame.right.next;
+    next.flippers = flipperFrame.map((motion) => motion.next);
 
     advanceElementStates(next, board, stepSeconds);
 
@@ -403,26 +381,18 @@ const resolveDropTargetCollisions = (
 const resolveFlipperCollisions = (
   state: GameState,
   board: BoardDefinition,
-  flipperFrame: {
-    left: FlipperMotionFrame;
-    right: FlipperMotionFrame;
-  },
+  flipperFrame: FlipperMotionFrame[],
   solver: SolverPhysicsDefinition,
 ): void => {
-  resolveFlipperCollision(
-    state,
-    board,
-    getFlipperBySide(board, 'left'),
-    flipperFrame.left,
-    solver,
-  );
-  resolveFlipperCollision(
-    state,
-    board,
-    getFlipperBySide(board, 'right'),
-    flipperFrame.right,
-    solver,
-  );
+  board.flippers.forEach((flipper, index) => {
+    const motion = flipperFrame[index];
+
+    if (!motion) {
+      return;
+    }
+
+    resolveFlipperCollision(state, board, flipper, motion, solver);
+  });
 };
 
 const resolveFlipperCollision = (
@@ -757,30 +727,37 @@ const advanceFlipperFrame = (
   board: BoardDefinition,
   input: InputState,
   deltaSeconds: number,
-): {
-  left: FlipperMotionFrame;
-  right: FlipperMotionFrame;
-} => {
-  const leftFlipper = getFlipperBySide(board, 'left');
-  const rightFlipper = getFlipperBySide(board, 'right');
+): FlipperMotionFrame[] =>
+  board.flippers.map((flipper, index) =>
+    advanceFlipper(
+      flipper,
+      getFlipperState(state, flipper, index),
+      flipper.side === 'left' ? input.leftPressed : input.rightPressed,
+      deltaSeconds,
+      board.physics.flipper.swingAngularSpeed,
+    ),
+  );
 
-  return {
-    left: advanceFlipper(
-      leftFlipper,
-      state.flippers.left,
-      input.leftPressed,
-      deltaSeconds,
-      board.physics.flipper.swingAngularSpeed,
-    ),
-    right: advanceFlipper(
-      rightFlipper,
-      state.flippers.right,
-      input.rightPressed,
-      deltaSeconds,
-      board.physics.flipper.swingAngularSpeed,
-    ),
-  };
-};
+const getFlipperState = (
+  state: GameState,
+  flipper: FlipperDefinition,
+  index: number,
+): FlipperState =>
+  state.flippers[index] ?? createRestingFlipperState(flipper);
+
+const createRestingFlipperState = (
+  flipper: FlipperDefinition,
+): FlipperState => ({
+  engaged: false,
+  angle: flipper.restingAngle,
+  angularVelocity: 0,
+});
+
+const cloneFlipperState = (state: FlipperState): FlipperState => ({
+  engaged: state.engaged,
+  angle: state.angle,
+  angularVelocity: state.angularVelocity,
+});
 
 const advanceElementStates = (
   state: GameState,

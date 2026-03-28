@@ -237,11 +237,16 @@ export const createTableId = (): string =>
 export const getFlipperBySide = (
   board: BoardDefinition,
   side: FlipperSide,
+  occurrence = 0,
 ): FlipperDefinition => {
-  const flipper = board.flippers.find((candidate) => candidate.side === side);
+  const flipper = board.flippers.filter((candidate) => candidate.side === side)[
+    occurrence
+  ];
 
   if (!flipper) {
-    throw new Error(`Expected ${side} flipper to exist on board ${board.name}.`);
+    throw new Error(
+      `Expected ${side} flipper #${occurrence + 1} to exist on board ${board.name}.`,
+    );
   }
 
   return flipper;

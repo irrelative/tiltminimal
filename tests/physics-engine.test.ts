@@ -89,10 +89,12 @@ describe('stepGame', () => {
       1 / 60,
     );
 
-    expect(next.flippers.left.engaged).toBe(true);
-    expect(next.flippers.left.angle).toBeLessThan(leftFlipper.restingAngle);
-    expect(next.flippers.left.angle).toBeGreaterThan(leftFlipper.activeAngle);
-    expect(next.flippers.left.angularVelocity).toBeLessThan(0);
+    const leftState = getFlipperState(next, classicTable, 'left');
+
+    expect(leftState.engaged).toBe(true);
+    expect(leftState.angle).toBeLessThan(leftFlipper.restingAngle);
+    expect(leftState.angle).toBeGreaterThan(leftFlipper.activeAngle);
+    expect(leftState.angularVelocity).toBeLessThan(0);
 
     const fullyRaised = stepGame(
       next,
@@ -107,12 +109,17 @@ describe('stepGame', () => {
       1 / 60,
     );
 
-    expect(fullyRaised.flippers.left.angle).toBeCloseTo(
+    expect(getFlipperState(fullyRaised, classicTable, 'left').angle).toBeCloseTo(
       leftFlipper.activeAngle,
       5,
     );
-    expect(settled.flippers.left.angle).toBeCloseTo(leftFlipper.activeAngle, 5);
-    expect(settled.flippers.left.angularVelocity).toBe(0);
+    expect(getFlipperState(settled, classicTable, 'left').angle).toBeCloseTo(
+      leftFlipper.activeAngle,
+      5,
+    );
+    expect(getFlipperState(settled, classicTable, 'left').angularVelocity).toBe(
+      0,
+    );
   });
 
   it('keeps flipper animation at real-time speed on long frames', () => {
@@ -126,8 +133,13 @@ describe('stepGame', () => {
       1 / 15,
     );
 
-    expect(next.flippers.left.angle).toBeCloseTo(leftFlipper.activeAngle, 5);
-    expect(next.flippers.left.angularVelocity).toBeLessThanOrEqual(0);
+    expect(getFlipperState(next, classicTable, 'left').angle).toBeCloseTo(
+      leftFlipper.activeAngle,
+      5,
+    );
+    expect(
+      getFlipperState(next, classicTable, 'left').angularVelocity,
+    ).toBeLessThanOrEqual(0);
   });
 
   it('collides against the rounded flipper tip', () => {
@@ -185,8 +197,12 @@ describe('stepGame', () => {
       passive.ball.linearVelocity.y - 100,
     );
     expect(Math.abs(next.ball.angularVelocity.z)).toBeGreaterThan(0);
-    expect(next.flippers.left.angle).toBeGreaterThan(leftFlipper.activeAngle);
-    expect(next.flippers.left.angle).toBeLessThan(leftFlipper.restingAngle);
+    expect(getFlipperState(next, classicTable, 'left').angle).toBeGreaterThan(
+      leftFlipper.activeAngle,
+    );
+    expect(getFlipperState(next, classicTable, 'left').angle).toBeLessThan(
+      leftFlipper.restingAngle,
+    );
   });
 
   it('prevents a fast ball from tunneling through the left flipper', () => {
@@ -379,6 +395,32 @@ const placeBallOnFlipperSurface = (
 
   state.ball.position.x = surfaceX + normalX * distance;
   state.ball.position.y = surfaceY + normalY * distance;
+};
+
+const getFlipperState = (
+  state: ReturnType<typeof createInitialGameState>,
+  board: typeof classicTable,
+  side: 'left' | 'right',
+  occurrence = 0,
+) => {
+  const flipperIndex = board.flippers.reduce(
+    (matchIndex, flipper, index) => {
+      if (matchIndex !== -1 || flipper.side !== side) {
+        return matchIndex;
+      }
+
+      const sideIndex = board.flippers
+        .slice(0, index + 1)
+        .filter((candidate) => candidate.side === side).length;
+
+      return sideIndex === occurrence + 1 ? index : -1;
+    },
+    -1,
+  );
+
+  expect(flipperIndex).toBeGreaterThanOrEqual(0);
+
+  return state.flippers[flipperIndex]!;
 };
 
 const placeBallOnFlipperTip = (

@@ -1,5 +1,4 @@
 import type { BoardDefinition } from '../types/board-definition';
-import { getFlipperBySide } from '../boards/table-library';
 
 export interface Vector3 {
   x: number;
@@ -53,10 +52,7 @@ export interface GameState {
   launcher: {
     chargeSeconds: number;
   };
-  flippers: {
-    left: FlipperState;
-    right: FlipperState;
-  };
+  flippers: FlipperState[];
   standupTargets: StandupTargetState[];
   dropTargets: DropTargetState[];
   saucers: SaucerState[];
@@ -72,10 +68,7 @@ export const createInitialGameState = (board: BoardDefinition): GameState => ({
   launcher: {
     chargeSeconds: 0,
   },
-  flippers: {
-    left: createFlipperState(getFlipperBySide(board, 'left')),
-    right: createFlipperState(getFlipperBySide(board, 'right')),
-  },
+  flippers: board.flippers.map(createFlipperState),
   standupTargets: board.standupTargets.map(createStandupTargetState),
   dropTargets: board.dropTargets.map(createDropTargetState),
   saucers: board.saucers.map(createSaucerState),
@@ -93,10 +86,7 @@ export const resetBall = (
   launcher: {
     chargeSeconds: 0,
   },
-  flippers: {
-    left: createFlipperState(getFlipperBySide(board, 'left')),
-    right: createFlipperState(getFlipperBySide(board, 'right')),
-  },
+  flippers: board.flippers.map(createFlipperState),
   standupTargets: board.standupTargets.map(createStandupTargetState),
   dropTargets: board.dropTargets.map(createDropTargetState),
   saucers: board.saucers.map(createSaucerState),

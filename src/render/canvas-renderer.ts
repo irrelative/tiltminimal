@@ -90,11 +90,11 @@ export class CanvasRenderer {
     this.drawSpinners(context, board, state);
     this.drawRollovers(context, board, state);
 
-    for (const flipper of board.flippers) {
+    for (const [index, flipper] of board.flippers.entries()) {
       this.drawFlipper(
         context,
         flipper,
-        state ? getRenderedFlipperAngle(state, flipper) : flipper.restingAngle,
+        state ? getRenderedFlipperAngle(state, flipper, index) : flipper.restingAngle,
         FLIPPER_COLOR,
       );
     }
@@ -728,7 +728,6 @@ export class CanvasRenderer {
 const getRenderedFlipperAngle = (
   state: GameState,
   flipper: FlipperDefinition,
+  index: number,
 ): number =>
-  flipper.side === 'left'
-    ? state.flippers.left.angle
-    : state.flippers.right.angle;
+  state.flippers[index]?.angle ?? flipper.restingAngle;

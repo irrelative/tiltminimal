@@ -312,11 +312,10 @@ const getNearbyImpactMaterial = (
     }
   }
 
-  for (const flipper of board.flippers) {
-    const tipX =
-      flipper.x + Math.cos(state.flippers[flipper.side].angle) * flipper.length;
-    const tipY =
-      flipper.y + Math.sin(state.flippers[flipper.side].angle) * flipper.length;
+  for (const [index, flipper] of board.flippers.entries()) {
+    const angle = state.flippers[index]?.angle ?? flipper.restingAngle;
+    const tipX = flipper.x + Math.cos(angle) * flipper.length;
+    const tipY = flipper.y + Math.sin(angle) * flipper.length;
 
     if (
       getDistanceToSegment(
