@@ -228,6 +228,7 @@ function bootEditorRoute(): void {
       ),
       true,
     );
+    renderApp();
   });
 
   deleteSelectionButton.addEventListener('click', () => {
