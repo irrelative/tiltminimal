@@ -17,7 +17,7 @@ export const physicsDefaults = {
   surfaceMaterials: {
     playfieldWood: {
       name: 'playfieldWood',
-      restitution: 0.88,
+      restitution: 0.52,
       staticFriction: 0.42,
       dynamicFriction: 0.3,
       rollingResistance: 0.018,
@@ -27,7 +27,7 @@ export const physicsDefaults = {
     },
     metalGuide: {
       name: 'metalGuide',
-      restitution: 0.9,
+      restitution: 0.62,
       staticFriction: 0.24,
       dynamicFriction: 0.16,
       rollingResistance: 0.01,
@@ -37,7 +37,7 @@ export const physicsDefaults = {
     },
     rubberPost: {
       name: 'rubberPost',
-      restitution: 1.1,
+      restitution: 0.82,
       staticFriction: 0.74,
       dynamicFriction: 0.58,
       rollingResistance: 0.024,
@@ -47,7 +47,7 @@ export const physicsDefaults = {
     },
     flipperRubber: {
       name: 'flipperRubber',
-      restitution: 0.92,
+      restitution: 0.76,
       staticFriction: 0.96,
       dynamicFriction: 0.82,
       rollingResistance: 0.03,
@@ -65,7 +65,7 @@ export const physicsDefaults = {
       maxLaunchDrift: -260,
     },
     flipper: {
-      swingAngularSpeed: 3.2,
+      swingAngularSpeed: 15,
       collisionAngleStep: 0.08,
     },
     solver: {

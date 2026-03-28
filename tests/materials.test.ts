@@ -23,4 +23,17 @@ describe('surface materials', () => {
     expect(rubberPost.restitution).toBeGreaterThan(playfieldWood.restitution);
     expect(rubberPost.compliance).toBeGreaterThan(playfieldWood.compliance);
   });
+
+  it('keeps all default materials below a perfectly elastic bounce', () => {
+    const materials = [
+      getSurfaceMaterial('playfieldWood'),
+      getSurfaceMaterial('metalGuide'),
+      getSurfaceMaterial('rubberPost'),
+      getSurfaceMaterial('flipperRubber'),
+    ];
+
+    for (const material of materials) {
+      expect(material.restitution).toBeLessThan(1);
+    }
+  });
 });
