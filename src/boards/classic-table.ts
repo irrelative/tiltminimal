@@ -1,7 +1,8 @@
 import { createBoardDefinition } from '../game/physics-defaults';
+import { snapBoardLayoutToGrid } from './snap-board-layout';
 import { classicRulesScript } from './classic-rules-script';
 
-export const classicTable = createBoardDefinition({
+export const classicTable = snapBoardLayoutToGrid(createBoardDefinition({
   name: 'Classic Table',
   width: 900,
   height: 1400,
@@ -139,4 +140,4 @@ export const classicTable = createBoardDefinition({
       material: 'flipperRubber',
     },
   ],
-});
+}));
