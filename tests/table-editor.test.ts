@@ -7,8 +7,10 @@ import {
   hitTestGuideHandle,
   hitTestOrientedRotateHandle,
   hitTestSelection,
+  moveSelection,
   moveGuideHandle,
   rotateSelection,
+  updateSelectedNumericField,
 } from '../src/editor/table-editor';
 
 describe('hitTestSelection', () => {
@@ -100,6 +102,17 @@ describe('hitTestSelection', () => {
     const selection = hitTestSelection(board, { x: 268, y: 324 });
 
     expect(selection).toEqual({ kind: 'saucer', index: 0 });
+  });
+
+  it('selects the plunger when clicking on the shooter body', () => {
+    const board = createBlankTable();
+
+    const selection = hitTestSelection(board, {
+      x: board.plunger.x,
+      y: board.plunger.y,
+    });
+
+    expect(selection).toEqual({ kind: 'plunger' });
   });
 
   it('finds start, end, and rotate handles for a selected guide', () => {
@@ -362,5 +375,34 @@ describe('hitTestSelection', () => {
     );
 
     expect(next.dropTargets[0]?.angle).toBeCloseTo(-Math.PI, 5);
+  });
+
+  it('moves the plunger and keeps the launch position aligned', () => {
+    const board = createBlankTable();
+    const startPlunger = { x: board.plunger.x, y: board.plunger.y };
+    const startLaunch = { ...board.launchPosition };
+
+    const next = moveSelection(board, { kind: 'plunger' }, { x: 720, y: 1120 });
+
+    expect(next.plunger.x).toBe(720);
+    expect(next.plunger.y).toBe(1120);
+    expect(next.launchPosition.x - startLaunch.x).toBe(
+      next.plunger.x - startPlunger.x,
+    );
+    expect(next.launchPosition.y - startLaunch.y).toBe(
+      next.plunger.y - startPlunger.y,
+    );
+  });
+
+  it('updates plunger numeric fields while keeping the launch position aligned', () => {
+    const board = createBlankTable();
+    const startLaunch = { ...board.launchPosition };
+    const startPlungerX = board.plunger.x;
+
+    const next = updateSelectedNumericField(board, { kind: 'plunger' }, 'x', 700);
+
+    expect(next.plunger.x).toBe(700);
+    expect(next.launchPosition.x - startLaunch.x).toBe(700 - startPlungerX);
+    expect(next.launchPosition.y).toBe(startLaunch.y);
   });
 });

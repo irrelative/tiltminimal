@@ -43,6 +43,13 @@ export const hitTestSelection = (
     return { kind: 'launch-position' };
   }
 
+  if (
+    distanceToOrientedSegment(point, board.plunger, board.plunger.length, Math.PI / 2) <=
+    board.plunger.thickness / 2 + SELECTION_PADDING
+  ) {
+    return { kind: 'plunger' };
+  }
+
   for (let index = board.saucers.length - 1; index >= 0; index -= 1) {
     const saucer = board.saucers[index];
 
@@ -353,6 +360,32 @@ export const moveSelection = (
     };
   }
 
+  if (selection.kind === 'plunger') {
+    const clampedPoint = clampPoint(
+      board,
+      point,
+      Math.max(board.plunger.length / 2, board.plunger.thickness / 2) + 24,
+    );
+    const deltaX = clampedPoint.x - board.plunger.x;
+    const deltaY = clampedPoint.y - board.plunger.y;
+
+    return {
+      ...board,
+      plunger: {
+        ...board.plunger,
+        ...clampedPoint,
+      },
+      launchPosition: clampPoint(
+        board,
+        {
+          x: board.launchPosition.x + deltaX,
+          y: board.launchPosition.y + deltaY,
+        },
+        30,
+      ),
+    };
+  }
+
   if (selection.kind === 'bumper' && selection.index !== undefined) {
     return {
       ...board,
@@ -606,6 +639,45 @@ export const updateSelectedNumericField = (
           30,
           field === 'x' ? board.width - 30 : board.height - 30,
         ),
+      },
+    };
+  }
+
+  if (selection.kind === 'plunger') {
+    if (field === 'x' || field === 'y') {
+      const nextPoint = clampPoint(
+        board,
+        {
+          x: field === 'x' ? value : board.plunger.x,
+          y: field === 'y' ? value : board.plunger.y,
+        },
+        Math.max(board.plunger.length / 2, board.plunger.thickness / 2) + 24,
+      );
+      const deltaX = nextPoint.x - board.plunger.x;
+      const deltaY = nextPoint.y - board.plunger.y;
+
+      return {
+        ...board,
+        plunger: {
+          ...board.plunger,
+          ...nextPoint,
+        },
+        launchPosition: clampPoint(
+          board,
+          {
+            x: board.launchPosition.x + deltaX,
+            y: board.launchPosition.y + deltaY,
+          },
+          30,
+        ),
+      };
+    }
+
+    return {
+      ...board,
+      plunger: {
+        ...board.plunger,
+        [field]: value,
       },
     };
   }

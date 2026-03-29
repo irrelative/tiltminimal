@@ -627,6 +627,16 @@ export class CanvasRenderer {
         this.drawCircularSelection(context, rollover, rollover.radius);
       }
     }
+
+    if (selection.kind === 'plunger') {
+      this.drawOrientedSelection(
+        context,
+        board.plunger,
+        board.plunger.length,
+        board.plunger.thickness,
+        Math.PI / 2,
+      );
+    }
   }
 
   private drawBumperSelection(
