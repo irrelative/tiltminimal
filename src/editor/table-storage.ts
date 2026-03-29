@@ -7,6 +7,7 @@ import {
 import { cloneGuide } from '../game/guide-geometry';
 import { physicsDefaults } from '../game/physics-defaults';
 import { defaultRulesScript } from '../game/rules-defaults';
+import { DEFAULT_BOARD_THEME_ID } from '../render/board-themes';
 import type {
   BoardDefinition,
   BoardDefinitionInput,
@@ -259,6 +260,8 @@ export const exportBoardDefinition = (
 ): BoardDefinitionInput => {
   const stored: BoardDefinitionInput = {
     name: board.name,
+    themeId:
+      board.themeId === DEFAULT_BOARD_THEME_ID ? undefined : board.themeId,
     width: board.width,
     height: board.height,
     rulesScript:

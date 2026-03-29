@@ -3,6 +3,8 @@ export interface Point {
   y: number;
 }
 
+export type BoardThemeId = 'classic' | 'midnight' | 'sunburst' | 'grayscale';
+
 export type FlipperSide = 'left' | 'right';
 
 export interface BallDefinition {
@@ -148,6 +150,7 @@ export type GuideDefinition = LineGuideDefinition | ArcGuideDefinition;
 
 export interface BoardDefinition {
   name: string;
+  themeId: BoardThemeId;
   width: number;
   height: number;
   rulesScript: string;
@@ -176,6 +179,7 @@ export interface BoardDefinition {
 
 export interface BoardDefinitionInput {
   name: string;
+  themeId?: BoardThemeId;
   width: number;
   height: number;
   rulesScript?: string;

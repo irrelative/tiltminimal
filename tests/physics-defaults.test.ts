@@ -9,6 +9,7 @@ describe('createBoardDefinition', () => {
   it('fills in omitted physics values from the defaults', () => {
     const board = createTestBoard();
 
+    expect(board.themeId).toBe('classic');
     expect(board.gravity).toBe(physicsDefaults.gravity);
     expect(board.tableAngle).toBe(physicsDefaults.tableAngle);
     expect(board.ball).toEqual(physicsDefaults.ball);
@@ -24,6 +25,7 @@ describe('createBoardDefinition', () => {
 
   it('lets board definitions override nested physics and material defaults', () => {
     const board = createTestBoard({
+      themeId: 'grayscale',
       gravity: 1725,
       tableAngle: 7.1,
       ball: {
@@ -50,6 +52,7 @@ describe('createBoardDefinition', () => {
       },
     });
 
+    expect(board.themeId).toBe('grayscale');
     expect(board.gravity).toBe(1725);
     expect(board.tableAngle).toBe(7.1);
     expect(board.ball.radius).toBe(18);

@@ -91,6 +91,7 @@ export const normalizeBoardDefinition = (
 
   return createBoardDefinition({
     name: source.name ?? 'Untitled Table',
+    themeId: source.themeId,
     width: source.width ?? 900,
     height: source.height ?? 1400,
     rulesScript: source.rulesScript,

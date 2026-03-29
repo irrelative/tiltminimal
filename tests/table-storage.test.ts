@@ -194,6 +194,7 @@ describe('table storage', () => {
     expect(exported.surfaceMaterials).toBeUndefined();
     expect(exported.rulesScript).toBeUndefined();
     expect(exported.flippers).toHaveLength(2);
+    expect(exported.themeId).toBeUndefined();
   });
 
   it('includes custom rule scripts in exported table JSON', () => {
@@ -203,5 +204,33 @@ describe('table storage', () => {
     const exported = exportBoardDefinition(board);
 
     expect(exported.rulesScript).toContain('setBallsPerGame(5)');
+  });
+
+  it('persists non-default board themes through export and load', () => {
+    const table = {
+      id: 'theme-table',
+      builtIn: false,
+      board: {
+        ...createBlankTable('Theme Table'),
+        themeId: 'grayscale' as const,
+      },
+    };
+
+    upsertTable(table, window.localStorage);
+
+    const raw = window.localStorage.getItem('pball-web.tables.v2');
+    const stored = JSON.parse(raw ?? '{}') as {
+      tables?: Array<{ id?: string; board?: { themeId?: string } }>;
+    };
+
+    expect(
+      stored.tables?.find((entry) => entry.id === 'theme-table')?.board?.themeId,
+    ).toBe('grayscale');
+
+    const state = loadTablesState(window.localStorage);
+
+    expect(
+      state.tables.find((entry) => entry.id === 'theme-table')?.board.themeId,
+    ).toBe('grayscale');
   });
 });

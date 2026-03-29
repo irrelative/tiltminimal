@@ -89,6 +89,7 @@ export const createBoardDefinition = (
   input: BoardDefinitionInput,
 ): BoardDefinition => ({
   name: input.name,
+  themeId: input.themeId ?? 'classic',
   width: input.width,
   height: input.height,
   rulesScript: input.rulesScript ?? defaultRulesScript,

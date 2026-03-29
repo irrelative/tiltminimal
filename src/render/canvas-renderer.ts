@@ -19,6 +19,7 @@ import {
 import type { GameState } from '../game/game-state';
 import { getStatusLabel } from '../game/game-loop';
 import { getPlungerPullRatio } from '../game/physics-engine';
+import { getBoardTheme } from './board-themes';
 import type {
   BoardDefinition,
   BumperDefinition,
@@ -27,21 +28,7 @@ import type {
   PostDefinition,
 } from '../types/board-definition';
 import type { InputState } from '../input/keyboard-input';
-
-const PALETTE = {
-  backgroundYellow: '#fed41d',
-  insetYellow: '#ffd94d',
-  skyBlue: '#70d1f4',
-  outlineBlue: '#2f6db2',
-  pink: '#f26ca7',
-  orange: '#f89c2a',
-  red: '#e94f37',
-  green: '#8dc63f',
-  cream: '#fff7d6',
-  ink: '#22304a',
-};
-
-const FLIPPER_COLOR = PALETTE.red;
+const EDITOR_INK = '#22304a';
 
 interface EditorRenderOptions {
   showGrid?: boolean;
@@ -66,7 +53,7 @@ export class CanvasRenderer {
     context.clearRect(0, 0, board.width, board.height);
 
     this.drawBoard(context, board, state);
-    this.drawBall(context, state);
+    this.drawBall(context, board, state);
     this.drawHud(context, board, state, input);
   }
 
@@ -119,11 +106,11 @@ export class CanvasRenderer {
     for (const [index, flipper] of board.flippers.entries()) {
       this.drawFlipper(
         context,
+        board,
         flipper,
         state
           ? getRenderedFlipperAngle(state, flipper, index)
           : flipper.restingAngle,
-        FLIPPER_COLOR,
       );
     }
   }
@@ -132,20 +119,21 @@ export class CanvasRenderer {
     context: CanvasRenderingContext2D,
     board: BoardDefinition,
   ): void {
+    const theme = getBoardTheme(board.themeId);
     const gradient = context.createLinearGradient(0, 0, 0, board.height);
-    gradient.addColorStop(0, PALETTE.backgroundYellow);
-    gradient.addColorStop(0.38, PALETTE.insetYellow);
-    gradient.addColorStop(1, '#f7bd17');
+    gradient.addColorStop(0, theme.backgroundTop);
+    gradient.addColorStop(0.38, theme.backgroundMid);
+    gradient.addColorStop(1, theme.backgroundBottom);
 
     context.fillStyle = gradient;
     context.fillRect(0, 0, board.width, board.height);
 
-    context.fillStyle = 'rgba(255, 255, 255, 0.28)';
+    context.fillStyle = theme.glowPrimary;
     context.beginPath();
     context.arc(180, 220, 180, 0, Math.PI * 2);
     context.fill();
 
-    context.fillStyle = 'rgba(112, 209, 244, 0.24)';
+    context.fillStyle = theme.glowSecondary;
     context.beginPath();
     context.arc(720, 1180, 260, 0, Math.PI * 2);
     context.fill();
@@ -155,6 +143,7 @@ export class CanvasRenderer {
     context: CanvasRenderingContext2D,
     board: BoardDefinition,
   ): void {
+    const theme = getBoardTheme(board.themeId);
     for (const guide of board.guides) {
       const material = getSurfaceMaterial(
         guide.material,
@@ -162,7 +151,9 @@ export class CanvasRenderer {
       );
 
       context.strokeStyle =
-        material.name === 'rubberPost' ? PALETTE.orange : PALETTE.skyBlue;
+        material.name === 'rubberPost'
+          ? theme.guideRubberPrimary
+          : theme.guideMetalPrimary;
       context.lineWidth = guide.thickness;
       context.lineCap = 'round';
       if (isArcGuide(guide)) {
@@ -176,8 +167,8 @@ export class CanvasRenderer {
 
       context.strokeStyle =
         material.name === 'rubberPost'
-          ? 'rgba(233, 79, 55, 0.85)'
-          : PALETTE.outlineBlue;
+          ? theme.guideRubberSecondary
+          : theme.guideMetalSecondary;
       context.lineWidth = Math.max(guide.thickness - 8, 4);
       if (isArcGuide(guide)) {
         this.traceArcGuide(context, guide);
@@ -195,20 +186,21 @@ export class CanvasRenderer {
     board: BoardDefinition,
     state?: GameState,
   ): void {
-    const bumperColors = [PALETTE.pink, PALETTE.green, PALETTE.skyBlue];
+    const theme = getBoardTheme(board.themeId);
 
     board.bumpers.forEach((bumper, index) => {
       context.fillStyle =
-        bumperColors[index % bumperColors.length] ?? PALETTE.pink;
+        theme.bumperColors[index % theme.bumperColors.length] ??
+        theme.bumperColors[0];
       context.beginPath();
       context.arc(bumper.x, bumper.y, bumper.radius, 0, Math.PI * 2);
       context.fill();
 
       context.lineWidth = 8;
-      context.strokeStyle = PALETTE.cream;
+      context.strokeStyle = theme.bumperRing;
       context.stroke();
 
-      context.fillStyle = PALETTE.cream;
+      context.fillStyle = theme.bumperCap;
       context.beginPath();
       context.arc(bumper.x, bumper.y, bumper.radius * 0.45, 0, Math.PI * 2);
       context.fill();
@@ -216,10 +208,10 @@ export class CanvasRenderer {
       if (state) {
         context.font = '600 20px Georgia, serif';
         context.textAlign = 'center';
-        context.fillStyle = 'rgba(34, 48, 74, 0.9)';
+        context.fillStyle = theme.bumperText;
         context.fillText(String(bumper.score), bumper.x, bumper.y + 8);
       } else {
-        context.fillStyle = PALETTE.ink;
+        context.fillStyle = theme.bumperText;
         context.beginPath();
         context.arc(bumper.x, bumper.y, bumper.radius * 0.18, 0, Math.PI * 2);
         context.fill();
@@ -233,21 +225,28 @@ export class CanvasRenderer {
     context: CanvasRenderingContext2D,
     board: BoardDefinition,
   ): void {
+    const theme = getBoardTheme(board.themeId);
     board.posts.forEach((post) => {
       const material = getSurfaceMaterial(post.material, board.surfaceMaterials);
 
       context.save();
       context.fillStyle =
-        material.name === 'metalGuide' ? PALETTE.cream : PALETTE.red;
+        material.name === 'metalGuide'
+          ? theme.postMetalFill
+          : theme.postRubberFill;
       context.beginPath();
       context.arc(post.x, post.y, post.radius, 0, Math.PI * 2);
       context.fill();
       context.lineWidth = 5;
       context.strokeStyle =
-        material.name === 'metalGuide' ? PALETTE.outlineBlue : PALETTE.cream;
+        material.name === 'metalGuide'
+          ? theme.postMetalRing
+          : theme.postRubberRing;
       context.stroke();
       context.fillStyle =
-        material.name === 'metalGuide' ? PALETTE.outlineBlue : PALETTE.ink;
+        material.name === 'metalGuide'
+          ? theme.postMetalCore
+          : theme.postRubberCore;
       context.beginPath();
       context.arc(
         post.x,
@@ -266,6 +265,7 @@ export class CanvasRenderer {
     board: BoardDefinition,
     state?: GameState,
   ): void {
+    const theme = getBoardTheme(board.themeId);
     const pullback = state?.plunger.pullback ?? 0;
     const laneWidth = getPlungerLaneHalfWidth(board.plunger) * 2;
     const laneTop = getPlungerGuideTopY(board);
@@ -274,8 +274,8 @@ export class CanvasRenderer {
     const guideSegments = getPlungerGuideSegments(board);
 
     context.save();
-    context.fillStyle = 'rgba(34, 48, 74, 0.14)';
-    context.strokeStyle = 'rgba(47, 109, 178, 0.45)';
+    context.fillStyle = theme.plungerLaneFill;
+    context.strokeStyle = theme.plungerLaneStroke;
     context.lineWidth = 3;
     context.beginPath();
     context.rect(
@@ -287,7 +287,7 @@ export class CanvasRenderer {
     context.fill();
     context.stroke();
 
-    context.strokeStyle = PALETTE.skyBlue;
+    context.strokeStyle = theme.plungerGuidePrimary;
     context.lineWidth = guideSegments[0].thickness;
     context.lineCap = 'round';
     for (const guide of guideSegments) {
@@ -297,7 +297,7 @@ export class CanvasRenderer {
       context.stroke();
     }
 
-    context.strokeStyle = PALETTE.outlineBlue;
+    context.strokeStyle = theme.plungerGuideSecondary;
     context.lineWidth = Math.max(guideSegments[0].thickness - 4, 4);
     for (const guide of guideSegments) {
       context.beginPath();
@@ -315,11 +315,11 @@ export class CanvasRenderer {
       board.plunger.thickness,
       board.plunger.length,
       Math.PI / 2,
-      PALETTE.cream,
-      PALETTE.outlineBlue,
+      theme.plungerBodyFill,
+      theme.plungerBodyStroke,
     );
 
-    context.fillStyle = PALETTE.red;
+    context.fillStyle = theme.plungerKnob;
     context.beginPath();
     context.arc(
       board.plunger.x,
@@ -340,6 +340,7 @@ export class CanvasRenderer {
     board: BoardDefinition,
     state?: GameState,
   ): void {
+    const theme = getBoardTheme(board.themeId);
     board.standupTargets.forEach((target, index) => {
       const lit = Boolean(
         state && state.standupTargets[index]?.cooldownSeconds > 0,
@@ -350,8 +351,8 @@ export class CanvasRenderer {
         target.width,
         target.height,
         target.angle,
-        lit ? PALETTE.cream : PALETTE.orange,
-        PALETTE.ink,
+        lit ? theme.standupLitFill : theme.standupFill,
+        theme.targetStroke,
       );
     });
   }
@@ -361,6 +362,7 @@ export class CanvasRenderer {
     board: BoardDefinition,
     state?: GameState,
   ): void {
+    const theme = getBoardTheme(board.themeId);
     board.dropTargets.forEach((target, index) => {
       const isDown = Boolean(state?.dropTargets[index]?.isDown);
       const yOffset = isDown ? target.height * 0.6 : 0;
@@ -371,8 +373,8 @@ export class CanvasRenderer {
         target.width,
         target.height,
         target.angle,
-        isDown ? 'rgba(255, 247, 214, 0.45)' : PALETTE.red,
-        PALETTE.cream,
+        isDown ? theme.dropDownFill : theme.dropUpFill,
+        theme.dropStroke,
       );
     });
   }
@@ -382,21 +384,20 @@ export class CanvasRenderer {
     board: BoardDefinition,
     state?: GameState,
   ): void {
+    const theme = getBoardTheme(board.themeId);
     board.saucers.forEach((saucer, index) => {
       const occupied = Boolean(state?.saucers[index]?.occupied);
 
       context.save();
-      context.fillStyle = occupied ? PALETTE.green : PALETTE.ink;
+      context.fillStyle = occupied ? theme.saucerOccupiedFill : theme.saucerFill;
       context.beginPath();
       context.arc(saucer.x, saucer.y, saucer.radius, 0, Math.PI * 2);
       context.fill();
-      context.fillStyle = occupied
-        ? PALETTE.cream
-        : 'rgba(255, 247, 214, 0.35)';
+      context.fillStyle = occupied ? theme.saucerCoreOccupied : theme.saucerCore;
       context.beginPath();
       context.arc(saucer.x, saucer.y, saucer.radius * 0.62, 0, Math.PI * 2);
       context.fill();
-      context.strokeStyle = PALETTE.skyBlue;
+      context.strokeStyle = theme.saucerRing;
       context.lineWidth = 5;
       context.stroke();
       context.restore();
@@ -408,6 +409,7 @@ export class CanvasRenderer {
     board: BoardDefinition,
     state?: GameState,
   ): void {
+    const theme = getBoardTheme(board.themeId);
     board.spinners.forEach((spinner, index) => {
       const angle = spinner.angle + (state?.spinners[index]?.angle ?? 0);
 
@@ -417,12 +419,12 @@ export class CanvasRenderer {
         spinner.length,
         spinner.thickness,
         angle,
-        PALETTE.skyBlue,
-        PALETTE.ink,
+        theme.spinnerFill,
+        theme.spinnerStroke,
       );
 
       context.save();
-      context.fillStyle = PALETTE.cream;
+      context.fillStyle = theme.spinnerCap;
       context.beginPath();
       context.arc(
         spinner.x,
@@ -441,15 +443,18 @@ export class CanvasRenderer {
     board: BoardDefinition,
     state?: GameState,
   ): void {
+    const theme = getBoardTheme(board.themeId);
     board.rollovers.forEach((rollover, index) => {
       const lit = Boolean(state?.rollovers[index]?.lit);
 
       context.save();
-      context.fillStyle = lit ? PALETTE.green : 'rgba(255, 247, 214, 0.24)';
+      context.fillStyle = lit ? theme.rolloverLitFill : theme.rolloverFill;
       context.beginPath();
       context.arc(rollover.x, rollover.y, rollover.radius, 0, Math.PI * 2);
       context.fill();
-      context.strokeStyle = lit ? PALETTE.cream : PALETTE.outlineBlue;
+      context.strokeStyle = lit
+        ? theme.rolloverStrokeLit
+        : theme.rolloverStroke;
       context.lineWidth = 4;
       context.stroke();
       context.restore();
@@ -458,25 +463,26 @@ export class CanvasRenderer {
 
   private drawFlipper(
     context: CanvasRenderingContext2D,
+    board: BoardDefinition,
     flipper: FlipperDefinition,
     angle: number,
-    color: string,
   ): void {
+    const theme = getBoardTheme(board.themeId);
     const baseRadius = getFlipperBaseRadius(flipper);
     const tipRadius = getFlipperTipRadius(flipper);
 
     context.save();
     context.translate(flipper.x, flipper.y);
     context.rotate(angle);
-    context.fillStyle = color;
+    context.fillStyle = theme.flipperFill;
     this.traceFlipperPath(context, flipper);
     context.fill();
 
-    context.strokeStyle = PALETTE.cream;
+    context.strokeStyle = theme.flipperStroke;
     context.lineWidth = 4;
     context.stroke();
 
-    context.fillStyle = PALETTE.cream;
+    context.fillStyle = theme.flipperCore;
     context.beginPath();
     context.arc(baseRadius * 0.6, 0, baseRadius * 0.32, 0, Math.PI * 2);
     context.fill();
@@ -492,8 +498,13 @@ export class CanvasRenderer {
     context.restore();
   }
 
-  private drawBall(context: CanvasRenderingContext2D, state: GameState): void {
-    context.fillStyle = '#fffdf7';
+  private drawBall(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+    state: GameState,
+  ): void {
+    const theme = getBoardTheme(board.themeId);
+    context.fillStyle = theme.ballFill;
     context.beginPath();
     context.arc(
       state.ball.position.x,
@@ -504,7 +515,7 @@ export class CanvasRenderer {
     );
     context.fill();
 
-    context.strokeStyle = 'rgba(34, 48, 74, 0.25)';
+    context.strokeStyle = theme.ballStroke;
     context.lineWidth = 2;
     context.stroke();
   }
@@ -515,7 +526,8 @@ export class CanvasRenderer {
     state: GameState,
     input: InputState,
   ): void {
-    context.fillStyle = PALETTE.ink;
+    const theme = getBoardTheme(board.themeId);
+    context.fillStyle = theme.hudText;
     context.font = '600 28px Georgia, serif';
     context.fillText(board.name, 48, 64);
     context.fillText(`Score ${state.score}`, 48, 104);
@@ -525,7 +537,7 @@ export class CanvasRenderer {
     }
 
     context.font = '400 20px Georgia, serif';
-    context.fillStyle = 'rgba(34, 48, 74, 0.85)';
+    context.fillStyle = theme.hudMuted;
     context.fillText(
       getStatusLabel(state, input, board),
       48,
@@ -538,24 +550,25 @@ export class CanvasRenderer {
     board: BoardDefinition,
     state: GameState,
   ): void {
+    const theme = getBoardTheme(board.themeId);
     const ratio = getPlungerPullRatio(state, board);
     const meterWidth = 200;
     const meterHeight = 14;
     const x = board.width - meterWidth - 48;
     const y = 54;
 
-    context.fillStyle = 'rgba(34, 48, 74, 0.18)';
+    context.fillStyle = theme.launchMeterTrack;
     context.fillRect(x, y, meterWidth, meterHeight);
 
-    context.fillStyle = PALETTE.red;
+    context.fillStyle = theme.launchMeterFill;
     context.fillRect(x, y, meterWidth * ratio, meterHeight);
 
-    context.strokeStyle = PALETTE.outlineBlue;
+    context.strokeStyle = theme.launchMeterStroke;
     context.lineWidth = 2;
     context.strokeRect(x, y, meterWidth, meterHeight);
 
     context.font = '400 16px Georgia, serif';
-    context.fillStyle = PALETTE.ink;
+    context.fillStyle = theme.hudText;
     context.fillText('Plunger', x, y - 10);
   }
 
@@ -564,12 +577,13 @@ export class CanvasRenderer {
     board: BoardDefinition,
     selection: EditorSelection,
   ): void {
+    const theme = getBoardTheme(board.themeId);
     context.save();
     context.strokeStyle =
       selection.kind === 'launch-position'
-        ? 'rgba(0, 0, 0, 0.95)'
-        : 'rgba(0, 0, 0, 0.82)';
-    context.fillStyle = 'rgba(0, 0, 0, 0.12)';
+        ? theme.launchMarkerStrokeActive
+        : theme.launchMarkerStroke;
+    context.fillStyle = theme.launchMarkerFill;
     context.lineWidth = selection.kind === 'launch-position' ? 4 : 2;
     context.beginPath();
     context.arc(
@@ -971,11 +985,12 @@ export class CanvasRenderer {
     board: BoardDefinition,
     options: EditorRenderOptions,
   ): void {
-    context.fillStyle = 'rgba(241, 250, 238, 0.92)';
+    const theme = getBoardTheme(board.themeId);
+    context.fillStyle = theme.hudText;
     context.font = '600 28px Georgia, serif';
     context.fillText(`${board.name} Editor`, 48, 64);
     context.font = '400 18px Georgia, serif';
-    context.fillStyle = 'rgba(241, 250, 238, 0.82)';
+    context.fillStyle = theme.hudMuted;
     context.fillText(
       'Drag elements to reposition. Delete removes the selection.',
       48,
@@ -1001,7 +1016,7 @@ export class CanvasRenderer {
     color: string,
   ): void {
     context.fillStyle = color;
-    context.strokeStyle = PALETTE.ink;
+    context.strokeStyle = EDITOR_INK;
     context.lineWidth = 2;
     context.beginPath();
     context.arc(point.x, point.y, 8, 0, Math.PI * 2);

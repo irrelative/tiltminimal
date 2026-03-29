@@ -44,6 +44,7 @@ import { GameLoop } from './game/game-loop';
 import { createInitialGameState } from './game/game-state';
 import { validateRulesScript } from './game/rules-engine';
 import { KeyboardInput } from './input/keyboard-input';
+import { BOARD_THEMES } from './render/board-themes';
 import { CanvasRenderer } from './render/canvas-renderer';
 import type { BoardDefinition, Point } from './types/board-definition';
 import { isArcGuide } from './game/guide-geometry';
@@ -93,6 +94,7 @@ const duplicateTableButton =
 const playToggleButton = queryRequired<HTMLButtonElement>('#play-toggle');
 const removeTableButton = queryRequired<HTMLButtonElement>('#remove-table');
 const tableNameInput = queryRequired<HTMLInputElement>('#table-name');
+const tableThemeSelect = queryRequired<HTMLSelectElement>('#table-theme');
 const tableMeta = queryRequired<HTMLElement>('#table-meta');
 const selectionLabel = queryRequired<HTMLElement>('#selection-label');
 const selectionFields = queryRequired<HTMLElement>('#selection-fields');
@@ -247,6 +249,17 @@ function bootEditorRoute(): void {
       },
       true,
     );
+  });
+
+  tableThemeSelect.addEventListener('change', () => {
+    replaceActiveBoard(
+      {
+        ...getActiveTable().board,
+        themeId: tableThemeSelect.value as BoardDefinition['themeId'],
+      },
+      true,
+    );
+    renderApp();
   });
 
   snapToGridToggle.addEventListener('change', () => {
@@ -801,6 +814,17 @@ function bootRulesRoute(): void {
     renderApp();
   });
 
+  tableThemeSelect.addEventListener('change', () => {
+    replaceActiveBoard(
+      {
+        ...getActiveTable().board,
+        themeId: tableThemeSelect.value as BoardDefinition['themeId'],
+      },
+      true,
+    );
+    renderApp();
+  });
+
   rulesScriptEditor.addEventListener('input', () => {
     replaceActiveBoard(
       {
@@ -920,6 +944,15 @@ function syncTablePanel(): void {
   const active = getActiveTable();
 
   tableNameInput.value = active.board.name;
+  tableThemeSelect.replaceChildren(
+    ...Object.values(BOARD_THEMES).map((theme) => {
+      const option = document.createElement('option');
+      option.value = theme.id;
+      option.selected = theme.id === active.board.themeId;
+      option.textContent = theme.label;
+      return option;
+    }),
+  );
   tableMeta.textContent = `${active.builtIn ? 'Built-in table' : 'Custom table'} · ${getFeatureCount(active.board)} features`;
   removeTableButton.textContent = active.builtIn ? 'Reset built-in' : 'Delete';
 }
