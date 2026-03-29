@@ -55,6 +55,7 @@ export const cloneBoardDefinition = (
   board: BoardDefinition,
 ): BoardDefinition => ({
   ...board,
+  rulesScript: board.rulesScript,
   ball: { ...board.ball },
   launchPosition: { ...board.launchPosition },
   plunger: { ...board.plunger },
@@ -90,6 +91,7 @@ export const normalizeBoardDefinition = (
     name: source.name ?? 'Untitled Table',
     width: source.width ?? 900,
     height: source.height ?? 1400,
+    rulesScript: source.rulesScript,
     gravity: source.gravity,
     tableAngle: source.tableAngle,
     drainY: source.drainY ?? 1425,

@@ -5,7 +5,8 @@ import type { GameAudio } from '../audio/game-audio';
 import { getFrameAudioEvents } from '../audio/game-audio';
 import type { GameState } from './game-state';
 import { resetBall } from './game-state';
-import { getPlungerPullRatio, stepGame } from './physics-engine';
+import { applyRulesFrame, initializeRulesState } from './rules-engine';
+import { getPlungerPullRatio, stepGameFrame } from './physics-engine';
 
 export class GameLoop {
   private animationFrameId = 0;
@@ -21,6 +22,7 @@ export class GameLoop {
     private readonly renderer: CanvasRenderer,
     private readonly audio?: GameAudio,
   ) {
+    this.state = initializeRulesState(this.state, this.board);
     this.lastInputState = this.input.getState();
   }
 
@@ -71,9 +73,33 @@ export class GameLoop {
         : (frameTime - this.lastFrameTime) / 1000;
     this.lastFrameTime = frameTime;
     const input = this.input.getState();
-    const previousState = this.state;
+    let previousState = this.state;
 
-    this.state = stepGame(previousState, this.board, input, deltaSeconds);
+    if (
+      previousState.status === 'game-over' &&
+      input.launchPressed &&
+      !this.lastInputState.launchPressed
+    ) {
+      this.state = initializeRulesState(
+        resetBall(previousState, this.board),
+        this.board,
+      );
+      previousState = this.state;
+    } else {
+      const frame = stepGameFrame(
+        previousState,
+        this.board,
+        input,
+        deltaSeconds,
+      );
+      this.state = applyRulesFrame(
+        frame.state,
+        this.board,
+        frame.events,
+        deltaSeconds,
+      );
+    }
+
     this.audio?.playEvents(
       getFrameAudioEvents(
         previousState,
@@ -100,6 +126,10 @@ export const getStatusLabel = (
   input: InputState,
   board: BoardDefinition,
 ): string => {
+  if (state.status === 'game-over') {
+    return 'Game over. Hold Space to start a new game.';
+  }
+
   if (state.status === 'waiting-launch') {
     const launchPercent = Math.round(getPlungerPullRatio(state, board) * 100);
 

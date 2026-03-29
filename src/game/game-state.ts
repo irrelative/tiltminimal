@@ -1,4 +1,9 @@
 import type { BoardDefinition } from '../types/board-definition';
+import {
+  cloneRulesState,
+  createInitialRulesState,
+  type RulesState,
+} from './rules-types';
 
 export interface Vector3 {
   x: number;
@@ -53,7 +58,7 @@ export interface GameState {
   ball: BallState;
   score: number;
   tick: number;
-  status: 'waiting-launch' | 'playing';
+  status: 'waiting-launch' | 'playing' | 'game-over';
   plunger: PlungerState;
   flippers: FlipperState[];
   standupTargets: StandupTargetState[];
@@ -61,6 +66,7 @@ export interface GameState {
   saucers: SaucerState[];
   spinners: SpinnerState[];
   rollovers: RolloverState[];
+  rules: RulesState;
 }
 
 export const createInitialGameState = (board: BoardDefinition): GameState => ({
@@ -75,6 +81,7 @@ export const createInitialGameState = (board: BoardDefinition): GameState => ({
   saucers: board.saucers.map(createSaucerState),
   spinners: board.spinners.map(createSpinnerState),
   rollovers: board.rollovers.map(createRolloverState),
+  rules: createInitialRulesState(),
 });
 
 export const resetBall = (
@@ -91,6 +98,7 @@ export const resetBall = (
   saucers: board.saucers.map(createSaucerState),
   spinners: board.spinners.map(createSpinnerState),
   rollovers: board.rollovers.map(createRolloverState),
+  rules: cloneRulesState(state.rules),
 });
 
 export const createBallState = (board: BoardDefinition): BallState => {

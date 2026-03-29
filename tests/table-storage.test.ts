@@ -192,6 +192,16 @@ describe('table storage', () => {
     expect(exported.name).toBe('Export Table');
     expect(exported.physics).toBeUndefined();
     expect(exported.surfaceMaterials).toBeUndefined();
+    expect(exported.rulesScript).toBeUndefined();
     expect(exported.flippers).toHaveLength(2);
+  });
+
+  it('includes custom rule scripts in exported table JSON', () => {
+    const board = createBlankTable('Rules Table');
+    board.rulesScript =
+      'return { onGameStart(ctx) { ctx.setBallsPerGame(5); } };';
+    const exported = exportBoardDefinition(board);
+
+    expect(exported.rulesScript).toContain('setBallsPerGame(5)');
   });
 });

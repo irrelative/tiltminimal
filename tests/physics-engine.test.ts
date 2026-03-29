@@ -10,7 +10,7 @@ import {
   getFlipperTipRadius,
 } from '../src/game/flipper-geometry';
 import { createInitialGameState } from '../src/game/game-state';
-import { stepGame } from '../src/game/physics-engine';
+import { stepGame, stepGameFrame } from '../src/game/physics-engine';
 import type { FlipperDefinition } from '../src/types/board-definition';
 
 const idleInput: InputState = {
@@ -297,10 +297,18 @@ describe('stepGame', () => {
     state.ball.position.y = 390;
     state.ball.linearVelocity.y = 180;
 
-    const next = stepGame(state, board, idleInput, 1 / 60);
+    const next = stepGameFrame(state, board, idleInput, 1 / 60);
 
-    expect(next.score).toBe(75);
-    expect(next.standupTargets[0]?.cooldownSeconds).toBeGreaterThan(0);
+    expect(next.events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'standup-target-hit',
+          index: 0,
+          score: 75,
+        }),
+      ]),
+    );
+    expect(next.state.standupTargets[0]?.cooldownSeconds).toBeGreaterThan(0);
   });
 
   it('drops a drop target after a hit', () => {
@@ -322,10 +330,18 @@ describe('stepGame', () => {
     state.ball.position.y = 390;
     state.ball.linearVelocity.y = 180;
 
-    const next = stepGame(state, board, idleInput, 1 / 60);
+    const next = stepGameFrame(state, board, idleInput, 1 / 60);
 
-    expect(next.score).toBe(100);
-    expect(next.dropTargets[0]?.isDown).toBe(true);
+    expect(next.events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'drop-target-hit',
+          index: 0,
+          score: 100,
+        }),
+      ]),
+    );
+    expect(next.state.dropTargets[0]?.isDown).toBe(true);
   });
 
   it('captures and ejects the ball from a saucer', () => {
@@ -349,14 +365,22 @@ describe('stepGame', () => {
 
     const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(1);
 
-    const captured = stepGame(state, board, idleInput, 1 / 60);
-    const held = stepGame(captured, board, idleInput, 1 / 30);
+    const captured = stepGameFrame(state, board, idleInput, 1 / 60);
+    const held = stepGame(captured.state, board, idleInput, 1 / 30);
     const ejected = stepGame(held, board, idleInput, 1 / 30);
 
     randomSpy.mockRestore();
 
-    expect(captured.saucers[0]?.occupied).toBe(true);
-    expect(captured.score).toBe(500);
+    expect(captured.state.saucers[0]?.occupied).toBe(true);
+    expect(captured.events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'saucer-captured',
+          index: 0,
+          score: 500,
+        }),
+      ]),
+    );
     expect(ejected.saucers[0]?.occupied).toBe(false);
     expect(ejected.ball.linearVelocity.x).toBeGreaterThan(0);
     expect(ejected.ball.linearVelocity.y).toBeLessThan(0);
@@ -381,10 +405,20 @@ describe('stepGame', () => {
     state.ball.position.y = 392;
     state.ball.linearVelocity.y = 220;
 
-    const next = stepGame(state, board, idleInput, 1 / 60);
+    const next = stepGameFrame(state, board, idleInput, 1 / 60);
 
-    expect(next.score).toBe(10);
-    expect(Math.abs(next.spinners[0]?.angularVelocity ?? 0)).toBeGreaterThan(0);
+    expect(next.events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'spinner-spin',
+          index: 0,
+          score: 10,
+        }),
+      ]),
+    );
+    expect(
+      Math.abs(next.state.spinners[0]?.angularVelocity ?? 0),
+    ).toBeGreaterThan(0);
   });
 
   it('lights a rollover when the ball crosses it', () => {
@@ -395,10 +429,18 @@ describe('stepGame', () => {
     state.ball.position.x = 450;
     state.ball.position.y = 400;
 
-    const next = stepGame(state, board, idleInput, 1 / 60);
+    const next = stepGameFrame(state, board, idleInput, 1 / 60);
 
-    expect(next.rollovers[0]?.lit).toBe(true);
-    expect(next.score).toBe(25);
+    expect(next.state.rollovers[0]?.lit).toBe(true);
+    expect(next.events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'rollover-hit',
+          index: 0,
+          score: 25,
+        }),
+      ]),
+    );
   });
 
   it('bounces off a curved guide', () => {

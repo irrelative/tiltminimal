@@ -122,6 +122,18 @@ body[data-route='play'] .control-panel {
   display: none;
 }
 
+.rules-only {
+  display: none;
+}
+
+body[data-route='rules'] .rules-only {
+  display: grid;
+}
+
+body[data-route='rules'] .editor-only {
+  display: none;
+}
+
 .panel-header,
 .panel-section {
   padding: 16px;
@@ -272,13 +284,18 @@ h2 {
 .export-json {
   min-height: 220px;
   resize: vertical;
-  font-family:
-    'SFMono-Regular',
-    'Consolas',
-    'Liberation Mono',
-    monospace;
+  font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
   font-size: 0.85rem;
   line-height: 1.45;
+  white-space: pre;
+}
+
+.rules-script-editor {
+  min-height: 420px;
+  resize: vertical;
+  font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
+  font-size: 0.86rem;
+  line-height: 1.5;
   white-space: pre;
 }
 
@@ -367,7 +384,8 @@ body[data-route='play'] .toolbar-main {
   font-weight: 700;
 }
 
-body[data-route='editor'] .play-route-panel {
+body[data-route='editor'] .play-route-panel,
+body[data-route='rules'] .play-route-panel {
   display: none;
 }
 

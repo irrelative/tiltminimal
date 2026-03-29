@@ -40,14 +40,15 @@ import {
 import { GameAudio } from './audio/game-audio';
 import { GameLoop } from './game/game-loop';
 import { createInitialGameState } from './game/game-state';
+import { validateRulesScript } from './game/rules-engine';
 import { KeyboardInput } from './input/keyboard-input';
 import { CanvasRenderer } from './render/canvas-renderer';
 import type { BoardDefinition, Point } from './types/board-definition';
 import { isArcGuide } from './game/guide-geometry';
 import './styles.css';
 
-type AppMode = 'edit' | 'play';
-type AppRoute = 'editor' | 'play';
+type AppMode = 'edit' | 'play' | 'rules';
+type AppRoute = 'editor' | 'play' | 'rules';
 type DebugDestination = 'board-editor' | 'play-test';
 
 const DEBUG_HASHES: Record<DebugDestination, string> = {
@@ -80,6 +81,8 @@ const queryRequired = <T extends Element>(selector: string): T => {
 };
 
 const canvas = queryRequired<HTMLCanvasElement>('#game');
+const panelTitle = queryRequired<HTMLElement>('#panel-title');
+const panelCopy = queryRequired<HTMLElement>('#panel-copy');
 const tableSelect = queryRequired<HTMLSelectElement>('#table-select');
 const newTableButton = queryRequired<HTMLButtonElement>('#new-table');
 const duplicateTableButton =
@@ -99,6 +102,12 @@ const tableExportJson =
   queryRequired<HTMLTextAreaElement>('#table-export-json');
 const copyTableJsonButton =
   queryRequired<HTMLButtonElement>('#copy-table-json');
+const rulesScriptStatus = queryRequired<HTMLElement>('#rules-script-status');
+const rulesScriptEditor = queryRequired<HTMLTextAreaElement>(
+  '#rules-script-editor',
+);
+const copyRulesScriptButton =
+  queryRequired<HTMLButtonElement>('#copy-rules-script');
 const modeTitle = queryRequired<HTMLElement>('#mode-title');
 const modeCopy = queryRequired<HTMLElement>('#mode-copy');
 const playTableSelect = queryRequired<HTMLSelectElement>('#play-table-select');
@@ -111,6 +120,7 @@ const playDebugVelocity = queryRequired<HTMLElement>('#play-debug-velocity');
 const playDebugSpin = queryRequired<HTMLElement>('#play-debug-spin');
 const debugLinkEditor = queryRequired<HTMLAnchorElement>('#debug-link-editor');
 const debugLinkPlay = queryRequired<HTMLAnchorElement>('#debug-link-play');
+const debugLinkRules = queryRequired<HTMLAnchorElement>('#debug-link-rules');
 
 const renderer = new CanvasRenderer(canvas);
 const gameAudio = new GameAudio();
@@ -120,7 +130,8 @@ const appRoute = getAppRoute(window.location.pathname);
 const state: AppState = {
   tables: loadedState.tables,
   activeTableId: loadedState.activeTableId,
-  mode: appRoute === 'editor' ? 'edit' : 'play',
+  mode:
+    appRoute === 'editor' ? 'edit' : appRoute === 'rules' ? 'rules' : 'play',
   tool: 'select',
   selection: { kind: 'none' },
   dragging: false,
@@ -139,15 +150,22 @@ if (BUILT_IN_TABLES.length === 0) {
 
 if (appRoute === 'editor') {
   bootEditorRoute();
+} else if (appRoute === 'rules') {
+  bootRulesRoute();
 } else {
   bootPlayRoute();
 }
 
 function bootEditorRoute(): void {
+  panelTitle.textContent = 'Table editor';
+  panelCopy.textContent =
+    'Add, drag, delete, and play-test tables. All edits persist in local storage.';
   debugLinkEditor.href = DEBUG_HASHES['board-editor'];
   debugLinkEditor.textContent = 'Board editor';
   debugLinkPlay.href = DEBUG_HASHES['play-test'];
   debugLinkPlay.textContent = 'Play test';
+  debugLinkRules.href = '/rules';
+  debugLinkRules.textContent = 'Rules';
 
   window.addEventListener('hashchange', () => {
     applyHashNavigation();
@@ -694,10 +712,81 @@ function bootPlayRoute(): void {
   debugLinkEditor.textContent = 'Open editor';
   debugLinkPlay.href = '/';
   debugLinkPlay.textContent = 'Game';
+  debugLinkRules.href = '/rules';
+  debugLinkRules.textContent = 'Rules';
   debugLinkEditor.classList.remove('is-active');
   debugLinkEditor.setAttribute('aria-current', 'false');
   debugLinkPlay.classList.add('is-active');
   debugLinkPlay.setAttribute('aria-current', 'page');
+  debugLinkRules.classList.remove('is-active');
+  debugLinkRules.setAttribute('aria-current', 'false');
+}
+
+function bootRulesRoute(): void {
+  state.mode = 'rules';
+  state.selection = { kind: 'none' };
+  state.tool = 'select';
+  state.draftPosition = null;
+
+  panelTitle.textContent = 'Rules editor';
+  panelCopy.textContent =
+    'Edit scriptable table rules in a separate workspace from the layout builder.';
+
+  tableSelect.addEventListener('change', () => {
+    state.activeTableId = tableSelect.value;
+    state.selection = { kind: 'none' };
+    setActiveTableId(state.activeTableId);
+    renderApp();
+  });
+
+  tableNameInput.addEventListener('input', () => {
+    const active = getActiveTable();
+    const name = tableNameInput.value.trim() || active.board.name;
+
+    replaceActiveBoard(
+      {
+        ...active.board,
+        name,
+      },
+      true,
+    );
+    renderApp();
+  });
+
+  rulesScriptEditor.addEventListener('input', () => {
+    replaceActiveBoard(
+      {
+        ...getActiveTable().board,
+        rulesScript: rulesScriptEditor.value,
+      },
+      true,
+    );
+    syncRulesPanel();
+  });
+
+  copyRulesScriptButton.addEventListener('click', async () => {
+    const script = rulesScriptEditor.value;
+
+    try {
+      await navigator.clipboard.writeText(script);
+      copyRulesScriptButton.textContent = 'Copied';
+      window.setTimeout(() => {
+        copyRulesScriptButton.textContent = 'Copy Script';
+      }, 1200);
+    } catch {
+      rulesScriptEditor.focus();
+      rulesScriptEditor.select();
+    }
+  });
+
+  debugLinkEditor.href = '/editor';
+  debugLinkEditor.textContent = 'Board editor';
+  debugLinkPlay.href = '/';
+  debugLinkPlay.textContent = 'Game';
+  debugLinkRules.href = '/rules';
+  debugLinkRules.textContent = 'Rules';
+
+  renderApp();
 }
 
 function renderApp(): void {
@@ -706,14 +795,17 @@ function renderApp(): void {
   syncTablePanel();
   syncSelectionPanel();
   syncExportPanel();
+  syncRulesPanel();
   syncModeCopy();
   syncDebugMenu();
 
-  if (state.mode === 'edit') {
+  if (state.mode === 'edit' || state.mode === 'rules') {
     renderer.renderEditor(
       getActiveTable().board,
-      state.selection,
-      state.tool === 'select' ? null : state.draftPosition,
+      state.mode === 'edit' ? state.selection : { kind: 'none' },
+      state.mode === 'edit' && state.tool !== 'select'
+        ? state.draftPosition
+        : null,
     );
   }
 }
@@ -725,6 +817,23 @@ function syncExportPanel(): void {
 
   const exported = exportBoardDefinition(getActiveTable().board);
   tableExportJson.value = `${JSON.stringify(exported, null, 2)}\n`;
+}
+
+function syncRulesPanel(): void {
+  if (state.mode !== 'rules') {
+    return;
+  }
+
+  const { board } = getActiveTable();
+  const validationError = validateRulesScript(board.rulesScript);
+
+  if (document.activeElement !== rulesScriptEditor) {
+    rulesScriptEditor.value = board.rulesScript;
+  }
+
+  rulesScriptStatus.textContent = validationError
+    ? `Rules have a compile error. Game falls back to the default rules until this is fixed: ${validationError}`
+    : 'Rules script compiled successfully.';
 }
 
 function syncTableList(): void {
@@ -984,6 +1093,13 @@ function syncModeCopy(): void {
     return;
   }
 
+  if (state.mode === 'rules') {
+    modeTitle.textContent = 'Editing rules';
+    modeCopy.textContent =
+      'Use this route to edit game logic separately from the table layout.';
+    return;
+  }
+
   modeTitle.textContent = 'Editing table';
   modeCopy.textContent =
     'Click to select. Drag to move. Press Delete to remove the selected element.';
@@ -993,10 +1109,15 @@ function syncModeCopy(): void {
 
 function syncDebugMenu(): void {
   const editorActive = state.mode === 'edit';
+  const playActive = state.mode === 'play';
+  const rulesActive = state.mode === 'rules';
+
   debugLinkEditor.classList.toggle('is-active', editorActive);
   debugLinkEditor.setAttribute('aria-current', editorActive ? 'page' : 'false');
-  debugLinkPlay.classList.toggle('is-active', !editorActive);
-  debugLinkPlay.setAttribute('aria-current', !editorActive ? 'page' : 'false');
+  debugLinkPlay.classList.toggle('is-active', playActive);
+  debugLinkPlay.setAttribute('aria-current', playActive ? 'page' : 'false');
+  debugLinkRules.classList.toggle('is-active', rulesActive);
+  debugLinkRules.setAttribute('aria-current', rulesActive ? 'page' : 'false');
 }
 
 function getActiveTable(): TableRecord {
@@ -1327,7 +1448,15 @@ function capitalize(value: string): string {
 }
 
 function getAppRoute(pathname: string): AppRoute {
-  return pathname === '/editor' || pathname === '/editor/' ? 'editor' : 'play';
+  if (pathname === '/editor' || pathname === '/editor/') {
+    return 'editor';
+  }
+
+  if (pathname === '/rules' || pathname === '/rules/') {
+    return 'rules';
+  }
+
+  return 'play';
 }
 
 function restartStandalonePlay(): void {
@@ -1347,7 +1476,7 @@ function restartStandalonePlay(): void {
   state.loop = loop;
   modeTitle.textContent = board.name;
   loop.setOnStateChange((nextState) => {
-    playDebugStatus.textContent = nextState.status;
+    playDebugStatus.textContent = `${nextState.status} · Ball ${nextState.rules.currentBall}/${nextState.rules.ballsPerGame} · Score ${nextState.score}`;
     playDebugPosition.textContent = formatVector2(
       nextState.ball.position.x,
       nextState.ball.position.y,

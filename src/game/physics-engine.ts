@@ -21,6 +21,7 @@ import type {
 } from './game-state';
 import { resetBall } from './game-state';
 import { getSurfaceMaterial } from './materials';
+import { cloneRulesState, type GameEvent } from './rules-types';
 import { getContactTangent, resolveBallContact } from './spin-solver';
 
 const MAX_SIMULATION_STEP_SECONDS = 1 / 120;
@@ -31,8 +32,30 @@ export const stepGame = (
   board: BoardDefinition,
   input: InputState,
   deltaSeconds: number,
-): GameState => {
+): GameState => stepGameFrame(state, board, input, deltaSeconds).state;
+
+export interface PhysicsStepResult {
+  state: GameState;
+  events: GameEvent[];
+}
+
+export const stepGameFrame = (
+  state: GameState,
+  board: BoardDefinition,
+  input: InputState,
+  deltaSeconds: number,
+): PhysicsStepResult => {
   const dt = Math.min(deltaSeconds, 1 / 30);
+
+  if (state.status === 'game-over') {
+    return {
+      state: {
+        ...state,
+        rules: cloneRulesState(state.rules),
+      },
+      events: [],
+    };
+  }
 
   if (state.status === 'waiting-launch') {
     return stepWaitingLaunchState(
@@ -51,9 +74,10 @@ const stepWaitingLaunchState = (
   board: BoardDefinition,
   input: InputState,
   deltaSeconds: number,
-): GameState => {
+): PhysicsStepResult => {
   const plungerFrame = advancePlungerFrame(state, board, input, deltaSeconds);
   const flipperFrame = advanceFlipperFrame(state, board, input, deltaSeconds);
+  const events: GameEvent[] = [];
   const next: GameState = {
     ...state,
     tick: state.tick + 1,
@@ -79,10 +103,11 @@ const stepWaitingLaunchState = (
     },
     plunger: plungerFrame.next,
     flippers: flipperFrame.map((motion) => motion.next),
+    rules: cloneRulesState(state.rules),
   };
 
   if (plungerFrame.surfaceVelocity.y >= 0) {
-    return next;
+    return { state: next, events };
   }
 
   resolvePlungerCollision(next, board, plungerFrame, board.physics.solver);
@@ -92,6 +117,10 @@ const stepWaitingLaunchState = (
     next.ball.position.y < board.launchPosition.y - 2
   ) {
     next.status = 'playing';
+    events.push({
+      type: 'ball-launched',
+      tick: next.tick,
+    });
   } else {
     next.ball.position.x = board.launchPosition.x;
     next.ball.position.y = board.launchPosition.y;
@@ -104,7 +133,7 @@ const stepWaitingLaunchState = (
     next.ball.angularVelocity.z = 0;
   }
 
-  return next;
+  return { state: next, events };
 };
 
 const stepPlayingState = (
@@ -112,7 +141,8 @@ const stepPlayingState = (
   board: BoardDefinition,
   input: InputState,
   deltaSeconds: number,
-): GameState => {
+): PhysicsStepResult => {
+  const events: GameEvent[] = [];
   const next: GameState = {
     ...state,
     tick: state.tick + 1,
@@ -137,6 +167,7 @@ const stepPlayingState = (
     saucers: state.saucers.map(cloneSaucerState),
     spinners: state.spinners.map(cloneSpinnerState),
     rollovers: state.rollovers.map(cloneRolloverState),
+    rules: cloneRulesState(state.rules),
   };
   const stepCount = Math.max(
     1,
@@ -164,20 +195,31 @@ const stepPlayingState = (
     resolveWallCollisions(next, board);
     resolveGuideCollisions(next, board, board.physics.solver);
     resolvePlungerCollision(next, board, plungerFrame, board.physics.solver);
-    resolveStandupTargetCollisions(next, board, board.physics.solver);
-    resolveDropTargetCollisions(next, board, board.physics.solver);
-    resolveBumperCollisions(next, board, board.physics.solver);
+    resolveStandupTargetCollisions(next, board, board.physics.solver, events);
+    resolveDropTargetCollisions(next, board, board.physics.solver, events);
+    resolveBumperCollisions(next, board, board.physics.solver, events);
     resolveFlipperCollisions(next, board, flipperFrame, board.physics.solver);
-    resolveSaucerCaptures(next, board);
-    resolveSpinnerInteractions(next, board, board.physics.solver);
-    resolveRolloverTriggers(next, board);
+    resolveSaucerCaptures(next, board, events);
+    resolveSpinnerInteractions(next, board, board.physics.solver, events);
+    resolveRolloverTriggers(next, board, events);
 
     if (next.ball.position.y - next.ball.radius > board.drainY) {
-      return resetBall(next, board);
+      events.push({
+        type: 'ball-drained',
+        tick: next.tick,
+      });
+
+      return {
+        state: resetBall(next, board),
+        events,
+      };
     }
   }
 
-  return next;
+  return {
+    state: next,
+    events,
+  };
 };
 
 export const getLaunchChargeRatio = (
@@ -319,6 +361,7 @@ const resolveStandupTargetCollisions = (
   state: GameState,
   board: BoardDefinition,
   solver: SolverPhysicsDefinition,
+  events: GameEvent[],
 ): void => {
   board.standupTargets.forEach((target, index) => {
     const targetState = state.standupTargets[index];
@@ -362,7 +405,12 @@ const resolveStandupTargetCollisions = (
     }
 
     if (targetState.cooldownSeconds <= 0) {
-      state.score += target.score;
+      events.push({
+        type: 'standup-target-hit',
+        index,
+        score: target.score,
+        tick: state.tick,
+      });
       targetState.cooldownSeconds = 0.12;
     }
   });
@@ -372,6 +420,7 @@ const resolveDropTargetCollisions = (
   state: GameState,
   board: BoardDefinition,
   solver: SolverPhysicsDefinition,
+  events: GameEvent[],
 ): void => {
   board.dropTargets.forEach((target, index) => {
     const targetState = state.dropTargets[index];
@@ -412,7 +461,12 @@ const resolveDropTargetCollisions = (
         ),
         solver,
       );
-      state.score += target.score;
+      events.push({
+        type: 'drop-target-hit',
+        index,
+        score: target.score,
+        tick: state.tick,
+      });
       targetState.isDown = true;
     }
   });
@@ -545,8 +599,9 @@ const resolveBumperCollisions = (
   state: GameState,
   board: BoardDefinition,
   solver: SolverPhysicsDefinition,
+  events: GameEvent[],
 ): void => {
-  for (const bumper of board.bumpers) {
+  for (const [index, bumper] of board.bumpers.entries()) {
     const bumperMaterial = getSurfaceMaterial(
       bumper.material,
       board.surfaceMaterials,
@@ -576,7 +631,12 @@ const resolveBumperCollisions = (
 
     if (approachSpeed < 0 || overlap > solver.epsilon) {
       resolveBallContact(state.ball, contact, solver);
-      state.score += bumper.score;
+      events.push({
+        type: 'bumper-hit',
+        index,
+        score: bumper.score,
+        tick: state.tick,
+      });
     }
   }
 };
@@ -584,6 +644,7 @@ const resolveBumperCollisions = (
 const resolveSaucerCaptures = (
   state: GameState,
   board: BoardDefinition,
+  events: GameEvent[],
 ): void => {
   board.saucers.forEach((saucer, index) => {
     const saucerState = state.saucers[index];
@@ -603,7 +664,12 @@ const resolveSaucerCaptures = (
 
     saucerState.occupied = true;
     saucerState.holdSecondsRemaining = saucer.holdSeconds;
-    state.score += saucer.score;
+    events.push({
+      type: 'saucer-captured',
+      index,
+      score: saucer.score,
+      tick: state.tick,
+    });
     state.ball.position.x = saucer.x;
     state.ball.position.y = saucer.y;
     state.ball.linearVelocity.x = 0;
@@ -618,6 +684,7 @@ const resolveSpinnerInteractions = (
   state: GameState,
   board: BoardDefinition,
   solver: SolverPhysicsDefinition,
+  events: GameEvent[],
 ): void => {
   board.spinners.forEach((spinner, index) => {
     const spinnerState = state.spinners[index];
@@ -650,13 +717,19 @@ const resolveSpinnerInteractions = (
     spinnerState.angularVelocity +=
       Math.sign(-crossingSpeed) * Math.min(Math.abs(crossingSpeed) / 36, 18);
     spinnerState.cooldownSeconds = 0.08;
-    state.score += spinner.score;
+    events.push({
+      type: 'spinner-spin',
+      index,
+      score: spinner.score,
+      tick: state.tick,
+    });
   });
 };
 
 const resolveRolloverTriggers = (
   state: GameState,
   board: BoardDefinition,
+  events: GameEvent[],
 ): void => {
   board.rollovers.forEach((rollover, index) => {
     const rolloverState = state.rollovers[index];
@@ -675,7 +748,12 @@ const resolveRolloverTriggers = (
     }
 
     rolloverState.lit = true;
-    state.score += rollover.score;
+    events.push({
+      type: 'rollover-hit',
+      index,
+      score: rollover.score,
+      tick: state.tick,
+    });
   });
 };
 

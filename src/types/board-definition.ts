@@ -144,6 +144,7 @@ export interface BoardDefinition {
   name: string;
   width: number;
   height: number;
+  rulesScript: string;
   gravity: number;
   tableAngle: number;
   drainY: number;
@@ -170,6 +171,7 @@ export interface BoardDefinitionInput {
   name: string;
   width: number;
   height: number;
+  rulesScript?: string;
   gravity?: number;
   tableAngle?: number;
   drainY: number;

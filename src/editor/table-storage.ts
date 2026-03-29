@@ -6,6 +6,7 @@ import {
 } from '../boards/table-library';
 import { cloneGuide } from '../game/guide-geometry';
 import { physicsDefaults } from '../game/physics-defaults';
+import { defaultRulesScript } from '../game/rules-defaults';
 import type {
   BoardDefinition,
   BoardDefinitionInput,
@@ -260,6 +261,8 @@ export const exportBoardDefinition = (
     name: board.name,
     width: board.width,
     height: board.height,
+    rulesScript:
+      board.rulesScript === defaultRulesScript ? undefined : board.rulesScript,
     drainY: board.drainY,
     launchPosition: { ...board.launchPosition },
     plunger: { ...board.plunger },

@@ -1,9 +1,11 @@
 import { createBoardDefinition } from '../game/physics-defaults';
+import { classicRulesScript } from './classic-rules-script';
 
 export const classicTable = createBoardDefinition({
   name: 'Classic Table',
   width: 900,
   height: 1400,
+  rulesScript: classicRulesScript,
   drainY: 1425,
   launchPosition: {
     x: 770,

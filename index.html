@@ -12,8 +12,8 @@
         <aside class="control-panel">
           <header class="panel-header">
             <p class="eyebrow">Pinball Browser</p>
-            <h1>Table editor</h1>
-            <p class="lede">
+            <h1 id="panel-title">Table editor</h1>
+            <p id="panel-copy" class="lede">
               Add, drag, delete, and play-test tables. All edits persist in
               local storage.
             </p>
@@ -33,11 +33,11 @@
               size="6"
               aria-label="Saved pinball tables"
             ></select>
-            <div class="button-row">
+            <div class="button-row editor-only">
               <button id="new-table" type="button">New</button>
               <button id="duplicate-table" type="button">Duplicate</button>
             </div>
-            <div class="button-row">
+            <div class="button-row editor-only">
               <button id="play-toggle" type="button" class="accent-button">
                 Play Test
               </button>
@@ -57,7 +57,7 @@
             <p id="table-meta" class="meta-text"></p>
           </section>
 
-          <section class="panel-section">
+          <section class="panel-section editor-only">
             <div class="section-heading">
               <h2>Tools</h2>
               <p>Choose a tool, then click the playfield.</p>
@@ -127,7 +127,7 @@
             </div>
           </section>
 
-          <section class="panel-section">
+          <section class="panel-section editor-only">
             <div class="section-heading">
               <h2>Selection</h2>
               <p id="selection-label">Nothing selected.</p>
@@ -138,7 +138,7 @@
             </button>
           </section>
 
-          <section class="panel-section">
+          <section class="panel-section editor-only">
             <div class="section-heading">
               <h2>Export</h2>
               <p>Copy the current table definition for import elsewhere.</p>
@@ -156,6 +156,25 @@
                 <button id="copy-table-json" type="button">Copy JSON</button>
               </div>
             </details>
+          </section>
+
+          <section class="panel-section rules-only">
+            <div class="section-heading">
+              <h2>Rules Script</h2>
+              <p>
+                Edit the current table rules as a script. Changes save locally.
+              </p>
+            </div>
+            <p id="rules-script-status" class="meta-text"></p>
+            <textarea
+              id="rules-script-editor"
+              class="rules-script-editor"
+              spellcheck="false"
+              aria-label="Table rules script"
+            ></textarea>
+            <div class="button-row">
+              <button id="copy-rules-script" type="button">Copy Script</button>
+            </div>
           </section>
         </aside>
 
@@ -175,7 +194,10 @@
               <p class="eyebrow">Table</p>
               <label class="field">
                 <span>Choose board</span>
-                <select id="play-table-select" aria-label="Playable pinball tables"></select>
+                <select
+                  id="play-table-select"
+                  aria-label="Playable pinball tables"
+                ></select>
               </label>
               <p id="play-table-meta" class="meta-text"></p>
             </section>
@@ -219,6 +241,9 @@
                   href="#debug-play-test"
                 >
                   Play test
+                </a>
+                <a id="debug-link-rules" class="debug-link" href="/rules">
+                  Rules
                 </a>
               </div>
             </nav>

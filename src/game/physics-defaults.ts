@@ -7,6 +7,7 @@ import type {
   SurfaceMaterial,
   SurfaceMaterialName,
 } from '../types/board-definition';
+import { defaultRulesScript } from './rules-defaults';
 
 export const physicsDefaults = {
   gravity: 1600,
@@ -89,6 +90,7 @@ export const createBoardDefinition = (
   name: input.name,
   width: input.width,
   height: input.height,
+  rulesScript: input.rulesScript ?? defaultRulesScript,
   gravity: input.gravity ?? physicsDefaults.gravity,
   tableAngle: input.tableAngle ?? physicsDefaults.tableAngle,
   drainY: input.drainY,
