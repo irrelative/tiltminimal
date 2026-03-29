@@ -144,7 +144,7 @@ const state: AppState = {
   dragMode: null,
   dragOffset: null,
   draftPosition: null,
-  snapToGrid: false,
+  snapToGrid: true,
   loop: null,
   input: null,
 };
