@@ -104,7 +104,7 @@ describe('hitTestSelection', () => {
     expect(selection).toEqual({ kind: 'saucer', index: 0 });
   });
 
-  it('selects the plunger when clicking on the shooter body', () => {
+  it('selects the launcher when clicking on the shooter body', () => {
     const board = createBlankTable();
 
     const selection = hitTestSelection(board, {
@@ -112,7 +112,7 @@ describe('hitTestSelection', () => {
       y: board.plunger.y,
     });
 
-    expect(selection).toEqual({ kind: 'plunger' });
+    expect(selection).toEqual({ kind: 'launch-position' });
   });
 
   it('finds start, end, and rotate handles for a selected guide', () => {
@@ -377,15 +377,21 @@ describe('hitTestSelection', () => {
     expect(next.dropTargets[0]?.angle).toBeCloseTo(-Math.PI, 5);
   });
 
-  it('moves the plunger and keeps the launch position aligned', () => {
+  it('moves the launcher and keeps the plunger aligned', () => {
     const board = createBlankTable();
     const startPlunger = { x: board.plunger.x, y: board.plunger.y };
     const startLaunch = { ...board.launchPosition };
 
-    const next = moveSelection(board, { kind: 'plunger' }, { x: 720, y: 1120 });
+    const next = moveSelection(board, { kind: 'launch-position' }, {
+      x: 720,
+      y: 1120,
+    });
 
-    expect(next.plunger.x).toBe(720);
-    expect(next.plunger.y).toBe(1120);
+    expect(next.launchPosition.x).toBe(720);
+    expect(next.launchPosition.y).toBe(1120);
+    expect(next.plunger.y - startPlunger.y).toBe(
+      next.launchPosition.y - startLaunch.y,
+    );
     expect(next.launchPosition.x - startLaunch.x).toBe(
       next.plunger.x - startPlunger.x,
     );
@@ -394,15 +400,20 @@ describe('hitTestSelection', () => {
     );
   });
 
-  it('updates plunger numeric fields while keeping the launch position aligned', () => {
+  it('updates launcher numeric fields while keeping the plunger aligned', () => {
     const board = createBlankTable();
     const startLaunch = { ...board.launchPosition };
     const startPlungerX = board.plunger.x;
 
-    const next = updateSelectedNumericField(board, { kind: 'plunger' }, 'x', 700);
+    const next = updateSelectedNumericField(
+      board,
+      { kind: 'launch-position' },
+      'x',
+      700,
+    );
 
-    expect(next.plunger.x).toBe(700);
-    expect(next.launchPosition.x - startLaunch.x).toBe(700 - startPlungerX);
-    expect(next.launchPosition.y).toBe(startLaunch.y);
+    expect(next.launchPosition.x).toBe(700);
+    expect(next.launchPosition.x - startLaunch.x).toBe(700 - startLaunch.x);
+    expect(next.plunger.x - startPlungerX).toBe(700 - startLaunch.x);
   });
 });

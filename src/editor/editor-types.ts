@@ -9,7 +9,6 @@ export interface EditorSelection {
     | 'flipper'
     | 'guide'
     | 'launch-position'
-    | 'plunger'
     | 'none';
   index?: number;
 }

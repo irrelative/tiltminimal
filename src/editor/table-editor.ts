@@ -44,10 +44,15 @@ export const hitTestSelection = (
   }
 
   if (
-    distanceToOrientedSegment(point, board.plunger, board.plunger.length, Math.PI / 2) <=
+    distanceToOrientedSegment(
+      point,
+      board.plunger,
+      board.plunger.length,
+      Math.PI / 2,
+    ) <=
     board.plunger.thickness / 2 + SELECTION_PADDING
   ) {
-    return { kind: 'plunger' };
+    return { kind: 'launch-position' };
   }
 
   for (let index = board.saucers.length - 1; index >= 0; index -= 1) {
@@ -354,35 +359,24 @@ export const moveSelection = (
   point: Point,
 ): BoardDefinition => {
   if (selection.kind === 'launch-position') {
-    return {
-      ...board,
-      launchPosition: clampPoint(board, point, 30),
-    };
-  }
-
-  if (selection.kind === 'plunger') {
-    const clampedPoint = clampPoint(
-      board,
-      point,
-      Math.max(board.plunger.length / 2, board.plunger.thickness / 2) + 24,
-    );
-    const deltaX = clampedPoint.x - board.plunger.x;
-    const deltaY = clampedPoint.y - board.plunger.y;
+    const nextLaunchPosition = clampPoint(board, point, 30);
+    const deltaX = nextLaunchPosition.x - board.launchPosition.x;
+    const deltaY = nextLaunchPosition.y - board.launchPosition.y;
 
     return {
       ...board,
+      launchPosition: nextLaunchPosition,
       plunger: {
         ...board.plunger,
-        ...clampedPoint,
+        ...clampPoint(
+          board,
+          {
+            x: board.plunger.x + deltaX,
+            y: board.plunger.y + deltaY,
+          },
+          Math.max(board.plunger.length / 2, board.plunger.thickness / 2) + 24,
+        ),
       },
-      launchPosition: clampPoint(
-        board,
-        {
-          x: board.launchPosition.x + deltaX,
-          y: board.launchPosition.y + deltaY,
-        },
-        30,
-      ),
     };
   }
 
@@ -626,60 +620,23 @@ export const updateSelectedNumericField = (
   field: string,
   value: number,
 ): BoardDefinition => {
-  if (
-    selection.kind === 'launch-position' &&
-    (field === 'x' || field === 'y')
-  ) {
-    return {
-      ...board,
-      launchPosition: {
-        ...board.launchPosition,
-        [field]: clamp(
-          value,
-          30,
-          field === 'x' ? board.width - 30 : board.height - 30,
-        ),
-      },
-    };
-  }
-
-  if (selection.kind === 'plunger') {
+  if (selection.kind === 'launch-position') {
     if (field === 'x' || field === 'y') {
-      const nextPoint = clampPoint(
-        board,
-        {
-          x: field === 'x' ? value : board.plunger.x,
-          y: field === 'y' ? value : board.plunger.y,
-        },
-        Math.max(board.plunger.length / 2, board.plunger.thickness / 2) + 24,
-      );
-      const deltaX = nextPoint.x - board.plunger.x;
-      const deltaY = nextPoint.y - board.plunger.y;
+      return moveSelection(board, selection, {
+        x: field === 'x' ? value : board.launchPosition.x,
+        y: field === 'y' ? value : board.launchPosition.y,
+      });
+    }
 
+    if (field === 'length' || field === 'thickness' || field === 'travel') {
       return {
         ...board,
         plunger: {
           ...board.plunger,
-          ...nextPoint,
+          [field]: value,
         },
-        launchPosition: clampPoint(
-          board,
-          {
-            x: board.launchPosition.x + deltaX,
-            y: board.launchPosition.y + deltaY,
-          },
-          30,
-        ),
       };
     }
-
-    return {
-      ...board,
-      plunger: {
-        ...board.plunger,
-        [field]: value,
-      },
-    };
   }
 
   if (selection.kind === 'bumper' && selection.index !== undefined) {

@@ -877,27 +877,20 @@ function syncSelectionPanel(): void {
     return;
   }
 
-  deleteSelectionButton.disabled =
-    state.selection.kind === 'launch-position' ||
-    state.selection.kind === 'plunger';
+  deleteSelectionButton.disabled = state.selection.kind === 'launch-position';
   selectionFields.replaceChildren();
 
   if (state.selection.kind === 'launch-position') {
-    selectionLabel.textContent = 'Launch position';
+    selectionLabel.textContent = 'Launcher';
     selectionFields.append(
-      createNumericField('x', 'X', active.board.launchPosition.x),
-      createNumericField('y', 'Y', active.board.launchPosition.y),
-    );
-    return;
-  }
-
-  if (state.selection.kind === 'plunger') {
-    selectionLabel.textContent = 'Plunger';
-    selectionFields.append(
-      createNumericField('x', 'X', active.board.plunger.x),
-      createNumericField('y', 'Y', active.board.plunger.y),
+      createNumericField('x', 'Ball X', active.board.launchPosition.x),
+      createNumericField('y', 'Ball Y', active.board.launchPosition.y),
       createNumericField('length', 'Length', active.board.plunger.length),
-      createNumericField('thickness', 'Thickness', active.board.plunger.thickness),
+      createNumericField(
+        'thickness',
+        'Thickness',
+        active.board.plunger.thickness,
+      ),
       createNumericField('travel', 'Travel', active.board.plunger.travel),
     );
     return;
@@ -1261,8 +1254,7 @@ function setAppMode(mode: AppMode, renderImmediately: boolean): void {
 function removeCurrentSelection(): void {
   if (
     state.selection.kind === 'none' ||
-    state.selection.kind === 'launch-position' ||
-    state.selection.kind === 'plunger'
+    state.selection.kind === 'launch-position'
   ) {
     return;
   }
@@ -1294,13 +1286,6 @@ function getDragOffset(
     return {
       x: point.x - board.launchPosition.x,
       y: point.y - board.launchPosition.y,
-    };
-  }
-
-  if (selection.kind === 'plunger') {
-    return {
-      x: point.x - board.plunger.x,
-      y: point.y - board.plunger.y,
     };
   }
 

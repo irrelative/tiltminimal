@@ -611,7 +611,7 @@ export class CanvasRenderer {
       }
     }
 
-    if (selection.kind === 'plunger') {
+    if (selection.kind === 'launch-position') {
       this.drawOrientedSelection(
         context,
         board.plunger,
