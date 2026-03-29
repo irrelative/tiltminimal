@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 
 import { createBlankTable } from '../src/boards/table-library';
 import {
+  getLauncherMinX,
+  getPlungerGuideSegments,
+} from '../src/game/plunger-geometry';
+import {
   getGuideHandles,
   getOrientedRotateHandle,
   hitTestGuideHandle,
@@ -110,6 +114,18 @@ describe('hitTestSelection', () => {
     const selection = hitTestSelection(board, {
       x: board.plunger.x,
       y: board.plunger.y,
+    });
+
+    expect(selection).toEqual({ kind: 'launch-position' });
+  });
+
+  it('selects the launcher when clicking on the shooter guide', () => {
+    const board = createBlankTable();
+    const [leftGuide] = getPlungerGuideSegments(board);
+
+    const selection = hitTestSelection(board, {
+      x: leftGuide.start.x,
+      y: (leftGuide.start.y + leftGuide.end.y) / 2,
     });
 
     expect(selection).toEqual({ kind: 'launch-position' });
@@ -463,5 +479,13 @@ describe('hitTestSelection', () => {
     expect(next.launchPosition.x).toBe(700);
     expect(next.launchPosition.x - startLaunch.x).toBe(700 - startLaunch.x);
     expect(next.plunger.x - startPlungerX).toBe(700 - startLaunch.x);
+  });
+
+  it('keeps the launcher on the right half of the board', () => {
+    const board = createBlankTable();
+
+    const next = moveSelection(board, { kind: 'launch-position' }, { x: 100, y: 900 });
+
+    expect(next.launchPosition.x).toBe(getLauncherMinX(board));
   });
 });

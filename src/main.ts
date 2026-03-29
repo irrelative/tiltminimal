@@ -892,6 +892,11 @@ function syncSelectionPanel(): void {
         active.board.plunger.thickness,
       ),
       createNumericField('travel', 'Travel', active.board.plunger.travel),
+      createNumericField(
+        'guideLength',
+        'Guide Length',
+        active.board.plunger.guideLength,
+      ),
     );
     return;
   }

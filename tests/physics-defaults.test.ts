@@ -16,6 +16,7 @@ describe('createBoardDefinition', () => {
     expect(board.physics.flipper).toEqual(physicsDefaults.tuning.flipper);
     expect(board.physics.solver).toEqual(physicsDefaults.tuning.solver);
     expect(board.plunger.travel).toBe(physicsDefaults.plunger.travel);
+    expect(board.plunger.guideLength).toBe(physicsDefaults.plunger.guideLength);
     expect(board.surfaceMaterials.flipperRubber).toEqual(
       physicsDefaults.surfaceMaterials.flipperRubber,
     );
@@ -60,6 +61,7 @@ describe('createBoardDefinition', () => {
     expect(board.physics.plunger.bodyMass).toBe(0.26);
     expect(board.plunger.length).toBe(physicsDefaults.plunger.length);
     expect(board.plunger.material).toBe(physicsDefaults.plunger.material);
+    expect(board.plunger.guideLength).toBe(physicsDefaults.plunger.guideLength);
     expect(board.plunger.x).toBe(720);
     expect(board.plunger.y).toBeGreaterThan(board.launchPosition.y);
     expect(board.physics.flipper.swingAngularSpeed).toBe(4.1);

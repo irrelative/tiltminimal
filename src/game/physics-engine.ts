@@ -21,6 +21,7 @@ import type {
 } from './game-state';
 import { resetBall } from './game-state';
 import { getSurfaceMaterial } from './materials';
+import { getPlungerGuideSegments } from './plunger-geometry';
 import { cloneRulesState, type GameEvent } from './rules-types';
 import { getContactTangent, resolveBallContact } from './spin-solver';
 
@@ -193,6 +194,7 @@ const stepPlayingState = (
     next.ball.position.y += next.ball.linearVelocity.y * stepSeconds;
 
     resolveWallCollisions(next, board);
+    resolvePlungerGuideCollisions(next, board, board.physics.solver);
     resolveGuideCollisions(next, board, board.physics.solver);
     resolvePlungerCollision(next, board, plungerFrame, board.physics.solver);
     resolveStandupTargetCollisions(next, board, board.physics.solver, events);
@@ -270,6 +272,16 @@ const resolveGuideCollisions = (
   solver: SolverPhysicsDefinition,
 ): void => {
   for (const guide of board.guides) {
+    resolveGuideCollision(state, board, guide, solver);
+  }
+};
+
+const resolvePlungerGuideCollisions = (
+  state: GameState,
+  board: BoardDefinition,
+  solver: SolverPhysicsDefinition,
+): void => {
+  for (const guide of getPlungerGuideSegments(board)) {
     resolveGuideCollision(state, board, guide, solver);
   }
 };

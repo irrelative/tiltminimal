@@ -20,6 +20,7 @@ export const physicsDefaults = {
     length: 72,
     thickness: 24,
     travel: 124,
+    guideLength: 640,
     material: 'metalGuide',
   } satisfies Omit<PlungerDefinition, 'x' | 'y'>,
   surfaceMaterials: {
@@ -181,6 +182,8 @@ const resolvePlungerDefinition = (
     length,
     thickness,
     travel: input.plunger?.travel ?? physicsDefaults.plunger.travel,
+    guideLength:
+      input.plunger?.guideLength ?? physicsDefaults.plunger.guideLength,
     material: input.plunger?.material ?? physicsDefaults.plunger.material,
   };
 };

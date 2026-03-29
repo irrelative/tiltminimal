@@ -9,6 +9,12 @@ import {
 } from '../game/flipper-geometry';
 import { isArcGuide } from '../game/guide-geometry';
 import { getSurfaceMaterial } from '../game/materials';
+import {
+  getPlungerGuideBottomY,
+  getPlungerGuideSegments,
+  getPlungerGuideTopY,
+  getPlungerLaneHalfWidth,
+} from '../game/plunger-geometry';
 import type { GameState } from '../game/game-state';
 import { getStatusLabel } from '../game/game-loop';
 import { getPlungerPullRatio } from '../game/physics-engine';
@@ -217,28 +223,44 @@ export class CanvasRenderer {
     state?: GameState,
   ): void {
     const pullback = state?.plunger.pullback ?? 0;
-    const laneWidth = board.plunger.thickness + 24;
-    const laneHeight = board.plunger.length + board.plunger.travel + 32;
-    const laneTop =
-      board.plunger.y -
-      board.plunger.length / 2 -
-      board.plunger.thickness / 2 -
-      8;
+    const laneWidth = getPlungerLaneHalfWidth(board.plunger) * 2;
+    const laneTop = getPlungerGuideTopY(board);
+    const laneBottom = getPlungerGuideBottomY(board);
+    const laneHeight = laneBottom - laneTop;
+    const guideSegments = getPlungerGuideSegments(board);
 
     context.save();
     context.fillStyle = 'rgba(34, 48, 74, 0.14)';
     context.strokeStyle = 'rgba(47, 109, 178, 0.45)';
     context.lineWidth = 3;
     context.beginPath();
-    context.roundRect(
+    context.rect(
       board.plunger.x - laneWidth / 2,
       laneTop,
       laneWidth,
       laneHeight,
-      laneWidth / 2,
     );
     context.fill();
     context.stroke();
+
+    context.strokeStyle = PALETTE.skyBlue;
+    context.lineWidth = guideSegments[0].thickness;
+    context.lineCap = 'round';
+    for (const guide of guideSegments) {
+      context.beginPath();
+      context.moveTo(guide.start.x, guide.start.y);
+      context.lineTo(guide.end.x, guide.end.y);
+      context.stroke();
+    }
+
+    context.strokeStyle = PALETTE.outlineBlue;
+    context.lineWidth = Math.max(guideSegments[0].thickness - 4, 4);
+    for (const guide of guideSegments) {
+      context.beginPath();
+      context.moveTo(guide.start.x, guide.start.y);
+      context.lineTo(guide.end.x, guide.end.y);
+      context.stroke();
+    }
 
     this.drawOrientedPlate(
       context,
@@ -619,6 +641,9 @@ export class CanvasRenderer {
         board.plunger.thickness,
         Math.PI / 2,
       );
+      for (const guide of getPlungerGuideSegments(board)) {
+        this.drawLineSelection(context, guide.start, guide.end, guide.thickness);
+      }
     }
   }
 
@@ -701,6 +726,31 @@ export class CanvasRenderer {
     this.drawEditorHandle(context, handles.start, '#ffd166');
     this.drawEditorHandle(context, handles.end, '#ffd166');
     this.drawEditorHandle(context, handles.rotate, '#70d1f4');
+    context.restore();
+  }
+
+  private drawLineSelection(
+    context: CanvasRenderingContext2D,
+    start: { x: number; y: number },
+    end: { x: number; y: number },
+    thickness: number,
+  ): void {
+    context.save();
+    context.strokeStyle = '#ffd166';
+    context.lineWidth = thickness + 10;
+    context.lineCap = 'round';
+    context.globalAlpha = 0.45;
+    context.beginPath();
+    context.moveTo(start.x, start.y);
+    context.lineTo(end.x, end.y);
+    context.stroke();
+    context.globalAlpha = 1;
+    context.setLineDash([10, 6]);
+    context.lineWidth = 4;
+    context.beginPath();
+    context.moveTo(start.x, start.y);
+    context.lineTo(end.x, end.y);
+    context.stroke();
     context.restore();
   }
 

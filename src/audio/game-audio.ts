@@ -7,6 +7,7 @@ import type {
 import type { GameState } from '../game/game-state';
 import { getDistanceToFlipperSurface } from '../game/flipper-geometry';
 import { getGuideDistance } from '../game/guide-geometry';
+import { getPlungerGuideSegments } from '../game/plunger-geometry';
 
 export type GameAudioEvent =
   | {
@@ -295,6 +296,15 @@ const getNearbyImpactMaterial = (
 
     if (distance <= radius + bumper.radius + 10) {
       return bumper.material;
+    }
+  }
+
+  for (const guide of getPlungerGuideSegments(board)) {
+    if (
+      getGuideDistance(position, guide) <=
+      radius + guide.thickness / 2 + 10
+    ) {
+      return guide.material;
     }
   }
 

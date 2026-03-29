@@ -14,6 +14,7 @@ export interface PlungerDefinition extends Point {
   length: number;
   thickness: number;
   travel: number;
+  guideLength: number;
   material: SurfaceMaterialName;
 }
 

@@ -17,6 +17,12 @@ import {
   isArcGuide,
   normalizeWrappedAngle,
 } from '../game/guide-geometry';
+import {
+  getLauncherGuideDistance,
+  getLauncherMaxX,
+  getLauncherMinX,
+  getPlungerGuideThickness,
+} from '../game/plunger-geometry';
 import type {
   BoardDefinition,
   FlipperSide,
@@ -43,14 +49,19 @@ export const hitTestSelection = (
     return { kind: 'launch-position' };
   }
 
-  if (
+  const plungerDistance =
     distanceToOrientedSegment(
       point,
       board.plunger,
       board.plunger.length,
       Math.PI / 2,
-    ) <=
-    board.plunger.thickness / 2 + SELECTION_PADDING
+    ) -
+    board.plunger.thickness / 2;
+
+  if (
+    plungerDistance <= SELECTION_PADDING ||
+    getLauncherGuideDistance(board, point) <=
+      getPlungerGuideThickness(board.plunger) / 2 + SELECTION_PADDING
   ) {
     return { kind: 'launch-position' };
   }
@@ -359,12 +370,7 @@ export const moveSelection = (
   point: Point,
 ): BoardDefinition => {
   if (selection.kind === 'launch-position') {
-    const nextLaunchPosition = clampPoint(
-      board,
-      point,
-      board.ball.radius,
-      board.ball.radius,
-    );
+    const nextLaunchPosition = clampLauncherPosition(board, point);
     const deltaX = nextLaunchPosition.x - board.launchPosition.x;
     const deltaY = nextLaunchPosition.y - board.launchPosition.y;
 
@@ -373,14 +379,11 @@ export const moveSelection = (
       launchPosition: nextLaunchPosition,
       plunger: {
         ...board.plunger,
-        ...clampPoint(
-          board,
-          {
-            x: board.plunger.x + deltaX,
-            y: board.plunger.y + deltaY,
-          },
-          board.plunger.thickness / 2,
+        x: board.plunger.x + deltaX,
+        y: clamp(
+          board.plunger.y + deltaY,
           board.plunger.length / 2,
+          board.height - board.plunger.length / 2,
         ),
       },
     };
@@ -662,7 +665,12 @@ export const updateSelectedNumericField = (
       });
     }
 
-    if (field === 'length' || field === 'thickness' || field === 'travel') {
+    if (
+      field === 'length' ||
+      field === 'thickness' ||
+      field === 'travel' ||
+      field === 'guideLength'
+    ) {
       return {
         ...board,
         plunger: {
@@ -1072,6 +1080,14 @@ const clampPoint = (
 ): Point => ({
   x: clamp(point.x, padding, board.width - padding),
   y: clamp(point.y, verticalPadding, board.height - verticalPadding),
+});
+
+const clampLauncherPosition = (
+  board: BoardDefinition,
+  point: Point,
+): Point => ({
+  x: clamp(point.x, getLauncherMinX(board), getLauncherMaxX(board)),
+  y: clamp(point.y, board.ball.radius, board.height - board.ball.radius),
 });
 
 const getOrientedSelectionPadding = (

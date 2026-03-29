@@ -10,6 +10,7 @@ import {
   getFlipperTipRadius,
 } from '../src/game/flipper-geometry';
 import { createInitialGameState } from '../src/game/game-state';
+import { getPlungerGuideSegments } from '../src/game/plunger-geometry';
 import { stepGame, stepGameFrame } from '../src/game/physics-engine';
 import type { FlipperDefinition } from '../src/types/board-definition';
 
@@ -441,6 +442,22 @@ describe('stepGame', () => {
         }),
       ]),
     );
+  });
+
+  it('catches a falling ball with the launcher guide rail', () => {
+    const board = createBlankTable('Launcher Guide Board');
+    const [leftGuide] = getPlungerGuideSegments(board);
+    const state = createInitialGameState(board);
+    state.status = 'playing';
+    state.ball.position.x = leftGuide.start.x - state.ball.radius + 1;
+    state.ball.position.y = board.launchPosition.y - board.plunger.guideLength / 2;
+    state.ball.linearVelocity.x = 220;
+    state.ball.linearVelocity.y = 40;
+
+    const next = stepGame(state, board, idleInput, 1 / 60);
+
+    expect(next.ball.position.x).toBeLessThanOrEqual(leftGuide.start.x);
+    expect(next.ball.linearVelocity.x).toBeLessThan(220);
   });
 
   it('bounces off a curved guide', () => {
