@@ -263,10 +263,8 @@ const createRulesContext = (
     state.plunger.releaseSpeed = 0;
     state.ball.linearVelocity.x = 0;
     state.ball.linearVelocity.y = 0;
-    state.ball.linearVelocity.z = 0;
     state.ball.angularVelocity.x = 0;
     state.ball.angularVelocity.y = 0;
-    state.ball.angularVelocity.z = 0;
   },
   startMode(name, durationMs) {
     if (durationMs <= 0) {

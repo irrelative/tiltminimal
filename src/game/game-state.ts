@@ -5,16 +5,15 @@ import {
   type RulesState,
 } from './rules-types';
 
-export interface Vector3 {
+export interface Vector2 {
   x: number;
   y: number;
-  z: number;
 }
 
 export interface BallState {
-  position: Vector3;
-  linearVelocity: Vector3;
-  angularVelocity: Vector3;
+  position: Vector2;
+  linearVelocity: Vector2;
+  angularVelocity: Vector2;
   radius: number;
   mass: number;
   momentOfInertia: number;
@@ -109,17 +108,14 @@ export const createBallState = (board: BoardDefinition): BallState => {
     position: {
       x: board.launchPosition.x,
       y: board.launchPosition.y,
-      z: radius,
     },
     linearVelocity: {
       x: 0,
       y: 0,
-      z: 0,
     },
     angularVelocity: {
       x: 0,
       y: 0,
-      z: 0,
     },
     radius,
     mass,

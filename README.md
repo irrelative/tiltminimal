@@ -10,6 +10,7 @@ A browser based pinball game. Some overall requirements:
 The repository now includes a small TypeScript + Vite scaffold with:
 
 * a 2D canvas-based playfield
+* 2D ball physics with planar position/velocity and 2-axis rolling spin
 * a data-driven `classicTable` board definition
 * separated game loop, physics, input, and rendering modules
 * Vitest and GitHub Actions wiring for basic verification

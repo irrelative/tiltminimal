@@ -18,7 +18,7 @@ describe('resolveBallContact', () => {
 
     expect(result.normalImpulse).toBeGreaterThan(0);
     expect(Math.abs(result.tangentImpulse)).toBeGreaterThan(0);
-    expect(Math.abs(ball.angularVelocity.z)).toBeGreaterThan(0);
+    expect(getSpinMagnitude(ball)).toBeGreaterThan(0);
   });
 
   it('lets grippier materials transfer more spin', () => {
@@ -33,8 +33,8 @@ describe('resolveBallContact', () => {
     resolveBallContact(metalBall, createContact('metalGuide'));
     resolveBallContact(rubberBall, createContact('flipperRubber'));
 
-    expect(Math.abs(rubberBall.angularVelocity.z)).toBeGreaterThan(
-      Math.abs(metalBall.angularVelocity.z),
+    expect(getSpinMagnitude(rubberBall)).toBeGreaterThan(
+      getSpinMagnitude(metalBall),
     );
   });
 
@@ -88,3 +88,8 @@ const createContact = (
     restitutionScale: overrides.restitutionScale,
   };
 };
+
+const getSpinMagnitude = (
+  ball: ReturnType<typeof createBallState>,
+): number =>
+  Math.hypot(ball.angularVelocity.x, ball.angularVelocity.y);

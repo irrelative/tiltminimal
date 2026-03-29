@@ -1544,10 +1544,9 @@ function restartStandalonePlay(): void {
       nextState.ball.linearVelocity.x,
       nextState.ball.linearVelocity.y,
     );
-    playDebugSpin.textContent = formatVector3(
+    playDebugSpin.textContent = formatVector2(
       nextState.ball.angularVelocity.x,
       nextState.ball.angularVelocity.y,
-      nextState.ball.angularVelocity.z,
     );
   });
   loop.start();
@@ -1591,8 +1590,4 @@ function radiansToDegrees(angle: number): number {
 
 function formatVector2(x: number, y: number): string {
   return `${Math.round(x)}, ${Math.round(y)}`;
-}
-
-function formatVector3(x: number, y: number, z: number): string {
-  return `${Math.round(x)}, ${Math.round(y)}, ${Math.round(z)}`;
 }

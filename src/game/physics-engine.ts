@@ -89,17 +89,14 @@ const stepWaitingLaunchState = (
         ...state.ball.position,
         x: board.launchPosition.x,
         y: board.launchPosition.y,
-        z: state.ball.radius,
       },
       linearVelocity: {
         x: 0,
         y: 0,
-        z: 0,
       },
       angularVelocity: {
         x: 0,
         y: 0,
-        z: 0,
       },
     },
     plunger: plungerFrame.next,
@@ -125,13 +122,10 @@ const stepWaitingLaunchState = (
   } else {
     next.ball.position.x = board.launchPosition.x;
     next.ball.position.y = board.launchPosition.y;
-    next.ball.position.z = state.ball.radius;
     next.ball.linearVelocity.x = 0;
     next.ball.linearVelocity.y = 0;
-    next.ball.linearVelocity.z = 0;
     next.ball.angularVelocity.x = 0;
     next.ball.angularVelocity.y = 0;
-    next.ball.angularVelocity.z = 0;
   }
 
   return { state: next, events };
@@ -728,7 +722,6 @@ const resolveSaucerCaptures = (
     state.ball.linearVelocity.y = 0;
     state.ball.angularVelocity.x = 0;
     state.ball.angularVelocity.y = 0;
-    state.ball.angularVelocity.z = 0;
   });
 };
 
@@ -1044,7 +1037,6 @@ const resolveOccupiedSaucer = (
   state.ball.linearVelocity.y = 0;
   state.ball.angularVelocity.x = 0;
   state.ball.angularVelocity.y = 0;
-  state.ball.angularVelocity.z = 0;
 
   if (saucerState.holdSecondsRemaining === 0) {
     saucerState.occupied = false;

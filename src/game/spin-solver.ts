@@ -41,9 +41,13 @@ export const resolveBallContact = (
     applyTangentImpulse(ball, contact, tangentImpulse);
   }
 
-  if (Math.abs(ball.angularVelocity.z) > solver.epsilon) {
+  if (
+    Math.abs(ball.angularVelocity.x) > solver.epsilon ||
+    Math.abs(ball.angularVelocity.y) > solver.epsilon
+  ) {
     const spinDampingFactor = Math.max(0, 1 - contact.material.spinDamping * 0.12);
-    ball.angularVelocity.z *= spinDampingFactor;
+    ball.angularVelocity.x *= spinDampingFactor;
+    ball.angularVelocity.y *= spinDampingFactor;
   }
 
   return {
@@ -79,9 +83,12 @@ const getRelativeTangentSpeed = (
     x: ball.linearVelocity.x - contact.surfaceVelocity.x,
     y: ball.linearVelocity.y - contact.surfaceVelocity.y,
   };
-  const spinSurfaceSpeed = -ball.angularVelocity.z * ball.radius;
+  const spinSurfaceVelocity = getSpinSurfaceVelocity(ball);
 
-  return dot(relativeLinearVelocity, contact.tangent) + spinSurfaceSpeed;
+  return (
+    dot(relativeLinearVelocity, contact.tangent) +
+    dot(spinSurfaceVelocity, contact.tangent)
+  );
 };
 
 const getTangentImpulse = (
@@ -129,9 +136,15 @@ const applyTangentImpulse = (
 ): void => {
   applyLinearImpulse(ball, contact.tangent, impulseMagnitude);
 
-  const torque = -ball.radius * impulseMagnitude;
-  ball.angularVelocity.z += torque / ball.momentOfInertia;
-}
+  const torqueScale = (ball.radius * impulseMagnitude) / ball.momentOfInertia;
+  ball.angularVelocity.x += contact.tangent.y * torqueScale;
+  ball.angularVelocity.y -= contact.tangent.x * torqueScale;
+};
+
+const getSpinSurfaceVelocity = (ball: BallState): Vector2 => ({
+  x: -ball.angularVelocity.y * ball.radius,
+  y: ball.angularVelocity.x * ball.radius,
+});
 
 const dot = (left: Vector2, right: Vector2): number =>
   left.x * right.x + left.y * right.y;

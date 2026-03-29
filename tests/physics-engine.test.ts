@@ -37,7 +37,6 @@ describe('stepGame', () => {
     expect(next.plunger.pullback).toBeGreaterThan(0);
     expect(next.ball.position.x).toBe(classicTable.launchPosition.x);
     expect(next.ball.position.y).toBe(classicTable.launchPosition.y);
-    expect(next.ball.position.z).toBe(classicTable.ball.radius);
     expect(next.ball.linearVelocity.x).toBe(0);
     expect(next.ball.linearVelocity.y).toBe(0);
   });
@@ -188,7 +187,7 @@ describe('stepGame', () => {
 
     const next = stepGame(state, classicTable, idleInput, 1 / 60);
 
-    expect(Math.abs(next.ball.angularVelocity.z)).toBeGreaterThan(0);
+    expect(getBallSpinMagnitude(next)).toBeGreaterThan(0);
   });
 
   it('bounces the ball off a post without emitting scoring events', () => {
@@ -240,7 +239,7 @@ describe('stepGame', () => {
     expect(next.ball.linearVelocity.y).toBeLessThan(
       passive.ball.linearVelocity.y - 100,
     );
-    expect(Math.abs(next.ball.angularVelocity.z)).toBeGreaterThan(0);
+    expect(getBallSpinMagnitude(next)).toBeGreaterThan(0);
     expect(getFlipperState(next, classicTable, 'left').angle).toBeGreaterThan(
       leftFlipper.activeAngle,
     );
@@ -297,7 +296,6 @@ describe('stepGame', () => {
     expect(next.status).toBe('waiting-launch');
     expect(next.ball.position.x).toBe(classicTable.launchPosition.x);
     expect(next.ball.position.y).toBe(classicTable.launchPosition.y);
-    expect(next.ball.position.z).toBe(classicTable.ball.radius);
     expect(next.ball.linearVelocity.x).toBe(0);
     expect(next.ball.linearVelocity.y).toBe(0);
     expect(next.plunger.pullback).toBe(0);
@@ -587,6 +585,10 @@ const placeBallOnBumperSurface = (
   state.ball.position.x = bumper.x + (normal.x / magnitude) * distance;
   state.ball.position.y = bumper.y + (normal.y / magnitude) * distance;
 };
+
+const getBallSpinMagnitude = (
+  state: ReturnType<typeof createInitialGameState>,
+): number => Math.hypot(state.ball.angularVelocity.x, state.ball.angularVelocity.y);
 
 const releaseUntilLaunched = <TBoard extends typeof classicTable>(
   state: ReturnType<typeof createInitialGameState>,
