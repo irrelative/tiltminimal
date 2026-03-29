@@ -89,7 +89,6 @@ export class CanvasRenderer {
     state?: GameState,
   ): void {
     this.drawBackground(context, board);
-    this.drawBounds(context, board);
     this.drawGuides(context, board);
     this.drawPlunger(context, board, state);
     this.drawBumpers(context, board, state);
@@ -132,22 +131,6 @@ export class CanvasRenderer {
     context.beginPath();
     context.arc(720, 1180, 260, 0, Math.PI * 2);
     context.fill();
-  }
-
-  private drawBounds(
-    context: CanvasRenderingContext2D,
-    board: BoardDefinition,
-  ): void {
-    context.strokeStyle = PALETTE.outlineBlue;
-    context.lineWidth = 12;
-    context.strokeRect(24, 24, board.width - 48, board.height - 48);
-
-    context.strokeStyle = 'rgba(47, 109, 178, 0.35)';
-    context.lineWidth = 5;
-    context.beginPath();
-    context.moveTo(board.width / 2, 24);
-    context.lineTo(board.width / 2, board.height - 180);
-    context.stroke();
   }
 
   private drawGuides(
