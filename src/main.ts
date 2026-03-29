@@ -11,6 +11,7 @@ import {
   addDropTarget,
   addFlipper,
   addGuide,
+  addPost,
   addRollover,
   addSaucer,
   addSpinner,
@@ -327,6 +328,20 @@ function bootEditorRoute(): void {
 
     if (state.tool === 'add-bumper') {
       const result = addBumper(getActiveTable().board, point);
+
+      state.selection = result.selection;
+      state.tool = 'select';
+      state.dragging = true;
+      state.dragMode = 'move-selection';
+      state.dragOffset = { x: 0, y: 0 };
+      state.draftPosition = null;
+      replaceActiveBoard(result.board, false);
+      renderApp();
+      return;
+    }
+
+    if (state.tool === 'add-post') {
+      const result = addPost(getActiveTable().board, point);
 
       state.selection = result.selection;
       state.tool = 'select';
@@ -922,6 +937,25 @@ function syncSelectionPanel(): void {
   }
 
   if (
+    state.selection.kind === 'post' &&
+    state.selection.index !== undefined
+  ) {
+    const post = active.board.posts[state.selection.index];
+
+    if (!post) {
+      return;
+    }
+
+    selectionLabel.textContent = `Post ${state.selection.index + 1}`;
+    selectionFields.append(
+      createNumericField('x', 'X', post.x),
+      createNumericField('y', 'Y', post.y),
+      createNumericField('radius', 'Radius', post.radius),
+    );
+    return;
+  }
+
+  if (
     state.selection.kind === 'standup-target' &&
     state.selection.index !== undefined
   ) {
@@ -1307,6 +1341,19 @@ function getDragOffset(
     };
   }
 
+  if (selection.kind === 'post' && selection.index !== undefined) {
+    const post = board.posts[selection.index];
+
+    if (!post) {
+      return null;
+    }
+
+    return {
+      x: point.x - post.x,
+      y: point.y - post.y,
+    };
+  }
+
   if (selection.kind === 'guide' && selection.index !== undefined) {
     const guide = board.guides[selection.index];
 
@@ -1526,6 +1573,7 @@ function syncPlayRoutePanel(): void {
 
 function getFeatureCount(board: BoardDefinition): number {
   return (
+    board.posts.length +
     board.bumpers.length +
     board.standupTargets.length +
     board.dropTargets.length +

@@ -74,6 +74,11 @@ export interface BumperDefinition extends Point {
   material: SurfaceMaterialName;
 }
 
+export interface PostDefinition extends Point {
+  radius: number;
+  material: SurfaceMaterialName;
+}
+
 export interface StandupTargetDefinition extends Point {
   width: number;
   height: number;
@@ -158,6 +163,7 @@ export interface BoardDefinition {
   };
   surfaceMaterials: Record<SurfaceMaterialName, SurfaceMaterial>;
   physics: PhysicsDefinition;
+  posts: PostDefinition[];
   bumpers: BumperDefinition[];
   standupTargets: StandupTargetDefinition[];
   dropTargets: DropTargetDefinition[];
@@ -192,6 +198,7 @@ export interface BoardDefinitionInput {
     flipper?: Partial<FlipperPhysicsDefinition>;
     solver?: Partial<SolverPhysicsDefinition>;
   };
+  posts?: PostDefinition[];
   bumpers: BumperDefinition[];
   standupTargets?: StandupTargetDefinition[];
   dropTargets?: DropTargetDefinition[];

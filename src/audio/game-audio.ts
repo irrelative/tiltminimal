@@ -299,6 +299,14 @@ const getNearbyImpactMaterial = (
     }
   }
 
+  for (const post of board.posts) {
+    const distance = Math.hypot(position.x - post.x, position.y - post.y);
+
+    if (distance <= radius + post.radius + 10) {
+      return post.material;
+    }
+  }
+
   for (const guide of getPlungerGuideSegments(board)) {
     if (
       getGuideDistance(position, guide) <=

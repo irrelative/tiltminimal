@@ -3,6 +3,7 @@ import {
   createDefaultGuide,
   createDefaultDropTarget,
   createDefaultFlipper,
+  createDefaultPost,
   createDefaultRollover,
   createDefaultSaucer,
   createDefaultSpinner,
@@ -28,6 +29,7 @@ import type {
   FlipperSide,
   GuideDefinition,
   Point,
+  PostDefinition,
 } from '../types/board-definition';
 import type { EditorSelection } from './editor-types';
 
@@ -87,6 +89,18 @@ export const hitTestSelection = (
         rollover.radius + SELECTION_PADDING
     ) {
       return { kind: 'rollover', index };
+    }
+  }
+
+  for (let index = board.posts.length - 1; index >= 0; index -= 1) {
+    const post = board.posts[index];
+
+    if (
+      post &&
+      Math.hypot(point.x - post.x, point.y - post.y) <=
+        post.radius + SELECTION_PADDING
+    ) {
+      return { kind: 'post', index };
     }
   }
 
@@ -202,6 +216,25 @@ export const addBumper = (
   return {
     board: nextBoard,
     selection: { kind: 'bumper', index: nextBoard.bumpers.length - 1 },
+  };
+};
+
+export const addPost = (
+  board: BoardDefinition,
+  point: Point,
+): {
+  board: BoardDefinition;
+  selection: EditorSelection;
+} => {
+  const nextPost = createDefaultPost(point.x, point.y);
+  const nextBoard = {
+    ...board,
+    posts: [...board.posts, nextPost],
+  };
+
+  return {
+    board: nextBoard,
+    selection: { kind: 'post', index: nextBoard.posts.length - 1 },
   };
 };
 
@@ -400,6 +433,17 @@ export const moveSelection = (
     };
   }
 
+  if (selection.kind === 'post' && selection.index !== undefined) {
+    return {
+      ...board,
+      posts: board.posts.map((post, index) =>
+        index === selection.index
+          ? { ...post, ...clampPoint(board, point, post.radius) }
+          : post,
+      ),
+    };
+  }
+
   if (selection.kind === 'standup-target' && selection.index !== undefined) {
     return {
       ...board,
@@ -571,6 +615,16 @@ export const deleteSelection = (
     };
   }
 
+  if (selection.kind === 'post' && selection.index !== undefined) {
+    return {
+      board: {
+        ...board,
+        posts: board.posts.filter((_, index) => index !== selection.index),
+      },
+      selection: { kind: 'none' },
+    };
+  }
+
   if (selection.kind === 'standup-target' && selection.index !== undefined) {
     return {
       board: {
@@ -691,6 +745,15 @@ export const updateSelectedNumericField = (
               [field]: value,
             }
           : bumper,
+      ),
+    };
+  }
+
+  if (selection.kind === 'post' && selection.index !== undefined) {
+    return {
+      ...board,
+      posts: board.posts.map((post, index) =>
+        index === selection.index ? { ...post, [field]: value } : post,
       ),
     };
   }
@@ -1224,6 +1287,9 @@ const getGuideLength = (guide: GuideDefinition): number =>
   isArcGuide(guide)
     ? guide.radius * getArcGuideSweep(guide)
     : Math.hypot(guide.end.x - guide.start.x, guide.end.y - guide.start.y);
+
+export const getPostSelectionPadding = (post: PostDefinition): number =>
+  post.radius;
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max);

@@ -267,6 +267,7 @@ export const exportBoardDefinition = (
     launchPosition: { ...board.launchPosition },
     plunger: { ...board.plunger },
     materials: { ...board.materials },
+    posts: board.posts.map((post) => ({ ...post })),
     bumpers: board.bumpers.map((bumper) => ({ ...bumper })),
     standupTargets: board.standupTargets.map((target) => ({ ...target })),
     dropTargets: board.dropTargets.map((target) => ({ ...target })),

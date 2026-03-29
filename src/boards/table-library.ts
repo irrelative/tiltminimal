@@ -10,6 +10,7 @@ import type {
   FlipperSide,
   GuideDefinition,
   LegacyLaunchPhysicsDefinition,
+  PostDefinition,
   RolloverDefinition,
   SaucerDefinition,
   SpinnerDefinition,
@@ -66,6 +67,7 @@ export const cloneBoardDefinition = (
     flipper: { ...board.physics.flipper },
     solver: { ...board.physics.solver },
   },
+  posts: board.posts.map((post) => ({ ...post })),
   bumpers: board.bumpers.map((bumper) => ({ ...bumper })),
   standupTargets: board.standupTargets.map((target) => ({ ...target })),
   dropTargets: board.dropTargets.map((target) => ({ ...target })),
@@ -116,6 +118,7 @@ export const normalizeBoardDefinition = (
       flipper: source.physics?.flipper,
       solver: source.physics?.solver,
     },
+    posts: source.posts ?? [],
     bumpers: source.bumpers ?? [],
     standupTargets: source.standupTargets ?? [],
     dropTargets: source.dropTargets ?? [],
@@ -157,6 +160,7 @@ export const createBlankTable = (name = 'Custom Table'): BoardDefinition =>
       playfield: 'playfieldWood',
       walls: 'metalGuide',
     },
+    posts: [],
     bumpers: [],
     standupTargets: [],
     dropTargets: [],
@@ -216,6 +220,13 @@ export const createDefaultStandupTarget = (
   height: 16,
   angle: -Math.PI / 2,
   score: 50,
+  material: 'rubberPost',
+});
+
+export const createDefaultPost = (x: number, y: number): PostDefinition => ({
+  x,
+  y,
+  radius: 18,
   material: 'rubberPost',
 });
 

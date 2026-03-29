@@ -108,6 +108,22 @@ describe('hitTestSelection', () => {
     expect(selection).toEqual({ kind: 'saucer', index: 0 });
   });
 
+  it('selects a post when clicking inside its radius', () => {
+    const board = createBlankTable();
+    board.posts = [
+      {
+        x: 260,
+        y: 320,
+        radius: 18,
+        material: 'rubberPost',
+      },
+    ];
+
+    const selection = hitTestSelection(board, { x: 266, y: 324 });
+
+    expect(selection).toEqual({ kind: 'post', index: 0 });
+  });
+
   it('selects the launcher when clicking on the shooter body', () => {
     const board = createBlankTable();
 
@@ -147,6 +163,32 @@ describe('hitTestSelection', () => {
 
     expect(next.bumpers[0]?.x).toBe(44);
     expect(next.bumpers[0]?.y).toBe(44);
+  });
+
+  it('moves and updates a post like other circular elements', () => {
+    const board = createBlankTable();
+    board.posts = [
+      {
+        x: 220,
+        y: 260,
+        radius: 18,
+        material: 'rubberPost',
+      },
+    ];
+
+    const moved = moveSelection(board, { kind: 'post', index: 0 }, { x: 0, y: 0 });
+
+    expect(moved.posts[0]?.x).toBe(18);
+    expect(moved.posts[0]?.y).toBe(18);
+
+    const updated = updateSelectedNumericField(
+      moved,
+      { kind: 'post', index: 0 },
+      'radius',
+      24,
+    );
+
+    expect(updated.posts[0]?.radius).toBe(24);
   });
 
   it('finds start, end, and rotate handles for a selected guide', () => {

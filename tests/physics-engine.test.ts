@@ -191,6 +191,30 @@ describe('stepGame', () => {
     expect(Math.abs(next.ball.angularVelocity.z)).toBeGreaterThan(0);
   });
 
+  it('bounces the ball off a post without emitting scoring events', () => {
+    const board = createBlankTable();
+    board.posts = [
+      {
+        x: 240,
+        y: 260,
+        radius: 18,
+        material: 'rubberPost',
+      },
+    ];
+
+    const state = createInitialGameState(board);
+    state.status = 'playing';
+    state.ball.position.x = 240 - state.ball.radius - 18 - 2;
+    state.ball.position.y = 260;
+    state.ball.linearVelocity.x = 360;
+    state.ball.linearVelocity.y = 0;
+
+    const result = stepGameFrame(state, board, idleInput, 1 / 60);
+
+    expect(result.state.ball.linearVelocity.x).toBeLessThan(0);
+    expect(result.events).toEqual([]);
+  });
+
   it('adds a stronger upward impulse when the left flipper flips into the ball', () => {
     const passiveState = createInitialGameState(classicTable);
     passiveState.status = 'playing';

@@ -23,6 +23,7 @@ import type {
   BumperDefinition,
   FlipperDefinition,
   GuideDefinition,
+  PostDefinition,
 } from '../types/board-definition';
 import type { InputState } from '../input/keyboard-input';
 
@@ -97,6 +98,7 @@ export class CanvasRenderer {
     this.drawBackground(context, board);
     this.drawGuides(context, board);
     this.drawPlunger(context, board, state);
+    this.drawPosts(context, board);
     this.drawBumpers(context, board, state);
     this.drawStandupTargets(context, board, state);
     this.drawDropTargets(context, board, state);
@@ -215,6 +217,38 @@ export class CanvasRenderer {
     });
 
     context.textAlign = 'start';
+  }
+
+  private drawPosts(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+  ): void {
+    board.posts.forEach((post) => {
+      const material = getSurfaceMaterial(post.material, board.surfaceMaterials);
+
+      context.save();
+      context.fillStyle =
+        material.name === 'metalGuide' ? PALETTE.cream : PALETTE.red;
+      context.beginPath();
+      context.arc(post.x, post.y, post.radius, 0, Math.PI * 2);
+      context.fill();
+      context.lineWidth = 5;
+      context.strokeStyle =
+        material.name === 'metalGuide' ? PALETTE.outlineBlue : PALETTE.cream;
+      context.stroke();
+      context.fillStyle =
+        material.name === 'metalGuide' ? PALETTE.outlineBlue : PALETTE.ink;
+      context.beginPath();
+      context.arc(
+        post.x,
+        post.y,
+        Math.max(post.radius * 0.26, 4),
+        0,
+        Math.PI * 2,
+      );
+      context.fill();
+      context.restore();
+    });
   }
 
   private drawPlunger(
@@ -559,6 +593,14 @@ export class CanvasRenderer {
       }
     }
 
+    if (selection.kind === 'post' && selection.index !== undefined) {
+      const post = board.posts[selection.index];
+
+      if (post) {
+        this.drawPostSelection(context, post);
+      }
+    }
+
     if (selection.kind === 'guide' && selection.index !== undefined) {
       const guide = board.guides[selection.index];
 
@@ -657,6 +699,20 @@ export class CanvasRenderer {
     context.setLineDash([10, 6]);
     context.beginPath();
     context.arc(bumper.x, bumper.y, bumper.radius + 10, 0, Math.PI * 2);
+    context.stroke();
+    context.restore();
+  }
+
+  private drawPostSelection(
+    context: CanvasRenderingContext2D,
+    post: PostDefinition,
+  ): void {
+    context.save();
+    context.strokeStyle = '#ffd166';
+    context.lineWidth = 4;
+    context.setLineDash([10, 6]);
+    context.beginPath();
+    context.arc(post.x, post.y, post.radius + 10, 0, Math.PI * 2);
     context.stroke();
     context.restore();
   }

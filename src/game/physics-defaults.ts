@@ -127,6 +127,7 @@ export const createBoardDefinition = (
         physicsDefaults.tuning.solver.staticSlipThreshold,
     },
   },
+  posts: input.posts ?? [],
   bumpers: input.bumpers,
   standupTargets: input.standupTargets ?? [],
   dropTargets: input.dropTargets ?? [],

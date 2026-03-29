@@ -196,6 +196,7 @@ const stepPlayingState = (
     resolveWallCollisions(next, board);
     resolvePlungerGuideCollisions(next, board, board.physics.solver);
     resolveGuideCollisions(next, board, board.physics.solver);
+    resolvePostCollisions(next, board, board.physics.solver);
     resolvePlungerCollision(next, board, plungerFrame, board.physics.solver);
     resolveStandupTargetCollisions(next, board, board.physics.solver, events);
     resolveDropTargetCollisions(next, board, board.physics.solver, events);
@@ -649,6 +650,45 @@ const resolveBumperCollisions = (
         score: bumper.score,
         tick: state.tick,
       });
+    }
+  }
+};
+
+const resolvePostCollisions = (
+  state: GameState,
+  board: BoardDefinition,
+  solver: SolverPhysicsDefinition,
+): void => {
+  for (const post of board.posts) {
+    const postMaterial = getSurfaceMaterial(
+      post.material,
+      board.surfaceMaterials,
+    );
+    const dx = state.ball.position.x - post.x;
+    const dy = state.ball.position.y - post.y;
+    const distance = Math.hypot(dx, dy) || solver.epsilon;
+    const overlap = state.ball.radius + post.radius - distance;
+
+    if (overlap <= 0) {
+      continue;
+    }
+
+    const nx = dx / distance;
+    const ny = dy / distance;
+    const approachSpeed =
+      state.ball.linearVelocity.x * nx + state.ball.linearVelocity.y * ny;
+    const contact = createStaticContact(
+      postMaterial,
+      {
+        x: post.x + nx * post.radius,
+        y: post.y + ny * post.radius,
+      },
+      { x: nx, y: ny },
+      overlap,
+    );
+
+    if (approachSpeed < 0 || overlap > solver.epsilon) {
+      resolveBallContact(state.ball, contact, solver);
     }
   }
 };

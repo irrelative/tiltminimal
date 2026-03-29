@@ -1,5 +1,6 @@
 export interface EditorSelection {
   kind:
+    | 'post'
     | 'bumper'
     | 'standup-target'
     | 'drop-target'
@@ -25,6 +26,7 @@ export type EditorDragMode =
 
 export type EditorTool =
   | 'select'
+  | 'add-post'
   | 'add-guide'
   | 'add-curved-guide'
   | 'add-bumper'
