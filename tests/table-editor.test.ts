@@ -115,6 +115,24 @@ describe('hitTestSelection', () => {
     expect(selection).toEqual({ kind: 'launch-position' });
   });
 
+  it('allows a bumper to move flush to the canvas edge', () => {
+    const board = createBlankTable();
+    board.bumpers = [
+      {
+        x: 220,
+        y: 260,
+        radius: 44,
+        score: 100,
+        material: 'rubberPost',
+      },
+    ];
+
+    const next = moveSelection(board, { kind: 'bumper', index: 0 }, { x: 0, y: 0 });
+
+    expect(next.bumpers[0]?.x).toBe(44);
+    expect(next.bumpers[0]?.y).toBe(44);
+  });
+
   it('finds start, end, and rotate handles for a selected guide', () => {
     const guide = {
       kind: 'line' as const,
@@ -186,6 +204,36 @@ describe('hitTestSelection', () => {
 
     expect(guide.start).toEqual({ x: 140, y: 260 });
     expect(guide.end).toEqual({ x: 320, y: 220 });
+  });
+
+  it('allows a guide endpoint to reach the canvas edge', () => {
+    const board = createBlankTable();
+    board.guides = [
+      {
+        kind: 'line',
+        start: { x: 120, y: 220 },
+        end: { x: 320, y: 220 },
+        thickness: 20,
+        material: 'metalGuide',
+      },
+    ];
+
+    const next = moveGuideHandle(
+      board,
+      { kind: 'guide', index: 0 },
+      'start',
+      { x: 0, y: 0 },
+    );
+
+    const guide = next.guides[0];
+
+    expect(guide).toBeDefined();
+    expect(guide?.kind).toBe('line');
+    if (!guide || guide.kind === 'arc') {
+      throw new Error('Expected line guide.');
+    }
+
+    expect(guide.start).toEqual({ x: 10, y: 10 });
   });
 
   it('rotates a guide around its midpoint when dragging the rotate handle', () => {

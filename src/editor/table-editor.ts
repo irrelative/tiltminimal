@@ -359,7 +359,12 @@ export const moveSelection = (
   point: Point,
 ): BoardDefinition => {
   if (selection.kind === 'launch-position') {
-    const nextLaunchPosition = clampPoint(board, point, 30);
+    const nextLaunchPosition = clampPoint(
+      board,
+      point,
+      board.ball.radius,
+      board.ball.radius,
+    );
     const deltaX = nextLaunchPosition.x - board.launchPosition.x;
     const deltaY = nextLaunchPosition.y - board.launchPosition.y;
 
@@ -374,7 +379,8 @@ export const moveSelection = (
             x: board.plunger.x + deltaX,
             y: board.plunger.y + deltaY,
           },
-          Math.max(board.plunger.length / 2, board.plunger.thickness / 2) + 24,
+          board.plunger.thickness / 2,
+          board.plunger.length / 2,
         ),
       },
     };
@@ -385,7 +391,7 @@ export const moveSelection = (
       ...board,
       bumpers: board.bumpers.map((bumper, index) =>
         index === selection.index
-          ? { ...bumper, ...clampPoint(board, point, bumper.radius + 24) }
+          ? { ...bumper, ...clampPoint(board, point, bumper.radius) }
           : bumper,
       ),
     };
@@ -396,7 +402,14 @@ export const moveSelection = (
       ...board,
       standupTargets: board.standupTargets.map((target, index) =>
         index === selection.index
-          ? { ...target, ...clampPoint(board, point, target.width / 2 + 24) }
+          ? {
+              ...target,
+              ...clampPoint(
+                board,
+                point,
+                getOrientedSelectionPadding(target.width, target.height),
+              ),
+            }
           : target,
       ),
     };
@@ -407,7 +420,14 @@ export const moveSelection = (
       ...board,
       dropTargets: board.dropTargets.map((target, index) =>
         index === selection.index
-          ? { ...target, ...clampPoint(board, point, target.width / 2 + 24) }
+          ? {
+              ...target,
+              ...clampPoint(
+                board,
+                point,
+                getOrientedSelectionPadding(target.width, target.height),
+              ),
+            }
           : target,
       ),
     };
@@ -418,7 +438,7 @@ export const moveSelection = (
       ...board,
       saucers: board.saucers.map((saucer, index) =>
         index === selection.index
-          ? { ...saucer, ...clampPoint(board, point, saucer.radius + 24) }
+          ? { ...saucer, ...clampPoint(board, point, saucer.radius) }
           : saucer,
       ),
     };
@@ -429,7 +449,17 @@ export const moveSelection = (
       ...board,
       spinners: board.spinners.map((spinner, index) =>
         index === selection.index
-          ? { ...spinner, ...clampPoint(board, point, spinner.length / 2 + 24) }
+          ? {
+              ...spinner,
+              ...clampPoint(
+                board,
+                point,
+                getOrientedSelectionPadding(
+                  spinner.length,
+                  spinner.thickness,
+                ),
+              ),
+            }
           : spinner,
       ),
     };
@@ -440,7 +470,7 @@ export const moveSelection = (
       ...board,
       rollovers: board.rollovers.map((rollover, index) =>
         index === selection.index
-          ? { ...rollover, ...clampPoint(board, point, rollover.radius + 24) }
+          ? { ...rollover, ...clampPoint(board, point, rollover.radius) }
           : rollover,
       ),
     };
@@ -463,7 +493,7 @@ export const moveSelection = (
                 center: clampPoint(
                   board,
                   point,
-                  guide.radius + guide.thickness / 2 + 24,
+                  guide.radius + guide.thickness / 2,
                 ),
               }
             : candidate,
@@ -473,11 +503,11 @@ export const moveSelection = (
 
     const deltaX = point.x - guide.start.x;
     const deltaY = point.y - guide.start.y;
-    const clampedStart = clampPoint(board, point, guide.thickness / 2 + 24);
+    const clampedStart = clampPoint(board, point, guide.thickness / 2);
     const clampedEnd = clampPoint(
       board,
       { x: guide.end.x + deltaX, y: guide.end.y + deltaY },
-      guide.thickness / 2 + 24,
+      guide.thickness / 2,
     );
 
     return {
@@ -507,7 +537,11 @@ export const moveSelection = (
         index === selection.index
           ? {
               ...candidate,
-              ...clampPoint(board, point, candidate.length + 40),
+              ...clampPoint(
+                board,
+                point,
+                getFlipperSelectionPadding(candidate.length, candidate.thickness),
+              ),
             }
           : candidate,
       ),
@@ -926,7 +960,7 @@ export const moveGuideHandle = (
   }
 
   if (handle === 'start' || handle === 'end') {
-    const nextPoint = clampPoint(board, point, guide.thickness / 2 + 24);
+    const nextPoint = clampPoint(board, point, guide.thickness / 2);
 
     return {
       ...board,
@@ -966,7 +1000,7 @@ export const moveGuideHandle = (
       x: midpoint.x - direction.x * halfLength,
       y: midpoint.y - direction.y * halfLength,
     },
-    guide.thickness / 2 + 24,
+    guide.thickness / 2,
   );
   const nextEnd = clampPoint(
     board,
@@ -974,7 +1008,7 @@ export const moveGuideHandle = (
       x: midpoint.x + direction.x * halfLength,
       y: midpoint.y + direction.y * halfLength,
     },
-    guide.thickness / 2 + 24,
+    guide.thickness / 2,
   );
 
   return {
@@ -1034,10 +1068,21 @@ const clampPoint = (
   board: BoardDefinition,
   point: Point,
   padding: number,
+  verticalPadding = padding,
 ): Point => ({
   x: clamp(point.x, padding, board.width - padding),
-  y: clamp(point.y, padding, board.height - padding),
+  y: clamp(point.y, verticalPadding, board.height - verticalPadding),
 });
+
+const getOrientedSelectionPadding = (
+  width: number,
+  height: number,
+): number => Math.hypot(width / 2, height / 2);
+
+const getFlipperSelectionPadding = (
+  length: number,
+  thickness: number,
+): number => length + thickness / 2;
 
 const distanceToOrientedSegment = (
   point: Point,
