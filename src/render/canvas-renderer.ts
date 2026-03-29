@@ -1,4 +1,5 @@
 import type { EditorSelection } from '../editor/editor-types';
+import { EDITOR_GRID_SIZE } from '../editor/grid';
 import {
   getGuideHandles,
   getOrientedRotateHandle,
@@ -42,6 +43,11 @@ const PALETTE = {
 
 const FLIPPER_COLOR = PALETTE.red;
 
+interface EditorRenderOptions {
+  showGrid?: boolean;
+  snapToGrid?: boolean;
+}
+
 export class CanvasRenderer {
   constructor(private readonly canvas: HTMLCanvasElement) {}
 
@@ -68,6 +74,7 @@ export class CanvasRenderer {
     board: BoardDefinition,
     selection: EditorSelection,
     draftPosition: { x: number; y: number } | null,
+    options: EditorRenderOptions = {},
   ): void {
     const context = this.canvas.getContext('2d');
 
@@ -79,10 +86,13 @@ export class CanvasRenderer {
     context.clearRect(0, 0, board.width, board.height);
 
     this.drawBoard(context, board);
+    if (options.showGrid) {
+      this.drawEditorGrid(context, board);
+    }
     this.drawLaunchPosition(context, board, selection);
     this.drawEditorSelection(context, board, selection);
     this.drawDraft(context, draftPosition);
-    this.drawEditorHud(context, board);
+    this.drawEditorHud(context, board, options);
   }
 
   private syncCanvasSize(board: BoardDefinition): void {
@@ -923,9 +933,43 @@ export class CanvasRenderer {
     context.restore();
   }
 
+  private drawEditorGrid(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+  ): void {
+    context.save();
+
+    for (let x = 0; x <= board.width; x += EDITOR_GRID_SIZE) {
+      const isMajor = x % (EDITOR_GRID_SIZE * 5) === 0;
+      context.strokeStyle = isMajor
+        ? 'rgba(34, 48, 74, 0.22)'
+        : 'rgba(34, 48, 74, 0.1)';
+      context.lineWidth = isMajor ? 1.4 : 1;
+      context.beginPath();
+      context.moveTo(x + 0.5, 0);
+      context.lineTo(x + 0.5, board.height);
+      context.stroke();
+    }
+
+    for (let y = 0; y <= board.height; y += EDITOR_GRID_SIZE) {
+      const isMajor = y % (EDITOR_GRID_SIZE * 5) === 0;
+      context.strokeStyle = isMajor
+        ? 'rgba(34, 48, 74, 0.22)'
+        : 'rgba(34, 48, 74, 0.1)';
+      context.lineWidth = isMajor ? 1.4 : 1;
+      context.beginPath();
+      context.moveTo(0, y + 0.5);
+      context.lineTo(board.width, y + 0.5);
+      context.stroke();
+    }
+
+    context.restore();
+  }
+
   private drawEditorHud(
     context: CanvasRenderingContext2D,
     board: BoardDefinition,
+    options: EditorRenderOptions,
   ): void {
     context.fillStyle = 'rgba(241, 250, 238, 0.92)';
     context.font = '600 28px Georgia, serif';
@@ -942,6 +986,13 @@ export class CanvasRenderer {
       48,
       122,
     );
+    if (options.showGrid) {
+      context.fillText(
+        `Grid ${EDITOR_GRID_SIZE}px · Snap ${options.snapToGrid ? 'On' : 'Off'}`,
+        48,
+        148,
+      );
+    }
   }
 
   private drawEditorHandle(

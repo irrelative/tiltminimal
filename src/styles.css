@@ -228,6 +228,18 @@ h2 {
   gap: 6px;
 }
 
+.toggle-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text);
+}
+
+.toggle-field input {
+  width: auto;
+  margin: 0;
+}
+
 .field span {
   color: var(--muted);
   font-size: 0.92rem;

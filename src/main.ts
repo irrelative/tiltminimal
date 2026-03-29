@@ -38,6 +38,7 @@ import {
   setActiveTableId,
   upsertTable,
 } from './editor/table-storage';
+import { snapPointToGrid } from './editor/grid';
 import { GameAudio } from './audio/game-audio';
 import { GameLoop } from './game/game-loop';
 import { createInitialGameState } from './game/game-state';
@@ -67,6 +68,7 @@ interface AppState {
   dragMode: EditorDragMode | null;
   dragOffset: Point | null;
   draftPosition: Point | null;
+  snapToGrid: boolean;
   loop: GameLoop | null;
   input: KeyboardInput | null;
 }
@@ -96,6 +98,7 @@ const selectionLabel = queryRequired<HTMLElement>('#selection-label');
 const selectionFields = queryRequired<HTMLElement>('#selection-fields');
 const deleteSelectionButton =
   queryRequired<HTMLButtonElement>('#delete-selection');
+const snapToGridToggle = queryRequired<HTMLInputElement>('#snap-to-grid');
 const tableExportPanel = queryRequired<HTMLDetailsElement>(
   '#table-export-panel',
 );
@@ -139,6 +142,7 @@ const state: AppState = {
   dragMode: null,
   dragOffset: null,
   draftPosition: null,
+  snapToGrid: false,
   loop: null,
   input: null,
 };
@@ -245,6 +249,11 @@ function bootEditorRoute(): void {
     );
   });
 
+  snapToGridToggle.addEventListener('change', () => {
+    state.snapToGrid = snapToGridToggle.checked;
+    renderApp();
+  });
+
   selectionFields.addEventListener('input', (event) => {
     const target = event.target;
 
@@ -327,7 +336,7 @@ function bootEditorRoute(): void {
     canvas.setPointerCapture(event.pointerId);
 
     if (state.tool === 'add-bumper') {
-      const result = addBumper(getActiveTable().board, point);
+      const result = addBumper(getActiveTable().board, getSnappedEditorPoint(point));
 
       state.selection = result.selection;
       state.tool = 'select';
@@ -341,7 +350,7 @@ function bootEditorRoute(): void {
     }
 
     if (state.tool === 'add-post') {
-      const result = addPost(getActiveTable().board, point);
+      const result = addPost(getActiveTable().board, getSnappedEditorPoint(point));
 
       state.selection = result.selection;
       state.tool = 'select';
@@ -355,7 +364,7 @@ function bootEditorRoute(): void {
     }
 
     if (state.tool === 'add-guide') {
-      const result = addGuide(getActiveTable().board, point);
+      const result = addGuide(getActiveTable().board, getSnappedEditorPoint(point));
 
       state.selection = result.selection;
       state.tool = 'select';
@@ -369,7 +378,10 @@ function bootEditorRoute(): void {
     }
 
     if (state.tool === 'add-curved-guide') {
-      const result = addCurvedGuide(getActiveTable().board, point);
+      const result = addCurvedGuide(
+        getActiveTable().board,
+        getSnappedEditorPoint(point),
+      );
 
       state.selection = result.selection;
       state.tool = 'select';
@@ -383,7 +395,10 @@ function bootEditorRoute(): void {
     }
 
     if (state.tool === 'add-standup-target') {
-      const result = addStandupTarget(getActiveTable().board, point);
+      const result = addStandupTarget(
+        getActiveTable().board,
+        getSnappedEditorPoint(point),
+      );
 
       state.selection = result.selection;
       state.tool = 'select';
@@ -397,7 +412,10 @@ function bootEditorRoute(): void {
     }
 
     if (state.tool === 'add-drop-target') {
-      const result = addDropTarget(getActiveTable().board, point);
+      const result = addDropTarget(
+        getActiveTable().board,
+        getSnappedEditorPoint(point),
+      );
 
       state.selection = result.selection;
       state.tool = 'select';
@@ -411,7 +429,7 @@ function bootEditorRoute(): void {
     }
 
     if (state.tool === 'add-saucer') {
-      const result = addSaucer(getActiveTable().board, point);
+      const result = addSaucer(getActiveTable().board, getSnappedEditorPoint(point));
 
       state.selection = result.selection;
       state.tool = 'select';
@@ -425,7 +443,7 @@ function bootEditorRoute(): void {
     }
 
     if (state.tool === 'add-spinner') {
-      const result = addSpinner(getActiveTable().board, point);
+      const result = addSpinner(getActiveTable().board, getSnappedEditorPoint(point));
 
       state.selection = result.selection;
       state.tool = 'select';
@@ -439,7 +457,10 @@ function bootEditorRoute(): void {
     }
 
     if (state.tool === 'add-rollover') {
-      const result = addRollover(getActiveTable().board, point);
+      const result = addRollover(
+        getActiveTable().board,
+        getSnappedEditorPoint(point),
+      );
 
       state.selection = result.selection;
       state.tool = 'select';
@@ -459,7 +480,7 @@ function bootEditorRoute(): void {
       const result = addFlipper(
         getActiveTable().board,
         state.tool === 'add-left-flipper' ? 'left' : 'right',
-        point,
+        getSnappedEditorPoint(point),
       );
 
       state.selection = result.selection;
@@ -584,12 +605,22 @@ function bootEditorRoute(): void {
 
       if (state.dragMode === 'guide-start') {
         replaceActiveBoard(
-          moveGuideHandle(board, state.selection, 'start', point),
+          moveGuideHandle(
+            board,
+            state.selection,
+            'start',
+            getSnappedEditorPoint(point),
+          ),
           false,
         );
       } else if (state.dragMode === 'guide-end') {
         replaceActiveBoard(
-          moveGuideHandle(board, state.selection, 'end', point),
+          moveGuideHandle(
+            board,
+            state.selection,
+            'end',
+            getSnappedEditorPoint(point),
+          ),
           false,
         );
       } else if (state.dragMode === 'guide-arc-start') {
@@ -619,12 +650,13 @@ function bootEditorRoute(): void {
         );
       } else {
         const dragOffset = state.dragOffset ?? { x: 0, y: 0 };
+        const targetPoint = getSnappedEditorPoint({
+          x: point.x - dragOffset.x,
+          y: point.y - dragOffset.y,
+        });
 
         replaceActiveBoard(
-          moveSelection(board, state.selection, {
-            x: point.x - dragOffset.x,
-            y: point.y - dragOffset.y,
-          }),
+          moveSelection(board, state.selection, targetPoint),
           false,
         );
       }
@@ -633,7 +665,8 @@ function bootEditorRoute(): void {
       return;
     }
 
-    state.draftPosition = state.tool === 'select' ? null : point;
+    state.draftPosition =
+      state.tool === 'select' ? null : getSnappedEditorPoint(point);
     renderApp();
   });
 
@@ -807,6 +840,7 @@ function bootRulesRoute(): void {
 function renderApp(): void {
   syncTableList();
   syncToolButtons();
+  syncGridControls();
   syncTablePanel();
   syncSelectionPanel();
   syncExportPanel();
@@ -821,6 +855,10 @@ function renderApp(): void {
       state.mode === 'edit' && state.tool !== 'select'
         ? state.draftPosition
         : null,
+      {
+        showGrid: state.mode === 'edit',
+        snapToGrid: state.snapToGrid,
+      },
     );
   }
 }
@@ -872,6 +910,10 @@ function syncToolButtons(): void {
     .forEach((button) => {
       button.classList.toggle('is-active', button.dataset.tool === state.tool);
     });
+}
+
+function syncGridControls(): void {
+  snapToGridToggle.checked = state.snapToGrid;
 }
 
 function syncTablePanel(): void {
@@ -1314,6 +1356,14 @@ function getBoardPoint(event: PointerEvent): Point {
     x: (event.clientX - rect.left) * scaleX,
     y: (event.clientY - rect.top) * scaleY,
   };
+}
+
+function getSnappedEditorPoint(point: Point): Point {
+  if (state.mode !== 'edit' || !state.snapToGrid) {
+    return point;
+  }
+
+  return snapPointToGrid(point);
 }
 
 function getDragOffset(
