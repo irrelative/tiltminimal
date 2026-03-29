@@ -33,3 +33,8 @@ Use the `Makefile` entrypoints:
 * `src/render/` canvas rendering
 * `src/input/` player controls
 * `tests/` unit tests
+
+## Additional docs
+
+* [docs/physics-and-animation.md](docs/physics-and-animation.md) explains how
+  the frame loop, physics solver, rolling spin, and renderer fit together
