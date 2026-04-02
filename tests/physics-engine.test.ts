@@ -101,6 +101,36 @@ describe('stepGame', () => {
     expect(next.ball.linearVelocity.y).toBeLessThan(180);
   });
 
+  it('keeps a dead-bounce moving on a resting left flipper instead of killing speed', () => {
+    const state = createInitialGameState(classicTable);
+    state.status = 'playing';
+    placeBallOnFlipperSurface(state, leftFlipper, 0.66);
+    state.ball.linearVelocity.x = 0;
+    state.ball.linearVelocity.y = 220;
+
+    const next = stepGame(state, classicTable, idleInput, 1 / 60);
+    const settled = advanceFrames(next, classicTable, 10);
+
+    expect(getBallSpeed(next)).toBeGreaterThan(40);
+    expect(settled.ball.position.x - state.ball.position.x).toBeGreaterThan(16);
+    expect(settled.ball.position.y).toBeLessThan(state.ball.position.y + 32);
+  });
+
+  it('keeps a dead-bounce moving on a resting right flipper instead of killing speed', () => {
+    const state = createInitialGameState(classicTable);
+    state.status = 'playing';
+    placeBallOnFlipperSurface(state, rightFlipper, 0.66);
+    state.ball.linearVelocity.x = 0;
+    state.ball.linearVelocity.y = 220;
+
+    const next = stepGame(state, classicTable, idleInput, 1 / 60);
+    const settled = advanceFrames(next, classicTable, 10);
+
+    expect(getBallSpeed(next)).toBeGreaterThan(40);
+    expect(state.ball.position.x - settled.ball.position.x).toBeGreaterThan(16);
+    expect(settled.ball.position.y).toBeLessThan(state.ball.position.y + 32);
+  });
+
   it('animates the left flipper through intermediate angles before reaching full extension', () => {
     const state = createInitialGameState(classicTable);
     state.status = 'playing';
@@ -687,6 +717,23 @@ const placeBallOnBumperSurface = (
 const getBallSpinMagnitude = (
   state: ReturnType<typeof createInitialGameState>,
 ): number => Math.hypot(state.ball.angularVelocity.x, state.ball.angularVelocity.y);
+
+const getBallSpeed = (state: ReturnType<typeof createInitialGameState>): number =>
+  Math.hypot(state.ball.linearVelocity.x, state.ball.linearVelocity.y);
+
+const advanceFrames = <TBoard extends typeof classicTable>(
+  state: ReturnType<typeof createInitialGameState>,
+  board: TBoard,
+  frameCount: number,
+): ReturnType<typeof createInitialGameState> => {
+  let current = state;
+
+  for (let index = 0; index < frameCount; index += 1) {
+    current = stepGame(current, board, idleInput, 1 / 60);
+  }
+
+  return current;
+};
 
 const releaseUntilLaunched = <TBoard extends typeof classicTable>(
   state: ReturnType<typeof createInitialGameState>,

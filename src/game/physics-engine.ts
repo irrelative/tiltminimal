@@ -217,7 +217,13 @@ const stepPlayingState = (
     resolveDropTargetCollisions(next, board, board.physics.solver, events);
     resolveSlingshotCollisions(next, board, board.physics.solver, events);
     resolveBumperCollisions(next, board, board.physics.solver, events);
-    resolveFlipperCollisions(next, board, flipperFrame, board.physics.solver);
+    resolveFlipperCollisions(
+      next,
+      board,
+      flipperFrame,
+      stepSeconds,
+      board.physics.solver,
+    );
     resolveSaucerCaptures(next, board, events);
     resolveSpinnerInteractions(next, board, board.physics.solver, events);
     resolveRolloverTriggers(next, board, events);
@@ -588,6 +594,7 @@ const resolveFlipperCollisions = (
   state: GameState,
   board: BoardDefinition,
   flipperFrame: FlipperMotionFrame[],
+  deltaSeconds: number,
   solver: SolverPhysicsDefinition,
 ): void => {
   board.flippers.forEach((flipper, index) => {
@@ -597,7 +604,7 @@ const resolveFlipperCollisions = (
       return;
     }
 
-    resolveFlipperCollision(state, board, flipper, motion, solver);
+    resolveFlipperCollision(state, board, flipper, motion, deltaSeconds, solver);
   });
 };
 
@@ -606,6 +613,7 @@ const resolveFlipperCollision = (
   board: BoardDefinition,
   flipper: FlipperDefinition,
   motion: FlipperMotionFrame,
+  deltaSeconds: number,
   solver: SolverPhysicsDefinition,
 ): void => {
   const shiftedFlipper = offsetFlipper(flipper, state.tableNudge.offset);
@@ -621,10 +629,21 @@ const resolveFlipperCollision = (
         board,
         shiftedFlipper,
         angle,
+        deltaSeconds,
         {
           angularVelocity: motion.next.angularVelocity,
+          engaged: motion.next.engaged,
           bodyMass: board.physics.flipper.bodyMass,
           restitutionScale: board.physics.flipper.restitutionScale,
+          passiveAngularVelocityThreshold:
+            board.physics.flipper.passiveAngularVelocityThreshold,
+          passiveRestitutionScale:
+            board.physics.flipper.passiveRestitutionScale,
+          passiveFrictionScale: board.physics.flipper.passiveFrictionScale,
+          passiveSpinDampingScale:
+            board.physics.flipper.passiveSpinDampingScale,
+          passiveSlopeGravityScale:
+            board.physics.flipper.passiveSlopeGravityScale,
           tableVelocity: state.tableNudge.velocity,
         },
         solver,
@@ -640,10 +659,17 @@ const applyFlipperCollisionAtAngle = (
   board: BoardDefinition,
   flipper: FlipperDefinition,
   collisionAngle: number,
+  deltaSeconds: number,
   motion: {
     angularVelocity: number;
+    engaged: boolean;
     bodyMass: number;
     restitutionScale: number;
+    passiveAngularVelocityThreshold: number;
+    passiveRestitutionScale: number;
+    passiveFrictionScale: number;
+    passiveSpinDampingScale: number;
+    passiveSlopeGravityScale: number;
     tableVelocity: ContactData['surfaceVelocity'];
   },
   solver: SolverPhysicsDefinition,
@@ -690,6 +716,9 @@ const applyFlipperCollisionAtAngle = (
     (state.ball.linearVelocity.y -
       (motion.tableVelocity.y + surfaceVelocityY)) *
       normal.y;
+  const isPassiveContact =
+    !motion.engaged &&
+    Math.abs(motion.angularVelocity) <= motion.passiveAngularVelocityThreshold;
   const contact: ContactData = {
     point: contactPoint,
     normal,
@@ -704,11 +733,31 @@ const applyFlipperCollisionAtAngle = (
       contactRadiusSquared > solver.epsilon
         ? flipperMomentOfInertia / contactRadiusSquared
         : Number.POSITIVE_INFINITY,
-    restitutionScale: motion.restitutionScale,
+    restitutionScale: isPassiveContact
+      ? motion.passiveRestitutionScale
+      : motion.restitutionScale,
+    frictionScale: isPassiveContact ? motion.passiveFrictionScale : 1,
+    spinDampingScale: isPassiveContact ? motion.passiveSpinDampingScale : 1,
   };
+
+  if (isPassiveContact && incomingNormalSpeed >= 0 && overlap > solver.epsilon) {
+    state.ball.position.x += normal.x * overlap;
+    state.ball.position.y += normal.y * overlap;
+    return true;
+  }
 
   if (incomingNormalSpeed < 0 || overlap > solver.epsilon) {
     resolveBallContact(state.ball, contact, solver);
+  }
+
+  if (isPassiveContact && deltaSeconds > 0) {
+    applyPassiveFlipperSlopeCarry(
+      state,
+      collisionAngle,
+      board.gravity,
+      motion.passiveSlopeGravityScale,
+      deltaSeconds,
+    );
   }
 
   return true;
@@ -1284,6 +1333,28 @@ const createStaticContact = (
   surfaceVelocity,
   material,
 });
+
+const applyPassiveFlipperSlopeCarry = (
+  state: GameState,
+  collisionAngle: number,
+  gravity: number,
+  slopeGravityScale: number,
+  deltaSeconds: number,
+): void => {
+  const axis = {
+    x: Math.cos(collisionAngle),
+    y: Math.sin(collisionAngle),
+  };
+  const downhillProjection = axis.y;
+
+  if (Math.abs(downhillProjection) <= 0.001) {
+    return;
+  }
+
+  const carrySpeed = gravity * slopeGravityScale * downhillProjection * deltaSeconds;
+  state.ball.linearVelocity.x += axis.x * carrySpeed;
+  state.ball.linearVelocity.y += axis.y * carrySpeed;
+};
 
 const advanceTableNudgeState = (
   current: TableNudgeState,

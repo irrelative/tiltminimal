@@ -45,7 +45,13 @@ export const resolveBallContact = (
     Math.abs(ball.angularVelocity.x) > solver.epsilon ||
     Math.abs(ball.angularVelocity.y) > solver.epsilon
   ) {
-    const spinDampingFactor = Math.max(0, 1 - contact.material.spinDamping * 0.12);
+    const spinDampingFactor = Math.max(
+      0,
+      1 -
+        contact.material.spinDamping *
+          (contact.spinDampingScale ?? 1) *
+          0.12,
+    );
     ball.angularVelocity.x *= spinDampingFactor;
     ball.angularVelocity.y *= spinDampingFactor;
   }
@@ -108,7 +114,10 @@ const getTangentImpulse = (
     Math.abs(inputs.relativeTangentSpeed) <= solver.staticSlipThreshold
       ? contact.material.staticFriction
       : contact.material.dynamicFriction;
-  const effectiveFriction = frictionCoefficient * contact.material.grip;
+  const effectiveFriction =
+    frictionCoefficient *
+    contact.material.grip *
+    (contact.frictionScale ?? 1);
   const tangentialMass =
     1 / ball.mass + (ball.radius * ball.radius) / ball.momentOfInertia;
   const desiredImpulse = -inputs.relativeTangentSpeed / tangentialMass;

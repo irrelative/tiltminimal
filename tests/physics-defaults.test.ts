@@ -40,6 +40,7 @@ describe('createBoardDefinition', () => {
         flipper: {
           swingAngularSpeed: 4.1,
           bodyMass: 0.15,
+          passiveFrictionScale: 0.22,
         },
         solver: {
           epsilon: 0.0025,
@@ -81,6 +82,19 @@ describe('createBoardDefinition', () => {
     expect(board.physics.flipper.bodyMass).toBe(0.15);
     expect(board.physics.flipper.restitutionScale).toBe(
       physicsDefaults.tuning.flipper.restitutionScale,
+    );
+    expect(board.physics.flipper.passiveAngularVelocityThreshold).toBe(
+      physicsDefaults.tuning.flipper.passiveAngularVelocityThreshold,
+    );
+    expect(board.physics.flipper.passiveRestitutionScale).toBe(
+      physicsDefaults.tuning.flipper.passiveRestitutionScale,
+    );
+    expect(board.physics.flipper.passiveFrictionScale).toBe(0.22);
+    expect(board.physics.flipper.passiveSpinDampingScale).toBe(
+      physicsDefaults.tuning.flipper.passiveSpinDampingScale,
+    );
+    expect(board.physics.flipper.passiveSlopeGravityScale).toBe(
+      physicsDefaults.tuning.flipper.passiveSlopeGravityScale,
     );
     expect(board.physics.solver.epsilon).toBe(0.0025);
     expect(board.physics.solver.staticSlipThreshold).toBe(

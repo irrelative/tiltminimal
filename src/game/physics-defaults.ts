@@ -78,6 +78,11 @@ export const physicsDefaults = {
       collisionAngleStep: 0.08,
       bodyMass: 0.12,
       restitutionScale: 0.7,
+      passiveAngularVelocityThreshold: 1.8,
+      passiveRestitutionScale: 1.12,
+      passiveFrictionScale: 0.12,
+      passiveSpinDampingScale: 0.2,
+      passiveSlopeGravityScale: 0.7,
     },
     solver: {
       epsilon: 0.0001,
@@ -134,6 +139,21 @@ export const createBoardDefinition = (
       restitutionScale:
         input.physics?.flipper?.restitutionScale ??
         physicsDefaults.tuning.flipper.restitutionScale,
+      passiveAngularVelocityThreshold:
+        input.physics?.flipper?.passiveAngularVelocityThreshold ??
+        physicsDefaults.tuning.flipper.passiveAngularVelocityThreshold,
+      passiveRestitutionScale:
+        input.physics?.flipper?.passiveRestitutionScale ??
+        physicsDefaults.tuning.flipper.passiveRestitutionScale,
+      passiveFrictionScale:
+        input.physics?.flipper?.passiveFrictionScale ??
+        physicsDefaults.tuning.flipper.passiveFrictionScale,
+      passiveSpinDampingScale:
+        input.physics?.flipper?.passiveSpinDampingScale ??
+        physicsDefaults.tuning.flipper.passiveSpinDampingScale,
+      passiveSlopeGravityScale:
+        input.physics?.flipper?.passiveSlopeGravityScale ??
+        physicsDefaults.tuning.flipper.passiveSlopeGravityScale,
     },
     solver: {
       epsilon:

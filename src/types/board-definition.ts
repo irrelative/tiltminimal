@@ -59,6 +59,11 @@ export interface FlipperPhysicsDefinition {
   collisionAngleStep: number;
   bodyMass: number;
   restitutionScale: number;
+  passiveAngularVelocityThreshold: number;
+  passiveRestitutionScale: number;
+  passiveFrictionScale: number;
+  passiveSpinDampingScale: number;
+  passiveSlopeGravityScale: number;
 }
 
 export interface SolverPhysicsDefinition {

@@ -148,6 +148,21 @@ This is why flipper motion is both:
 - visibly animated over time
 - physically meaningful to ball contact
 
+Flipper contacts now use two response profiles:
+
+- active contacts: used while a flipper is swinging, preserving shot power and
+  the stronger transfer expected from an energized bat
+- passive contacts: used when a flipper is effectively at rest, with reduced
+  grip and spin damping plus a slightly livelier rebound so dead bounces can
+  continue across the bat instead of sticking unnaturally
+- passive contacts also add a small gravity-projected carry along the flipper
+  axis, which approximates the way a ball continues to roll down a resting bat
+  during a dead bounce
+
+Those passive/active thresholds and scales live under `board.physics.flipper`
+in `src/types/board-definition.ts` and default from
+`src/game/physics-defaults.ts`.
+
 The same flipper angle stored in `GameState.flippers[index].angle` is what the
 renderer uses in `src/render/canvas-renderer.ts`.
 

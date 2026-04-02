@@ -14,6 +14,8 @@ export interface ContactData {
   material: SurfaceMaterial;
   surfaceEffectiveMass?: number;
   restitutionScale?: number;
+  frictionScale?: number;
+  spinDampingScale?: number;
 }
 
 export interface ContactImpulseResult {
