@@ -1,5 +1,5 @@
 :root {
-  --font-sans: 'Avenir Next', Avenir, Futura, 'Trebuchet MS', sans-serif;
+  --font-sans: Futura, 'Avenir Next', Avenir, 'Trebuchet MS', sans-serif;
   --bg-top: #09131f;
   --bg-bottom: #03070d;
   --panel: rgba(10, 21, 31, 0.82);

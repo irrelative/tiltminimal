@@ -29,7 +29,7 @@ import type {
 } from '../types/board-definition';
 import type { InputState } from '../input/keyboard-input';
 const EDITOR_INK = '#22304a';
-const UI_FONT_FAMILY = "'Avenir Next', Avenir, Futura, 'Trebuchet MS', sans-serif";
+const UI_FONT_FAMILY = "Futura, 'Avenir Next', Avenir, 'Trebuchet MS', sans-serif";
 
 interface EditorRenderOptions {
   showGrid?: boolean;
