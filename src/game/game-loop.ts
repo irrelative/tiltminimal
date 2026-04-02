@@ -127,7 +127,7 @@ export const getStatusLabel = (
   board: BoardDefinition,
 ): string => {
   if (state.status === 'game-over') {
-    return 'Game over. Hold Space to start a new game.';
+    return 'Game over. Hold Arrow Up to start a new game.';
   }
 
   if (state.status === 'waiting-launch') {
@@ -138,11 +138,11 @@ export const getStatusLabel = (
     }
 
     if (state.plunger.pullback > 0) {
-      return 'Release Space and the plunger will strike the ball.';
+      return 'Release Arrow Up and the plunger will strike the ball.';
     }
 
-    return 'Hold Space to pull back the plunger. Release to launch.';
+    return 'Hold Arrow Up to pull back the plunger. Release to launch.';
   }
 
-  return 'Left Shift / Z / Left Arrow and Right Shift / ? / Right Arrow flip. Space controls the plunger.';
+  return 'Left Shift / Left Arrow and Right Shift / Right Arrow flip. Z, /, and Space nudge. Arrow Up controls the plunger.';
 };

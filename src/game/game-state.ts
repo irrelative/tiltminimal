@@ -53,12 +53,28 @@ export interface RolloverState {
   lit: boolean;
 }
 
+export type TableNudgeDirection = 'left' | 'right' | 'up';
+export type TableNudgePhase = 'idle' | 'attack' | 'settle';
+
+export interface TableNudgeState {
+  offset: Vector2;
+  velocity: Vector2;
+  phase: TableNudgePhase;
+  direction: TableNudgeDirection | null;
+  phaseElapsedSeconds: number;
+  cooldownSeconds: number;
+  leftHeld: boolean;
+  rightHeld: boolean;
+  upHeld: boolean;
+}
+
 export interface GameState {
   ball: BallState;
   score: number;
   tick: number;
   status: 'waiting-launch' | 'playing' | 'game-over';
   plunger: PlungerState;
+  tableNudge: TableNudgeState;
   flippers: FlipperState[];
   standupTargets: StandupTargetState[];
   dropTargets: DropTargetState[];
@@ -74,6 +90,7 @@ export const createInitialGameState = (board: BoardDefinition): GameState => ({
   tick: 0,
   status: 'waiting-launch',
   plunger: createPlungerState(),
+  tableNudge: createTableNudgeState(),
   flippers: board.flippers.map(createFlipperState),
   standupTargets: board.standupTargets.map(createStandupTargetState),
   dropTargets: board.dropTargets.map(createDropTargetState),
@@ -91,6 +108,7 @@ export const resetBall = (
   ball: createBallState(board),
   status: 'waiting-launch',
   plunger: createPlungerState(),
+  tableNudge: createTableNudgeState(),
   flippers: board.flippers.map(createFlipperState),
   standupTargets: board.standupTargets.map(createStandupTargetState),
   dropTargets: board.dropTargets.map(createDropTargetState),
@@ -139,6 +157,24 @@ const createFlipperState = (
 const createPlungerState = (): PlungerState => ({
   pullback: 0,
   releaseSpeed: 0,
+});
+
+const createTableNudgeState = (): TableNudgeState => ({
+  offset: {
+    x: 0,
+    y: 0,
+  },
+  velocity: {
+    x: 0,
+    y: 0,
+  },
+  phase: 'idle',
+  direction: null,
+  phaseElapsedSeconds: 0,
+  cooldownSeconds: 0,
+  leftHeld: false,
+  rightHeld: false,
+  upHeld: false,
 });
 
 const createStandupTargetState = (): StandupTargetState => ({

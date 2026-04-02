@@ -38,3 +38,12 @@ Use the `Makefile` entrypoints:
 
 * [docs/physics-and-animation.md](docs/physics-and-animation.md) explains how
   the frame loop, physics solver, rolling spin, and renderer fit together
+
+## Play Controls
+
+* `Left Shift` / `Left Arrow`: left flipper
+* `Right Shift` / `Right Arrow`: right flipper
+* `Arrow Up`: plunger
+* `Z`: left nudge
+* `/`: right nudge
+* `Space`: forward/up nudge

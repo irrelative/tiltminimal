@@ -6,7 +6,7 @@ import type {
 } from '../types/board-definition';
 import type { GameState } from '../game/game-state';
 import { getDistanceToFlipperSurface } from '../game/flipper-geometry';
-import { getGuideDistance } from '../game/guide-geometry';
+import { getGuideDistance, isArcGuide } from '../game/guide-geometry';
 import { getPlungerGuideSegments } from '../game/plunger-geometry';
 
 export type GameAudioEvent =
@@ -281,18 +281,22 @@ const getNearbyImpactMaterial = (
   board: BoardDefinition,
 ): SurfaceMaterialName | null => {
   const { position, radius } = state.ball;
+  const offset = state.tableNudge.offset;
   const wallMargin = radius + 8;
 
   if (
-    position.x <= wallMargin ||
-    position.x >= board.width - wallMargin ||
-    position.y <= wallMargin
+    position.x <= offset.x + wallMargin ||
+    position.x >= offset.x + board.width - wallMargin ||
+    position.y <= offset.y + wallMargin
   ) {
     return board.materials.walls;
   }
 
   for (const bumper of board.bumpers) {
-    const distance = Math.hypot(position.x - bumper.x, position.y - bumper.y);
+    const distance = Math.hypot(
+      position.x - (bumper.x + offset.x),
+      position.y - (bumper.y + offset.y),
+    );
 
     if (distance <= radius + bumper.radius + 10) {
       return bumper.material;
@@ -300,7 +304,10 @@ const getNearbyImpactMaterial = (
   }
 
   for (const post of board.posts) {
-    const distance = Math.hypot(position.x - post.x, position.y - post.y);
+    const distance = Math.hypot(
+      position.x - (post.x + offset.x),
+      position.y - (post.y + offset.y),
+    );
 
     if (distance <= radius + post.radius + 10) {
       return post.material;
@@ -308,25 +315,67 @@ const getNearbyImpactMaterial = (
   }
 
   for (const guide of getPlungerGuideSegments(board)) {
+    const shiftedGuide = {
+      ...guide,
+      start: {
+        x: guide.start.x + offset.x,
+        y: guide.start.y + offset.y,
+      },
+      end: {
+        x: guide.end.x + offset.x,
+        y: guide.end.y + offset.y,
+      },
+    };
     if (
-      getGuideDistance(position, guide) <=
-      radius + guide.thickness / 2 + 10
+      getGuideDistance(position, shiftedGuide) <=
+      radius + shiftedGuide.thickness / 2 + 10
     ) {
-      return guide.material;
+      return shiftedGuide.material;
     }
   }
 
   for (const guide of board.guides) {
-    if (getGuideDistance(position, guide) <= radius + guide.thickness / 2 + 10) {
-      return guide.material;
+    const shiftedGuide =
+      isArcGuide(guide)
+        ? {
+            ...guide,
+            center: {
+              x: guide.center.x + offset.x,
+              y: guide.center.y + offset.y,
+            },
+          }
+        : {
+            ...guide,
+            start: {
+              x: guide.start.x + offset.x,
+              y: guide.start.y + offset.y,
+            },
+            end: {
+              x: guide.end.x + offset.x,
+              y: guide.end.y + offset.y,
+            },
+          };
+    if (
+      getGuideDistance(position, shiftedGuide) <=
+      radius + shiftedGuide.thickness / 2 + 10
+    ) {
+      return shiftedGuide.material;
     }
   }
 
   for (const [index, flipper] of board.flippers.entries()) {
     const angle = state.flippers[index]?.angle ?? flipper.restingAngle;
+    const shiftedFlipper = {
+      ...flipper,
+      x: flipper.x + offset.x,
+      y: flipper.y + offset.y,
+    };
 
-    if (getDistanceToFlipperSurface(position, flipper, angle) <= radius + 10) {
-      return flipper.material;
+    if (
+      getDistanceToFlipperSurface(position, shiftedFlipper, angle) <=
+      radius + 10
+    ) {
+      return shiftedFlipper.material;
     }
   }
 

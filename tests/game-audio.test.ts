@@ -16,6 +16,9 @@ const idleInput: InputState = {
   leftPressed: false,
   rightPressed: false,
   launchPressed: false,
+  nudgeLeftPressed: false,
+  nudgeRightPressed: false,
+  nudgeUpPressed: false,
 };
 
 describe('getFrameAudioEvents', () => {

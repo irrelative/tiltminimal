@@ -18,6 +18,9 @@ const idleInput: InputState = {
   leftPressed: false,
   rightPressed: false,
   launchPressed: false,
+  nudgeLeftPressed: false,
+  nudgeRightPressed: false,
+  nudgeUpPressed: false,
 };
 const leftFlipper = getFlipperBySide(classicTable, 'left');
 const rightFlipper = getFlipperBySide(classicTable, 'right');
@@ -176,6 +179,65 @@ describe('stepGame', () => {
     expect(next.ball.position.x).toBeGreaterThan(state.ball.position.x);
     expect(next.ball.linearVelocity.x).toBeGreaterThan(-220);
     expect(next.ball.linearVelocity.y).toBeLessThan(160);
+  });
+
+  it('animates table offset on a nudge without directly moving a free ball in space', () => {
+    const state = createInitialGameState(classicTable);
+    state.status = 'playing';
+    state.ball.position.x = 420;
+    state.ball.position.y = 520;
+    state.ball.linearVelocity.x = 0;
+    state.ball.linearVelocity.y = 0;
+
+    const result = stepGameFrame(
+      state,
+      classicTable,
+      { ...idleInput, nudgeLeftPressed: true },
+      1 / 60,
+    );
+
+    expect(result.state.tableNudge.offset.x).toBeGreaterThan(0);
+    expect(result.state.ball.position.x).toBeCloseTo(420, 5);
+    expect(result.state.ball.linearVelocity.x).toBeCloseTo(0, 5);
+  });
+
+  it('returns the table to rest after a nudge settles', () => {
+    let state = createInitialGameState(classicTable);
+    state.status = 'playing';
+
+    state = stepGame(
+      state,
+      classicTable,
+      { ...idleInput, nudgeUpPressed: true },
+      1 / 60,
+    );
+
+    for (let step = 0; step < 18; step += 1) {
+      state = stepGame(state, classicTable, idleInput, 1 / 60);
+    }
+
+    expect(state.tableNudge.phase).toBe('idle');
+    expect(state.tableNudge.direction).toBeNull();
+    expect(state.tableNudge.offset.x).toBeCloseTo(0, 5);
+    expect(state.tableNudge.offset.y).toBeCloseTo(0, 5);
+  });
+
+  it('lets a moving nudged wall push the ball on contact', () => {
+    const state = createInitialGameState(classicTable);
+    state.status = 'playing';
+    state.ball.position.x = state.ball.radius + 1;
+    state.ball.position.y = 520;
+    state.ball.linearVelocity.x = 0;
+    state.ball.linearVelocity.y = 0;
+
+    const result = stepGameFrame(
+      state,
+      classicTable,
+      { ...idleInput, nudgeLeftPressed: true },
+      1 / 60,
+    );
+
+    expect(result.state.ball.linearVelocity.x).toBeGreaterThan(0);
   });
 
   it('transfers tangential slip into spin on bumper contact', () => {

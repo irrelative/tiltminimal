@@ -25,6 +25,20 @@ export const snapBoardLayoutToGrid = (
       plunger: { ...board.physics.plunger },
       flipper: { ...board.physics.flipper },
       solver: { ...board.physics.solver },
+      nudge: {
+        left: {
+          displacement: { ...board.physics.nudge.left.displacement },
+        },
+        right: {
+          displacement: { ...board.physics.nudge.right.displacement },
+        },
+        up: {
+          displacement: { ...board.physics.nudge.up.displacement },
+        },
+        attackSeconds: board.physics.nudge.attackSeconds,
+        settleSeconds: board.physics.nudge.settleSeconds,
+        cooldownSeconds: board.physics.nudge.cooldownSeconds,
+      },
     },
     posts: board.posts.map((post) => ({ ...post })),
     bumpers: board.bumpers.map((bumper) => ({ ...bumper })),

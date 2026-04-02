@@ -18,6 +18,8 @@ import type {
   SaucerState,
   SpinnerState,
   StandupTargetState,
+  TableNudgeDirection,
+  TableNudgeState,
 } from './game-state';
 import { resetBall } from './game-state';
 import { getSurfaceMaterial } from './materials';
@@ -79,6 +81,12 @@ const stepWaitingLaunchState = (
   const plungerFrame = advancePlungerFrame(state, board, input, deltaSeconds);
   const flipperFrame = advanceFlipperFrame(state, board, input, deltaSeconds);
   const events: GameEvent[] = [];
+  const tableNudge = advanceTableNudgeState(
+    state.tableNudge,
+    board,
+    input,
+    deltaSeconds,
+  );
   const next: GameState = {
     ...state,
     tick: state.tick + 1,
@@ -100,6 +108,7 @@ const stepWaitingLaunchState = (
       },
     },
     plunger: plungerFrame.next,
+    tableNudge,
     flippers: flipperFrame.map((motion) => motion.next),
     rules: cloneRulesState(state.rules),
   };
@@ -154,6 +163,7 @@ const stepPlayingState = (
       },
     },
     plunger: clonePlungerState(state.plunger),
+    tableNudge: cloneTableNudgeState(state.tableNudge),
     flippers: board.flippers.map((flipper, index) =>
       cloneFlipperState(getFlipperState(state, flipper, index)),
     ),
@@ -171,6 +181,12 @@ const stepPlayingState = (
   const stepSeconds = stepCount > 0 ? deltaSeconds / stepCount : 0;
 
   for (let stepIndex = 0; stepIndex < stepCount; stepIndex += 1) {
+    next.tableNudge = advanceTableNudgeState(
+      next.tableNudge,
+      board,
+      input,
+      stepSeconds,
+    );
     const plungerFrame = advancePlungerFrame(next, board, input, stepSeconds);
     const flipperFrame = advanceFlipperFrame(next, board, input, stepSeconds);
 
@@ -187,7 +203,7 @@ const stepPlayingState = (
     next.ball.position.x += next.ball.linearVelocity.x * stepSeconds;
     next.ball.position.y += next.ball.linearVelocity.y * stepSeconds;
 
-    resolveWallCollisions(next, board);
+    resolveWallCollisions(next, board, board.physics.solver);
     resolvePlungerGuideCollisions(next, board, board.physics.solver);
     resolveGuideCollisions(next, board, board.physics.solver);
     resolvePostCollisions(next, board, board.physics.solver);
@@ -200,7 +216,10 @@ const stepPlayingState = (
     resolveSpinnerInteractions(next, board, board.physics.solver, events);
     resolveRolloverTriggers(next, board, events);
 
-    if (next.ball.position.y - next.ball.radius > board.drainY) {
+    if (
+      next.ball.position.y - next.ball.radius >
+      board.drainY + next.tableNudge.offset.y
+    ) {
       events.push({
         type: 'ball-drained',
         tick: next.tick,
@@ -235,29 +254,83 @@ export const getPlungerPullRatio = (
 const resolveWallCollisions = (
   state: GameState,
   board: BoardDefinition,
+  solver: SolverPhysicsDefinition,
 ): void => {
   const { ball } = state;
   const wallMaterial = getSurfaceMaterial(
     board.materials.walls,
     board.surfaceMaterials,
   );
+  const offset = state.tableNudge.offset;
+  const surfaceVelocity = state.tableNudge.velocity;
+  const leftWallX = offset.x;
+  const rightWallX = offset.x + board.width;
+  const topWallY = offset.y;
 
-  if (ball.position.x - ball.radius < 0) {
-    ball.position.x = ball.radius;
-    ball.linearVelocity.x =
-      Math.abs(ball.linearVelocity.x) * wallMaterial.restitution;
+  if (ball.position.x - ball.radius < leftWallX) {
+    const overlap = leftWallX - (ball.position.x - ball.radius);
+    const normal = { x: 1, y: 0 };
+    const incomingNormalSpeed =
+      (ball.linearVelocity.x - surfaceVelocity.x) * normal.x +
+      (ball.linearVelocity.y - surfaceVelocity.y) * normal.y;
+
+    if (incomingNormalSpeed < 0 || overlap > solver.epsilon) {
+      resolveBallContact(
+        ball,
+        createStaticContact(
+          wallMaterial,
+          { x: leftWallX, y: ball.position.y },
+          normal,
+          overlap,
+          surfaceVelocity,
+        ),
+        solver,
+      );
+    }
   }
 
-  if (ball.position.x + ball.radius > board.width) {
-    ball.position.x = board.width - ball.radius;
-    ball.linearVelocity.x =
-      -Math.abs(ball.linearVelocity.x) * wallMaterial.restitution;
+  if (ball.position.x + ball.radius > rightWallX) {
+    const overlap = ball.position.x + ball.radius - rightWallX;
+    const normal = { x: -1, y: 0 };
+    const incomingNormalSpeed =
+      (ball.linearVelocity.x - surfaceVelocity.x) * normal.x +
+      (ball.linearVelocity.y - surfaceVelocity.y) * normal.y;
+
+    if (incomingNormalSpeed < 0 || overlap > solver.epsilon) {
+      resolveBallContact(
+        ball,
+        createStaticContact(
+          wallMaterial,
+          { x: rightWallX, y: ball.position.y },
+          normal,
+          overlap,
+          surfaceVelocity,
+        ),
+        solver,
+      );
+    }
   }
 
-  if (ball.position.y - ball.radius < 0) {
-    ball.position.y = ball.radius;
-    ball.linearVelocity.y =
-      Math.abs(ball.linearVelocity.y) * wallMaterial.restitution;
+  if (ball.position.y - ball.radius < topWallY) {
+    const overlap = topWallY - (ball.position.y - ball.radius);
+    const normal = { x: 0, y: 1 };
+    const incomingNormalSpeed =
+      (ball.linearVelocity.x - surfaceVelocity.x) * normal.x +
+      (ball.linearVelocity.y - surfaceVelocity.y) * normal.y;
+
+    if (incomingNormalSpeed < 0 || overlap > solver.epsilon) {
+      resolveBallContact(
+        ball,
+        createStaticContact(
+          wallMaterial,
+          { x: ball.position.x, y: topWallY },
+          normal,
+          overlap,
+          surfaceVelocity,
+        ),
+        solver,
+      );
+    }
   }
 };
 
@@ -266,8 +339,16 @@ const resolveGuideCollisions = (
   board: BoardDefinition,
   solver: SolverPhysicsDefinition,
 ): void => {
+  const tableOffset = state.tableNudge.offset;
+
   for (const guide of board.guides) {
-    resolveGuideCollision(state, board, guide, solver);
+    resolveGuideCollision(
+      state,
+      board,
+      offsetGuide(guide, tableOffset),
+      solver,
+      state.tableNudge.velocity,
+    );
   }
 };
 
@@ -276,8 +357,16 @@ const resolvePlungerGuideCollisions = (
   board: BoardDefinition,
   solver: SolverPhysicsDefinition,
 ): void => {
+  const tableOffset = state.tableNudge.offset;
+
   for (const guide of getPlungerGuideSegments(board)) {
-    resolveGuideCollision(state, board, guide, solver);
+    resolveGuideCollision(
+      state,
+      board,
+      offsetGuide(guide, tableOffset),
+      solver,
+      state.tableNudge.velocity,
+    );
   }
 };
 
@@ -286,6 +375,7 @@ const resolveGuideCollision = (
   board: BoardDefinition,
   guide: GuideDefinition,
   solver: SolverPhysicsDefinition,
+  surfaceVelocity: ContactData['surfaceVelocity'] = { x: 0, y: 0 },
 ): void => {
   const projection = projectPointToGuide(state.ball.position, guide);
   const overlap = state.ball.radius + guide.thickness / 2 - projection.distance;
@@ -299,13 +389,14 @@ const resolveGuideCollision = (
     board.surfaceMaterials,
   );
   const incomingNormalSpeed =
-    state.ball.linearVelocity.x * projection.normal.x +
-    state.ball.linearVelocity.y * projection.normal.y;
+    (state.ball.linearVelocity.x - surfaceVelocity.x) * projection.normal.x +
+    (state.ball.linearVelocity.y - surfaceVelocity.y) * projection.normal.y;
   const contact = createStaticContact(
     guideMaterial,
     projection.point,
     projection.normal,
     overlap,
+    surfaceVelocity,
   );
 
   if (incomingNormalSpeed < 0 || overlap > solver.epsilon) {
@@ -322,8 +413,8 @@ const resolvePlungerCollision = (
   const collision = getOrientedElementCollision(
     state,
     {
-      x: board.plunger.x,
-      y: board.plunger.y + motion.next.pullback,
+      x: board.plunger.x + state.tableNudge.offset.x,
+      y: board.plunger.y + state.tableNudge.offset.y + motion.next.pullback,
     },
     board.plunger.length,
     board.plunger.thickness,
@@ -339,11 +430,13 @@ const resolvePlungerCollision = (
     board.plunger.material,
     board.surfaceMaterials,
   );
+  const surfaceVelocity = {
+    x: state.tableNudge.velocity.x + motion.surfaceVelocity.x,
+    y: state.tableNudge.velocity.y + motion.surfaceVelocity.y,
+  };
   const incomingNormalSpeed =
-    (state.ball.linearVelocity.x - motion.surfaceVelocity.x) *
-      collision.normal.x +
-    (state.ball.linearVelocity.y - motion.surfaceVelocity.y) *
-      collision.normal.y;
+    (state.ball.linearVelocity.x - surfaceVelocity.x) * collision.normal.x +
+    (state.ball.linearVelocity.y - surfaceVelocity.y) * collision.normal.y;
 
   if (incomingNormalSpeed >= 0 && collision.overlap <= solver.epsilon) {
     return;
@@ -356,7 +449,7 @@ const resolvePlungerCollision = (
       normal: collision.normal,
       tangent: getContactTangent(collision.normal),
       overlap: collision.overlap,
-      surfaceVelocity: motion.surfaceVelocity,
+      surfaceVelocity,
       material,
       surfaceEffectiveMass: board.physics.plunger.bodyMass,
     },
@@ -379,7 +472,7 @@ const resolveStandupTargetCollisions = (
 
     const collision = getOrientedElementCollision(
       state,
-      target,
+      offsetPoint(target, state.tableNudge.offset),
       target.width,
       target.height,
       target.angle,
@@ -395,8 +488,10 @@ const resolveStandupTargetCollisions = (
       board.surfaceMaterials,
     );
     const incomingNormalSpeed =
-      state.ball.linearVelocity.x * collision.normal.x +
-      state.ball.linearVelocity.y * collision.normal.y;
+      (state.ball.linearVelocity.x - state.tableNudge.velocity.x) *
+        collision.normal.x +
+      (state.ball.linearVelocity.y - state.tableNudge.velocity.y) *
+        collision.normal.y;
 
     if (incomingNormalSpeed < 0 || collision.overlap > solver.epsilon) {
       resolveBallContact(
@@ -406,6 +501,7 @@ const resolveStandupTargetCollisions = (
           collision.point,
           collision.normal,
           collision.overlap,
+          state.tableNudge.velocity,
         ),
         solver,
       );
@@ -438,7 +534,7 @@ const resolveDropTargetCollisions = (
 
     const collision = getOrientedElementCollision(
       state,
-      target,
+      offsetPoint(target, state.tableNudge.offset),
       target.width,
       target.height,
       target.angle,
@@ -454,8 +550,10 @@ const resolveDropTargetCollisions = (
       board.surfaceMaterials,
     );
     const incomingNormalSpeed =
-      state.ball.linearVelocity.x * collision.normal.x +
-      state.ball.linearVelocity.y * collision.normal.y;
+      (state.ball.linearVelocity.x - state.tableNudge.velocity.x) *
+        collision.normal.x +
+      (state.ball.linearVelocity.y - state.tableNudge.velocity.y) *
+        collision.normal.y;
 
     if (incomingNormalSpeed < 0 || collision.overlap > solver.epsilon) {
       resolveBallContact(
@@ -465,6 +563,7 @@ const resolveDropTargetCollisions = (
           collision.point,
           collision.normal,
           collision.overlap,
+          state.tableNudge.velocity,
         ),
         solver,
       );
@@ -503,6 +602,7 @@ const resolveFlipperCollision = (
   motion: FlipperMotionFrame,
   solver: SolverPhysicsDefinition,
 ): void => {
+  const shiftedFlipper = offsetFlipper(flipper, state.tableNudge.offset);
   const collisionAngles = getFlipperCollisionAngles(
     motion,
     board.physics.flipper.collisionAngleStep,
@@ -513,12 +613,13 @@ const resolveFlipperCollision = (
       applyFlipperCollisionAtAngle(
         state,
         board,
-        flipper,
+        shiftedFlipper,
         angle,
         {
           angularVelocity: motion.next.angularVelocity,
           bodyMass: board.physics.flipper.bodyMass,
           restitutionScale: board.physics.flipper.restitutionScale,
+          tableVelocity: state.tableNudge.velocity,
         },
         solver,
       )
@@ -537,6 +638,7 @@ const applyFlipperCollisionAtAngle = (
     angularVelocity: number;
     bodyMass: number;
     restitutionScale: number;
+    tableVelocity: ContactData['surfaceVelocity'];
   },
   solver: SolverPhysicsDefinition,
 ): boolean => {
@@ -576,16 +678,20 @@ const applyFlipperCollisionAtAngle = (
   const surfaceVelocityX = -motion.angularVelocity * relativeContactY;
   const surfaceVelocityY = motion.angularVelocity * relativeContactX;
   const incomingNormalSpeed =
-    (state.ball.linearVelocity.x - surfaceVelocityX) * normal.x +
-    (state.ball.linearVelocity.y - surfaceVelocityY) * normal.y;
+    (state.ball.linearVelocity.x -
+      (motion.tableVelocity.x + surfaceVelocityX)) *
+      normal.x +
+    (state.ball.linearVelocity.y -
+      (motion.tableVelocity.y + surfaceVelocityY)) *
+      normal.y;
   const contact: ContactData = {
     point: contactPoint,
     normal,
     tangent: getContactTangent(normal),
     overlap,
     surfaceVelocity: {
-      x: surfaceVelocityX,
-      y: surfaceVelocityY,
+      x: motion.tableVelocity.x + surfaceVelocityX,
+      y: motion.tableVelocity.y + surfaceVelocityY,
     },
     material: flipperMaterial,
     surfaceEffectiveMass:
@@ -613,8 +719,9 @@ const resolveBumperCollisions = (
       bumper.material,
       board.surfaceMaterials,
     );
-    const dx = state.ball.position.x - bumper.x;
-    const dy = state.ball.position.y - bumper.y;
+    const center = offsetPoint(bumper, state.tableNudge.offset);
+    const dx = state.ball.position.x - center.x;
+    const dy = state.ball.position.y - center.y;
     const distance = Math.hypot(dx, dy) || solver.epsilon;
     const overlap = state.ball.radius + bumper.radius - distance;
 
@@ -625,15 +732,17 @@ const resolveBumperCollisions = (
     const nx = dx / distance;
     const ny = dy / distance;
     const approachSpeed =
-      state.ball.linearVelocity.x * nx + state.ball.linearVelocity.y * ny;
+      (state.ball.linearVelocity.x - state.tableNudge.velocity.x) * nx +
+      (state.ball.linearVelocity.y - state.tableNudge.velocity.y) * ny;
     const contact = createStaticContact(
       bumperMaterial,
       {
-        x: bumper.x + nx * bumper.radius,
-        y: bumper.y + ny * bumper.radius,
+        x: center.x + nx * bumper.radius,
+        y: center.y + ny * bumper.radius,
       },
       { x: nx, y: ny },
       overlap,
+      state.tableNudge.velocity,
     );
 
     if (approachSpeed < 0 || overlap > solver.epsilon) {
@@ -658,8 +767,9 @@ const resolvePostCollisions = (
       post.material,
       board.surfaceMaterials,
     );
-    const dx = state.ball.position.x - post.x;
-    const dy = state.ball.position.y - post.y;
+    const center = offsetPoint(post, state.tableNudge.offset);
+    const dx = state.ball.position.x - center.x;
+    const dy = state.ball.position.y - center.y;
     const distance = Math.hypot(dx, dy) || solver.epsilon;
     const overlap = state.ball.radius + post.radius - distance;
 
@@ -670,15 +780,17 @@ const resolvePostCollisions = (
     const nx = dx / distance;
     const ny = dy / distance;
     const approachSpeed =
-      state.ball.linearVelocity.x * nx + state.ball.linearVelocity.y * ny;
+      (state.ball.linearVelocity.x - state.tableNudge.velocity.x) * nx +
+      (state.ball.linearVelocity.y - state.tableNudge.velocity.y) * ny;
     const contact = createStaticContact(
       postMaterial,
       {
-        x: post.x + nx * post.radius,
-        y: post.y + ny * post.radius,
+        x: center.x + nx * post.radius,
+        y: center.y + ny * post.radius,
       },
       { x: nx, y: ny },
       overlap,
+      state.tableNudge.velocity,
     );
 
     if (approachSpeed < 0 || overlap > solver.epsilon) {
@@ -699,9 +811,10 @@ const resolveSaucerCaptures = (
       return;
     }
 
+    const center = offsetPoint(saucer, state.tableNudge.offset);
     const distance = Math.hypot(
-      state.ball.position.x - saucer.x,
-      state.ball.position.y - saucer.y,
+      state.ball.position.x - center.x,
+      state.ball.position.y - center.y,
     );
 
     if (distance > saucer.radius - state.ball.radius * 0.15) {
@@ -716,8 +829,8 @@ const resolveSaucerCaptures = (
       score: saucer.score,
       tick: state.tick,
     });
-    state.ball.position.x = saucer.x;
-    state.ball.position.y = saucer.y;
+    state.ball.position.x = center.x;
+    state.ball.position.y = center.y;
     state.ball.linearVelocity.x = 0;
     state.ball.linearVelocity.y = 0;
     state.ball.angularVelocity.x = 0;
@@ -740,7 +853,7 @@ const resolveSpinnerInteractions = (
 
     const collision = getOrientedElementCollision(
       state,
-      spinner,
+      offsetPoint(spinner, state.tableNudge.offset),
       spinner.length,
       spinner.thickness,
       spinner.angle + spinnerState.angle,
@@ -752,8 +865,10 @@ const resolveSpinnerInteractions = (
     }
 
     const crossingSpeed =
-      state.ball.linearVelocity.x * collision.normal.x +
-      state.ball.linearVelocity.y * collision.normal.y;
+      (state.ball.linearVelocity.x - state.tableNudge.velocity.x) *
+        collision.normal.x +
+      (state.ball.linearVelocity.y - state.tableNudge.velocity.y) *
+        collision.normal.y;
 
     if (Math.abs(crossingSpeed) < 60) {
       return;
@@ -783,9 +898,10 @@ const resolveRolloverTriggers = (
       return;
     }
 
+    const center = offsetPoint(rollover, state.tableNudge.offset);
     const distance = Math.hypot(
-      state.ball.position.x - rollover.x,
-      state.ball.position.y - rollover.y,
+      state.ball.position.x - center.x,
+      state.ball.position.y - center.y,
     );
 
     if (distance > rollover.radius + state.ball.radius * 0.3) {
@@ -973,6 +1089,18 @@ const clonePlungerState = (state: PlungerState): PlungerState => ({
   ...state,
 });
 
+const cloneTableNudgeState = (state: TableNudgeState): TableNudgeState => ({
+  offset: { ...state.offset },
+  velocity: { ...state.velocity },
+  phase: state.phase,
+  direction: state.direction,
+  phaseElapsedSeconds: state.phaseElapsedSeconds,
+  cooldownSeconds: state.cooldownSeconds,
+  leftHeld: state.leftHeld,
+  rightHeld: state.rightHeld,
+  upHeld: state.upHeld,
+});
+
 const advanceElementStates = (
   state: GameState,
   board: BoardDefinition,
@@ -1031,8 +1159,9 @@ const resolveOccupiedSaucer = (
     0,
     saucerState.holdSecondsRemaining - deltaSeconds,
   );
-  state.ball.position.x = saucer.x;
-  state.ball.position.y = saucer.y;
+  const center = offsetPoint(saucer, state.tableNudge.offset);
+  state.ball.position.x = center.x;
+  state.ball.position.y = center.y;
   state.ball.linearVelocity.x = 0;
   state.ball.linearVelocity.y = 0;
   state.ball.angularVelocity.x = 0;
@@ -1043,11 +1172,13 @@ const resolveOccupiedSaucer = (
     const ejectAngle =
       saucer.ejectAngle + (Math.random() * 2 - 1) * SAUCER_EJECT_ANGLE_JITTER;
     state.ball.position.x =
-      saucer.x + Math.cos(ejectAngle) * (saucer.radius + state.ball.radius + 4);
+      center.x + Math.cos(ejectAngle) * (saucer.radius + state.ball.radius + 4);
     state.ball.position.y =
-      saucer.y + Math.sin(ejectAngle) * (saucer.radius + state.ball.radius + 4);
-    state.ball.linearVelocity.x = Math.cos(ejectAngle) * saucer.ejectSpeed;
-    state.ball.linearVelocity.y = Math.sin(ejectAngle) * saucer.ejectSpeed;
+      center.y + Math.sin(ejectAngle) * (saucer.radius + state.ball.radius + 4);
+    state.ball.linearVelocity.x =
+      state.tableNudge.velocity.x + Math.cos(ejectAngle) * saucer.ejectSpeed;
+    state.ball.linearVelocity.y =
+      state.tableNudge.velocity.y + Math.sin(ejectAngle) * saucer.ejectSpeed;
   }
 
   return true;
@@ -1058,17 +1189,180 @@ const createStaticContact = (
   point: ContactData['point'],
   normal: ContactData['normal'],
   overlap: number,
+  surfaceVelocity: ContactData['surfaceVelocity'] = { x: 0, y: 0 },
 ): ContactData => ({
   point,
   normal,
   tangent: getContactTangent(normal),
   overlap,
-  surfaceVelocity: {
-    x: 0,
-    y: 0,
-  },
+  surfaceVelocity,
   material,
 });
+
+const advanceTableNudgeState = (
+  current: TableNudgeState,
+  board: BoardDefinition,
+  input: InputState,
+  deltaSeconds: number,
+): TableNudgeState => {
+  const next = cloneTableNudgeState(current);
+  const triggeredDirection = getTriggeredNudgeDirection(current, input);
+
+  next.leftHeld = input.nudgeLeftPressed;
+  next.rightHeld = input.nudgeRightPressed;
+  next.upHeld = input.nudgeUpPressed;
+  next.cooldownSeconds = Math.max(0, current.cooldownSeconds - deltaSeconds);
+
+  if (triggeredDirection && next.cooldownSeconds === 0) {
+    next.direction = triggeredDirection;
+    next.phase = 'attack';
+    next.phaseElapsedSeconds = 0;
+    next.cooldownSeconds = board.physics.nudge.cooldownSeconds;
+  }
+
+  const previousOffset = { ...current.offset };
+
+  if (next.direction && next.phase !== 'idle') {
+    const displacement = board.physics.nudge[next.direction].displacement;
+
+    if (next.phase === 'attack') {
+      const attackSpeed =
+        getVectorMagnitude(displacement) /
+        Math.max(board.physics.nudge.attackSeconds, Number.EPSILON);
+      next.offset = movePointToward(
+        current.offset,
+        displacement,
+        attackSpeed * deltaSeconds,
+      );
+      next.phaseElapsedSeconds += deltaSeconds;
+
+      if (pointsNearlyEqual(next.offset, displacement)) {
+        next.offset = { ...displacement };
+        next.phase = 'settle';
+        next.phaseElapsedSeconds = 0;
+      }
+    } else {
+      const settleSpeed =
+        getVectorMagnitude(displacement) /
+        Math.max(board.physics.nudge.settleSeconds, Number.EPSILON);
+      next.offset = movePointToward(
+        current.offset,
+        { x: 0, y: 0 },
+        settleSpeed * deltaSeconds,
+      );
+      next.phaseElapsedSeconds += deltaSeconds;
+
+      if (pointsNearlyEqual(next.offset, { x: 0, y: 0 })) {
+        next.offset = { x: 0, y: 0 };
+        next.phase = 'idle';
+        next.direction = null;
+        next.phaseElapsedSeconds = 0;
+      }
+    }
+  } else {
+    next.offset = { x: 0, y: 0 };
+    next.velocity = { x: 0, y: 0 };
+    next.phase = 'idle';
+    next.direction = null;
+    next.phaseElapsedSeconds = 0;
+  }
+
+  next.velocity =
+    deltaSeconds > 0
+      ? {
+          x: (next.offset.x - previousOffset.x) / deltaSeconds,
+          y: (next.offset.y - previousOffset.y) / deltaSeconds,
+        }
+      : { x: 0, y: 0 };
+
+  return next;
+};
+
+const getTriggeredNudgeDirection = (
+  state: TableNudgeState,
+  input: InputState,
+): TableNudgeDirection | null => {
+  if (input.nudgeLeftPressed && !state.leftHeld) {
+    return 'left';
+  }
+
+  if (input.nudgeRightPressed && !state.rightHeld) {
+    return 'right';
+  }
+
+  if (input.nudgeUpPressed && !state.upHeld) {
+    return 'up';
+  }
+
+  return null;
+};
+
+const offsetPoint = <TPoint extends { x: number; y: number }>(
+  point: TPoint,
+  offset: { x: number; y: number },
+): TPoint => ({
+  ...point,
+  x: point.x + offset.x,
+  y: point.y + offset.y,
+});
+
+const offsetFlipper = (
+  flipper: FlipperDefinition,
+  offset: { x: number; y: number },
+): FlipperDefinition => ({
+  ...flipper,
+  x: flipper.x + offset.x,
+  y: flipper.y + offset.y,
+});
+
+const offsetGuide = (
+  guide: GuideDefinition,
+  offset: { x: number; y: number },
+): GuideDefinition =>
+  guide.kind === 'arc'
+    ? {
+        ...guide,
+        center: offsetPoint(guide.center, offset),
+      }
+    : {
+        ...guide,
+        start: offsetPoint(guide.start, offset),
+        end: offsetPoint(guide.end, offset),
+      };
+
+const getVectorMagnitude = (vector: { x: number; y: number }): number =>
+  Math.hypot(vector.x, vector.y);
+
+const movePointToward = (
+  current: { x: number; y: number },
+  target: { x: number; y: number },
+  maxDistance: number,
+): { x: number; y: number } => {
+  if (maxDistance <= 0) {
+    return { ...current };
+  }
+
+  const deltaX = target.x - current.x;
+  const deltaY = target.y - current.y;
+  const distance = Math.hypot(deltaX, deltaY);
+
+  if (distance === 0 || distance <= maxDistance) {
+    return { ...target };
+  }
+
+  const scale = maxDistance / distance;
+
+  return {
+    x: current.x + deltaX * scale,
+    y: current.y + deltaY * scale,
+  };
+};
+
+const pointsNearlyEqual = (
+  left: { x: number; y: number },
+  right: { x: number; y: number },
+): boolean =>
+  Math.abs(left.x - right.x) <= 0.001 && Math.abs(left.y - right.y) <= 0.001;
 
 const getOrientedElementCollision = (
   state: GameState,

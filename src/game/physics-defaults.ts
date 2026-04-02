@@ -2,6 +2,7 @@ import type {
   BallDefinition,
   BoardDefinition,
   BoardDefinitionInput,
+  NudgeDirectionDefinition,
   PhysicsDefinition,
   PlungerDefinition,
   SurfaceMaterial,
@@ -82,6 +83,20 @@ export const physicsDefaults = {
       epsilon: 0.0001,
       staticSlipThreshold: 28,
     },
+    nudge: {
+      left: {
+        displacement: { x: 8, y: 0 },
+      },
+      right: {
+        displacement: { x: -8, y: 0 },
+      },
+      up: {
+        displacement: { x: 0, y: -11 },
+      },
+      attackSeconds: 0.035,
+      settleSeconds: 0.16,
+      cooldownSeconds: 0.12,
+    },
   } satisfies PhysicsDefinition,
 };
 
@@ -127,6 +142,7 @@ export const createBoardDefinition = (
         input.physics?.solver?.staticSlipThreshold ??
         physicsDefaults.tuning.solver.staticSlipThreshold,
     },
+    nudge: resolveNudgePhysics(input),
   },
   posts: input.posts ?? [],
   bumpers: input.bumpers,
@@ -207,4 +223,40 @@ const resolvePlungerPhysics = (
     physicsDefaults.tuning.plunger.maxReleaseSpeed,
   bodyMass:
     input.physics?.plunger?.bodyMass ?? physicsDefaults.tuning.plunger.bodyMass,
+});
+
+const resolveNudgeDirection = (
+  overrides: Partial<NudgeDirectionDefinition> | undefined,
+  defaults: NudgeDirectionDefinition,
+): NudgeDirectionDefinition => ({
+  displacement: {
+    x: overrides?.displacement?.x ?? defaults.displacement.x,
+    y: overrides?.displacement?.y ?? defaults.displacement.y,
+  },
+});
+
+const resolveNudgePhysics = (
+  input: BoardDefinitionInput,
+): PhysicsDefinition['nudge'] => ({
+  left: resolveNudgeDirection(
+    input.physics?.nudge?.left,
+    physicsDefaults.tuning.nudge.left,
+  ),
+  right: resolveNudgeDirection(
+    input.physics?.nudge?.right,
+    physicsDefaults.tuning.nudge.right,
+  ),
+  up: resolveNudgeDirection(
+    input.physics?.nudge?.up,
+    physicsDefaults.tuning.nudge.up,
+  ),
+  attackSeconds:
+    input.physics?.nudge?.attackSeconds ??
+    physicsDefaults.tuning.nudge.attackSeconds,
+  settleSeconds:
+    input.physics?.nudge?.settleSeconds ??
+    physicsDefaults.tuning.nudge.settleSeconds,
+  cooldownSeconds:
+    input.physics?.nudge?.cooldownSeconds ??
+    physicsDefaults.tuning.nudge.cooldownSeconds,
 });

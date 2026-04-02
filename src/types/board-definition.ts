@@ -64,10 +64,24 @@ export interface SolverPhysicsDefinition {
   staticSlipThreshold: number;
 }
 
+export interface NudgeDirectionDefinition {
+  displacement: Point;
+}
+
+export interface NudgePhysicsDefinition {
+  left: NudgeDirectionDefinition;
+  right: NudgeDirectionDefinition;
+  up: NudgeDirectionDefinition;
+  attackSeconds: number;
+  settleSeconds: number;
+  cooldownSeconds: number;
+}
+
 export interface PhysicsDefinition {
   plunger: PlungerPhysicsDefinition;
   flipper: FlipperPhysicsDefinition;
   solver: SolverPhysicsDefinition;
+  nudge: NudgePhysicsDefinition;
 }
 
 export interface BumperDefinition extends Point {
@@ -201,6 +215,14 @@ export interface BoardDefinitionInput {
     plunger?: Partial<PlungerPhysicsDefinition>;
     flipper?: Partial<FlipperPhysicsDefinition>;
     solver?: Partial<SolverPhysicsDefinition>;
+    nudge?: {
+      left?: Partial<NudgeDirectionDefinition>;
+      right?: Partial<NudgeDirectionDefinition>;
+      up?: Partial<NudgeDirectionDefinition>;
+      attackSeconds?: number;
+      settleSeconds?: number;
+      cooldownSeconds?: number;
+    };
   };
   posts?: PostDefinition[];
   bumpers: BumperDefinition[];

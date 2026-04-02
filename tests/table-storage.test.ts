@@ -206,6 +206,38 @@ describe('table storage', () => {
     expect(exported.rulesScript).toContain('setBallsPerGame(5)');
   });
 
+  it('persists custom nudge overrides through export and load', () => {
+    const table = {
+      id: 'nudge-table',
+      builtIn: false,
+      board: createBlankTable('Nudge Table'),
+    };
+    table.board.physics.nudge.up.displacement.y = -22;
+    table.board.physics.nudge.cooldownSeconds = 0.2;
+
+    upsertTable(table, window.localStorage);
+
+    const raw = window.localStorage.getItem('pball-web.tables.v2');
+    const stored = JSON.parse(raw ?? '{}') as {
+      tables?: Array<{
+        id?: string;
+        board?: { physics?: { nudge?: { up?: { displacement?: { y?: number } } } } };
+      }>;
+    };
+
+    expect(
+      stored.tables?.find((entry) => entry.id === 'nudge-table')?.board?.physics
+        ?.nudge?.up?.displacement?.y,
+    ).toBe(-22);
+
+    const state = loadTablesState(window.localStorage);
+
+    expect(
+      state.tables.find((entry) => entry.id === 'nudge-table')?.board.physics
+        .nudge.up.displacement.y,
+    ).toBe(-22);
+  });
+
   it('persists non-default board themes through export and load', () => {
     const table = {
       id: 'theme-table',

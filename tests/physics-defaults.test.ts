@@ -16,6 +16,7 @@ describe('createBoardDefinition', () => {
     expect(board.physics.plunger).toEqual(physicsDefaults.tuning.plunger);
     expect(board.physics.flipper).toEqual(physicsDefaults.tuning.flipper);
     expect(board.physics.solver).toEqual(physicsDefaults.tuning.solver);
+    expect(board.physics.nudge).toEqual(physicsDefaults.tuning.nudge);
     expect(board.plunger.travel).toBe(physicsDefaults.plunger.travel);
     expect(board.plunger.guideLength).toBe(physicsDefaults.plunger.guideLength);
     expect(board.surfaceMaterials.flipperRubber).toEqual(
@@ -42,6 +43,12 @@ describe('createBoardDefinition', () => {
         },
         solver: {
           epsilon: 0.0025,
+        },
+        nudge: {
+          up: {
+            displacement: { x: 3, y: -18 },
+          },
+          cooldownSeconds: 0.2,
         },
       },
       surfaceMaterials: {
@@ -79,6 +86,9 @@ describe('createBoardDefinition', () => {
     expect(board.physics.solver.staticSlipThreshold).toBe(
       physicsDefaults.tuning.solver.staticSlipThreshold,
     );
+    expect(board.physics.nudge.left).toEqual(physicsDefaults.tuning.nudge.left);
+    expect(board.physics.nudge.up.displacement).toEqual({ x: 3, y: -18 });
+    expect(board.physics.nudge.cooldownSeconds).toBe(0.2);
     expect(board.surfaceMaterials.flipperRubber.grip).toBe(1);
     expect(board.surfaceMaterials.flipperRubber.restitution).toBe(0.98);
     expect(board.surfaceMaterials.flipperRubber.dynamicFriction).toBe(

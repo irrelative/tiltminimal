@@ -345,8 +345,42 @@ const serializePhysicsOverrides = (
       physicsDefaults.tuning.solver.staticSlipThreshold
       ? { ...board.physics.solver }
       : undefined;
+  const nudge =
+    board.physics.nudge.attackSeconds !==
+      physicsDefaults.tuning.nudge.attackSeconds ||
+    board.physics.nudge.settleSeconds !==
+      physicsDefaults.tuning.nudge.settleSeconds ||
+    board.physics.nudge.cooldownSeconds !==
+      physicsDefaults.tuning.nudge.cooldownSeconds ||
+    !pointsEqual(
+      board.physics.nudge.left.displacement,
+      physicsDefaults.tuning.nudge.left.displacement,
+    ) ||
+    !pointsEqual(
+      board.physics.nudge.right.displacement,
+      physicsDefaults.tuning.nudge.right.displacement,
+    ) ||
+    !pointsEqual(
+      board.physics.nudge.up.displacement,
+      physicsDefaults.tuning.nudge.up.displacement,
+    )
+      ? {
+          left: {
+            displacement: { ...board.physics.nudge.left.displacement },
+          },
+          right: {
+            displacement: { ...board.physics.nudge.right.displacement },
+          },
+          up: {
+            displacement: { ...board.physics.nudge.up.displacement },
+          },
+          attackSeconds: board.physics.nudge.attackSeconds,
+          settleSeconds: board.physics.nudge.settleSeconds,
+          cooldownSeconds: board.physics.nudge.cooldownSeconds,
+        }
+      : undefined;
 
-  if (!plunger && !flipper && !solver) {
+  if (!plunger && !flipper && !solver && !nudge) {
     return undefined;
   }
 
@@ -354,8 +388,14 @@ const serializePhysicsOverrides = (
     plunger,
     flipper,
     solver,
+    nudge,
   };
 };
+
+const pointsEqual = (
+  left: { x: number; y: number },
+  right: { x: number; y: number },
+): boolean => left.x === right.x && left.y === right.y;
 
 const serializeSurfaceMaterialOverrides = (
   board: BoardDefinition,

@@ -51,8 +51,13 @@ export class CanvasRenderer {
 
     this.syncCanvasSize(board);
     context.clearRect(0, 0, board.width, board.height);
+    context.fillStyle = getBoardTheme(board.themeId).backgroundMid;
+    context.fillRect(0, 0, board.width, board.height);
 
+    context.save();
+    context.translate(state.tableNudge.offset.x, state.tableNudge.offset.y);
     this.drawBoard(context, board, state);
+    context.restore();
     this.drawBall(context, board, state);
     this.drawHud(context, board, state, input);
   }

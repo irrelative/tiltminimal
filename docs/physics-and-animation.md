@@ -83,16 +83,51 @@ Substepping keeps collision checks dense enough for the current solver.
 
 Inside each playing substep:
 
-1. Plunger motion advances.
-2. Flipper motion advances.
-3. Stateful device animation advances.
-4. Saucer possession may take over the ball.
-5. Gravity updates ball velocity.
-6. Velocity updates ball position.
-7. Collision and trigger passes run.
+1. Table nudge state advances.
+2. Plunger motion advances.
+3. Flipper motion advances.
+4. Stateful device animation advances.
+5. Saucer possession may take over the ball.
+6. Gravity updates ball velocity.
+7. Velocity updates ball position.
+8. Collision and trigger passes run.
 
 The order is important because moving devices need their transient motion solved
 before ball contacts are evaluated.
+
+## Table Nudging
+
+The game now models cabinet nudging as transient table motion rather than a
+direct ball teleport.
+
+- `Z` nudges the left side of the cabinet
+- `/` nudges the right side
+- `Space` nudges the front / up-table side
+- `Arrow Up` is reserved for the plunger
+
+Each board can override its own nudge tuning through `board.physics.nudge` in
+`src/types/board-definition.ts`. The default tuning in
+`src/game/physics-defaults.ts` defines:
+
+- per-direction displacement
+- attack time
+- settle time
+- cooldown time
+
+At runtime, `TableNudgeState` in `src/game/game-state.ts` tracks:
+
+- the current translated table offset
+- the instantaneous table velocity
+- the active nudge direction
+- attack / settle phase
+
+The renderer applies that offset to the board artwork and playfield geometry,
+but not to the freely moving ball. This makes the table visibly move underneath
+the ball, which matches how a cabinet shove reads on a top-down 2D playfield.
+
+Physics uses the same offset and derived table velocity when resolving walls,
+guides, posts, targets, bumpers, flippers, and saucers. That means table motion
+is not just cosmetic: moving geometry can push on the ball when contact occurs.
 
 ## Flipper Animation And Physics
 
@@ -177,12 +212,10 @@ There is no duplicate animation model in the renderer.
 
 `CanvasRenderer.renderGame(...)` draws in this order:
 
-1. background
-2. guides and plunger lane
-3. static and stateful devices
-4. flippers
-5. ball
-6. HUD
+1. board backdrop
+2. translated table background and devices
+3. ball in world coordinates
+4. HUD
 
 The renderer does not extrapolate or interpolate state between frames. It
 renders the exact solved state from the simulation step. That keeps visuals and

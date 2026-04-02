@@ -43,6 +43,7 @@ interface LegacyBoardDefinition extends Omit<
     plunger?: Partial<BoardDefinition['physics']['plunger']>;
     flipper?: Partial<BoardDefinition['physics']['flipper']>;
     solver?: Partial<BoardDefinition['physics']['solver']>;
+    nudge?: Partial<BoardDefinition['physics']['nudge']>;
   };
   flippers:
     | BoardDefinition['flippers']
@@ -66,6 +67,20 @@ export const cloneBoardDefinition = (
     plunger: { ...board.physics.plunger },
     flipper: { ...board.physics.flipper },
     solver: { ...board.physics.solver },
+    nudge: {
+      left: {
+        displacement: { ...board.physics.nudge.left.displacement },
+      },
+      right: {
+        displacement: { ...board.physics.nudge.right.displacement },
+      },
+      up: {
+        displacement: { ...board.physics.nudge.up.displacement },
+      },
+      attackSeconds: board.physics.nudge.attackSeconds,
+      settleSeconds: board.physics.nudge.settleSeconds,
+      cooldownSeconds: board.physics.nudge.cooldownSeconds,
+    },
   },
   posts: board.posts.map((post) => ({ ...post })),
   bumpers: board.bumpers.map((bumper) => ({ ...bumper })),
@@ -118,6 +133,7 @@ export const normalizeBoardDefinition = (
       plunger: source.physics?.plunger,
       flipper: source.physics?.flipper,
       solver: source.physics?.solver,
+      nudge: source.physics?.nudge,
     },
     posts: source.posts ?? [],
     bumpers: source.bumpers ?? [],

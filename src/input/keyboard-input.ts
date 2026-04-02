@@ -2,11 +2,17 @@ export interface InputState {
   leftPressed: boolean;
   rightPressed: boolean;
   launchPressed: boolean;
+  nudgeLeftPressed: boolean;
+  nudgeRightPressed: boolean;
+  nudgeUpPressed: boolean;
 }
 
-const LEFT_KEYS = new Set(['ArrowLeft', 'a', 'A', 'z', 'Z']);
-const RIGHT_KEYS = new Set(['ArrowRight', 'd', 'D', '/', '?']);
-const LAUNCH_KEYS = new Set([' ', 'ArrowUp']);
+const LEFT_KEYS = new Set(['ArrowLeft', 'a', 'A']);
+const RIGHT_KEYS = new Set(['ArrowRight', 'd', 'D']);
+const LAUNCH_KEYS = new Set(['ArrowUp']);
+const NUDGE_LEFT_KEYS = new Set(['z', 'Z']);
+const NUDGE_RIGHT_KEYS = new Set(['/','?']);
+const NUDGE_UP_KEYS = new Set([' ']);
 const LEFT_CODES = new Set(['ShiftLeft']);
 const RIGHT_CODES = new Set(['ShiftRight']);
 
@@ -15,6 +21,9 @@ export class KeyboardInput {
     leftPressed: false,
     rightPressed: false,
     launchPressed: false,
+    nudgeLeftPressed: false,
+    nudgeRightPressed: false,
+    nudgeUpPressed: false,
   };
 
   private connected = false;
@@ -66,6 +75,21 @@ export class KeyboardInput {
 
     if (LAUNCH_KEYS.has(key)) {
       this.state.launchPressed = pressed;
+      event.preventDefault();
+    }
+
+    if (NUDGE_LEFT_KEYS.has(key)) {
+      this.state.nudgeLeftPressed = pressed;
+      event.preventDefault();
+    }
+
+    if (NUDGE_RIGHT_KEYS.has(key)) {
+      this.state.nudgeRightPressed = pressed;
+      event.preventDefault();
+    }
+
+    if (NUDGE_UP_KEYS.has(key)) {
+      this.state.nudgeUpPressed = pressed;
       event.preventDefault();
     }
   }

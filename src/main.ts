@@ -768,7 +768,7 @@ function bootPlayRoute(): void {
   restartStandalonePlay();
 
   modeCopy.textContent =
-    'Hold and release Space to work the plunger. Left Shift / Z / Left Arrow and Right Shift / ? / Right Arrow control the flippers.';
+    'Hold and release Arrow Up to work the plunger. Left Shift / Left Arrow and Right Shift / Right Arrow control the flippers. Z, /, and Space nudge the table.';
   debugLinkEditor.href = '/editor';
   debugLinkEditor.textContent = 'Open editor';
   debugLinkPlay.href = '/';
@@ -1208,7 +1208,7 @@ function syncModeCopy(): void {
   if (state.mode === 'play') {
     modeTitle.textContent = 'Playing current table';
     modeCopy.textContent =
-      'Use Space to pull and release the plunger, and Left Shift / Z / Left Arrow plus Right Shift / ? / Right Arrow to flip. Press Play Test again or Escape to return to editing.';
+      'Use Arrow Up to pull and release the plunger, Left Shift / Left Arrow plus Right Shift / Right Arrow to flip, and Z, /, or Space to nudge. Press Play Test again or Escape to return to editing.';
     playToggleButton.textContent = 'Back to editor';
     playToggleButton.classList.add('accent-button');
     return;

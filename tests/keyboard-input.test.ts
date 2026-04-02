@@ -44,10 +44,35 @@ describe('KeyboardInput', () => {
   it('keeps arrow keys mapped to the same flippers', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
 
     expect(input.getState()).toMatchObject({
       leftPressed: true,
       rightPressed: true,
+      launchPressed: true,
+    });
+  });
+
+  it('maps z, slash, and space to left, right, and up nudges', () => {
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'z' }));
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: '/' }));
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+
+    expect(input.getState()).toMatchObject({
+      nudgeLeftPressed: true,
+      nudgeRightPressed: true,
+      nudgeUpPressed: true,
+      launchPressed: false,
+    });
+
+    window.dispatchEvent(new KeyboardEvent('keyup', { key: 'z' }));
+    window.dispatchEvent(new KeyboardEvent('keyup', { key: '/' }));
+    window.dispatchEvent(new KeyboardEvent('keyup', { key: ' ' }));
+
+    expect(input.getState()).toMatchObject({
+      nudgeLeftPressed: false,
+      nudgeRightPressed: false,
+      nudgeUpPressed: false,
     });
   });
 });
