@@ -142,4 +142,39 @@ describe('validateCompiledBoardLayout', () => {
       diagnostics.some((diagnostic) => diagnostic.code === 'flipper-keepout'),
     ).toBe(false);
   });
+
+  it('reports an error when a guide intrudes into a spinner rotation envelope', () => {
+    const board = createBlankTable('Spinner Clearance');
+    board.spinners = [
+      {
+        x: 450,
+        y: 620,
+        length: 110,
+        thickness: 10,
+        angle: 0,
+        score: 100,
+        material: 'metalGuide',
+      },
+    ];
+    board.guides = [
+      {
+        kind: 'line',
+        start: { x: 315, y: 658 },
+        end: { x: 585, y: 658 },
+        thickness: 12,
+        material: 'metalGuide',
+      },
+    ];
+
+    const diagnostics = validateCompiledBoardLayout(board);
+
+    expect(diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          severity: 'error',
+          code: 'spinner-obstructed',
+        }),
+      ]),
+    );
+  });
 });

@@ -12,6 +12,7 @@ but still fails basic playability:
 - the shooter lane exits into a wall
 - top rollover lanes are sealed off by continuous guide geometry
 - playfield guides intrude into flipper swing and feed space
+- guide geometry occupies a spinner's rotation envelope
 - important geometry shifts under grid snapping and collapses onto the ball path
 
 ## Shooter Lane Primitive
@@ -96,6 +97,7 @@ Behavior requirements:
 - each top rollover near the upper playfield has at least one clear approach
   path from below
 - no playfield-level guide intrudes into a flipper swing/feed keepout zone
+- no guide intrudes into a spinner's rotation envelope
 
 These checks are geometric heuristics. They do not replace shot simulation, but
 they are intended to fail fast on layouts that are visibly unplayable.
@@ -121,4 +123,5 @@ lane, top arch, and lower-lane primitives and is covered by tests that require:
 - no `launcher-blocked` validation error
 - no `rollover-unreachable` validation error
 - no `flipper-keepout` validation error
+- no `spinner-obstructed` validation error
 - a full plunge that reaches the upper playfield

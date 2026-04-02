@@ -142,6 +142,7 @@ export const validateCompiledBoardLayout = (
   validateLaunchCorridor(board, diagnostics);
   validateTopRolloverReachability(board, diagnostics);
   validateFlipperKeepouts(board, diagnostics);
+  validateSpinnerClearance(board, diagnostics);
 
   return diagnostics;
 };
@@ -292,6 +293,32 @@ const validateFlipperKeepouts = (
         severity: 'error',
         code: 'flipper-keepout',
         message: `Guide ${guideIndex + 1} intrudes into flipper ${flipperIndex + 1}'s swing and feed area.`,
+      });
+    }
+  });
+};
+
+const validateSpinnerClearance = (
+  board: BoardDefinition,
+  diagnostics: LayoutDiagnostic[],
+): void => {
+  board.spinners.forEach((spinner, spinnerIndex) => {
+    const sweepRadius = spinner.length / 2 + spinner.thickness / 2 + 4;
+
+    for (const [guideIndex, guide] of board.guides.entries()) {
+      const obstructsSpinner = sampleGuidePoints(guide, 14).some((point) =>
+        Math.hypot(point.x - spinner.x, point.y - spinner.y) <
+        sweepRadius + guide.thickness / 2,
+      );
+
+      if (!obstructsSpinner) {
+        continue;
+      }
+
+      diagnostics.push({
+        severity: 'error',
+        code: 'spinner-obstructed',
+        message: `Guide ${guideIndex + 1} intrudes into spinner ${spinnerIndex + 1}'s rotation envelope.`,
       });
     }
   });

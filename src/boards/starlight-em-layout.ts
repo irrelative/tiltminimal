@@ -210,7 +210,13 @@ export const starlightEmLayout: BoardLayoutDefinition = {
     },
     {
       start: absolutePoint(116, 644),
-      end: absolutePoint(222, 224),
+      end: absolutePoint(96, 620),
+      thickness: 14,
+      material: 'metalGuide',
+    },
+    {
+      start: absolutePoint(96, 620),
+      end: absolutePoint(202, 224),
       thickness: 14,
       material: 'metalGuide',
     },
@@ -222,6 +228,12 @@ export const starlightEmLayout: BoardLayoutDefinition = {
     },
     {
       start: absolutePoint(315, 658),
+      end: absolutePoint(366, 658),
+      thickness: 12,
+      material: 'metalGuide',
+    },
+    {
+      start: absolutePoint(534, 658),
       end: absolutePoint(585, 658),
       thickness: 12,
       material: 'metalGuide',

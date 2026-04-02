@@ -47,6 +47,7 @@ describe('starlightEmTable', () => {
     expect(errorCodes).not.toContain('launcher-blocked');
     expect(errorCodes).not.toContain('rollover-unreachable');
     expect(errorCodes).not.toContain('flipper-keepout');
+    expect(errorCodes).not.toContain('spinner-obstructed');
   });
 
   it('can full-plunge the ball into the upper playfield', () => {
@@ -81,6 +82,32 @@ describe('starlightEmTable', () => {
 
     expect(raisedGuides.length).toBeGreaterThanOrEqual(4);
   });
+
+  it('leaves the center spinner rotation envelope clear of guides', () => {
+    const centerSpinner = starlightEmTable.spinners[1];
+
+    expect(centerSpinner).toBeDefined();
+    if (!centerSpinner) {
+      throw new Error('Expected Starlight center spinner.');
+    }
+
+    const nearestGuideDistance = Math.min(
+      ...starlightEmTable.guides.map((guide) =>
+        guide.kind === 'arc'
+          ? Math.abs(
+              Math.hypot(
+                guide.center.x - centerSpinner.x,
+                guide.center.y - centerSpinner.y,
+              ) - guide.radius,
+            ) -
+            guide.thickness / 2
+          : distanceToSegment(centerSpinner, guide.start, guide.end) -
+            guide.thickness / 2,
+      ),
+    );
+
+    expect(nearestGuideDistance).toBeGreaterThan(centerSpinner.length / 2);
+  });
 });
 
 const releaseUntilLaunched = (
@@ -97,4 +124,30 @@ const releaseUntilLaunched = (
   }
 
   throw new Error('Expected Starlight EM to launch within 1 second.');
+};
+
+const distanceToSegment = (
+  point: { x: number; y: number },
+  start: { x: number; y: number },
+  end: { x: number; y: number },
+): number => {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const lengthSquared = dx * dx + dy * dy;
+
+  if (lengthSquared === 0) {
+    return Math.hypot(point.x - start.x, point.y - start.y);
+  }
+
+  const projection = Math.min(
+    1,
+    Math.max(
+      0,
+      ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared,
+    ),
+  );
+  const closestX = start.x + dx * projection;
+  const closestY = start.y + dy * projection;
+
+  return Math.hypot(point.x - closestX, point.y - closestY);
 };

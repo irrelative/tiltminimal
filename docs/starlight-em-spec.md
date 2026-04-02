@@ -31,6 +31,8 @@ Major features:
 - raised lower return rails so the return hardware can visually cross the
   flipper region without being modeled as a flat playfield blocker
 - upper left and upper right lane loops feeding back to the pops and saucer
+- spinner lanes that leave visible clearance around the spinner rotation
+  envelope rather than running a continuous guide through the spinner sweep
 
 ## Rules
 
