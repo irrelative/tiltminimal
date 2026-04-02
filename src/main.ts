@@ -6,6 +6,10 @@ import {
   type TableRecord,
 } from './boards/table-library';
 import {
+  buildAppRoutePath,
+  getAppRouteFromPathname,
+} from './app/routes';
+import {
   addBumper,
   addCurvedGuide,
   addDropTarget,
@@ -52,7 +56,6 @@ import { isArcGuide } from './game/guide-geometry';
 import './styles.css';
 
 type AppMode = 'edit' | 'play' | 'rules';
-type AppRoute = 'editor' | 'play' | 'rules';
 type DebugDestination = 'board-editor' | 'play-test';
 
 const DEBUG_HASHES: Record<DebugDestination, string> = {
@@ -132,7 +135,8 @@ const debugLinkRules = queryRequired<HTMLAnchorElement>('#debug-link-rules');
 const renderer = new CanvasRenderer(canvas);
 const gameAudio = new GameAudio();
 const loadedState = loadTablesState();
-const appRoute = getAppRoute(window.location.pathname);
+const appBasePath = import.meta.env.BASE_URL;
+const appRoute = getAppRouteFromPathname(window.location.pathname, appBasePath);
 
 const state: AppState = {
   tables: loadedState.tables,
@@ -172,7 +176,7 @@ function bootEditorRoute(): void {
   debugLinkEditor.textContent = 'Board editor';
   debugLinkPlay.href = DEBUG_HASHES['play-test'];
   debugLinkPlay.textContent = 'Play test';
-  debugLinkRules.href = '/rules';
+  debugLinkRules.href = buildAppRoutePath('rules', appBasePath);
   debugLinkRules.textContent = 'Rules';
 
   window.addEventListener('hashchange', () => {
@@ -794,11 +798,11 @@ function bootPlayRoute(): void {
 
   modeCopy.textContent =
     'Keyboard and touch controls are both live. On touch, hold the lower left or right playfield to flip, swipe left/right/up to nudge, and swipe down on the right side to plunge.';
-  debugLinkEditor.href = '/editor';
+  debugLinkEditor.href = buildAppRoutePath('editor', appBasePath);
   debugLinkEditor.textContent = 'Open editor';
-  debugLinkPlay.href = '/';
+  debugLinkPlay.href = buildAppRoutePath('play', appBasePath);
   debugLinkPlay.textContent = 'Game';
-  debugLinkRules.href = '/rules';
+  debugLinkRules.href = buildAppRoutePath('rules', appBasePath);
   debugLinkRules.textContent = 'Rules';
   debugLinkEditor.classList.remove('is-active');
   debugLinkEditor.setAttribute('aria-current', 'false');
@@ -876,11 +880,11 @@ function bootRulesRoute(): void {
     }
   });
 
-  debugLinkEditor.href = '/editor';
+  debugLinkEditor.href = buildAppRoutePath('editor', appBasePath);
   debugLinkEditor.textContent = 'Board editor';
-  debugLinkPlay.href = '/';
+  debugLinkPlay.href = buildAppRoutePath('play', appBasePath);
   debugLinkPlay.textContent = 'Game';
-  debugLinkRules.href = '/rules';
+  debugLinkRules.href = buildAppRoutePath('rules', appBasePath);
   debugLinkRules.textContent = 'Rules';
 
   renderApp();
@@ -1645,18 +1649,6 @@ function createSelectField(
 
 function capitalize(value: string): string {
   return `${value.slice(0, 1).toUpperCase()}${value.slice(1)}`;
-}
-
-function getAppRoute(pathname: string): AppRoute {
-  if (pathname === '/editor' || pathname === '/editor/') {
-    return 'editor';
-  }
-
-  if (pathname === '/rules' || pathname === '/rules/') {
-    return 'rules';
-  }
-
-  return 'play';
 }
 
 function restartStandalonePlay(): void {

@@ -52,6 +52,10 @@ Use the `Makefile` entrypoints:
 ## Static Deployment
 
 * GitHub Pages: https://irrelative.github.io/tiltminimal/
+* Deployed routes:
+  * Game: `https://irrelative.github.io/tiltminimal/`
+  * Editor: `https://irrelative.github.io/tiltminimal/editor`
+  * Rules: `https://irrelative.github.io/tiltminimal/rules`
 * Deployment is handled by `.github/workflows/deploy-pages.yml`, which builds with the Pages-provided base path and publishes the `dist/` output.
 
 ## Play Controls
