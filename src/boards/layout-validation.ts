@@ -99,6 +99,12 @@ export const validateCompiledBoardLayout = (
       radius: Math.hypot(spinner.length / 2, spinner.thickness / 2),
       label: `spinner ${index + 1}`,
     })),
+    ...board.slingshots.map((slingshot, index) => ({
+      x: slingshot.x,
+      y: slingshot.y,
+      radius: Math.hypot(slingshot.width / 2, slingshot.height / 2),
+      label: `slingshot ${index + 1}`,
+    })),
   ];
 
   for (let leftIndex = 0; leftIndex < circularFeatures.length; leftIndex += 1) {

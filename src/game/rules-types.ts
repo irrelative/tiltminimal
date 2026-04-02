@@ -66,6 +66,12 @@ export interface SpinnerSpinEvent extends BaseGameEvent {
   score: number;
 }
 
+export interface SlingshotHitEvent extends BaseGameEvent {
+  type: 'slingshot-hit';
+  index: number;
+  score: number;
+}
+
 export interface RolloverHitEvent extends BaseGameEvent {
   type: 'rollover-hit';
   index: number;
@@ -85,6 +91,7 @@ export type GameEvent =
   | ModeEndedEvent
   | RolloverHitEvent
   | SaucerCapturedEvent
+  | SlingshotHitEvent
   | SpinnerSpinEvent
   | StandupTargetHitEvent;
 

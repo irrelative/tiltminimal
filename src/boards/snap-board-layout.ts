@@ -46,6 +46,7 @@ export const snapBoardLayoutToGrid = (
     dropTargets: board.dropTargets.map((target) => ({ ...target })),
     saucers: board.saucers.map((saucer) => ({ ...saucer })),
     spinners: board.spinners.map((spinner) => ({ ...spinner })),
+    slingshots: board.slingshots.map((slingshot) => ({ ...slingshot })),
     rollovers: board.rollovers.map((rollover) => ({ ...rollover })),
     guides: board.guides.map((guide) =>
       guide.kind === 'arc'
@@ -93,6 +94,10 @@ export const snapBoardLayoutToGrid = (
   snapped.spinners = snapped.spinners.map((spinner) => ({
     ...spinner,
     ...snapPointToGrid(spinner, gridSize),
+  }));
+  snapped.slingshots = snapped.slingshots.map((slingshot) => ({
+    ...slingshot,
+    ...snapPointToGrid(slingshot, gridSize),
   }));
   snapped.rollovers = snapped.rollovers.map((rollover) => ({
     ...rollover,

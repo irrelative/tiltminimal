@@ -105,6 +105,7 @@ export class CanvasRenderer {
     this.drawBumpers(context, board, state);
     this.drawStandupTargets(context, board, state);
     this.drawDropTargets(context, board, state);
+    this.drawSlingshots(context, board, state);
     this.drawSaucers(context, board, state);
     this.drawSpinners(context, board, state);
     this.drawRollovers(context, board, state);
@@ -431,6 +432,39 @@ export class CanvasRenderer {
     });
   }
 
+  private drawSlingshots(
+    context: CanvasRenderingContext2D,
+    board: BoardDefinition,
+    state?: GameState,
+  ): void {
+    const theme = getBoardTheme(board.themeId);
+
+    board.slingshots.forEach((slingshot, index) => {
+      const compression = state?.slingshots[index]?.compression ?? 0;
+      const innerDepth = slingshot.height * (1 - compression * 0.28);
+
+      context.save();
+      context.translate(slingshot.x, slingshot.y);
+      context.rotate(slingshot.angle);
+      this.traceSlingshotPath(context, slingshot.width, innerDepth);
+      context.fillStyle = theme.guideRubberPrimary;
+      context.fill();
+
+      context.lineWidth = 4;
+      context.strokeStyle = theme.guideRubberSecondary;
+      context.stroke();
+
+      context.beginPath();
+      context.moveTo(-slingshot.width / 2, 0);
+      context.lineTo(slingshot.width / 2, 0);
+      context.lineWidth = Math.max(6, slingshot.height * 0.36);
+      context.lineCap = 'round';
+      context.strokeStyle = theme.guideMetalSecondary;
+      context.stroke();
+      context.restore();
+    });
+  }
+
   private drawSpinners(
     context: CanvasRenderingContext2D,
     board: BoardDefinition,
@@ -718,6 +752,20 @@ export class CanvasRenderer {
       }
     }
 
+    if (selection.kind === 'slingshot' && selection.index !== undefined) {
+      const slingshot = board.slingshots[selection.index];
+
+      if (slingshot) {
+        this.drawOrientedSelection(
+          context,
+          slingshot,
+          slingshot.width,
+          slingshot.height,
+          slingshot.angle,
+        );
+      }
+    }
+
     if (selection.kind === 'rollover' && selection.index !== undefined) {
       const rollover = board.rollovers[selection.index];
 
@@ -889,6 +937,21 @@ export class CanvasRenderer {
     context.arc(flipper.length, 0, tipRadius, -Math.PI / 2, Math.PI / 2);
     context.lineTo(0, baseRadius);
     context.arc(0, 0, baseRadius, Math.PI / 2, -Math.PI / 2);
+    context.closePath();
+  }
+
+  private traceSlingshotPath(
+    context: CanvasRenderingContext2D,
+    width: number,
+    depth: number,
+  ): void {
+    const tipDepth = (depth * 2) / 3;
+    const baseDepth = depth / 3;
+
+    context.beginPath();
+    context.moveTo(-width / 2, -baseDepth);
+    context.lineTo(width / 2, -baseDepth);
+    context.lineTo(0, tipDepth);
     context.closePath();
   }
 

@@ -396,6 +396,42 @@ describe('stepGame', () => {
     expect(next.state.standupTargets[0]?.cooldownSeconds).toBeGreaterThan(0);
   });
 
+  it('fires a slingshot kick and emits a scoring event on impact', () => {
+    const board = createBlankTable('Slingshot Board');
+    board.slingshots = [
+      {
+        x: 240,
+        y: 260,
+        width: 120,
+        height: 24,
+        angle: 0,
+        score: 10,
+        strength: 560,
+        material: 'rubberPost',
+      },
+    ];
+    const state = createInitialGameState(board);
+    state.status = 'playing';
+    state.ball.position.x = 240;
+    state.ball.position.y =
+      260 - (state.ball.radius + board.slingshots[0]!.height / 2 - 1);
+    state.ball.linearVelocity.y = 220;
+
+    const next = stepGameFrame(state, board, idleInput, 1 / 60);
+
+    expect(next.events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: 'slingshot-hit',
+          index: 0,
+          score: 10,
+        }),
+      ]),
+    );
+    expect(next.state.slingshots[0]?.compression).toBeGreaterThan(0);
+    expect(next.state.ball.linearVelocity.y).toBeLessThan(0);
+  });
+
   it('drops a drop target after a hit', () => {
     const board = createBlankTable('Drop Board');
     board.dropTargets = [

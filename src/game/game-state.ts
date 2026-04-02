@@ -49,6 +49,11 @@ export interface SpinnerState {
   cooldownSeconds: number;
 }
 
+export interface SlingshotState {
+  cooldownSeconds: number;
+  compression: number;
+}
+
 export interface RolloverState {
   lit: boolean;
 }
@@ -80,6 +85,7 @@ export interface GameState {
   dropTargets: DropTargetState[];
   saucers: SaucerState[];
   spinners: SpinnerState[];
+  slingshots: SlingshotState[];
   rollovers: RolloverState[];
   rules: RulesState;
 }
@@ -96,6 +102,7 @@ export const createInitialGameState = (board: BoardDefinition): GameState => ({
   dropTargets: board.dropTargets.map(createDropTargetState),
   saucers: board.saucers.map(createSaucerState),
   spinners: board.spinners.map(createSpinnerState),
+  slingshots: board.slingshots.map(createSlingshotState),
   rollovers: board.rollovers.map(createRolloverState),
   rules: createInitialRulesState(),
 });
@@ -114,6 +121,7 @@ export const resetBall = (
   dropTargets: board.dropTargets.map(createDropTargetState),
   saucers: board.saucers.map(createSaucerState),
   spinners: board.spinners.map(createSpinnerState),
+  slingshots: board.slingshots.map(createSlingshotState),
   rollovers: board.rollovers.map(createRolloverState),
   rules: cloneRulesState(state.rules),
 });
@@ -196,6 +204,11 @@ const createSpinnerState = (
   angle: spinner.angle,
   angularVelocity: 0,
   cooldownSeconds: 0,
+});
+
+const createSlingshotState = (): SlingshotState => ({
+  cooldownSeconds: 0,
+  compression: 0,
 });
 
 const createRolloverState = (): RolloverState => ({

@@ -91,6 +91,15 @@ export const compileBoardLayout = (
       score: spinner.score,
       material: spinner.material,
     })),
+    slingshots: (layout.slingshots ?? []).map((slingshot) => ({
+      ...resolvePositionedElement(slingshot, context),
+      width: slingshot.width,
+      height: slingshot.height,
+      angle: slingshot.angle,
+      score: slingshot.score,
+      strength: slingshot.strength,
+      material: slingshot.material,
+    })),
     rollovers: (layout.rollovers ?? []).map((rollover) => ({
       ...resolvePositionedElement(rollover, context),
       radius: rollover.radius,

@@ -276,6 +276,7 @@ export const exportBoardDefinition = (
     dropTargets: board.dropTargets.map((target) => ({ ...target })),
     saucers: board.saucers.map((saucer) => ({ ...saucer })),
     spinners: board.spinners.map((spinner) => ({ ...spinner })),
+    slingshots: board.slingshots.map((slingshot) => ({ ...slingshot })),
     rollovers: board.rollovers.map((rollover) => ({ ...rollover })),
     guides: board.guides.map(cloneGuide),
     flippers: board.flippers.map((flipper) => ({ ...flipper })),

@@ -177,4 +177,40 @@ describe('validateCompiledBoardLayout', () => {
       ]),
     );
   });
+
+  it('warns when a slingshot overlaps another major playfield feature', () => {
+    const board = createBlankTable('Slingshot Overlap');
+    board.slingshots = [
+      {
+        x: 300,
+        y: 320,
+        width: 120,
+        height: 24,
+        angle: 0.4,
+        score: 10,
+        strength: 560,
+        material: 'rubberPost',
+      },
+    ];
+    board.bumpers = [
+      {
+        x: 320,
+        y: 320,
+        radius: 50,
+        score: 100,
+        material: 'rubberPost',
+      },
+    ];
+
+    const diagnostics = validateCompiledBoardLayout(board);
+
+    expect(diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          severity: 'warning',
+          code: 'feature-overlap',
+        }),
+      ]),
+    );
+  });
 });

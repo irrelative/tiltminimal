@@ -5,8 +5,20 @@ import {
   createFlipperPair,
   createMirroredRollovers,
   createMirroredStandupTargets,
+  createSlingshotPair,
 } from './layout-primitives';
 import type { BoardLayoutDefinition } from './layout-schema';
+
+const classicSlingshots = createSlingshotPair({
+  leftCenter: absolutePoint(291, 1116),
+  rightCenter: absolutePoint(609, 1116),
+  width: 152,
+  height: 24,
+  leftAngle: 0.375,
+  rightAngle: Math.PI - 0.375,
+  score: 10,
+  strength: 560,
+});
 
 export const classicTableLayout: BoardLayoutDefinition = {
   name: 'Classic Table',
@@ -69,6 +81,7 @@ export const classicTableLayout: BoardLayoutDefinition = {
       material: 'metalGuide',
     },
   ],
+  slingshots: classicSlingshots.slingshots,
   rollovers: createMirroredRollovers({
     center: anchorPoint('top-rollover-center'),
     offsetsX: [-150, 0, 150],
@@ -91,12 +104,6 @@ export const classicTableLayout: BoardLayoutDefinition = {
       plane: 'raised',
     },
     {
-      start: absolutePoint(220, 1088),
-      end: absolutePoint(362, 1144),
-      thickness: 20,
-      material: 'rubberPost',
-    },
-    {
       start: absolutePoint(810, 880),
       end: absolutePoint(730, 1260),
       thickness: 14,
@@ -109,12 +116,6 @@ export const classicTableLayout: BoardLayoutDefinition = {
       thickness: 18,
       material: 'metalGuide',
       plane: 'raised',
-    },
-    {
-      start: absolutePoint(680, 1088),
-      end: absolutePoint(538, 1144),
-      thickness: 20,
-      material: 'rubberPost',
     },
   ],
   flippers: createFlipperPair({

@@ -57,6 +57,12 @@ return {
       return;
     }
 
+    if (event.type === 'slingshot-hit') {
+      ctx.addScore(event.score);
+      ctx.addBonus(100);
+      return;
+    }
+
     if (event.type === 'saucer-captured') {
       ctx.addScore(event.score);
       ctx.addBonus(1500);

@@ -5,6 +5,7 @@ import type {
   LayoutPoint,
   PostLayoutDefinition,
   RolloverLayoutDefinition,
+  SlingshotLayoutDefinition,
   StandupTargetLayoutDefinition,
 } from './layout-schema';
 import type {
@@ -351,8 +352,8 @@ export const createInlaneOutlanePair = (options: {
   outerGuideEndOffset: { x: number; y: number };
   innerGuideStartOffset: { x: number; y: number };
   innerGuideEndOffset: { x: number; y: number };
-  slingGuideStartOffset: { x: number; y: number };
-  slingGuideEndOffset: { x: number; y: number };
+  slingGuideStartOffset?: { x: number; y: number };
+  slingGuideEndOffset?: { x: number; y: number };
   entryPostOffsets?: Array<{
     x: number;
     y: number;
@@ -399,27 +400,68 @@ export const createInlaneOutlanePair = (options: {
       material: options.innerMaterial ?? 'metalGuide',
       plane: options.innerPlane ?? 'raised',
     },
-    {
-      start: offsetLayoutPoint(
-        options.flipperPivot,
-        options.slingGuideStartOffset.x,
-        options.slingGuideStartOffset.y,
-      ),
-      end: offsetLayoutPoint(
-        options.flipperPivot,
-        options.slingGuideEndOffset.x,
-        options.slingGuideEndOffset.y,
-      ),
-      thickness: options.slingThickness ?? 20,
-      material: options.slingMaterial ?? 'rubberPost',
-      plane: 'playfield',
-    },
+    ...(options.slingGuideStartOffset && options.slingGuideEndOffset
+      ? [
+          {
+            start: offsetLayoutPoint(
+              options.flipperPivot,
+              options.slingGuideStartOffset.x,
+              options.slingGuideStartOffset.y,
+            ),
+            end: offsetLayoutPoint(
+              options.flipperPivot,
+              options.slingGuideEndOffset.x,
+              options.slingGuideEndOffset.y,
+            ),
+            thickness: options.slingThickness ?? 20,
+            material: options.slingMaterial ?? 'rubberPost',
+            plane: 'playfield' as const,
+          },
+        ]
+      : []),
   ],
   posts: (options.entryPostOffsets ?? []).map((post) => ({
     position: offsetLayoutPoint(options.flipperPivot, post.x, post.y),
     radius: post.radius,
     material: post.material ?? 'metalGuide',
   })),
+});
+
+export interface SlingshotPairLayout {
+  slingshots: SlingshotLayoutDefinition[];
+}
+
+export const createSlingshotPair = (options: {
+  leftCenter: LayoutPoint;
+  rightCenter: LayoutPoint;
+  width: number;
+  height: number;
+  leftAngle: number;
+  rightAngle: number;
+  score: number;
+  strength: number;
+  material?: SurfaceMaterialName;
+}): SlingshotPairLayout => ({
+  slingshots: [
+    {
+      position: options.leftCenter,
+      width: options.width,
+      height: options.height,
+      angle: options.leftAngle,
+      score: options.score,
+      strength: options.strength,
+      material: options.material ?? 'rubberPost',
+    },
+    {
+      position: options.rightCenter,
+      width: options.width,
+      height: options.height,
+      angle: options.rightAngle,
+      score: options.score,
+      strength: options.strength,
+      material: options.material ?? 'rubberPost',
+    },
+  ],
 });
 
 const createFlipperLayout = (

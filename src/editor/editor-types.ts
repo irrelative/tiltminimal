@@ -6,6 +6,7 @@ export interface EditorSelection {
     | 'drop-target'
     | 'saucer'
     | 'spinner'
+    | 'slingshot'
     | 'rollover'
     | 'flipper'
     | 'guide'
@@ -34,6 +35,7 @@ export type EditorTool =
   | 'add-drop-target'
   | 'add-saucer'
   | 'add-spinner'
+  | 'add-slingshot'
   | 'add-rollover'
   | 'add-left-flipper'
   | 'add-right-flipper';

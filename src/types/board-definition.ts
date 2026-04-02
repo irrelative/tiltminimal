@@ -130,6 +130,15 @@ export interface SpinnerDefinition extends Point {
   material: SurfaceMaterialName;
 }
 
+export interface SlingshotDefinition extends Point {
+  width: number;
+  height: number;
+  angle: number;
+  score: number;
+  strength: number;
+  material: SurfaceMaterialName;
+}
+
 export interface RolloverDefinition extends Point {
   radius: number;
   score: number;
@@ -190,6 +199,7 @@ export interface BoardDefinition {
   dropTargets: DropTargetDefinition[];
   saucers: SaucerDefinition[];
   spinners: SpinnerDefinition[];
+  slingshots: SlingshotDefinition[];
   rollovers: RolloverDefinition[];
   guides: GuideDefinition[];
   flippers: FlipperDefinition[];
@@ -234,6 +244,7 @@ export interface BoardDefinitionInput {
   dropTargets?: DropTargetDefinition[];
   saucers?: SaucerDefinition[];
   spinners?: SpinnerDefinition[];
+  slingshots?: SlingshotDefinition[];
   rollovers?: RolloverDefinition[];
   guides?: GuideDefinition[];
   flippers: FlipperDefinition[];

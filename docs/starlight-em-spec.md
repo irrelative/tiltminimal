@@ -21,6 +21,7 @@ Major features:
 - 3 pop bumpers in an upper-center triangle
 - 2 spinners
 - 1 upper-right saucer
+- 2 lower slingshots
 - 6 standup targets in mirrored left/right banks of 3
 - 4 top rollover lanes
 - 1 center post and additional lane posts
@@ -28,6 +29,9 @@ Major features:
 - a right shooter lane that full-plunges into the upper field
 - a 4-lane top arch with open entries rather than sealed rollover circles
 - lower inlane/outlane packages built relative to the flipper pivots
+- active lower slings generated separately from the lane rails so the lower
+  third behaves like a real EM/solid-state slingshot area instead of a passive
+  rubber guide
 - raised lower return rails so the return hardware can visually cross the
   flipper region without being modeled as a flat playfield blocker
 - upper left and upper right lane loops feeding back to the pops and saucer
@@ -63,6 +67,7 @@ This table should feel closer to a reel-score electromechanical game:
 - Rules script: `src/boards/starlight-em-rules-script.ts`
 - Registered in: `src/boards/table-library.ts`
 - The layout now uses `createShooterLaneRight(...)`,
-  `createTopArchLanes(...)`, and `createInlaneOutlanePair(...)` so the launcher
-  feed, top rollover bank, and lower lanes are generated from semantic
-  primitives rather than hand-placed guide fragments.
+  `createTopArchLanes(...)`, `createInlaneOutlanePair(...)`, and
+  `createSlingshotPair(...)` so the launcher feed, top rollover bank, lower
+  lanes, and lower slings are generated from semantic primitives rather than
+  hand-placed guide fragments.

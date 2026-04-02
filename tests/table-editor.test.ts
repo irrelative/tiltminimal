@@ -88,6 +88,26 @@ describe('hitTestSelection', () => {
     expect(selection).toEqual({ kind: 'standup-target', index: 0 });
   });
 
+  it('selects a slingshot when clicking near its face', () => {
+    const board = createBlankTable();
+    board.slingshots = [
+      {
+        x: 240,
+        y: 300,
+        width: 120,
+        height: 24,
+        angle: 0.4,
+        score: 10,
+        strength: 560,
+        material: 'rubberPost',
+      },
+    ];
+
+    const selection = hitTestSelection(board, { x: 256, y: 304 });
+
+    expect(selection).toEqual({ kind: 'slingshot', index: 0 });
+  });
+
   it('selects a saucer when clicking inside its radius', () => {
     const board = createBlankTable();
     board.saucers = [
@@ -189,6 +209,36 @@ describe('hitTestSelection', () => {
     );
 
     expect(updated.posts[0]?.radius).toBe(24);
+  });
+
+  it('moves and updates a slingshot like other oriented elements', () => {
+    const board = createBlankTable();
+    board.slingshots = [
+      {
+        x: 240,
+        y: 300,
+        width: 120,
+        height: 24,
+        angle: 0.4,
+        score: 10,
+        strength: 560,
+        material: 'rubberPost',
+      },
+    ];
+
+    const moved = moveSelection(board, { kind: 'slingshot', index: 0 }, { x: 0, y: 0 });
+
+    expect(moved.slingshots[0]?.x).toBeGreaterThan(0);
+    expect(moved.slingshots[0]?.y).toBeGreaterThan(0);
+
+    const updated = updateSelectedNumericField(
+      moved,
+      { kind: 'slingshot', index: 0 },
+      'strength',
+      640,
+    );
+
+    expect(updated.slingshots[0]?.strength).toBe(640);
   });
 
   it('finds start, end, and rotate handles for a selected guide', () => {
@@ -481,6 +531,30 @@ describe('hitTestSelection', () => {
     );
 
     expect(next.dropTargets[0]?.angle).toBeCloseTo(-Math.PI, 5);
+  });
+
+  it('rotates a slingshot with the rotate handle drag', () => {
+    const board = createBlankTable();
+    board.slingshots = [
+      {
+        x: 320,
+        y: 340,
+        width: 120,
+        height: 24,
+        angle: 0.4,
+        score: 10,
+        strength: 560,
+        material: 'rubberPost',
+      },
+    ];
+
+    const next = rotateSelection(
+      board,
+      { kind: 'slingshot', index: 0 },
+      { x: 320, y: 280 },
+    );
+
+    expect(next.slingshots[0]?.angle).toBeCloseTo(-Math.PI, 5);
   });
 
   it('moves the launcher and keeps the plunger aligned', () => {

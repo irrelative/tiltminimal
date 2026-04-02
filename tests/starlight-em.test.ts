@@ -25,6 +25,7 @@ describe('starlightEmTable', () => {
     expect(starlightEmTable.spinners).toHaveLength(2);
     expect(starlightEmTable.saucers).toHaveLength(1);
     expect(starlightEmTable.standupTargets).toHaveLength(6);
+    expect(starlightEmTable.slingshots).toHaveLength(2);
     expect(starlightEmTable.rollovers).toHaveLength(4);
     expect(starlightEmTable.dropTargets).toHaveLength(0);
     expect(starlightEmTable.flippers).toHaveLength(2);

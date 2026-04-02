@@ -24,6 +24,7 @@ const expectBoardLayoutOnGrid = (board: BoardDefinition): void => {
   board.dropTargets.forEach(expectPointOnGrid);
   board.saucers.forEach(expectPointOnGrid);
   board.spinners.forEach(expectPointOnGrid);
+  board.slingshots.forEach(expectPointOnGrid);
   board.rollovers.forEach(expectPointOnGrid);
   board.flippers.forEach(expectPointOnGrid);
 

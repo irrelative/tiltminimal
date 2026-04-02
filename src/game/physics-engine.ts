@@ -16,6 +16,7 @@ import type {
   PlungerState,
   RolloverState,
   SaucerState,
+  SlingshotState,
   SpinnerState,
   StandupTargetState,
   TableNudgeDirection,
@@ -29,6 +30,9 @@ import { getContactTangent, resolveBallContact } from './spin-solver';
 
 const MAX_SIMULATION_STEP_SECONDS = 1 / 120;
 const SAUCER_EJECT_ANGLE_JITTER = 0.12;
+const SLINGSHOT_REARM_SECONDS = 0.14;
+const SLINGSHOT_COMPRESSION_RECOVERY = 8;
+const MIN_SLINGSHOT_TRIGGER_SPEED = 40;
 
 export const stepGame = (
   state: GameState,
@@ -171,6 +175,7 @@ const stepPlayingState = (
     dropTargets: state.dropTargets.map(cloneDropTargetState),
     saucers: state.saucers.map(cloneSaucerState),
     spinners: state.spinners.map(cloneSpinnerState),
+    slingshots: state.slingshots.map(cloneSlingshotState),
     rollovers: state.rollovers.map(cloneRolloverState),
     rules: cloneRulesState(state.rules),
   };
@@ -210,6 +215,7 @@ const stepPlayingState = (
     resolvePlungerCollision(next, board, plungerFrame, board.physics.solver);
     resolveStandupTargetCollisions(next, board, board.physics.solver, events);
     resolveDropTargetCollisions(next, board, board.physics.solver, events);
+    resolveSlingshotCollisions(next, board, board.physics.solver, events);
     resolveBumperCollisions(next, board, board.physics.solver, events);
     resolveFlipperCollisions(next, board, flipperFrame, board.physics.solver);
     resolveSaucerCaptures(next, board, events);
@@ -757,6 +763,75 @@ const resolveBumperCollisions = (
   }
 };
 
+const resolveSlingshotCollisions = (
+  state: GameState,
+  board: BoardDefinition,
+  solver: SolverPhysicsDefinition,
+  events: GameEvent[],
+): void => {
+  board.slingshots.forEach((slingshot, index) => {
+    const slingshotState = state.slingshots[index];
+
+    if (!slingshotState) {
+      return;
+    }
+
+    const collision = getOrientedElementCollision(
+      state,
+      offsetPoint(slingshot, state.tableNudge.offset),
+      slingshot.width,
+      slingshot.height,
+      slingshot.angle,
+      solver,
+    );
+
+    if (!collision) {
+      return;
+    }
+
+    const material = getSurfaceMaterial(
+      slingshot.material,
+      board.surfaceMaterials,
+    );
+    const surfaceVelocity = state.tableNudge.velocity;
+    const incomingNormalSpeed =
+      (state.ball.linearVelocity.x - surfaceVelocity.x) * collision.normal.x +
+      (state.ball.linearVelocity.y - surfaceVelocity.y) * collision.normal.y;
+
+    if (incomingNormalSpeed < 0 || collision.overlap > solver.epsilon) {
+      resolveBallContact(
+        state.ball,
+        createStaticContact(
+          material,
+          collision.point,
+          collision.normal,
+          collision.overlap,
+          surfaceVelocity,
+        ),
+        solver,
+      );
+    }
+
+    if (
+      slingshotState.cooldownSeconds > 0 ||
+      incomingNormalSpeed >= -MIN_SLINGSHOT_TRIGGER_SPEED
+    ) {
+      return;
+    }
+
+    state.ball.linearVelocity.x += collision.normal.x * slingshot.strength;
+    state.ball.linearVelocity.y += collision.normal.y * slingshot.strength;
+    slingshotState.cooldownSeconds = SLINGSHOT_REARM_SECONDS;
+    slingshotState.compression = 1;
+    events.push({
+      type: 'slingshot-hit',
+      index,
+      score: slingshot.score,
+      tick: state.tick,
+    });
+  });
+};
+
 const resolvePostCollisions = (
   state: GameState,
   board: BoardDefinition,
@@ -1135,6 +1210,17 @@ const advanceElementStates = (
       spinnerState.cooldownSeconds = 0;
     }
   });
+
+  state.slingshots.forEach((slingshotState) => {
+    slingshotState.cooldownSeconds = Math.max(
+      0,
+      slingshotState.cooldownSeconds - deltaSeconds,
+    );
+    slingshotState.compression = Math.max(
+      0,
+      slingshotState.compression - deltaSeconds * SLINGSHOT_COMPRESSION_RECOVERY,
+    );
+  });
 };
 
 const resolveOccupiedSaucer = (
@@ -1483,6 +1569,10 @@ const cloneSaucerState = (state: SaucerState): SaucerState => ({
 });
 
 const cloneSpinnerState = (state: SpinnerState): SpinnerState => ({
+  ...state,
+});
+
+const cloneSlingshotState = (state: SlingshotState): SlingshotState => ({
   ...state,
 });
 

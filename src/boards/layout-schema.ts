@@ -13,6 +13,7 @@ import type {
   PostDefinition,
   RolloverDefinition,
   SaucerDefinition,
+  SlingshotDefinition,
   SpinnerDefinition,
   StandupTargetDefinition,
   SurfaceMaterial,
@@ -74,6 +75,10 @@ export interface SaucerLayoutDefinition
 
 export interface SpinnerLayoutDefinition
   extends Omit<SpinnerDefinition, 'x' | 'y'>,
+    PositionedLayoutElement {}
+
+export interface SlingshotLayoutDefinition
+  extends Omit<SlingshotDefinition, 'x' | 'y'>,
     PositionedLayoutElement {}
 
 export interface RolloverLayoutDefinition
@@ -142,6 +147,7 @@ export interface BoardLayoutDefinition {
   dropTargets?: DropTargetLayoutDefinition[];
   saucers?: SaucerLayoutDefinition[];
   spinners?: SpinnerLayoutDefinition[];
+  slingshots?: SlingshotLayoutDefinition[];
   rollovers?: RolloverLayoutDefinition[];
   guides?: GuideLayoutDefinition[];
   flippers: FlipperLayoutDefinition[];

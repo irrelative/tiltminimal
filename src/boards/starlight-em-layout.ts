@@ -5,6 +5,7 @@ import {
   createFlipperPair,
   createInlaneOutlanePair,
   createShooterLaneRight,
+  createSlingshotPair,
   createTopArchLanes,
   offsetLayoutPoint,
 } from './layout-primitives';
@@ -43,8 +44,6 @@ const starlightLeftLowerLanes = createInlaneOutlanePair({
   outerGuideEndOffset: { x: -120, y: -322 },
   innerGuideStartOffset: { x: -56, y: -216 },
   innerGuideEndOffset: { x: -84, y: 48 },
-  slingGuideStartOffset: { x: -50, y: -132 },
-  slingGuideEndOffset: { x: 94, y: -72 },
   entryPostOffsets: [
     { x: -72, y: -200, radius: 18, material: 'rubberPost' },
     { x: -114, y: -312, radius: 16, material: 'metalGuide' },
@@ -58,12 +57,21 @@ const starlightRightLowerLanes = createInlaneOutlanePair({
   outerGuideEndOffset: { x: 182, y: -322 },
   innerGuideStartOffset: { x: 56, y: -216 },
   innerGuideEndOffset: { x: 84, y: 48 },
-  slingGuideStartOffset: { x: 50, y: -132 },
-  slingGuideEndOffset: { x: -94, y: -72 },
   entryPostOffsets: [
     { x: 72, y: -200, radius: 18, material: 'rubberPost' },
     { x: 54, y: -312, radius: 16, material: 'metalGuide' },
   ],
+});
+
+const starlightSlingshots = createSlingshotPair({
+  leftCenter: offsetLayoutPoint(anchorPoint('left-flipper-pivot'), 22, -102),
+  rightCenter: offsetLayoutPoint(anchorPoint('right-flipper-pivot'), -22, -102),
+  width: 148,
+  height: 24,
+  leftAngle: 0.395,
+  rightAngle: Math.PI - 0.395,
+  score: 10,
+  strength: 560,
 });
 
 export const starlightEmLayout: BoardLayoutDefinition = {
@@ -198,6 +206,7 @@ export const starlightEmLayout: BoardLayoutDefinition = {
       material: 'metalGuide',
     },
   ],
+  slingshots: starlightSlingshots.slingshots,
   rollovers: starlightTopArch.rollovers,
   guides: [
     ...starlightLeftLowerLanes.guides,

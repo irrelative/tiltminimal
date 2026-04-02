@@ -67,8 +67,16 @@ Current helpers include:
 - `createShooterLaneRight(...)`
 - `createTopArchLanes(...)`
 - `createInlaneOutlanePair(...)`
+- `createSlingshotPair(...)`
 
 These return high-level layout objects, not runtime board data.
+
+Lower-playfield authoring is now intentionally split:
+
+- `createInlaneOutlanePair(...)` builds the raised return rails, divider rails,
+  and lane-entry posts
+- `createSlingshotPair(...)` builds the active lower slings as first-class
+  devices with kick behavior
 
 Guides can also now declare a `plane`:
 
@@ -102,6 +110,7 @@ The current validation pass checks for:
 - custom guide geometry blocking the shooter-lane exit path
 - top rollover lanes with no open approach corridor from below
 - playfield-level guides intruding into a flipper's swing and feed keepout
+- slingshots and other major features overlapping in invalid ways
 
 This is still a heuristic layer, not a full playability proof, but it now aims
 to reject the most common "looks plausible but does not actually play" failures
@@ -115,7 +124,7 @@ resolved runtime board format.
 
 The next logical steps are:
 
-- add more canonical primitives such as slingshots, inlane/outlane pairs, and target banks
+- add more canonical primitives such as lower-lane packages, target banks, and orbit families
 - grow validation from geometric heuristics into shot simulation acceptance checks
 - compile more built-in tables through the layout layer
 - expose a layout-source view alongside the raw board JSON export

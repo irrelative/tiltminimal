@@ -14,6 +14,7 @@ import type {
   PostDefinition,
   RolloverDefinition,
   SaucerDefinition,
+  SlingshotDefinition,
   SpinnerDefinition,
   StandupTargetDefinition,
   SurfaceMaterial,
@@ -35,6 +36,7 @@ interface LegacyBoardDefinition extends Omit<
   dropTargets?: BoardDefinition['dropTargets'];
   saucers?: BoardDefinition['saucers'];
   spinners?: BoardDefinition['spinners'];
+  slingshots?: BoardDefinition['slingshots'];
   rollovers?: BoardDefinition['rollovers'];
   surfaceMaterials?: Partial<
     Record<SurfaceMaterialName, Partial<SurfaceMaterial>>
@@ -89,6 +91,7 @@ export const cloneBoardDefinition = (
   dropTargets: board.dropTargets.map((target) => ({ ...target })),
   saucers: board.saucers.map((saucer) => ({ ...saucer })),
   spinners: board.spinners.map((spinner) => ({ ...spinner })),
+  slingshots: board.slingshots.map((slingshot) => ({ ...slingshot })),
   rollovers: board.rollovers.map((rollover) => ({ ...rollover })),
   guides: board.guides.map(cloneGuide),
   flippers: board.flippers.map((flipper) => ({ ...flipper })),
@@ -142,6 +145,7 @@ export const normalizeBoardDefinition = (
     dropTargets: source.dropTargets ?? [],
     saucers: source.saucers ?? [],
     spinners: source.spinners ?? [],
+    slingshots: source.slingshots ?? [],
     rollovers: source.rollovers ?? [],
     guides: (source.guides ?? []).map(normalizeGuide),
     flippers: flippers.map((flipper) => ({
@@ -189,6 +193,7 @@ export const createBlankTable = (name = 'Custom Table'): BoardDefinition =>
     dropTargets: [],
     saucers: [],
     spinners: [],
+    slingshots: [],
     rollovers: [],
     guides: [],
     flippers: [
@@ -293,6 +298,20 @@ export const createDefaultSpinner = (
   angle: -Math.PI / 2,
   score: 10,
   material: 'metalGuide',
+});
+
+export const createDefaultSlingshot = (
+  x: number,
+  y: number,
+): SlingshotDefinition => ({
+  x,
+  y,
+  width: 118,
+  height: 24,
+  angle: -0.42,
+  score: 10,
+  strength: 560,
+  material: 'rubberPost',
 });
 
 export const createDefaultRollover = (

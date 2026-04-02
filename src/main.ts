@@ -18,6 +18,7 @@ import {
   addPost,
   addRollover,
   addSaucer,
+  addSlingshot,
   addSpinner,
   addStandupTarget,
   deleteSelection,
@@ -498,6 +499,23 @@ function bootEditorRoute(): void {
       return;
     }
 
+    if (state.tool === 'add-slingshot') {
+      const result = addSlingshot(
+        getActiveTable().board,
+        getSnappedEditorPoint(point),
+      );
+
+      state.selection = result.selection;
+      state.tool = 'select';
+      state.dragging = true;
+      state.dragMode = 'move-selection';
+      state.dragOffset = { x: 0, y: 0 };
+      state.draftPosition = null;
+      replaceActiveBoard(result.board, false);
+      renderApp();
+      return;
+    }
+
     if (state.tool === 'add-rollover') {
       const result = addRollover(
         getActiveTable().board,
@@ -617,6 +635,30 @@ function bootEditorRoute(): void {
           spinner,
           spinner.thickness,
           spinner.angle,
+        )
+      ) {
+        state.dragging = true;
+        state.dragMode = 'oriented-rotate';
+        state.dragOffset = null;
+        state.draftPosition = null;
+        renderApp();
+        return;
+      }
+    }
+
+    if (
+      state.selection.kind === 'slingshot' &&
+      state.selection.index !== undefined
+    ) {
+      const slingshot = activeBoard.slingshots[state.selection.index];
+
+      if (
+        slingshot &&
+        hitTestOrientedRotateHandle(
+          point,
+          slingshot,
+          slingshot.height,
+          slingshot.angle,
         )
       ) {
         state.dragging = true;
@@ -1153,6 +1195,29 @@ function syncSelectionPanel(): void {
   }
 
   if (
+    state.selection.kind === 'slingshot' &&
+    state.selection.index !== undefined
+  ) {
+    const slingshot = active.board.slingshots[state.selection.index];
+
+    if (!slingshot) {
+      return;
+    }
+
+    selectionLabel.textContent = `Slingshot ${state.selection.index + 1}`;
+    selectionFields.append(
+      createNumericField('x', 'X', slingshot.x),
+      createNumericField('y', 'Y', slingshot.y),
+      createNumericField('width', 'Width', slingshot.width),
+      createNumericField('height', 'Height', slingshot.height),
+      createNumericField('angle', 'Angle', radiansToDegrees(slingshot.angle)),
+      createNumericField('score', 'Score', slingshot.score),
+      createNumericField('strength', 'Strength', slingshot.strength),
+    );
+    return;
+  }
+
+  if (
     state.selection.kind === 'rollover' &&
     state.selection.index !== undefined
   ) {
@@ -1544,6 +1609,19 @@ function getDragOffset(
     };
   }
 
+  if (selection.kind === 'slingshot' && selection.index !== undefined) {
+    const slingshot = board.slingshots[selection.index];
+
+    if (!slingshot) {
+      return null;
+    }
+
+    return {
+      x: point.x - slingshot.x,
+      y: point.y - slingshot.y,
+    };
+  }
+
   if (selection.kind === 'rollover' && selection.index !== undefined) {
     const rollover = board.rollovers[selection.index];
 
@@ -1711,6 +1789,7 @@ function getFeatureCount(board: BoardDefinition): number {
     board.dropTargets.length +
     board.saucers.length +
     board.spinners.length +
+    board.slingshots.length +
     board.rollovers.length +
     board.guides.length +
     board.flippers.length

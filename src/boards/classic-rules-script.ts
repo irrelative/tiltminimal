@@ -58,6 +58,12 @@ return {
       return;
     }
 
+    if (event.type === 'slingshot-hit') {
+      ctx.addScore(event.score);
+      ctx.addBonus(75);
+      return;
+    }
+
     if (event.type === 'rollover-hit') {
       ctx.addScore(event.score);
       ctx.addBonus(250);

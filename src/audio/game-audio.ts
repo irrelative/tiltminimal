@@ -314,6 +314,21 @@ const getNearbyImpactMaterial = (
     }
   }
 
+  for (const slingshot of board.slingshots) {
+    const shifted = {
+      ...slingshot,
+      x: slingshot.x + offset.x,
+      y: slingshot.y + offset.y,
+    };
+
+    if (
+      distanceToOrientedSegment(position, shifted, shifted.width, shifted.angle) <=
+      radius + shifted.height / 2 + 10
+    ) {
+      return shifted.material;
+    }
+  }
+
   for (const guide of getPlungerGuideSegments(board)) {
     const shiftedGuide = {
       ...guide,
@@ -380,6 +395,45 @@ const getNearbyImpactMaterial = (
   }
 
   return null;
+};
+
+const distanceToOrientedSegment = (
+  point: { x: number; y: number },
+  element: { x: number; y: number },
+  length: number,
+  angle: number,
+): number => {
+  const halfLength = length / 2;
+  const dx = Math.cos(angle) * halfLength;
+  const dy = Math.sin(angle) * halfLength;
+  const start = {
+    x: element.x - dx,
+    y: element.y - dy,
+  };
+  const end = {
+    x: element.x + dx,
+    y: element.y + dy,
+  };
+  const segmentX = end.x - start.x;
+  const segmentY = end.y - start.y;
+  const segmentLengthSquared = segmentX * segmentX + segmentY * segmentY;
+
+  if (segmentLengthSquared === 0) {
+    return Math.hypot(point.x - start.x, point.y - start.y);
+  }
+
+  const projection = Math.min(
+    1,
+    Math.max(
+      0,
+      ((point.x - start.x) * segmentX + (point.y - start.y) * segmentY) /
+        segmentLengthSquared,
+    ),
+  );
+  const closestX = start.x + segmentX * projection;
+  const closestY = start.y + segmentY * projection;
+
+  return Math.hypot(point.x - closestX, point.y - closestY);
 };
 
 const getBounceFrequency = (material: SurfaceMaterialName): number => {

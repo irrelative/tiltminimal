@@ -46,6 +46,9 @@ Use the `Makefile` entrypoints:
   playability validation guarantees for DSL-authored tables
 * [docs/mobile-controls-spec.md](docs/mobile-controls-spec.md) defines the
   touch control scheme for playing on phones and tablets
+* [docs/slingshot-layout-spec.md](docs/slingshot-layout-spec.md) defines the
+  active slingshot component and the lower-lane DSL patterns used to build
+  playable lower thirds
 * [docs/starlight-em-spec.md](docs/starlight-em-spec.md) defines the behavior
   and layout goals for the built-in 1970s EM-style table
 

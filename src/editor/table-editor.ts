@@ -6,6 +6,7 @@ import {
   createDefaultPost,
   createDefaultRollover,
   createDefaultSaucer,
+  createDefaultSlingshot,
   createDefaultSpinner,
   createDefaultStandupTarget,
 } from '../boards/table-library';
@@ -177,6 +178,26 @@ export const hitTestSelection = (
       spinner.thickness / 2 + SELECTION_PADDING
     ) {
       return { kind: 'spinner', index };
+    }
+  }
+
+  for (let index = board.slingshots.length - 1; index >= 0; index -= 1) {
+    const slingshot = board.slingshots[index];
+
+    if (!slingshot) {
+      continue;
+    }
+
+    if (
+      distanceToOrientedSegment(
+        point,
+        slingshot,
+        slingshot.width,
+        slingshot.angle,
+      ) <=
+      slingshot.height / 2 + SELECTION_PADDING
+    ) {
+      return { kind: 'slingshot', index };
     }
   }
 
@@ -359,6 +380,25 @@ export const addSpinner = (
   };
 };
 
+export const addSlingshot = (
+  board: BoardDefinition,
+  point: Point,
+): {
+  board: BoardDefinition;
+  selection: EditorSelection;
+} => {
+  const nextSlingshot = createDefaultSlingshot(point.x, point.y);
+  const nextBoard = {
+    ...board,
+    slingshots: [...board.slingshots, nextSlingshot],
+  };
+
+  return {
+    board: nextBoard,
+    selection: { kind: 'slingshot', index: nextBoard.slingshots.length - 1 },
+  };
+};
+
 export const addRollover = (
   board: BoardDefinition,
   point: Point,
@@ -509,6 +549,27 @@ export const moveSelection = (
               ),
             }
           : spinner,
+      ),
+    };
+  }
+
+  if (selection.kind === 'slingshot' && selection.index !== undefined) {
+    return {
+      ...board,
+      slingshots: board.slingshots.map((slingshot, index) =>
+        index === selection.index
+          ? {
+              ...slingshot,
+              ...clampPoint(
+                board,
+                point,
+                getOrientedSelectionPadding(
+                  slingshot.width,
+                  slingshot.height,
+                ),
+              ),
+            }
+          : slingshot,
       ),
     };
   }
@@ -670,6 +731,18 @@ export const deleteSelection = (
     };
   }
 
+  if (selection.kind === 'slingshot' && selection.index !== undefined) {
+    return {
+      board: {
+        ...board,
+        slingshots: board.slingshots.filter(
+          (_, index) => index !== selection.index,
+        ),
+      },
+      selection: { kind: 'none' },
+    };
+  }
+
   if (selection.kind === 'rollover' && selection.index !== undefined) {
     return {
       board: {
@@ -791,6 +864,15 @@ export const updateSelectedNumericField = (
       ...board,
       spinners: board.spinners.map((spinner, index) =>
         index === selection.index ? { ...spinner, [field]: value } : spinner,
+      ),
+    };
+  }
+
+  if (selection.kind === 'slingshot' && selection.index !== undefined) {
+    return {
+      ...board,
+      slingshots: board.slingshots.map((slingshot, index) =>
+        index === selection.index ? { ...slingshot, [field]: value } : slingshot,
       ),
     };
   }
@@ -981,6 +1063,15 @@ export const rotateSelection = (
       ...board,
       spinners: board.spinners.map((spinner, index) =>
         index === selection.index ? { ...spinner, angle: nextAngle } : spinner,
+      ),
+    };
+  }
+
+  if (selection.kind === 'slingshot' && selection.index !== undefined) {
+    return {
+      ...board,
+      slingshots: board.slingshots.map((slingshot, index) =>
+        index === selection.index ? { ...slingshot, angle: nextAngle } : slingshot,
       ),
     };
   }
@@ -1294,6 +1385,20 @@ const getSelectedOrientedElement = (
           length: spinner.length,
           thickness: spinner.thickness,
           angle: spinner.angle,
+        }
+      : null;
+  }
+
+  if (selection.kind === 'slingshot' && selection.index !== undefined) {
+    const slingshot = board.slingshots[selection.index];
+
+    return slingshot
+      ? {
+          x: slingshot.x,
+          y: slingshot.y,
+          length: slingshot.width,
+          thickness: slingshot.height,
+          angle: slingshot.angle,
         }
       : null;
   }

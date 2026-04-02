@@ -18,8 +18,9 @@ describe('classicTable', () => {
     expect(classicTable.dropTargets).toHaveLength(1);
     expect(classicTable.saucers).toHaveLength(1);
     expect(classicTable.spinners).toHaveLength(1);
+    expect(classicTable.slingshots).toHaveLength(2);
     expect(classicTable.rollovers).toHaveLength(3);
-    expect(classicTable.guides).toHaveLength(6);
+    expect(classicTable.guides).toHaveLength(4);
     expect(classicTable.bumpers[0]?.material).toBe('rubberPost');
     expect(classicTable.flippers).toHaveLength(2);
     expect(classicTable.flippers[0]?.length).toBeGreaterThan(0);

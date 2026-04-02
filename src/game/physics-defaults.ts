@@ -150,6 +150,7 @@ export const createBoardDefinition = (
   dropTargets: input.dropTargets ?? [],
   saucers: input.saucers ?? [],
   spinners: input.spinners ?? [],
+  slingshots: input.slingshots ?? [],
   rollovers: input.rollovers ?? [],
   guides: input.guides ?? [],
   flippers: input.flippers,

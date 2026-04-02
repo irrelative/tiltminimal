@@ -8,6 +8,7 @@ import {
   createInlaneOutlanePair,
   createPopTriangle,
   createShooterLaneRight,
+  createSlingshotPair,
   createTopArchLanes,
 } from '../src/boards/layout-primitives';
 import type { BoardLayoutDefinition } from '../src/boards/layout-schema';
@@ -158,9 +159,17 @@ describe('compileBoardLayout', () => {
       outerGuideEndOffset: { x: -120, y: -322 },
       innerGuideStartOffset: { x: -56, y: -216 },
       innerGuideEndOffset: { x: -84, y: 48 },
-      slingGuideStartOffset: { x: -50, y: -132 },
-      slingGuideEndOffset: { x: 94, y: -72 },
       entryPostOffsets: [{ x: -72, y: -200, radius: 18, material: 'rubberPost' }],
+    });
+    const slingshots = createSlingshotPair({
+      leftCenter: absolutePoint(292, 1120),
+      rightCenter: absolutePoint(608, 1120),
+      width: 148,
+      height: 24,
+      leftAngle: 0.4,
+      rightAngle: Math.PI - 0.4,
+      score: 10,
+      strength: 560,
     });
     const layout: BoardLayoutDefinition = {
       name: 'Lower Lanes Primitive Test',
@@ -174,6 +183,7 @@ describe('compileBoardLayout', () => {
       },
       posts: lowerLanes.posts,
       guides: lowerLanes.guides,
+      slingshots: slingshots.slingshots,
       flippers: createFlipperPair({
         leftX: 270,
         rightX: 630,
@@ -187,10 +197,10 @@ describe('compileBoardLayout', () => {
 
     const result = compileBoardLayout(layout, { snapToGrid: false });
 
-    expect(result.board.guides).toHaveLength(3);
+    expect(result.board.guides).toHaveLength(2);
     expect(result.board.guides[0]?.plane).toBe('raised');
     expect(result.board.guides[1]?.plane).toBe('raised');
-    expect(result.board.guides[2]?.plane).toBe('playfield');
     expect(result.board.posts).toHaveLength(1);
+    expect(result.board.slingshots).toHaveLength(2);
   });
 });
