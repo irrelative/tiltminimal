@@ -64,6 +64,8 @@ Current helpers include:
 - `createPopTriangle(...)`
 - `createMirroredRollovers(...)`
 - `createMirroredStandupTargets(...)`
+- `createShooterLaneRight(...)`
+- `createTopArchLanes(...)`
 
 These return high-level layout objects, not runtime board data.
 
@@ -83,16 +85,19 @@ throws if validation returns any errors.
 
 ## Validation
 
-The first validation pass checks for:
+The current validation pass checks for:
 
 - launcher on the wrong side of the table
 - flippers outside the board
 - flippers too near the drain
 - overlapping major features
 - features extending past the playfield edge
+- custom guide geometry blocking the shooter-lane exit path
+- top rollover lanes with no open approach corridor from below
 
-This is intentionally lightweight. It is meant to catch obvious generation
-mistakes before a table is shipped or edited further.
+This is still a heuristic layer, not a full playability proof, but it now aims
+to reject the most common "looks plausible but does not actually play" failures
+that showed up in DSL-authored tables.
 
 ## Current Scope
 
@@ -102,6 +107,7 @@ resolved runtime board format.
 
 The next logical steps are:
 
-- add more canonical primitives such as shooter lanes, slingshots, and target banks
+- add more canonical primitives such as slingshots, inlane/outlane pairs, and target banks
+- grow validation from geometric heuristics into shot simulation acceptance checks
 - compile more built-in tables through the layout layer
 - expose a layout-source view alongside the raw board JSON export

@@ -50,4 +50,51 @@ describe('validateCompiledBoardLayout', () => {
       ]),
     );
   });
+
+  it('reports an error when custom guides block the shooter lane path', () => {
+    const board = createBlankTable('Blocked Launcher');
+    board.guides = [
+      {
+        start: { x: board.launchPosition.x - 40, y: 500 },
+        end: { x: board.launchPosition.x + 40, y: 500 },
+        thickness: 14,
+        material: 'metalGuide',
+      },
+    ];
+
+    const diagnostics = validateCompiledBoardLayout(board);
+
+    expect(diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          severity: 'error',
+          code: 'launcher-blocked',
+        }),
+      ]),
+    );
+  });
+
+  it('reports an error when a top rollover has no open approach lane', () => {
+    const board = createBlankTable('Sealed Top Lane');
+    board.rollovers = [{ x: 450, y: 160, radius: 22, score: 500 }];
+    board.guides = [
+      {
+        start: { x: 360, y: 230 },
+        end: { x: 540, y: 230 },
+        thickness: 18,
+        material: 'metalGuide',
+      },
+    ];
+
+    const diagnostics = validateCompiledBoardLayout(board);
+
+    expect(diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          severity: 'error',
+          code: 'rollover-unreachable',
+        }),
+      ]),
+    );
+  });
 });

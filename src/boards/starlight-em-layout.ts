@@ -3,11 +3,37 @@ import {
   absolutePoint,
   anchorPoint,
   createFlipperPair,
-  createMirroredRollovers,
+  createShooterLaneRight,
+  createTopArchLanes,
   offsetLayoutPoint,
-  percentPoint,
 } from './layout-primitives';
 import type { BoardLayoutDefinition } from './layout-schema';
+
+const starlightShooterLane = createShooterLaneRight({
+  boardWidth: 900,
+  launchX: 760,
+  launchY: 1180,
+  guideLength: 620,
+  feedTopY: 280,
+  innerMergeX: 680,
+  innerMergeY: 360,
+  outerExitX: 800,
+  outerBendX: 800,
+  outerBendY: 440,
+});
+
+const starlightTopArch = createTopArchLanes({
+  center: absolutePoint(450, 176),
+  laneCount: 4,
+  spacingX: 150,
+  radius: 22,
+  score: 500,
+  roofOffsetY: -58,
+  separatorBottomOffsetY: 24,
+  shoulderStartOffsetY: 86,
+  sideEntryInset: 112,
+  roofInset: 66,
+});
 
 export const starlightEmLayout: BoardLayoutDefinition = {
   name: 'Starlight EM',
@@ -17,16 +43,23 @@ export const starlightEmLayout: BoardLayoutDefinition = {
   height: 1400,
   rulesScript: starlightEmRulesScript,
   drainY: 1425,
-  launchPosition: absolutePoint(770, 1180),
+  launchPosition: starlightShooterLane.launchPosition,
+  plunger: starlightShooterLane.plunger,
   materials: {
     playfield: 'playfieldWood',
     walls: 'metalGuide',
   },
+  physics: {
+    plunger: {
+      minReleaseSpeed: 1600,
+      maxReleaseSpeed: 4200,
+      bodyMass: 0.9,
+    },
+  },
   anchors: [
     { id: 'pop-top', point: absolutePoint(450, 260) },
-    { id: 'top-lane-center', point: absolutePoint(450, 170) },
     { id: 'left-bank-center', point: absolutePoint(180, 760) },
-    { id: 'right-bank-center', point: absolutePoint(720, 760) },
+    { id: 'right-bank-center', point: absolutePoint(660, 760) },
     { id: 'center-spinner', point: absolutePoint(450, 620) },
     { id: 'saucer-pocket', point: absolutePoint(690, 360) },
   ],
@@ -35,7 +68,7 @@ export const starlightEmLayout: BoardLayoutDefinition = {
     { position: absolutePoint(198, 1020), radius: 18, material: 'rubberPost' },
     { position: absolutePoint(702, 1020), radius: 18, material: 'rubberPost' },
     { position: absolutePoint(156, 908), radius: 16, material: 'metalGuide' },
-    { position: absolutePoint(744, 908), radius: 16, material: 'metalGuide' },
+    { position: absolutePoint(684, 908), radius: 16, material: 'metalGuide' },
   ],
   bumpers: [
     {
@@ -136,12 +169,7 @@ export const starlightEmLayout: BoardLayoutDefinition = {
       material: 'metalGuide',
     },
   ],
-  rollovers: createMirroredRollovers({
-    center: anchorPoint('top-lane-center'),
-    offsetsX: [-240, -80, 80, 240],
-    radius: 22,
-    score: 500,
-  }),
+  rollovers: starlightTopArch.rollovers,
   guides: [
     {
       start: absolutePoint(94, 1182),
@@ -162,8 +190,8 @@ export const starlightEmLayout: BoardLayoutDefinition = {
       material: 'rubberPost',
     },
     {
-      start: absolutePoint(806, 1182),
-      end: absolutePoint(748, 898),
+      start: absolutePoint(846, 1182),
+      end: absolutePoint(812, 898),
       thickness: 14,
       material: 'metalGuide',
     },
@@ -192,35 +220,19 @@ export const starlightEmLayout: BoardLayoutDefinition = {
       material: 'metalGuide',
     },
     {
-      start: absolutePoint(222, 224),
-      end: absolutePoint(414, 124),
+      start: absolutePoint(116, 644),
+      end: absolutePoint(114, 262),
       thickness: 14,
       material: 'metalGuide',
     },
     {
-      start: absolutePoint(768, 874),
-      end: absolutePoint(784, 600),
-      thickness: 14,
-      material: 'metalGuide',
-    },
-    {
-      start: absolutePoint(784, 600),
-      end: absolutePoint(730, 238),
-      thickness: 14,
-      material: 'metalGuide',
-    },
-    {
-      start: absolutePoint(730, 238),
-      end: absolutePoint(492, 126),
-      thickness: 14,
-      material: 'metalGuide',
-    },
-    {
-      start: percentPoint(0.35, 0.47),
-      end: percentPoint(0.65, 0.47),
+      start: absolutePoint(315, 658),
+      end: absolutePoint(585, 658),
       thickness: 12,
       material: 'metalGuide',
     },
+    ...starlightTopArch.guides,
+    ...starlightShooterLane.guides,
   ],
   flippers: createFlipperPair({
     leftX: 270,

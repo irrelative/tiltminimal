@@ -1,11 +1,16 @@
 import type {
   BumperLayoutDefinition,
   FlipperLayoutDefinition,
+  GuideLayoutDefinition,
   LayoutPoint,
   RolloverLayoutDefinition,
   StandupTargetLayoutDefinition,
 } from './layout-schema';
-import type { FlipperSide, SurfaceMaterialName } from '../types/board-definition';
+import type {
+  FlipperSide,
+  PlungerDefinition,
+  SurfaceMaterialName,
+} from '../types/board-definition';
 
 export const absolutePoint = (x: number, y: number): LayoutPoint => ({ x, y });
 
@@ -160,6 +165,176 @@ export const createMirroredStandupTargets = (options: {
       material,
     },
   ];
+};
+
+export interface ShooterLaneRightLayout {
+  launchPosition: LayoutPoint;
+  plunger: Partial<PlungerDefinition>;
+  guides: GuideLayoutDefinition[];
+}
+
+export const createShooterLaneRight = (options: {
+  boardWidth: number;
+  launchX: number;
+  launchY: number;
+  guideLength: number;
+  feedTopY: number;
+  innerMergeX?: number;
+  innerMergeY?: number;
+  outerExitX?: number;
+  outerBendX?: number;
+  outerBendY?: number;
+  wallThickness?: number;
+  material?: SurfaceMaterialName;
+  plunger?: Partial<Omit<PlungerDefinition, 'x' | 'y'>>;
+}): ShooterLaneRightLayout => {
+  const plungerThickness = options.plunger?.thickness ?? 24;
+  const laneHalfWidth = plungerThickness / 2 + 12;
+  const guideTopY = options.launchY - options.guideLength;
+  const material = options.material ?? options.plunger?.material ?? 'metalGuide';
+  const wallThickness = options.wallThickness ?? 14;
+  const innerX = options.launchX - laneHalfWidth;
+  const outerX = options.launchX + laneHalfWidth;
+  const innerMergeY = options.innerMergeY ?? options.feedTopY + 92;
+  const innerMergeX = options.innerMergeX ?? options.launchX - 72;
+  const outerExitX = options.outerExitX ?? options.boardWidth - 132;
+  const outerBendX = options.outerBendX ?? outerX + 18;
+  const outerBendY = options.outerBendY ?? guideTopY - 120;
+
+  return {
+    launchPosition: absolutePoint(options.launchX, options.launchY),
+    plunger: {
+      x: options.launchX,
+      guideLength: options.guideLength,
+      ...options.plunger,
+    },
+    guides: [
+      {
+        start: absolutePoint(innerX, guideTopY),
+        end: absolutePoint(innerMergeX, innerMergeY),
+        thickness: wallThickness,
+        material,
+      },
+      {
+        start: absolutePoint(outerX, guideTopY),
+        end: absolutePoint(outerBendX, outerBendY),
+        thickness: wallThickness,
+        material,
+      },
+      {
+        start: absolutePoint(outerBendX, outerBendY),
+        end: absolutePoint(outerExitX, options.feedTopY),
+        thickness: wallThickness,
+        material,
+      },
+    ],
+  };
+};
+
+export interface TopArchLanesLayout {
+  rollovers: RolloverLayoutDefinition[];
+  guides: GuideLayoutDefinition[];
+}
+
+export const createTopArchLanes = (options: {
+  center: LayoutPoint;
+  laneCount: number;
+  spacingX: number;
+  radius: number;
+  score: number;
+  roofOffsetY?: number;
+  separatorBottomOffsetY?: number;
+  shoulderStartOffsetY?: number;
+  sideEntryInset?: number;
+  roofInset?: number;
+  material?: SurfaceMaterialName;
+  guideThickness?: number;
+}): TopArchLanesLayout => {
+  const laneOffsets = Array.from(
+    { length: options.laneCount },
+    (_, index) => (index - (options.laneCount - 1) / 2) * options.spacingX,
+  );
+  const material = options.material ?? 'metalGuide';
+  const guideThickness = options.guideThickness ?? 14;
+  const roofOffsetY = options.roofOffsetY ?? -Math.max(54, options.radius * 2.5);
+  const separatorBottomOffsetY =
+    options.separatorBottomOffsetY ?? Math.max(28, options.radius * 1.15);
+  const shoulderStartOffsetY =
+    options.shoulderStartOffsetY ?? Math.max(72, options.radius * 3.1);
+  const sideEntryInset = options.sideEntryInset ?? options.spacingX * 0.85;
+  const roofInset = options.roofInset ?? options.spacingX * 0.5;
+  const leftmostOffset = laneOffsets[0] ?? 0;
+  const rightmostOffset = laneOffsets[laneOffsets.length - 1] ?? 0;
+
+  const rollovers = laneOffsets.map((offsetX) => ({
+    position: offsetLayoutPoint(options.center, offsetX, 0),
+    radius: options.radius,
+    score: options.score,
+  }));
+
+  const guides: GuideLayoutDefinition[] = [
+    {
+      start: offsetLayoutPoint(
+        options.center,
+        leftmostOffset - sideEntryInset,
+        shoulderStartOffsetY,
+      ),
+      end: offsetLayoutPoint(options.center, leftmostOffset - roofInset, roofOffsetY),
+      thickness: guideThickness,
+      material,
+    },
+    {
+      start: offsetLayoutPoint(options.center, leftmostOffset - roofInset, roofOffsetY),
+      end: offsetLayoutPoint(options.center, 0, roofOffsetY),
+      thickness: guideThickness,
+      material,
+    },
+    {
+      start: offsetLayoutPoint(options.center, 0, roofOffsetY),
+      end: offsetLayoutPoint(options.center, rightmostOffset + roofInset, roofOffsetY),
+      thickness: guideThickness,
+      material,
+    },
+    {
+      start: offsetLayoutPoint(
+        options.center,
+        rightmostOffset + roofInset,
+        roofOffsetY,
+      ),
+      end: offsetLayoutPoint(
+        options.center,
+        rightmostOffset + sideEntryInset,
+        shoulderStartOffsetY,
+      ),
+      thickness: guideThickness,
+      material,
+    },
+  ];
+
+  for (let index = 0; index < laneOffsets.length - 1; index += 1) {
+    const left = laneOffsets[index];
+    const right = laneOffsets[index + 1];
+
+    if (left === undefined || right === undefined) {
+      continue;
+    }
+
+    guides.push({
+      start: offsetLayoutPoint(options.center, (left + right) / 2, roofOffsetY + 8),
+      end: offsetLayoutPoint(
+        options.center,
+        (left + right) / 2,
+        separatorBottomOffsetY,
+      ),
+      thickness: guideThickness,
+      material,
+    });
+  }
+
+  return {
+    rollovers,
+    guides,
+  };
 };
 
 const createFlipperLayout = (

@@ -41,6 +41,9 @@ Use the `Makefile` entrypoints:
 * [docs/table-layout-authoring.md](docs/table-layout-authoring.md) explains the
   higher-level layout DSL, compiler, and validation flow for built-in and
   agent-generated tables
+* [docs/layout-playability-spec.md](docs/layout-playability-spec.md) defines
+  the semantic shooter-lane and top-arch primitives plus the current
+  playability validation guarantees for DSL-authored tables
 * [docs/starlight-em-spec.md](docs/starlight-em-spec.md) defines the behavior
   and layout goals for the built-in 1970s EM-style table
 

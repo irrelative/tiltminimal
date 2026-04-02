@@ -1,7 +1,20 @@
 import { describe, expect, it } from 'vitest';
 
 import { BUILT_IN_TABLES } from '../src/boards/table-library';
+import { validateCompiledBoardLayout } from '../src/boards/layout-validation';
 import { starlightEmTable } from '../src/boards/starlight-em-table';
+import { createInitialGameState } from '../src/game/game-state';
+import { stepGame } from '../src/game/physics-engine';
+import type { InputState } from '../src/input/keyboard-input';
+
+const idleInput: InputState = {
+  leftPressed: false,
+  rightPressed: false,
+  launchPressed: false,
+  nudgeLeftPressed: false,
+  nudgeRightPressed: false,
+  nudgeUpPressed: false,
+};
 
 describe('starlightEmTable', () => {
   it('exposes a valid EM-style built-in table', () => {
@@ -24,4 +37,55 @@ describe('starlightEmTable', () => {
       ),
     ).toBe(true);
   });
+
+  it('passes playability validation for the launcher and top arch', () => {
+    const diagnostics = validateCompiledBoardLayout(starlightEmTable);
+    const errorCodes = diagnostics
+      .filter((diagnostic) => diagnostic.severity === 'error')
+      .map((diagnostic) => diagnostic.code);
+
+    expect(errorCodes).not.toContain('launcher-blocked');
+    expect(errorCodes).not.toContain('rollover-unreachable');
+  });
+
+  it('can full-plunge the ball into the upper playfield', () => {
+    let state = createInitialGameState(starlightEmTable);
+    state = stepGame(
+      state,
+      starlightEmTable,
+      { ...idleInput, launchPressed: true },
+      1.2,
+    );
+
+    let launched = releaseUntilLaunched(state);
+    const initialLaunch = {
+      velocity: { ...launched.ball.linearVelocity },
+      position: { ...launched.ball.position },
+    };
+    let minY = launched.ball.position.y;
+
+    for (let step = 0; step < 120; step += 1) {
+      launched = stepGame(launched, starlightEmTable, idleInput, 1 / 60);
+      minY = Math.min(minY, launched.ball.position.y);
+    }
+
+    expect(initialLaunch.velocity.y).toBeLessThan(-1600);
+    expect(minY).toBeLessThan(280);
+  });
 });
+
+const releaseUntilLaunched = (
+  state: ReturnType<typeof createInitialGameState>,
+): ReturnType<typeof createInitialGameState> => {
+  let current = state;
+
+  for (let index = 0; index < 120; index += 1) {
+    current = stepGame(current, starlightEmTable, idleInput, 1 / 120);
+
+    if (current.status === 'playing') {
+      return current;
+    }
+  }
+
+  throw new Error('Expected Starlight EM to launch within 1 second.');
+};

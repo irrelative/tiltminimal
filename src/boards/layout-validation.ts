@@ -1,4 +1,9 @@
-import type { BoardDefinition } from '../types/board-definition';
+import { getGuideDistance } from '../game/guide-geometry';
+import {
+  getPlungerGuideTopY,
+  getPlungerLaneHalfWidth,
+} from '../game/plunger-geometry';
+import type { BoardDefinition, Point } from '../types/board-definition';
 
 export interface LayoutDiagnostic {
   severity: 'error' | 'warning';
@@ -128,6 +133,9 @@ export const validateCompiledBoardLayout = (
     }
   }
 
+  validateLaunchCorridor(board, diagnostics);
+  validateTopRolloverReachability(board, diagnostics);
+
   return diagnostics;
 };
 
@@ -147,3 +155,105 @@ const isCircleInsideBoard = (
   x + radius <= board.width &&
   y - radius >= 0 &&
   y + radius <= board.height;
+
+const validateLaunchCorridor = (
+  board: BoardDefinition,
+  diagnostics: LayoutDiagnostic[],
+): void => {
+  const guideTopY = getPlungerGuideTopY(board);
+  const upperReachY = Math.max(24, guideTopY - 180);
+  const centerlinePath = [
+    {
+      x: board.launchPosition.x,
+      y: guideTopY - 2,
+    },
+    {
+      x: board.launchPosition.x,
+      y: upperReachY,
+    },
+  ] as const;
+
+  if (pathBlockedByGuide(board, centerlinePath[0], centerlinePath[1], 10)) {
+    diagnostics.push({
+      severity: 'error',
+      code: 'launcher-blocked',
+      message: 'The shooter lane launch path is blocked by guide geometry.',
+    });
+  }
+
+  const laneHalfWidth = getPlungerLaneHalfWidth(board.plunger);
+  const innerGuideX = board.plunger.x - laneHalfWidth;
+  const outerGuideX = board.plunger.x + laneHalfWidth;
+
+  if (board.launchPosition.x <= innerGuideX || board.launchPosition.x >= outerGuideX) {
+    diagnostics.push({
+      severity: 'error',
+      code: 'launcher-misaligned',
+      message: 'The launch position must stay centered inside the shooter lane.',
+    });
+  }
+};
+
+const validateTopRolloverReachability = (
+  board: BoardDefinition,
+  diagnostics: LayoutDiagnostic[],
+): void => {
+  board.rollovers.forEach((rollover, index) => {
+    if (rollover.y > board.height * 0.3) {
+      return;
+    }
+
+    const entryY = Math.min(board.height * 0.42, rollover.y + 160);
+    const entryOffsets = [
+      -rollover.radius * 2,
+      -rollover.radius,
+      0,
+      rollover.radius,
+      rollover.radius * 2,
+    ];
+    const reachable = entryOffsets.some((offsetX) =>
+      !pathBlockedByGuide(
+        board,
+        { x: rollover.x + offsetX, y: entryY },
+        { x: rollover.x, y: rollover.y },
+        8,
+      ),
+    );
+
+    if (!reachable) {
+      diagnostics.push({
+        severity: 'error',
+        code: 'rollover-unreachable',
+        message: `Top rollover ${index + 1} does not have an open approach lane.`,
+      });
+    }
+  });
+};
+
+const pathBlockedByGuide = (
+  board: BoardDefinition,
+  start: Point,
+  end: Point,
+  extraClearance: number,
+): boolean => {
+  const sampleCount = 24;
+
+  for (let index = 0; index <= sampleCount; index += 1) {
+    const t = index / sampleCount;
+    const point = {
+      x: start.x + (end.x - start.x) * t,
+      y: start.y + (end.y - start.y) * t,
+    };
+    const blockingGuide = board.guides.some(
+      (guide) =>
+        getGuideDistance(point, guide) <
+        guide.thickness / 2 + extraClearance,
+    );
+
+    if (blockingGuide) {
+      return true;
+    }
+  }
+
+  return false;
+};
