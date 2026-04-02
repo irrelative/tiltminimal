@@ -461,7 +461,6 @@ body[data-route='rules'] .play-route-panel {
 .playfield-frame {
   min-height: 0;
   height: 100%;
-  container-type: size;
   border-radius: calc(var(--radius) - 4px);
   padding: clamp(8px, 1vw, 12px);
   background:
@@ -487,20 +486,20 @@ body[data-route='play'] .playfield-frame {
 
 #game {
   display: block;
-  width: min(100%, calc(100cqh * 9 / 14));
+  width: min(100%, calc((100svh - (var(--stage-padding) * 2) - 64px) * 9 / 14));
   height: auto;
-  max-width: 100cqw;
-  max-height: 100cqh;
+  max-width: 100%;
+  max-height: 100%;
   aspect-ratio: 9 / 14;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   touch-action: none;
 }
 
 body[data-route='play'] #game {
-  width: min(100%, calc(100cqh * 9 / 14));
+  width: min(100%, calc((100svh - (var(--stage-padding) * 2) - 64px) * 9 / 14));
   height: auto;
-  max-width: 100cqw;
-  max-height: 100cqh;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 #delete-selection {
