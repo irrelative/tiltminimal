@@ -101,6 +101,8 @@ textarea {
 
 body[data-route='play'] .workspace {
   grid-template-columns: 1fr;
+  min-height: calc(100svh - (var(--stage-padding) * 2));
+  height: calc(100svh - (var(--stage-padding) * 2));
 }
 
 .control-panel,
@@ -323,6 +325,8 @@ h2 {
 body[data-route='play'] .stage-shell {
   max-width: 1080px;
   min-height: calc(100svh - (var(--stage-padding) * 2));
+  max-height: calc(100svh - (var(--stage-padding) * 2));
+  height: calc(100svh - (var(--stage-padding) * 2));
   margin: 0 auto;
   grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
   grid-template-rows: minmax(0, 1fr);
@@ -341,11 +345,14 @@ body[data-route='play'] .stage-toolbar {
   grid-column: 2;
   grid-row: 1;
   height: 100%;
+  min-height: 0;
   padding: 0;
   display: grid;
   grid-auto-rows: min-content;
   align-content: start;
   gap: 14px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .toolbar-main {
@@ -473,6 +480,7 @@ body[data-route='play'] .playfield-frame {
   grid-column: 1;
   grid-row: 1;
   height: 100%;
+  min-height: 0;
   padding: 12px;
 }
 
@@ -515,12 +523,16 @@ body[data-route='play'] #game {
   body[data-route='play'] .stage-shell {
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(0, 1fr);
+    height: auto;
+    max-height: none;
   }
 
   body[data-route='play'] .stage-toolbar {
     grid-column: 1;
     grid-row: 1;
     height: auto;
+    min-height: auto;
+    overflow: visible;
   }
 
   body[data-route='play'] .playfield-frame {
