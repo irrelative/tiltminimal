@@ -68,6 +68,7 @@ Current helpers include:
 - `createTopArchLanes(...)`
 - `createInlaneOutlanePair(...)`
 - `createSlingshotPair(...)`
+- `createSlingshotTriangleGuides(...)`
 
 These return high-level layout objects, not runtime board data.
 
@@ -77,6 +78,8 @@ Lower-playfield authoring is now intentionally split:
   and lane-entry posts
 - `createSlingshotPair(...)` builds the active lower slings as first-class
   devices with kick behavior
+- `createSlingshotTriangleGuides(...)` builds the upper closing rails that make
+  those slings read and play like canonical triangular lower-lane packages
 
 Guides can also now declare a `plane`:
 
