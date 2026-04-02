@@ -45,7 +45,6 @@ The lower playfield is now intended to be built from two separate primitives:
 
 - `createInlaneOutlanePair(...)`
 - `createSlingshotPair(...)`
-- `createSlingshotTriangleGuides(...)`
 
 `createInlaneOutlanePair(...)` is responsible for:
 
@@ -62,21 +61,12 @@ It should not be relied on to create the active slingshot itself.
 - score and kick strength defaults
 - mirrored lower-playfield slings aligned to the flipper area
 
-`createSlingshotTriangleGuides(...)` is responsible for:
-
-- the two upper metal rails that close the classic triangular slingshot pocket
-- connecting those guide endpoints directly to the slingshot face geometry
-- giving lower lanes the canonical EM/solid-state triangle flow instead of a
-  disconnected sling plus return rails
-
 ## Authoring Guidance
 
 For DSL-authored solid-state and EM-style tables:
 
 - build the return rails and lane dividers with `createInlaneOutlanePair(...)`
 - build the active lower slings with `createSlingshotPair(...)`
-- build the upper triangle closure around those slings with
-  `createSlingshotTriangleGuides(...)`
 - keep the slingshot faces clear of raised rails and flipper keepout zones
 - prefer flipper-relative anchor offsets over hardcoded absolute lower-third
   coordinates

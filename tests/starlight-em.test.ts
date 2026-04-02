@@ -84,47 +84,6 @@ describe('starlightEmTable', () => {
     expect(raisedGuides.length).toBeGreaterThanOrEqual(4);
   });
 
-  it('forms triangular lower-lane flow guides around both slingshots', () => {
-    const lowerPlayfieldGuides = starlightEmTable.guides.filter((guide) => {
-      if (guide.plane === 'raised') {
-        return false;
-      }
-
-      if (guide.kind === 'arc') {
-        return guide.center.y > 980;
-      }
-
-      return (guide.start.y + guide.end.y) / 2 > 980;
-    });
-
-    expect(lowerPlayfieldGuides.length).toBeGreaterThanOrEqual(4);
-
-    for (const slingshot of starlightEmTable.slingshots) {
-      const halfWidth = slingshot.width / 2;
-      const dx = Math.cos(slingshot.angle) * halfWidth;
-      const dy = Math.sin(slingshot.angle) * halfWidth;
-      const endpoints = [
-        { x: slingshot.x - dx, y: slingshot.y - dy },
-        { x: slingshot.x + dx, y: slingshot.y + dy },
-      ];
-
-      endpoints.forEach((endpoint) => {
-        const nearestEndpointDistance = Math.min(
-          ...lowerPlayfieldGuides.map((guide) =>
-            guide.kind === 'arc'
-              ? Number.POSITIVE_INFINITY
-              : Math.min(
-                  Math.hypot(endpoint.x - guide.start.x, endpoint.y - guide.start.y),
-                  Math.hypot(endpoint.x - guide.end.x, endpoint.y - guide.end.y),
-                ),
-          ),
-        );
-
-        expect(nearestEndpointDistance).toBeLessThanOrEqual(42);
-      });
-    }
-  });
-
   it('leaves the center spinner rotation envelope clear of guides', () => {
     const centerSpinner = starlightEmTable.spinners[1];
 

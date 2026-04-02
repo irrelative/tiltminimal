@@ -32,9 +32,6 @@ Major features:
 - active lower slings generated separately from the lane rails so the lower
   third behaves like a real EM/solid-state slingshot area instead of a passive
   rubber guide
-- metal triangle rails above each sling so the lower inlane flow forms the
-  classic triangular pocket around the slingshot face rather than leaving the
-  sling isolated under the return rails
 - raised lower return rails so the return hardware can visually cross the
   flipper region without being modeled as a flat playfield blocker
 - upper left and upper right lane loops feeding back to the pops and saucer
@@ -71,7 +68,6 @@ This table should feel closer to a reel-score electromechanical game:
 - Registered in: `src/boards/table-library.ts`
 - The layout now uses `createShooterLaneRight(...)`,
   `createTopArchLanes(...)`, `createInlaneOutlanePair(...)`, and
-  `createSlingshotPair(...)`, plus `createSlingshotTriangleGuides(...)`, so the
-  launcher feed, top rollover bank, lower lanes, lower slings, and triangular
-  sling closure rails are generated from semantic primitives rather than
+  `createSlingshotPair(...)` so the launcher feed, top rollover bank, lower
+  lanes, and lower slings are generated from semantic primitives rather than
   hand-placed guide fragments.

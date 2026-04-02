@@ -6,7 +6,6 @@ import {
   createInlaneOutlanePair,
   createShooterLaneRight,
   createSlingshotPair,
-  createSlingshotTriangleGuides,
   createTopArchLanes,
   offsetLayoutPoint,
 } from './layout-primitives';
@@ -73,17 +72,6 @@ const starlightSlingshots = createSlingshotPair({
   rightAngle: Math.PI - 0.395,
   score: 10,
   strength: 560,
-});
-
-const starlightSlingshotTriangles = createSlingshotTriangleGuides({
-  leftCenter: offsetLayoutPoint(anchorPoint('left-flipper-pivot'), 22, -102),
-  rightCenter: offsetLayoutPoint(anchorPoint('right-flipper-pivot'), -22, -102),
-  width: 148,
-  leftAngle: 0.395,
-  rightAngle: Math.PI - 0.395,
-  apexDistance: 88,
-  endpointInset: 24,
-  thickness: 14,
 });
 
 export const starlightEmLayout: BoardLayoutDefinition = {
@@ -223,7 +211,6 @@ export const starlightEmLayout: BoardLayoutDefinition = {
   guides: [
     ...starlightLeftLowerLanes.guides,
     ...starlightRightLowerLanes.guides,
-    ...starlightSlingshotTriangles.guides,
     {
       start: absolutePoint(132, 872),
       end: absolutePoint(116, 644),

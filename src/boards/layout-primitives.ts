@@ -464,46 +464,6 @@ export const createSlingshotPair = (options: {
   ],
 });
 
-export interface SlingshotTriangleGuidesLayout {
-  guides: GuideLayoutDefinition[];
-}
-
-export const createSlingshotTriangleGuides = (options: {
-  leftCenter: LayoutPoint;
-  rightCenter: LayoutPoint;
-  width: number;
-  leftAngle: number;
-  rightAngle: number;
-  apexDistance: number;
-  apexShift?: number;
-  endpointInset?: number;
-  thickness?: number;
-  material?: SurfaceMaterialName;
-}): SlingshotTriangleGuidesLayout => ({
-  guides: [
-    ...createSlingshotTriangleGuidesForSide(
-      options.leftCenter,
-      options.width,
-      options.leftAngle,
-      options.apexDistance,
-      options.apexShift ?? 0,
-      options.endpointInset ?? 0,
-      options.thickness ?? 14,
-      options.material ?? 'metalGuide',
-    ),
-    ...createSlingshotTriangleGuidesForSide(
-      options.rightCenter,
-      options.width,
-      options.rightAngle,
-      options.apexDistance,
-      options.apexShift ?? 0,
-      options.endpointInset ?? 0,
-      options.thickness ?? 14,
-      options.material ?? 'metalGuide',
-    ),
-  ],
-});
-
 const createFlipperLayout = (
   side: FlipperSide,
   x: number,
@@ -530,64 +490,6 @@ const createFlipperLayout = (
       : Math.PI - options.activeAngleOffset,
   material: options.material ?? 'flipperRubber',
 });
-
-const createSlingshotTriangleGuidesForSide = (
-  center: LayoutPoint,
-  width: number,
-  angle: number,
-  apexDistance: number,
-  apexShift: number,
-  endpointInset: number,
-  thickness: number,
-  material: SurfaceMaterialName,
-): GuideLayoutDefinition[] => {
-  const halfWidth = Math.max(12, width / 2 - endpointInset);
-  const tangent = {
-    x: Math.cos(angle),
-    y: Math.sin(angle),
-  };
-  const firstNormal = {
-    x: -Math.sin(angle),
-    y: Math.cos(angle),
-  };
-  const secondNormal = {
-    x: Math.sin(angle),
-    y: -Math.cos(angle),
-  };
-  const upperNormal = firstNormal.y <= secondNormal.y ? firstNormal : secondNormal;
-  const start = offsetLayoutPoint(
-    center,
-    -tangent.x * halfWidth,
-    -tangent.y * halfWidth,
-  );
-  const end = offsetLayoutPoint(
-    center,
-    tangent.x * halfWidth,
-    tangent.y * halfWidth,
-  );
-  const apex = offsetLayoutPoint(
-    center,
-    upperNormal.x * apexDistance + tangent.x * apexShift,
-    upperNormal.y * apexDistance + tangent.y * apexShift,
-  );
-
-  return [
-    {
-      start,
-      end: apex,
-      thickness,
-      material,
-      plane: 'playfield',
-    },
-    {
-      start: apex,
-      end,
-      thickness,
-      material,
-      plane: 'playfield',
-    },
-  ];
-};
 
 const normalizeOffset = (
   offset: { x?: number; y?: number } | undefined,
