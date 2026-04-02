@@ -44,7 +44,7 @@ import { GameAudio } from './audio/game-audio';
 import { GameLoop } from './game/game-loop';
 import { createInitialGameState } from './game/game-state';
 import { validateRulesScript } from './game/rules-engine';
-import { KeyboardInput } from './input/keyboard-input';
+import { PlayInput, type InputSource } from './input/keyboard-input';
 import { BOARD_THEMES } from './render/board-themes';
 import { CanvasRenderer } from './render/canvas-renderer';
 import type { BoardDefinition, Point } from './types/board-definition';
@@ -72,7 +72,7 @@ interface AppState {
   draftPosition: Point | null;
   snapToGrid: boolean;
   loop: GameLoop | null;
-  input: KeyboardInput | null;
+  input: InputSource | null;
 }
 
 const queryRequired = <T extends Element>(selector: string): T => {
@@ -793,7 +793,7 @@ function bootPlayRoute(): void {
   restartStandalonePlay();
 
   modeCopy.textContent =
-    'Hold and release Arrow Up to work the plunger. Left Shift / Left Arrow and Right Shift / Right Arrow control the flippers. Z, /, and Space nudge the table.';
+    'Keyboard and touch controls are both live. On touch, hold the lower left or right playfield to flip, swipe left/right/up to nudge, and swipe down on the right side to plunge.';
   debugLinkEditor.href = '/editor';
   debugLinkEditor.textContent = 'Open editor';
   debugLinkPlay.href = '/';
@@ -1241,7 +1241,7 @@ function syncModeCopy(): void {
   if (state.mode === 'play') {
     modeTitle.textContent = 'Playing current table';
     modeCopy.textContent =
-      'Use Arrow Up to pull and release the plunger, Left Shift / Left Arrow plus Right Shift / Right Arrow to flip, and Z, /, or Space to nudge. Press Play Test again or Escape to return to editing.';
+      'Use Arrow Up to pull and release the plunger, Left Shift / Left Arrow plus Right Shift / Right Arrow to flip, and Z, /, or Space to nudge. On touch, hold the lower left or right playfield to flip, swipe left/right/up to nudge, and swipe down on the right side to plunge. Press Play Test again or Escape to return to editing.';
     playToggleButton.textContent = 'Back to editor';
     playToggleButton.classList.add('accent-button');
     return;
@@ -1356,7 +1356,7 @@ function startPlayMode(): void {
   stopPlayMode();
 
   const board = cloneBoardDefinition(getActiveTable().board);
-  const input = new KeyboardInput();
+  const input = new PlayInput(canvas);
   const loop = new GameLoop(
     createInitialGameState(board),
     board,
@@ -1663,7 +1663,7 @@ function restartStandalonePlay(): void {
   state.loop?.stop();
 
   const board = cloneBoardDefinition(getActiveTable().board);
-  const input = new KeyboardInput();
+  const input = new PlayInput(canvas);
   const loop = new GameLoop(
     createInitialGameState(board),
     board,

@@ -1,4 +1,4 @@
-import type { InputState, KeyboardInput } from '../input/keyboard-input';
+import type { InputSource, InputState } from '../input/keyboard-input';
 import type { BoardDefinition } from '../types/board-definition';
 import type { CanvasRenderer } from '../render/canvas-renderer';
 import type { GameAudio } from '../audio/game-audio';
@@ -18,7 +18,7 @@ export class GameLoop {
   constructor(
     private state: GameState,
     private readonly board: BoardDefinition,
-    private readonly input: KeyboardInput,
+    private readonly input: InputSource,
     private readonly renderer: CanvasRenderer,
     private readonly audio?: GameAudio,
   ) {
@@ -141,8 +141,8 @@ export const getStatusLabel = (
       return 'Release Arrow Up and the plunger will strike the ball.';
     }
 
-    return 'Hold Arrow Up to pull back the plunger. Release to launch.';
+    return 'Hold Arrow Up or swipe down on the right side to pull back the plunger. Release to launch.';
   }
 
-  return 'Left Shift / Left Arrow and Right Shift / Right Arrow flip. Z, /, and Space nudge. Arrow Up controls the plunger.';
+  return 'Left Shift / Left Arrow and Right Shift / Right Arrow flip. On touch, hold the lower left or right playfield to flip, swipe left/right/up to nudge, and swipe down on the right side to plunge.';
 };

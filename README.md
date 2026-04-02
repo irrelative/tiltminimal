@@ -44,6 +44,8 @@ Use the `Makefile` entrypoints:
 * [docs/layout-playability-spec.md](docs/layout-playability-spec.md) defines
   the semantic shooter-lane and top-arch primitives plus the current
   playability validation guarantees for DSL-authored tables
+* [docs/mobile-controls-spec.md](docs/mobile-controls-spec.md) defines the
+  touch control scheme for playing on phones and tablets
 * [docs/starlight-em-spec.md](docs/starlight-em-spec.md) defines the behavior
   and layout goals for the built-in 1970s EM-style table
 
@@ -60,3 +62,7 @@ Use the `Makefile` entrypoints:
 * `Z`: left nudge
 * `/`: right nudge
 * `Space`: forward/up nudge
+* Touch lower-left playfield: hold left flipper
+* Touch lower-right playfield: hold right flipper
+* Touch swipe left/right/up on the playfield: nudge
+* Touch swipe down on the right side: plunger pull/release
