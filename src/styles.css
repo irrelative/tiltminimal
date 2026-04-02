@@ -1,4 +1,5 @@
 :root {
+  --font-sans: 'Avenir Next', Avenir, Futura, 'Trebuchet MS', sans-serif;
   --bg-top: #09131f;
   --bg-bottom: #03070d;
   --panel: rgba(10, 21, 31, 0.82);
@@ -14,7 +15,7 @@
   --radius: 22px;
   --stage-padding: clamp(12px, 1.4vw, 22px);
   color: var(--text);
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--font-sans);
   background:
     radial-gradient(
       circle at top left,

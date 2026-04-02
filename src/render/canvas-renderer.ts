@@ -29,6 +29,7 @@ import type {
 } from '../types/board-definition';
 import type { InputState } from '../input/keyboard-input';
 const EDITOR_INK = '#22304a';
+const UI_FONT_FAMILY = "'Avenir Next', Avenir, Futura, 'Trebuchet MS', sans-serif";
 
 interface EditorRenderOptions {
   showGrid?: boolean;
@@ -211,7 +212,7 @@ export class CanvasRenderer {
       context.fill();
 
       if (state) {
-        context.font = '600 20px Georgia, serif';
+        context.font = `600 20px ${UI_FONT_FAMILY}`;
         context.textAlign = 'center';
         context.fillStyle = theme.bumperText;
         context.fillText(String(bumper.score), bumper.x, bumper.y + 8);
@@ -533,7 +534,7 @@ export class CanvasRenderer {
   ): void {
     const theme = getBoardTheme(board.themeId);
     context.fillStyle = theme.hudText;
-    context.font = '600 28px Georgia, serif';
+    context.font = `600 28px ${UI_FONT_FAMILY}`;
     context.fillText(board.name, 48, 64);
     context.fillText(`Score ${state.score}`, 48, 104);
 
@@ -541,7 +542,7 @@ export class CanvasRenderer {
       this.drawLaunchMeter(context, board, state);
     }
 
-    context.font = '400 20px Georgia, serif';
+    context.font = `400 20px ${UI_FONT_FAMILY}`;
     context.fillStyle = theme.hudMuted;
     context.fillText(
       getStatusLabel(state, input, board),
@@ -572,7 +573,7 @@ export class CanvasRenderer {
     context.lineWidth = 2;
     context.strokeRect(x, y, meterWidth, meterHeight);
 
-    context.font = '400 16px Georgia, serif';
+    context.font = `400 16px ${UI_FONT_FAMILY}`;
     context.fillStyle = theme.hudText;
     context.fillText('Plunger', x, y - 10);
   }
@@ -992,9 +993,9 @@ export class CanvasRenderer {
   ): void {
     const theme = getBoardTheme(board.themeId);
     context.fillStyle = theme.hudText;
-    context.font = '600 28px Georgia, serif';
+    context.font = `600 28px ${UI_FONT_FAMILY}`;
     context.fillText(`${board.name} Editor`, 48, 64);
-    context.font = '400 18px Georgia, serif';
+    context.font = `400 18px ${UI_FONT_FAMILY}`;
     context.fillStyle = theme.hudMuted;
     context.fillText(
       'Drag elements to reposition. Delete removes the selection.',
