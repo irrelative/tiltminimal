@@ -39,6 +39,14 @@ Vitest is configured for unit tests. Add tests under `tests/` with names such as
 
 Test names should describe behavior, for example: `loads bonus lane from board definition` or `applies flipper impulse once per input`.
 
+## Documentation Guidelines
+Keep documentation current with the codebase.
+
+- When behavior, architecture, workflows, controls, configuration, or authoring flows change, update the relevant markdown docs in `README.md` and/or `docs/` as part of the same logical change.
+- Do not leave documentation updates for a follow-up unless the user explicitly asks for that.
+- For medium or large functionality changes, add or update a spec-style markdown doc in `docs/` that defines the expected behavior, constraints, and important implementation details.
+- Prefer adding a focused doc in `docs/` over burying substantial behavioral definitions only in code comments or commit messages.
+
 ## Commit Guidelines
 There is no existing commit history yet, so use short imperative commit messages such as `Add board schema` or `Separate renderer from game state`. Keep each commit scoped to one logical change so history stays easy to review and revert.
 
