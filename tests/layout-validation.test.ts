@@ -97,4 +97,49 @@ describe('validateCompiledBoardLayout', () => {
       ]),
     );
   });
+
+  it('reports an error when a playfield guide intrudes into a flipper keepout zone', () => {
+    const board = createBlankTable('Flipper Keepout');
+    board.guides = [
+      {
+        kind: 'line',
+        start: { x: 215, y: 1088 },
+        end: { x: 360, y: 1148 },
+        thickness: 20,
+        material: 'metalGuide',
+        plane: 'playfield',
+      },
+    ];
+
+    const diagnostics = validateCompiledBoardLayout(board);
+
+    expect(diagnostics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          severity: 'error',
+          code: 'flipper-keepout',
+        }),
+      ]),
+    );
+  });
+
+  it('allows raised guides to pass above the flipper keepout zone', () => {
+    const board = createBlankTable('Raised Return Rail');
+    board.guides = [
+      {
+        kind: 'line',
+        start: { x: 215, y: 1088 },
+        end: { x: 360, y: 1148 },
+        thickness: 20,
+        material: 'metalGuide',
+        plane: 'raised',
+      },
+    ];
+
+    const diagnostics = validateCompiledBoardLayout(board);
+
+    expect(
+      diagnostics.some((diagnostic) => diagnostic.code === 'flipper-keepout'),
+    ).toBe(false);
+  });
 });

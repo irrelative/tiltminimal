@@ -164,6 +164,7 @@ const resolveGuideDefinition = (
       endAngle: guide.endAngle,
       thickness: guide.thickness,
       material: guide.material,
+      plane: guide.plane,
     };
 
     return arcGuide;
@@ -175,5 +176,6 @@ const resolveGuideDefinition = (
     end: resolveLayoutPoint(guide.end, context),
     thickness: guide.thickness,
     material: guide.material,
+    plane: guide.plane,
   };
 };

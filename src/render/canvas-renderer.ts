@@ -99,7 +99,7 @@ export class CanvasRenderer {
     state?: GameState,
   ): void {
     this.drawBackground(context, board);
-    this.drawGuides(context, board);
+    this.drawGuides(context, board, 'playfield');
     this.drawPlunger(context, board, state);
     this.drawPosts(context, board);
     this.drawBumpers(context, board, state);
@@ -119,6 +119,8 @@ export class CanvasRenderer {
           : flipper.restingAngle,
       );
     }
+
+    this.drawGuides(context, board, 'raised');
   }
 
   private drawBackground(
@@ -148,13 +150,25 @@ export class CanvasRenderer {
   private drawGuides(
     context: CanvasRenderingContext2D,
     board: BoardDefinition,
+    plane: 'playfield' | 'raised',
   ): void {
     const theme = getBoardTheme(board.themeId);
     for (const guide of board.guides) {
+      if ((guide.plane ?? 'playfield') !== plane) {
+        continue;
+      }
+
       const material = getSurfaceMaterial(
         guide.material,
         board.surfaceMaterials,
       );
+
+      context.save();
+      if (plane === 'raised') {
+        context.shadowColor = 'rgba(12, 18, 28, 0.24)';
+        context.shadowBlur = 10;
+        context.shadowOffsetY = -2;
+      }
 
       context.strokeStyle =
         material.name === 'rubberPost'
@@ -170,11 +184,15 @@ export class CanvasRenderer {
         context.lineTo(guide.end.x, guide.end.y);
       }
       context.stroke();
+      context.restore();
 
       context.strokeStyle =
         material.name === 'rubberPost'
           ? theme.guideRubberSecondary
           : theme.guideMetalSecondary;
+      if (plane === 'raised') {
+        context.save();
+      }
       context.lineWidth = Math.max(guide.thickness - 8, 4);
       if (isArcGuide(guide)) {
         this.traceArcGuide(context, guide);
@@ -184,6 +202,9 @@ export class CanvasRenderer {
         context.lineTo(guide.end.x, guide.end.y);
       }
       context.stroke();
+      if (plane === 'raised') {
+        context.restore();
+      }
     }
   }
 

@@ -27,6 +27,9 @@ Major features:
 - classic inlane / outlane lower guides
 - a right shooter lane that full-plunges into the upper field
 - a 4-lane top arch with open entries rather than sealed rollover circles
+- lower inlane/outlane packages built relative to the flipper pivots
+- raised lower return rails so the return hardware can visually cross the
+  flipper region without being modeled as a flat playfield blocker
 - upper left and upper right lane loops feeding back to the pops and saucer
 
 ## Rules
@@ -57,6 +60,7 @@ This table should feel closer to a reel-score electromechanical game:
 - Compiled built-in board: `src/boards/starlight-em-table.ts`
 - Rules script: `src/boards/starlight-em-rules-script.ts`
 - Registered in: `src/boards/table-library.ts`
-- The layout now uses `createShooterLaneRight(...)` and `createTopArchLanes(...)`
-  so the launcher feed and top rollover bank are generated from semantic
+- The layout now uses `createShooterLaneRight(...)`,
+  `createTopArchLanes(...)`, and `createInlaneOutlanePair(...)` so the launcher
+  feed, top rollover bank, and lower lanes are generated from semantic
   primitives rather than hand-placed guide fragments.

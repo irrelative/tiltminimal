@@ -18,6 +18,7 @@ export const normalizeGuide = (guide: GuideDefinition): GuideDefinition =>
         endAngle: guide.endAngle,
         thickness: guide.thickness,
         material: guide.material,
+        plane: guide.plane ?? 'playfield',
       }
     : {
         kind: 'line',
@@ -25,6 +26,7 @@ export const normalizeGuide = (guide: GuideDefinition): GuideDefinition =>
         end: { ...guide.end },
         thickness: guide.thickness,
         material: guide.material,
+        plane: guide.plane ?? 'playfield',
       };
 
 export const cloneGuide = (guide: GuideDefinition): GuideDefinition =>

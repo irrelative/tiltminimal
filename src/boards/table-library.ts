@@ -218,6 +218,7 @@ export const createDefaultGuide = (x: number, y: number): GuideDefinition => ({
   end: { x: x + 60, y },
   thickness: 18,
   material: 'metalGuide',
+  plane: 'playfield',
 });
 
 export const createDefaultCurvedGuide = (
@@ -231,6 +232,7 @@ export const createDefaultCurvedGuide = (
   endAngle: Math.PI * 1.85,
   thickness: 18,
   material: 'metalGuide',
+  plane: 'playfield',
 });
 
 export const createDefaultStandupTarget = (

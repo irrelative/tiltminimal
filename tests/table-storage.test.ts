@@ -187,6 +187,16 @@ describe('table storage', () => {
 
   it('exports sparse table JSON suitable for copy and import', () => {
     const board = createBlankTable('Export Table');
+    board.guides = [
+      {
+        kind: 'line',
+        start: { x: 120, y: 220 },
+        end: { x: 320, y: 220 },
+        thickness: 18,
+        material: 'metalGuide',
+        plane: 'raised',
+      },
+    ];
     const exported = exportBoardDefinition(board);
 
     expect(exported.name).toBe('Export Table');
@@ -195,6 +205,7 @@ describe('table storage', () => {
     expect(exported.rulesScript).toBeUndefined();
     expect(exported.flippers).toHaveLength(2);
     expect(exported.themeId).toBeUndefined();
+    expect(exported.guides?.[0]).toMatchObject({ plane: 'raised' });
   });
 
   it('includes custom rule scripts in exported table JSON', () => {

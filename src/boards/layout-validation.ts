@@ -1,3 +1,9 @@
+import { getDistanceToFlipperSurface } from '../game/flipper-geometry';
+import {
+  getArcGuidePoint,
+  getArcGuideSweep,
+  isArcGuide,
+} from '../game/guide-geometry';
 import { getGuideDistance } from '../game/guide-geometry';
 import {
   getPlungerGuideTopY,
@@ -135,6 +141,7 @@ export const validateCompiledBoardLayout = (
 
   validateLaunchCorridor(board, diagnostics);
   validateTopRolloverReachability(board, diagnostics);
+  validateFlipperKeepouts(board, diagnostics);
 
   return diagnostics;
 };
@@ -256,4 +263,79 @@ const pathBlockedByGuide = (
   }
 
   return false;
+};
+
+const validateFlipperKeepouts = (
+  board: BoardDefinition,
+  diagnostics: LayoutDiagnostic[],
+): void => {
+  board.flippers.forEach((flipper, flipperIndex) => {
+    for (const [guideIndex, guide] of board.guides.entries()) {
+      if ((guide.plane ?? 'playfield') === 'raised') {
+        continue;
+      }
+
+      if (guide.material === 'rubberPost') {
+        continue;
+      }
+
+      const threshold = guide.thickness / 2 + 18;
+      const penetratesKeepout = sampleGuidePoints(guide, 14).some((point) =>
+        getMinFlipperSweepDistance(point, flipper) < threshold,
+      );
+
+      if (!penetratesKeepout) {
+        continue;
+      }
+
+      diagnostics.push({
+        severity: 'error',
+        code: 'flipper-keepout',
+        message: `Guide ${guideIndex + 1} intrudes into flipper ${flipperIndex + 1}'s swing and feed area.`,
+      });
+    }
+  });
+};
+
+const sampleGuidePoints = (
+  guide: BoardDefinition['guides'][number],
+  sampleCount: number,
+): Point[] => {
+  if (isArcGuide(guide)) {
+    const sweep = getArcGuideSweep(guide);
+
+    return Array.from({ length: sampleCount + 1 }, (_, index) => {
+      const ratio = sampleCount > 0 ? index / sampleCount : 0;
+      return getArcGuidePoint(guide, guide.startAngle + sweep * ratio);
+    });
+  }
+
+  return Array.from({ length: sampleCount + 1 }, (_, index) => {
+    const ratio = sampleCount > 0 ? index / sampleCount : 0;
+
+    return {
+      x: guide.start.x + (guide.end.x - guide.start.x) * ratio,
+      y: guide.start.y + (guide.end.y - guide.start.y) * ratio,
+    };
+  });
+};
+
+const getMinFlipperSweepDistance = (
+  point: Point,
+  flipper: BoardDefinition['flippers'][number],
+): number => {
+  const sampleCount = 6;
+  let minDistance = Number.POSITIVE_INFINITY;
+
+  for (let index = 0; index <= sampleCount; index += 1) {
+    const ratio = index / sampleCount;
+    const angle =
+      flipper.restingAngle + (flipper.activeAngle - flipper.restingAngle) * ratio;
+    minDistance = Math.min(
+      minDistance,
+      getDistanceToFlipperSurface(point, flipper, angle),
+    );
+  }
+
+  return minDistance;
 };

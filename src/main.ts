@@ -23,6 +23,7 @@ import {
   moveGuideHandle,
   moveSelection,
   rotateSelection,
+  updateSelectedGuidePlane,
   updateSelectedNumericField,
 } from './editor/table-editor';
 import type {
@@ -300,6 +301,30 @@ function bootEditorRoute(): void {
         state.selection,
         field,
         normalizedValue,
+      ),
+      true,
+    );
+    renderApp();
+  });
+
+  selectionFields.addEventListener('change', (event) => {
+    const target = event.target;
+
+    if (!(target instanceof HTMLSelectElement)) {
+      return;
+    }
+
+    const field = target.dataset.field;
+
+    if (field !== 'plane' || state.selection.kind !== 'guide') {
+      return;
+    }
+
+    replaceActiveBoard(
+      updateSelectedGuidePlane(
+        getActiveTable().board,
+        state.selection,
+        target.value === 'raised' ? 'raised' : 'playfield',
       ),
       true,
     );
@@ -1170,6 +1195,10 @@ function syncSelectionPanel(): void {
           radiansToDegrees(guide.endAngle),
         ),
         createNumericField('thickness', 'Thickness', guide.thickness),
+        createSelectField('plane', 'Plane', guide.plane ?? 'playfield', [
+          { value: 'playfield', label: 'Playfield' },
+          { value: 'raised', label: 'Raised' },
+        ]),
       );
     } else {
       selectionFields.append(
@@ -1178,6 +1207,10 @@ function syncSelectionPanel(): void {
         createNumericField('endX', 'End X', guide.end.x),
         createNumericField('endY', 'End Y', guide.end.y),
         createNumericField('thickness', 'Thickness', guide.thickness),
+        createSelectField('plane', 'Plane', guide.plane ?? 'playfield', [
+          { value: 'playfield', label: 'Playfield' },
+          { value: 'raised', label: 'Raised' },
+        ]),
       );
     }
     return;
@@ -1582,6 +1615,31 @@ function createReadOnlyField(label: string, value: string): HTMLElement {
   valueText.textContent = value;
   wrapper.append(labelText, valueText);
 
+  return wrapper;
+}
+
+function createSelectField(
+  field: string,
+  label: string,
+  value: string,
+  options: Array<{ value: string; label: string }>,
+): HTMLElement {
+  const wrapper = document.createElement('label');
+  wrapper.className = 'field';
+  const labelText = document.createElement('span');
+  labelText.textContent = label;
+  const select = document.createElement('select');
+  select.dataset.field = field;
+
+  for (const option of options) {
+    const optionElement = document.createElement('option');
+    optionElement.value = option.value;
+    optionElement.textContent = option.label;
+    optionElement.selected = option.value === value;
+    select.append(optionElement);
+  }
+
+  wrapper.append(labelText, select);
   return wrapper;
 }
 

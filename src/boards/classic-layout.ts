@@ -81,12 +81,14 @@ export const classicTableLayout: BoardLayoutDefinition = {
       end: absolutePoint(170, 1260),
       thickness: 14,
       material: 'metalGuide',
+      plane: 'raised',
     },
     {
       start: absolutePoint(250, 1000),
       end: absolutePoint(214, 1284),
       thickness: 18,
       material: 'metalGuide',
+      plane: 'raised',
     },
     {
       start: absolutePoint(220, 1088),
@@ -99,12 +101,14 @@ export const classicTableLayout: BoardLayoutDefinition = {
       end: absolutePoint(730, 1260),
       thickness: 14,
       material: 'metalGuide',
+      plane: 'raised',
     },
     {
       start: absolutePoint(650, 1000),
       end: absolutePoint(686, 1284),
       thickness: 18,
       material: 'metalGuide',
+      plane: 'raised',
     },
     {
       start: absolutePoint(680, 1088),

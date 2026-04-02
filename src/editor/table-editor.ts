@@ -28,6 +28,7 @@ import type {
   BoardDefinition,
   FlipperSide,
   GuideDefinition,
+  GuidePlane,
   Point,
   PostDefinition,
 } from '../types/board-definition';
@@ -849,6 +850,23 @@ export const updateSelectedNumericField = (
   }
 
   return board;
+};
+
+export const updateSelectedGuidePlane = (
+  board: BoardDefinition,
+  selection: EditorSelection,
+  plane: GuidePlane,
+): BoardDefinition => {
+  if (selection.kind !== 'guide' || selection.index === undefined) {
+    return board;
+  }
+
+  return {
+    ...board,
+    guides: board.guides.map((guide, index) =>
+      index === selection.index ? { ...guide, plane } : guide,
+    ),
+  };
 };
 
 export const hitTestGuideHandle = (

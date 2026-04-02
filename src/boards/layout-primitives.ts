@@ -3,11 +3,13 @@ import type {
   FlipperLayoutDefinition,
   GuideLayoutDefinition,
   LayoutPoint,
+  PostLayoutDefinition,
   RolloverLayoutDefinition,
   StandupTargetLayoutDefinition,
 } from './layout-schema';
 import type {
   FlipperSide,
+  GuidePlane,
   PlungerDefinition,
   SurfaceMaterialName,
 } from '../types/board-definition';
@@ -336,6 +338,89 @@ export const createTopArchLanes = (options: {
     guides,
   };
 };
+
+export interface InlaneOutlanePairLayout {
+  guides: GuideLayoutDefinition[];
+  posts: PostLayoutDefinition[];
+}
+
+export const createInlaneOutlanePair = (options: {
+  side: FlipperSide;
+  flipperPivot: LayoutPoint;
+  outerGuideStartOffset: { x: number; y: number };
+  outerGuideEndOffset: { x: number; y: number };
+  innerGuideStartOffset: { x: number; y: number };
+  innerGuideEndOffset: { x: number; y: number };
+  slingGuideStartOffset: { x: number; y: number };
+  slingGuideEndOffset: { x: number; y: number };
+  entryPostOffsets?: Array<{
+    x: number;
+    y: number;
+    radius: number;
+    material?: SurfaceMaterialName;
+  }>;
+  outerPlane?: GuidePlane;
+  innerPlane?: GuidePlane;
+  outerMaterial?: SurfaceMaterialName;
+  innerMaterial?: SurfaceMaterialName;
+  slingMaterial?: SurfaceMaterialName;
+  outerThickness?: number;
+  innerThickness?: number;
+  slingThickness?: number;
+}): InlaneOutlanePairLayout => ({
+  guides: [
+    {
+      start: offsetLayoutPoint(
+        options.flipperPivot,
+        options.outerGuideStartOffset.x,
+        options.outerGuideStartOffset.y,
+      ),
+      end: offsetLayoutPoint(
+        options.flipperPivot,
+        options.outerGuideEndOffset.x,
+        options.outerGuideEndOffset.y,
+      ),
+      thickness: options.outerThickness ?? 14,
+      material: options.outerMaterial ?? 'metalGuide',
+      plane: options.outerPlane ?? 'raised',
+    },
+    {
+      start: offsetLayoutPoint(
+        options.flipperPivot,
+        options.innerGuideStartOffset.x,
+        options.innerGuideStartOffset.y,
+      ),
+      end: offsetLayoutPoint(
+        options.flipperPivot,
+        options.innerGuideEndOffset.x,
+        options.innerGuideEndOffset.y,
+      ),
+      thickness: options.innerThickness ?? 18,
+      material: options.innerMaterial ?? 'metalGuide',
+      plane: options.innerPlane ?? 'raised',
+    },
+    {
+      start: offsetLayoutPoint(
+        options.flipperPivot,
+        options.slingGuideStartOffset.x,
+        options.slingGuideStartOffset.y,
+      ),
+      end: offsetLayoutPoint(
+        options.flipperPivot,
+        options.slingGuideEndOffset.x,
+        options.slingGuideEndOffset.y,
+      ),
+      thickness: options.slingThickness ?? 20,
+      material: options.slingMaterial ?? 'rubberPost',
+      plane: 'playfield',
+    },
+  ],
+  posts: (options.entryPostOffsets ?? []).map((post) => ({
+    position: offsetLayoutPoint(options.flipperPivot, post.x, post.y),
+    radius: post.radius,
+    material: post.material ?? 'metalGuide',
+  })),
+});
 
 const createFlipperLayout = (
   side: FlipperSide,

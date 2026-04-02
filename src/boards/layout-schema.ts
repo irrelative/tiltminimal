@@ -4,6 +4,7 @@ import type {
   BoardThemeId,
   DropTargetDefinition,
   FlipperDefinition,
+  GuidePlane,
   GuideDefinition,
   LegacyLaunchPhysicsDefinition,
   PhysicsDefinition,
@@ -89,6 +90,7 @@ export interface LineGuideLayoutDefinition {
   end: LayoutPoint;
   thickness: number;
   material: SurfaceMaterialName;
+  plane?: GuidePlane;
 }
 
 export interface ArcGuideLayoutDefinition {
@@ -99,6 +101,7 @@ export interface ArcGuideLayoutDefinition {
   endAngle: number;
   thickness: number;
   material: SurfaceMaterialName;
+  plane?: GuidePlane;
 }
 
 export type GuideLayoutDefinition =

@@ -46,6 +46,7 @@ describe('starlightEmTable', () => {
 
     expect(errorCodes).not.toContain('launcher-blocked');
     expect(errorCodes).not.toContain('rollover-unreachable');
+    expect(errorCodes).not.toContain('flipper-keepout');
   });
 
   it('can full-plunge the ball into the upper playfield', () => {
@@ -71,6 +72,14 @@ describe('starlightEmTable', () => {
 
     expect(initialLaunch.velocity.y).toBeLessThan(-1600);
     expect(minY).toBeLessThan(280);
+  });
+
+  it('uses raised lower return guides instead of playfield-level flipper blockers', () => {
+    const raisedGuides = starlightEmTable.guides.filter(
+      (guide) => guide.plane === 'raised',
+    );
+
+    expect(raisedGuides.length).toBeGreaterThanOrEqual(4);
   });
 });
 

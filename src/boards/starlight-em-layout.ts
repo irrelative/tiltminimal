@@ -3,6 +3,7 @@ import {
   absolutePoint,
   anchorPoint,
   createFlipperPair,
+  createInlaneOutlanePair,
   createShooterLaneRight,
   createTopArchLanes,
   offsetLayoutPoint,
@@ -35,6 +36,36 @@ const starlightTopArch = createTopArchLanes({
   roofInset: 66,
 });
 
+const starlightLeftLowerLanes = createInlaneOutlanePair({
+  side: 'left',
+  flipperPivot: anchorPoint('left-flipper-pivot'),
+  outerGuideStartOffset: { x: -176, y: -38 },
+  outerGuideEndOffset: { x: -120, y: -322 },
+  innerGuideStartOffset: { x: -56, y: -216 },
+  innerGuideEndOffset: { x: -84, y: 48 },
+  slingGuideStartOffset: { x: -50, y: -132 },
+  slingGuideEndOffset: { x: 94, y: -72 },
+  entryPostOffsets: [
+    { x: -72, y: -200, radius: 18, material: 'rubberPost' },
+    { x: -114, y: -312, radius: 16, material: 'metalGuide' },
+  ],
+});
+
+const starlightRightLowerLanes = createInlaneOutlanePair({
+  side: 'right',
+  flipperPivot: anchorPoint('right-flipper-pivot'),
+  outerGuideStartOffset: { x: 216, y: -38 },
+  outerGuideEndOffset: { x: 182, y: -322 },
+  innerGuideStartOffset: { x: 56, y: -216 },
+  innerGuideEndOffset: { x: 84, y: 48 },
+  slingGuideStartOffset: { x: 50, y: -132 },
+  slingGuideEndOffset: { x: -94, y: -72 },
+  entryPostOffsets: [
+    { x: 72, y: -200, radius: 18, material: 'rubberPost' },
+    { x: 54, y: -312, radius: 16, material: 'metalGuide' },
+  ],
+});
+
 export const starlightEmLayout: BoardLayoutDefinition = {
   name: 'Starlight EM',
   themeId: 'sunburst',
@@ -65,10 +96,8 @@ export const starlightEmLayout: BoardLayoutDefinition = {
   ],
   posts: [
     { position: absolutePoint(450, 1140), radius: 18, material: 'rubberPost' },
-    { position: absolutePoint(198, 1020), radius: 18, material: 'rubberPost' },
-    { position: absolutePoint(702, 1020), radius: 18, material: 'rubberPost' },
-    { position: absolutePoint(156, 908), radius: 16, material: 'metalGuide' },
-    { position: absolutePoint(684, 908), radius: 16, material: 'metalGuide' },
+    ...starlightLeftLowerLanes.posts,
+    ...starlightRightLowerLanes.posts,
   ],
   bumpers: [
     {
@@ -171,42 +200,8 @@ export const starlightEmLayout: BoardLayoutDefinition = {
   ],
   rollovers: starlightTopArch.rollovers,
   guides: [
-    {
-      start: absolutePoint(94, 1182),
-      end: absolutePoint(150, 898),
-      thickness: 14,
-      material: 'metalGuide',
-    },
-    {
-      start: absolutePoint(214, 1004),
-      end: absolutePoint(186, 1268),
-      thickness: 18,
-      material: 'metalGuide',
-    },
-    {
-      start: absolutePoint(220, 1088),
-      end: absolutePoint(364, 1148),
-      thickness: 20,
-      material: 'rubberPost',
-    },
-    {
-      start: absolutePoint(846, 1182),
-      end: absolutePoint(812, 898),
-      thickness: 14,
-      material: 'metalGuide',
-    },
-    {
-      start: absolutePoint(686, 1004),
-      end: absolutePoint(714, 1268),
-      thickness: 18,
-      material: 'metalGuide',
-    },
-    {
-      start: absolutePoint(680, 1088),
-      end: absolutePoint(536, 1148),
-      thickness: 20,
-      material: 'rubberPost',
-    },
+    ...starlightLeftLowerLanes.guides,
+    ...starlightRightLowerLanes.guides,
     {
       start: absolutePoint(132, 872),
       end: absolutePoint(116, 644),

@@ -5,6 +5,7 @@ import {
   absolutePoint,
   anchorPoint,
   createFlipperPair,
+  createInlaneOutlanePair,
   createPopTriangle,
   createShooterLaneRight,
   createTopArchLanes,
@@ -147,5 +148,49 @@ describe('compileBoardLayout', () => {
     expect(result.board.guides.length).toBeGreaterThanOrEqual(7);
     expect(result.board.plunger.guideLength).toBe(620);
     expect(result.board.launchPosition).toEqual({ x: 770, y: 1180 });
+  });
+
+  it('expands lower-lane primitives with raised return guides', () => {
+    const lowerLanes = createInlaneOutlanePair({
+      side: 'left',
+      flipperPivot: absolutePoint(270, 1220),
+      outerGuideStartOffset: { x: -176, y: -38 },
+      outerGuideEndOffset: { x: -120, y: -322 },
+      innerGuideStartOffset: { x: -56, y: -216 },
+      innerGuideEndOffset: { x: -84, y: 48 },
+      slingGuideStartOffset: { x: -50, y: -132 },
+      slingGuideEndOffset: { x: 94, y: -72 },
+      entryPostOffsets: [{ x: -72, y: -200, radius: 18, material: 'rubberPost' }],
+    });
+    const layout: BoardLayoutDefinition = {
+      name: 'Lower Lanes Primitive Test',
+      width: 900,
+      height: 1400,
+      drainY: 1425,
+      launchPosition: absolutePoint(770, 1180),
+      materials: {
+        playfield: 'playfieldWood',
+        walls: 'metalGuide',
+      },
+      posts: lowerLanes.posts,
+      guides: lowerLanes.guides,
+      flippers: createFlipperPair({
+        leftX: 270,
+        rightX: 630,
+        y: 1220,
+        length: 150,
+        thickness: 20,
+        restingAngleOffset: 0.28,
+        activeAngleOffset: -0.42,
+      }),
+    };
+
+    const result = compileBoardLayout(layout, { snapToGrid: false });
+
+    expect(result.board.guides).toHaveLength(3);
+    expect(result.board.guides[0]?.plane).toBe('raised');
+    expect(result.board.guides[1]?.plane).toBe('raised');
+    expect(result.board.guides[2]?.plane).toBe('playfield');
+    expect(result.board.posts).toHaveLength(1);
   });
 });

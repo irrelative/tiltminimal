@@ -3,6 +3,8 @@ export interface Point {
   y: number;
 }
 
+export type GuidePlane = 'playfield' | 'raised';
+
 export type BoardThemeId = 'classic' | 'midnight' | 'sunburst' | 'grayscale';
 
 export type FlipperSide = 'left' | 'right';
@@ -148,6 +150,7 @@ export interface LineGuideDefinition {
   end: Point;
   thickness: number;
   material: SurfaceMaterialName;
+  plane?: GuidePlane;
 }
 
 export interface ArcGuideDefinition {
@@ -158,6 +161,7 @@ export interface ArcGuideDefinition {
   endAngle: number;
   thickness: number;
   material: SurfaceMaterialName;
+  plane?: GuidePlane;
 }
 
 export type GuideDefinition = LineGuideDefinition | ArcGuideDefinition;

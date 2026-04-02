@@ -11,6 +11,7 @@ but still fails basic playability:
 - the plunge path is blocked
 - the shooter lane exits into a wall
 - top rollover lanes are sealed off by continuous guide geometry
+- playfield guides intrude into flipper swing and feed space
 - important geometry shifts under grid snapping and collapses onto the ball path
 
 ## Shooter Lane Primitive
@@ -32,6 +33,39 @@ Behavior requirements:
 - generated geometry must remain valid after grid snapping
 - table-specific plunger tuning may be overridden when a layout needs a harder
   full plunge
+
+## Lower Inlane/Outlane Primitive
+
+`createInlaneOutlanePair(...)` is the canonical helper for the lower-lane
+package around a flipper.
+
+It is responsible for bundling:
+
+- the outer return/outlane rail
+- the inner inlane divider rail
+- the sling-style guide leading into the flipper
+- optional entry posts near the lane mouth
+
+Behavior requirements:
+
+- return rails that visually pass over the flipper area should be marked
+  `plane: 'raised'`
+- sling guides that represent playfield-level rubber or wood should remain
+  `plane: 'playfield'`
+- the packaged geometry should stay anchored relative to the flipper pivot so
+  lane spacing survives board edits more reliably than hand-placed guide lines
+
+## Guide Planes
+
+Guides can now be authored on two visual/playability planes:
+
+- `playfield`: normal guide geometry that participates in flipper keepout
+  validation
+- `raised`: guide geometry intended to represent elevated rails or returns;
+  these render above flippers and are exempt from flipper keepout validation
+
+This is still a 2D physics model. `raised` changes validation and rendering, not
+full 3D collision behavior.
 
 ## Top Arch Primitive
 
@@ -61,6 +95,7 @@ Behavior requirements:
 - no custom guide geometry blocks the shooter-lane exit corridor
 - each top rollover near the upper playfield has at least one clear approach
   path from below
+- no playfield-level guide intrudes into a flipper swing/feed keepout zone
 
 These checks are geometric heuristics. They do not replace shot simulation, but
 they are intended to fail fast on layouts that are visibly unplayable.
@@ -81,8 +116,9 @@ This means:
 ## Current Reference Table
 
 `Starlight EM` is the reference layout for this behavior. It uses the shooter
-lane and top arch primitives and is covered by tests that require:
+lane, top arch, and lower-lane primitives and is covered by tests that require:
 
 - no `launcher-blocked` validation error
 - no `rollover-unreachable` validation error
+- no `flipper-keepout` validation error
 - a full plunge that reaches the upper playfield

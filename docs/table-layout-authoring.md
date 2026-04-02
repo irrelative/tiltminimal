@@ -66,8 +66,15 @@ Current helpers include:
 - `createMirroredStandupTargets(...)`
 - `createShooterLaneRight(...)`
 - `createTopArchLanes(...)`
+- `createInlaneOutlanePair(...)`
 
 These return high-level layout objects, not runtime board data.
+
+Guides can also now declare a `plane`:
+
+- `playfield`: standard guide geometry, validated against flipper keepouts
+- `raised`: return-rail style geometry rendered above flippers and exempt from
+  flipper keepout validation
 
 ## Compiler Flow
 
@@ -94,6 +101,7 @@ The current validation pass checks for:
 - features extending past the playfield edge
 - custom guide geometry blocking the shooter-lane exit path
 - top rollover lanes with no open approach corridor from below
+- playfield-level guides intruding into a flipper's swing and feed keepout
 
 This is still a heuristic layer, not a full playability proof, but it now aims
 to reject the most common "looks plausible but does not actually play" failures
