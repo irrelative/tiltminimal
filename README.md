@@ -38,6 +38,9 @@ Use the `Makefile` entrypoints:
 
 * [docs/physics-and-animation.md](docs/physics-and-animation.md) explains how
   the frame loop, physics solver, rolling spin, and renderer fit together
+* [docs/table-layout-authoring.md](docs/table-layout-authoring.md) explains the
+  higher-level layout DSL, compiler, and validation flow for built-in and
+  agent-generated tables
 
 ## Play Controls
 
