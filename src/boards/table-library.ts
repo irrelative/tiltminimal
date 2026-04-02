@@ -1,5 +1,6 @@
 import { classicTable } from './classic-table';
 import { harlemGlobetrottersTable } from './harlem-globetrotters';
+import { starlightEmTable } from './starlight-em-table';
 import { cloneGuide, normalizeGuide } from '../game/guide-geometry';
 import { createBoardDefinition } from '../game/physics-defaults';
 import type {
@@ -159,6 +160,11 @@ export const BUILT_IN_TABLES: TableRecord[] = [
   {
     id: 'harlem-globetrotters',
     board: normalizeBoardDefinition(harlemGlobetrottersTable),
+    builtIn: true,
+  },
+  {
+    id: 'starlight-em',
+    board: normalizeBoardDefinition(starlightEmTable),
     builtIn: true,
   },
 ];

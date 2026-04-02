@@ -41,6 +41,8 @@ Use the `Makefile` entrypoints:
 * [docs/table-layout-authoring.md](docs/table-layout-authoring.md) explains the
   higher-level layout DSL, compiler, and validation flow for built-in and
   agent-generated tables
+* [docs/starlight-em-spec.md](docs/starlight-em-spec.md) defines the behavior
+  and layout goals for the built-in 1970s EM-style table
 
 ## Static Deployment
 

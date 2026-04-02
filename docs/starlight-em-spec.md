@@ -1,0 +1,57 @@
+# Starlight EM Specification
+
+`Starlight EM` is an original built-in table intended to evoke late-1960s to
+1970s electromechanical pinball rather than a solid-state or modern rules-heavy
+machine.
+
+## Design Goals
+
+- keep the playfield readable and symmetric
+- favor simple repeatable scoring over mode stacking
+- emphasize lanes, spinners, standup banks, pops, and a single saucer
+- use a five-ball rule set with straightforward end-of-ball bonus counting
+
+## Layout
+
+The table is authored through the layout DSL, not raw resolved board geometry.
+
+Major features:
+
+- 2 lower flippers
+- 3 pop bumpers in an upper-center triangle
+- 2 spinners
+- 1 upper-right saucer
+- 6 standup targets in mirrored left/right banks of 3
+- 4 top rollover lanes
+- 1 center post and additional lane posts
+- classic inlane / outlane lower guides
+- upper left and upper right lane loops feeding back to the pops and saucer
+
+## Rules
+
+The rules are intentionally EM-simple:
+
+- 5 balls per game
+- pop bumpers score and add a small amount of bonus
+- spinners score per spin and add small bonus
+- standup targets score and build bonus
+- completing either 3-target bank awards a larger score, bonus, and bonus multiplier step
+- completing all 4 top lanes awards a larger score and bonus multiplier step
+- the saucer awards a larger value and bonus multiplier step
+- drain awards `bonus * bonusMultiplier`
+- no timed modes, multiball, locks, or persistent modern feature ladders
+
+## Table Feel
+
+This table should feel closer to a reel-score electromechanical game:
+
+- more about repeating dependable shots
+- less about stacked features or toy interactions
+- a ruleset that can be understood from basic inserts and lane completion
+
+## Implementation Notes
+
+- Source layout: `src/boards/starlight-em-layout.ts`
+- Compiled built-in board: `src/boards/starlight-em-table.ts`
+- Rules script: `src/boards/starlight-em-rules-script.ts`
+- Registered in: `src/boards/table-library.ts`
