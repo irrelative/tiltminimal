@@ -45,6 +45,7 @@ Use the `Makefile` entrypoints:
 ## Static Deployment
 
 * GitHub Pages: https://irrelative.github.io/tiltminimal/
+* Deployment is handled by `.github/workflows/deploy-pages.yml`, which builds with the Pages-provided base path and publishes the `dist/` output.
 
 ## Play Controls
 
