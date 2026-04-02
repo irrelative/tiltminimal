@@ -42,6 +42,10 @@ Use the `Makefile` entrypoints:
   higher-level layout DSL, compiler, and validation flow for built-in and
   agent-generated tables
 
+## Static Deployment
+
+* GitHub Pages: https://irrelative.github.io/tiltminimal/
+
 ## Play Controls
 
 * `Left Shift` / `Left Arrow`: left flipper
