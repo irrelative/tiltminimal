@@ -32,6 +32,10 @@ The current physics model treats the slingshot as:
 4. a short re-arm cooldown
 5. a compression animation for rendering/editor feedback
 
+For lower-playfield tables, the rendered slingshot body is oriented toward the
+nearest flipper tip so mirrored left/right slings visually point into the
+flipper area instead of drawing the same wedge handedness on both sides.
+
 This is still a 2D approximation, but it is materially more accurate than the
 previous approach where a slingshot region was just another diagonal guide.
 
@@ -78,4 +82,3 @@ playability, but lower-third layouts should at minimum satisfy:
   `plane: 'raised'`
 
 Future validation should extend this with explicit lower shot-corridor checks.
-
