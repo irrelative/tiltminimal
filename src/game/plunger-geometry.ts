@@ -51,6 +51,44 @@ export const getPlungerGuideSegments = (
   ];
 };
 
+export const getPlungerLaneBounds = (
+  board: BoardDefinition,
+): {
+  minX: number;
+  maxX: number;
+  topY: number;
+  bottomY: number;
+} => {
+  const halfWidth = getPlungerLaneHalfWidth(board.plunger);
+  const guideHalfThickness = getPlungerGuideThickness(board.plunger) / 2;
+
+  return {
+    minX: board.plunger.x - halfWidth + guideHalfThickness,
+    maxX: board.plunger.x + halfWidth - guideHalfThickness,
+    topY: getPlungerGuideTopY(board),
+    bottomY: getPlungerGuideBottomY(board),
+  };
+};
+
+export const getPlungerLaneCenterBounds = (
+  board: BoardDefinition,
+  ballRadius: number,
+): {
+  minX: number;
+  maxX: number;
+  topY: number;
+  bottomY: number;
+} => {
+  const bounds = getPlungerLaneBounds(board);
+
+  return {
+    minX: bounds.minX + ballRadius,
+    maxX: bounds.maxX - ballRadius,
+    topY: bounds.topY,
+    bottomY: bounds.bottomY,
+  };
+};
+
 export const getLauncherGuideDistance = (
   board: BoardDefinition,
   point: Point,

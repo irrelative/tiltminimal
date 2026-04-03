@@ -10,7 +10,10 @@ import {
   getFlipperTipRadius,
 } from '../src/game/flipper-geometry';
 import { createInitialGameState } from '../src/game/game-state';
-import { getPlungerGuideSegments } from '../src/game/plunger-geometry';
+import {
+  getPlungerGuideSegments,
+  getPlungerLaneCenterBounds,
+} from '../src/game/plunger-geometry';
 import { stepGame, stepGameFrame } from '../src/game/physics-engine';
 import type { FlipperDefinition } from '../src/types/board-definition';
 
@@ -608,6 +611,38 @@ describe('stepGame', () => {
 
     expect(next.ball.position.x).toBeLessThanOrEqual(leftGuide.start.x);
     expect(next.ball.linearVelocity.x).toBeLessThan(220);
+  });
+
+  it('keeps a returned ball inside the launcher lane when it is re-plunged', () => {
+    const board = createBlankTable('Launcher Relaunch Board');
+    const lane = getPlungerLaneCenterBounds(board, board.ball.radius);
+    let state = createInitialGameState(board);
+    state.status = 'playing';
+    state.ball.position.x = lane.maxX + board.ball.radius / 2;
+    state.ball.position.y = board.launchPosition.y + 24;
+    state.ball.linearVelocity.x = 30;
+    state.ball.linearVelocity.y = 60;
+
+    state = stepGame(state, board, idleInput, 1 / 60);
+
+    expect(state.ball.position.x).toBeLessThanOrEqual(lane.maxX);
+    expect(state.ball.position.x).toBeGreaterThanOrEqual(lane.minX);
+
+    state = stepGame(state, board, { ...idleInput, launchPressed: true }, 0.25);
+
+    expect(state.ball.position.x).toBeLessThanOrEqual(lane.maxX);
+    expect(state.ball.position.x).toBeGreaterThanOrEqual(lane.minX);
+
+    for (let frame = 0; frame < 30; frame += 1) {
+      state = stepGame(state, board, idleInput, 1 / 60);
+
+      if (state.status !== 'playing' || state.ball.position.y < lane.topY) {
+        break;
+      }
+
+      expect(state.ball.position.x).toBeLessThanOrEqual(lane.maxX);
+      expect(state.ball.position.x).toBeGreaterThanOrEqual(lane.minX);
+    }
   });
 
   it('bounces off a curved guide', () => {

@@ -24,7 +24,10 @@ import type {
 } from './game-state';
 import { resetBall } from './game-state';
 import { getSurfaceMaterial } from './materials';
-import { getPlungerGuideSegments } from './plunger-geometry';
+import {
+  getPlungerGuideSegments,
+  getPlungerLaneCenterBounds,
+} from './plunger-geometry';
 import { cloneRulesState, type GameEvent } from './rules-types';
 import { getContactTangent, resolveBallContact } from './spin-solver';
 
@@ -213,6 +216,7 @@ const stepPlayingState = (
     resolveGuideCollisions(next, board, board.physics.solver);
     resolvePostCollisions(next, board, board.physics.solver);
     resolvePlungerCollision(next, board, plungerFrame, board.physics.solver);
+    constrainBallToLauncherLane(next, board);
     resolveStandupTargetCollisions(next, board, board.physics.solver, events);
     resolveDropTargetCollisions(next, board, board.physics.solver, events);
     resolveSlingshotCollisions(next, board, board.physics.solver, events);
@@ -467,6 +471,57 @@ const resolvePlungerCollision = (
     },
     solver,
   );
+};
+
+const constrainBallToLauncherLane = (
+  state: GameState,
+  board: BoardDefinition,
+): void => {
+  if (board.plunger.x <= board.width / 2) {
+    return;
+  }
+
+  const bounds = getPlungerLaneCenterBounds(board, state.ball.radius);
+  const minX = bounds.minX + state.tableNudge.offset.x;
+  const maxX = bounds.maxX + state.tableNudge.offset.x;
+  const topY = bounds.topY + state.tableNudge.offset.y;
+  const bottomY = bounds.bottomY + state.tableNudge.offset.y;
+  const leftCaptureMargin = state.ball.radius / 2;
+  const rightCaptureMargin = Math.max(
+    state.ball.radius,
+    board.plunger.thickness * 2,
+  );
+
+  if (
+    state.ball.position.y + state.ball.radius < topY ||
+    state.ball.position.y - state.ball.radius > bottomY
+  ) {
+    return;
+  }
+
+  if (
+    state.ball.position.x < minX - leftCaptureMargin ||
+    state.ball.position.x > maxX + rightCaptureMargin
+  ) {
+    return;
+  }
+
+  const clampedX = clamp(state.ball.position.x, minX, maxX);
+
+  if (clampedX === state.ball.position.x) {
+    return;
+  }
+
+  state.ball.position.x = clampedX;
+
+  if (state.ball.position.x <= minX && state.ball.linearVelocity.x < 0) {
+    state.ball.linearVelocity.x = 0;
+  } else if (
+    state.ball.position.x >= maxX &&
+    state.ball.linearVelocity.x > 0
+  ) {
+    state.ball.linearVelocity.x = 0;
+  }
 };
 
 const resolveStandupTargetCollisions = (

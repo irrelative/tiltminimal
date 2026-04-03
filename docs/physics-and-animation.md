@@ -62,6 +62,9 @@ Handled by `stepPlayingState(...)`.
 - Gravity is applied in screen-space `+y`.
 - Ball motion is integrated across one or more substeps.
 - Static and moving collisions are resolved.
+- The shooter lane is treated as a corridor while the ball is inside its guide
+  span, so a returned ball cannot clip outside the relaunch track before it
+  exits back onto the playfield.
 - Gameplay devices emit events for the rules system.
 - A drain resets the ball back to the launch state.
 
