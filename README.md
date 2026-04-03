@@ -51,6 +51,9 @@ Use the `Makefile` entrypoints:
   playable lower thirds
 * [docs/starlight-em-spec.md](docs/starlight-em-spec.md) defines the behavior
   and layout goals for the built-in 1970s EM-style table
+* [docs/module-boundary-refactor-spec.md](docs/module-boundary-refactor-spec.md)
+  defines the current structural refactor targets and the new shared module
+  boundaries for board codecs, physics helpers, and app UI composition
 
 ## Static Deployment
 

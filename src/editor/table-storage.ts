@@ -1,9 +1,11 @@
 import {
   BUILT_IN_TABLES,
-  cloneBoardDefinition,
-  normalizeBoardDefinition,
   type TableRecord,
 } from '../boards/table-library';
+import {
+  cloneBoardDefinition,
+  normalizeBoardDefinition,
+} from '../boards/board-codec';
 import { cloneGuide } from '../game/guide-geometry';
 import { physicsDefaults } from '../game/physics-defaults';
 import { defaultRulesScript } from '../game/rules-defaults';

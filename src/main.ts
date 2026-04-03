@@ -1,10 +1,15 @@
 import {
   BUILT_IN_TABLES,
-  cloneBoardDefinition,
   createBlankTable,
   createTableId,
   type TableRecord,
 } from './boards/table-library';
+import { renderSelectionPanel } from './app/editor-selection-panel';
+import {
+  startStandalonePlaySession,
+  syncPlayRoutePanel as renderPlayRoutePanel,
+} from './app/play-session';
+import { cloneBoardDefinition } from './boards/board-codec';
 import {
   buildAppRoutePath,
   getAppRouteFromPathname,
@@ -1029,281 +1034,13 @@ function syncTablePanel(): void {
 }
 
 function syncSelectionPanel(): void {
-  const active = getActiveTable();
-
-  if (state.selection.kind === 'none') {
-    selectionLabel.textContent = 'Nothing selected.';
-    deleteSelectionButton.disabled = true;
-    selectionFields.replaceChildren();
-    return;
-  }
-
-  deleteSelectionButton.disabled = state.selection.kind === 'launch-position';
-  selectionFields.replaceChildren();
-
-  if (state.selection.kind === 'launch-position') {
-    selectionLabel.textContent = 'Launcher';
-    selectionFields.append(
-      createNumericField('x', 'Ball X', active.board.launchPosition.x),
-      createNumericField('y', 'Ball Y', active.board.launchPosition.y),
-      createNumericField('length', 'Length', active.board.plunger.length),
-      createNumericField(
-        'thickness',
-        'Thickness',
-        active.board.plunger.thickness,
-      ),
-      createNumericField('travel', 'Travel', active.board.plunger.travel),
-      createNumericField(
-        'guideLength',
-        'Guide Length',
-        active.board.plunger.guideLength,
-      ),
-    );
-    return;
-  }
-
-  if (
-    state.selection.kind === 'bumper' &&
-    state.selection.index !== undefined
-  ) {
-    const bumper = active.board.bumpers[state.selection.index];
-
-    if (!bumper) {
-      return;
-    }
-
-    selectionLabel.textContent = `Bumper ${state.selection.index + 1}`;
-    selectionFields.append(
-      createNumericField('x', 'X', bumper.x),
-      createNumericField('y', 'Y', bumper.y),
-      createNumericField('radius', 'Radius', bumper.radius),
-      createNumericField('score', 'Score', bumper.score),
-    );
-    return;
-  }
-
-  if (
-    state.selection.kind === 'post' &&
-    state.selection.index !== undefined
-  ) {
-    const post = active.board.posts[state.selection.index];
-
-    if (!post) {
-      return;
-    }
-
-    selectionLabel.textContent = `Post ${state.selection.index + 1}`;
-    selectionFields.append(
-      createNumericField('x', 'X', post.x),
-      createNumericField('y', 'Y', post.y),
-      createNumericField('radius', 'Radius', post.radius),
-    );
-    return;
-  }
-
-  if (
-    state.selection.kind === 'standup-target' &&
-    state.selection.index !== undefined
-  ) {
-    const target = active.board.standupTargets[state.selection.index];
-
-    if (!target) {
-      return;
-    }
-
-    selectionLabel.textContent = `Standup target ${state.selection.index + 1}`;
-    selectionFields.append(
-      createNumericField('x', 'X', target.x),
-      createNumericField('y', 'Y', target.y),
-      createNumericField('width', 'Width', target.width),
-      createNumericField('height', 'Height', target.height),
-      createNumericField('angle', 'Angle', radiansToDegrees(target.angle)),
-      createNumericField('score', 'Score', target.score),
-    );
-    return;
-  }
-
-  if (
-    state.selection.kind === 'drop-target' &&
-    state.selection.index !== undefined
-  ) {
-    const target = active.board.dropTargets[state.selection.index];
-
-    if (!target) {
-      return;
-    }
-
-    selectionLabel.textContent = `Drop target ${state.selection.index + 1}`;
-    selectionFields.append(
-      createNumericField('x', 'X', target.x),
-      createNumericField('y', 'Y', target.y),
-      createNumericField('width', 'Width', target.width),
-      createNumericField('height', 'Height', target.height),
-      createNumericField('angle', 'Angle', radiansToDegrees(target.angle)),
-      createNumericField('score', 'Score', target.score),
-    );
-    return;
-  }
-
-  if (
-    state.selection.kind === 'saucer' &&
-    state.selection.index !== undefined
-  ) {
-    const saucer = active.board.saucers[state.selection.index];
-
-    if (!saucer) {
-      return;
-    }
-
-    selectionLabel.textContent = `Saucer ${state.selection.index + 1}`;
-    selectionFields.append(
-      createNumericField('x', 'X', saucer.x),
-      createNumericField('y', 'Y', saucer.y),
-      createNumericField('radius', 'Radius', saucer.radius),
-      createNumericField('score', 'Score', saucer.score),
-      createNumericField('holdSeconds', 'Hold (s)', saucer.holdSeconds, 0.05),
-      createNumericField('ejectSpeed', 'Eject speed', saucer.ejectSpeed),
-      createNumericField(
-        'ejectAngle',
-        'Eject angle',
-        radiansToDegrees(saucer.ejectAngle),
-      ),
-    );
-    return;
-  }
-
-  if (
-    state.selection.kind === 'spinner' &&
-    state.selection.index !== undefined
-  ) {
-    const spinner = active.board.spinners[state.selection.index];
-
-    if (!spinner) {
-      return;
-    }
-
-    selectionLabel.textContent = `Spinner ${state.selection.index + 1}`;
-    selectionFields.append(
-      createNumericField('x', 'X', spinner.x),
-      createNumericField('y', 'Y', spinner.y),
-      createNumericField('length', 'Length', spinner.length),
-      createNumericField('thickness', 'Thickness', spinner.thickness),
-      createNumericField('angle', 'Angle', radiansToDegrees(spinner.angle)),
-      createNumericField('score', 'Score', spinner.score),
-    );
-    return;
-  }
-
-  if (
-    state.selection.kind === 'slingshot' &&
-    state.selection.index !== undefined
-  ) {
-    const slingshot = active.board.slingshots[state.selection.index];
-
-    if (!slingshot) {
-      return;
-    }
-
-    selectionLabel.textContent = `Slingshot ${state.selection.index + 1}`;
-    selectionFields.append(
-      createNumericField('x', 'X', slingshot.x),
-      createNumericField('y', 'Y', slingshot.y),
-      createNumericField('width', 'Width', slingshot.width),
-      createNumericField('height', 'Height', slingshot.height),
-      createNumericField('angle', 'Angle', radiansToDegrees(slingshot.angle)),
-      createNumericField('score', 'Score', slingshot.score),
-      createNumericField('strength', 'Strength', slingshot.strength),
-    );
-    return;
-  }
-
-  if (
-    state.selection.kind === 'rollover' &&
-    state.selection.index !== undefined
-  ) {
-    const rollover = active.board.rollovers[state.selection.index];
-
-    if (!rollover) {
-      return;
-    }
-
-    selectionLabel.textContent = `Rollover ${state.selection.index + 1}`;
-    selectionFields.append(
-      createNumericField('x', 'X', rollover.x),
-      createNumericField('y', 'Y', rollover.y),
-      createNumericField('radius', 'Radius', rollover.radius),
-      createNumericField('score', 'Score', rollover.score),
-    );
-    return;
-  }
-
-  if (state.selection.kind === 'guide' && state.selection.index !== undefined) {
-    const guide = active.board.guides[state.selection.index];
-
-    if (!guide) {
-      return;
-    }
-
-    selectionLabel.textContent = isArcGuide(guide)
-      ? `Curved guide ${state.selection.index + 1}`
-      : `Guide ${state.selection.index + 1}`;
-
-    if (isArcGuide(guide)) {
-      selectionFields.append(
-        createNumericField('centerX', 'Center X', guide.center.x),
-        createNumericField('centerY', 'Center Y', guide.center.y),
-        createNumericField('radius', 'Radius', guide.radius),
-        createNumericField(
-          'startAngle',
-          'Start Angle',
-          radiansToDegrees(guide.startAngle),
-        ),
-        createNumericField(
-          'endAngle',
-          'End Angle',
-          radiansToDegrees(guide.endAngle),
-        ),
-        createNumericField('thickness', 'Thickness', guide.thickness),
-        createSelectField('plane', 'Plane', guide.plane ?? 'playfield', [
-          { value: 'playfield', label: 'Playfield' },
-          { value: 'raised', label: 'Raised' },
-        ]),
-      );
-    } else {
-      selectionFields.append(
-        createNumericField('startX', 'Start X', guide.start.x),
-        createNumericField('startY', 'Start Y', guide.start.y),
-        createNumericField('endX', 'End X', guide.end.x),
-        createNumericField('endY', 'End Y', guide.end.y),
-        createNumericField('thickness', 'Thickness', guide.thickness),
-        createSelectField('plane', 'Plane', guide.plane ?? 'playfield', [
-          { value: 'playfield', label: 'Playfield' },
-          { value: 'raised', label: 'Raised' },
-        ]),
-      );
-    }
-    return;
-  }
-
-  if (
-    state.selection.kind === 'flipper' &&
-    state.selection.index !== undefined
-  ) {
-    const flipper = active.board.flippers[state.selection.index];
-
-    if (!flipper) {
-      return;
-    }
-
-    selectionLabel.textContent = `${capitalize(flipper.side)} flipper ${state.selection.index + 1}`;
-    selectionFields.append(
-      createReadOnlyField('Side', capitalize(flipper.side)),
-      createNumericField('x', 'Pivot X', flipper.x),
-      createNumericField('y', 'Pivot Y', flipper.y),
-      createNumericField('length', 'Length', flipper.length),
-      createNumericField('thickness', 'Thickness', flipper.thickness),
-    );
-  }
+  renderSelectionPanel({
+    board: getActiveTable().board,
+    selection: state.selection,
+    selectionLabel,
+    selectionFields,
+    deleteSelectionButton,
+  });
 }
 
 function syncModeCopy(): void {
@@ -1665,120 +1402,33 @@ function nextCustomTableName(): string {
   return `Custom Table ${customCount}`;
 }
 
-function createNumericField(
-  field: string,
-  label: string,
-  value: number,
-  step = 1,
-): HTMLElement {
-  const wrapper = document.createElement('label');
-  wrapper.className = 'field';
-  const labelText = document.createElement('span');
-  labelText.textContent = label;
-  const input = document.createElement('input');
-  input.type = 'number';
-  input.step = String(step);
-  input.value =
-    step >= 1 ? String(Math.round(value)) : String(Number(value.toFixed(2)));
-  input.dataset.field = field;
-  wrapper.append(labelText, input);
-
-  return wrapper;
-}
-
-function createReadOnlyField(label: string, value: string): HTMLElement {
-  const wrapper = document.createElement('div');
-  wrapper.className = 'field';
-  wrapper.dataset.span = 'full';
-  wrapper.dataset.type = 'readonly';
-  const labelText = document.createElement('span');
-  labelText.textContent = label;
-  const valueText = document.createElement('strong');
-  valueText.textContent = value;
-  wrapper.append(labelText, valueText);
-
-  return wrapper;
-}
-
-function createSelectField(
-  field: string,
-  label: string,
-  value: string,
-  options: Array<{ value: string; label: string }>,
-): HTMLElement {
-  const wrapper = document.createElement('label');
-  wrapper.className = 'field';
-  const labelText = document.createElement('span');
-  labelText.textContent = label;
-  const select = document.createElement('select');
-  select.dataset.field = field;
-
-  for (const option of options) {
-    const optionElement = document.createElement('option');
-    optionElement.value = option.value;
-    optionElement.textContent = option.label;
-    optionElement.selected = option.value === value;
-    select.append(optionElement);
-  }
-
-  wrapper.append(labelText, select);
-  return wrapper;
-}
-
-function capitalize(value: string): string {
-  return `${value.slice(0, 1).toUpperCase()}${value.slice(1)}`;
-}
-
 function restartStandalonePlay(): void {
   state.loop?.stop();
 
-  const board = cloneBoardDefinition(getActiveTable().board);
-  const input = new PlayInput(canvas);
-  const loop = new GameLoop(
-    createInitialGameState(board),
-    board,
-    input,
+  const session = startStandalonePlaySession({
+    activeTable: getActiveTable(),
+    canvas,
     renderer,
     gameAudio,
-  );
-
-  state.input = input;
-  state.loop = loop;
-  modeTitle.textContent = board.name;
-  loop.setOnStateChange((nextState) => {
-    playDebugStatus.textContent = `${nextState.status} · Ball ${nextState.rules.currentBall}/${nextState.rules.ballsPerGame} · Score ${nextState.score}`;
-    playDebugPosition.textContent = formatVector2(
-      nextState.ball.position.x,
-      nextState.ball.position.y,
-    );
-    playDebugVelocity.textContent = formatVector2(
-      nextState.ball.linearVelocity.x,
-      nextState.ball.linearVelocity.y,
-    );
-    playDebugSpin.textContent = formatVector2(
-      nextState.ball.angularVelocity.x,
-      nextState.ball.angularVelocity.y,
-    );
+    modeTitle,
+    playDebugStatus,
+    playDebugPosition,
+    playDebugVelocity,
+    playDebugSpin,
   });
-  loop.start();
+
+  state.input = session.input;
+  state.loop = session.loop;
 }
 
 function syncPlayRoutePanel(): void {
-  playTableSelect.replaceChildren(
-    ...state.tables.map((table) => {
-      const option = document.createElement('option');
-      option.value = table.id;
-      option.selected = table.id === state.activeTableId;
-      option.textContent = table.builtIn
-        ? `${table.board.name} (built-in)`
-        : `${table.board.name} (edited)`;
-
-      return option;
-    }),
-  );
-
-  const active = getActiveTable();
-  playTableMeta.textContent = `${active.builtIn ? 'Built-in table' : 'Custom or edited table'} · ${getFeatureCount(active.board)} features`;
+  renderPlayRoutePanel({
+    tables: state.tables,
+    activeTableId: state.activeTableId,
+    playTableSelect,
+    playTableMeta,
+    getFeatureCount,
+  });
 }
 
 function getFeatureCount(board: BoardDefinition): number {
@@ -1794,12 +1444,4 @@ function getFeatureCount(board: BoardDefinition): number {
     board.guides.length +
     board.flippers.length
   );
-}
-
-function radiansToDegrees(angle: number): number {
-  return (angle * 180) / Math.PI;
-}
-
-function formatVector2(x: number, y: number): string {
-  return `${Math.round(x)}, ${Math.round(y)}`;
 }
