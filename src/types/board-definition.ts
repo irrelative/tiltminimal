@@ -10,14 +10,20 @@ export type BoardThemeId = 'classic' | 'midnight' | 'sunburst' | 'grayscale';
 export type FlipperSide = 'left' | 'right';
 
 export interface BallDefinition {
+  // Rendered and physical ball radius in board units/pixels.
   radius: number;
+  // Relative physical mass used by the solver.
   mass: number;
 }
 
 export interface PlungerDefinition extends Point {
+  // Body length measured along the plunger's long axis.
   length: number;
+  // Body width measured across the plunger.
   thickness: number;
+  // Maximum pullback distance.
   travel: number;
+  // Vertical shooter-lane guide span above the launch position.
   guideLength: number;
   material: SurfaceMaterialName;
 }
@@ -92,33 +98,42 @@ export interface PhysicsDefinition {
 }
 
 export interface BumperDefinition extends Point {
+  // Circular radius from center to outer edge.
   radius: number;
   score: number;
   material: SurfaceMaterialName;
 }
 
 export interface PostDefinition extends Point {
+  // Circular radius from center to outer edge.
   radius: number;
   material: SurfaceMaterialName;
 }
 
 export interface StandupTargetDefinition extends Point {
+  // Extent along the local horizontal axis before rotation.
   width: number;
+  // Extent along the local vertical axis before rotation.
   height: number;
+  // Rotation in radians around the target center.
   angle: number;
   score: number;
   material: SurfaceMaterialName;
 }
 
 export interface DropTargetDefinition extends Point {
+  // Extent along the local horizontal axis before rotation.
   width: number;
+  // Extent along the local vertical axis before rotation.
   height: number;
+  // Rotation in radians around the target center.
   angle: number;
   score: number;
   material: SurfaceMaterialName;
 }
 
 export interface SaucerDefinition extends Point {
+  // Capture cup radius from center to outer edge.
   radius: number;
   score: number;
   holdSeconds: number;
@@ -128,16 +143,22 @@ export interface SaucerDefinition extends Point {
 }
 
 export interface SpinnerDefinition extends Point {
+  // Tip-to-tip blade span.
   length: number;
+  // Blade width / hub thickness across the narrow axis.
   thickness: number;
+  // Resting blade rotation in radians around the spinner center.
   angle: number;
   score: number;
   material: SurfaceMaterialName;
 }
 
 export interface SlingshotDefinition extends Point {
+  // Base span across the sling face.
   width: number;
+  // Depth from base toward the pointed tip.
   height: number;
+  // Rotation in radians around the slingshot center.
   angle: number;
   score: number;
   strength: number;
@@ -145,23 +166,31 @@ export interface SlingshotDefinition extends Point {
 }
 
 export interface RolloverDefinition extends Point {
+  // Circular trigger radius from center to outer edge.
   radius: number;
   score: number;
 }
 
 export interface FlipperDefinition extends Point {
   side: FlipperSide;
+  // Pivot-to-tip body length along the flipper axis.
   length: number;
+  // Base body width at the pivot end.
   thickness: number;
+  // Resting angle in radians around the pivot point.
   restingAngle: number;
+  // Fully energized angle in radians around the pivot point.
   activeAngle: number;
   material: SurfaceMaterialName;
 }
 
 export interface LineGuideDefinition {
   kind?: 'line';
+  // Segment start point along the guide centerline.
   start: Point;
+  // Segment end point along the guide centerline.
   end: Point;
+  // Full guide diameter / rendered stroke width.
   thickness: number;
   material: SurfaceMaterialName;
   plane?: GuidePlane;
@@ -169,10 +198,15 @@ export interface LineGuideDefinition {
 
 export interface ArcGuideDefinition {
   kind: 'arc';
+  // Arc center point.
   center: Point;
+  // Centerline radius of the arc.
   radius: number;
+  // Start angle in radians.
   startAngle: number;
+  // End angle in radians.
   endAngle: number;
+  // Full guide diameter / rendered stroke width.
   thickness: number;
   material: SurfaceMaterialName;
   plane?: GuidePlane;
@@ -183,7 +217,9 @@ export type GuideDefinition = LineGuideDefinition | ArcGuideDefinition;
 export interface BoardDefinition {
   name: string;
   themeId: BoardThemeId;
+  // Playfield width in board units/pixels.
   width: number;
+  // Playfield height in board units/pixels.
   height: number;
   rulesScript: string;
   gravity: number;

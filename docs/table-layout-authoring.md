@@ -9,6 +9,10 @@ Raw `BoardDefinition` JSON is still the runtime format, but it is awkward for
 agents to author directly because every element needs final coordinates and
 guide geometry.
 
+Before authoring raw board geometry directly, use
+`docs/board-component-dimensions.md` as the reference for what each component's
+size fields actually mean.
+
 The layout layer solves that by adding:
 
 - named anchors

@@ -41,6 +41,8 @@ Use the `Makefile` entrypoints:
 * [docs/codebase-overview.md](docs/codebase-overview.md) explains the current
   folder layout, runtime flow, route responsibilities, and important module
   boundaries
+* [docs/board-component-dimensions.md](docs/board-component-dimensions.md)
+  defines the dimensional meaning of every board component field
 * [docs/table-analysis-spec.md](docs/table-analysis-spec.md) defines the editor
   analysis workflow and the current warning set for overlap, bounds,
   shooter-lane, flipper, spinner, saucer-eject, and rules-coverage issues
