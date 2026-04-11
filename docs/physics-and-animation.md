@@ -25,6 +25,15 @@ simulation in this order:
 3. `getFrameAudioEvents(...)` in `src/audio/game-audio.ts`
 4. `renderer.renderGame(...)` in `src/render/canvas-renderer.ts`
 
+`src/game/physics-engine.ts` is now the public façade for the physics step.
+Its implementation is split across:
+
+- `src/game/physics-engine-state.ts`
+- `src/game/physics-engine-boundaries.ts`
+- `src/game/physics-engine-devices.ts`
+- `src/game/physics-engine-flippers.ts`
+- `src/game/physics-engine-types.ts`
+
 The `CanvasRenderer` class is now only the façade. The actual drawing work is
 split across:
 
@@ -55,7 +64,7 @@ The physics engine runs in two main modes:
 ### `waiting-launch`
 
 Handled by `stepWaitingLaunchState(...)` in
-`src/game/physics-engine.ts`.
+`src/game/physics-engine-state.ts`.
 
 - The ball is pinned to `board.launchPosition`.
 - The plunger can charge and release.
@@ -79,7 +88,7 @@ Handled by `stepPlayingState(...)`.
 ## Why The Engine Substeps
 
 The physics step is capped into slices of at most `1/120s` via
-`MAX_SIMULATION_STEP_SECONDS` in `src/game/physics-engine.ts`.
+`MAX_SIMULATION_STEP_SECONDS` in `src/game/physics-engine-types.ts`.
 
 This matters because pinball has:
 
@@ -144,7 +153,8 @@ is not just cosmetic: moving geometry can push on the ball when contact occurs.
 
 Flippers do not teleport between rest and active angles.
 
-`advanceFlipper(...)` in `src/game/physics-engine.ts`:
+`advanceFlipper(...)` in `src/game/physics-motion.ts` works with flipper
+collision sampling in `src/game/physics-engine-flippers.ts`:
 
 - chooses a target angle from input
 - moves the flipper toward that target at
@@ -229,7 +239,9 @@ Several table elements animate as a byproduct of gameplay state:
 
 This work happens in two places:
 
-- state mutation in `src/game/physics-engine.ts`
+- state mutation in `src/game/physics-engine-state.ts`,
+  `src/game/physics-engine-devices.ts`, and
+  `src/game/physics-engine-flippers.ts`
 - drawing in `src/render/canvas-renderer-board.ts`,
   `src/render/canvas-renderer-hud.ts`, and
   `src/render/canvas-renderer-editor.ts`

@@ -63,6 +63,22 @@ Low-level physics helpers now live in:
 - event emission
 - interaction between the frame loop and the extracted helpers
 
+The orchestration file is now backed by dedicated internal modules:
+
+- `src/game/physics-engine-state.ts`
+- `src/game/physics-engine-boundaries.ts`
+- `src/game/physics-engine-devices.ts`
+- `src/game/physics-engine-flippers.ts`
+- `src/game/physics-engine-types.ts`
+
+The intended boundaries are:
+
+- frame-state stepping and substep sequencing
+- walls, guides, plunger, and shooter-lane constraints
+- table device contacts and trigger generation
+- flipper sweep sampling and passive/active bat response
+- shared step result types and engine constants
+
 ### App UI composition
 
 Route/bootstrap logic remains in `src/main.ts`, but route-specific UI helpers are
