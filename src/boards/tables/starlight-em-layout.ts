@@ -8,8 +8,8 @@ import {
   createSlingshotPair,
   createTopArchLanes,
   offsetLayoutPoint,
-} from './layout-primitives';
-import type { BoardLayoutDefinition } from './layout-schema';
+} from '../layout-primitives';
+import type { BoardLayoutDefinition } from '../layout-schema';
 
 const starlightShooterLane = createShooterLaneRight({
   boardWidth: 900,

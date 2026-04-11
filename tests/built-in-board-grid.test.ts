@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { classicTable } from '../src/boards/classic-table';
-import { harlemGlobetrottersTable } from '../src/boards/harlem-globetrotters';
+import { classicTable } from '../src/boards/tables/classic-table';
+import { harlemGlobetrottersTable } from '../src/boards/tables/harlem-globetrotters';
 import { EDITOR_GRID_SIZE } from '../src/editor/grid';
 import type { BoardDefinition, Point } from '../src/types/board-definition';
 

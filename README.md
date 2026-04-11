@@ -28,7 +28,8 @@ Use the `Makefile` entrypoints:
 
 ## Structure
 
-* `src/boards/` static board definitions
+* `src/boards/` shared board authoring, codec, and library modules
+* `src/boards/tables/` built-in table implementations and rules scripts
 * `src/game/` runtime state and physics
 * `src/render/` canvas rendering
 * `src/input/` player controls

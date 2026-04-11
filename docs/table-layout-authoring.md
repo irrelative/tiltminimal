@@ -25,6 +25,7 @@ The layout layer solves that by adding:
 - `src/boards/layout-primitives.ts`: reusable helpers like flipper pairs and pop clusters
 - `src/boards/layout-compiler.ts`: compiles a layout into a board definition
 - `src/boards/layout-validation.ts`: validates the compiled board
+- `src/boards/tables/`: built-in table layouts, compiled boards, and table-specific rules scripts
 
 ## Authoring Model
 

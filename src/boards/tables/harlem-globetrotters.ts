@@ -1,5 +1,5 @@
-import { createBoardDefinition } from '../game/physics-defaults';
-import { snapBoardLayoutToGrid } from './snap-board-layout';
+import { createBoardDefinition } from '../../game/physics-defaults';
+import { snapBoardLayoutToGrid } from '../snap-board-layout';
 
 export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinition({
   name: 'Harlem Globetrotters',

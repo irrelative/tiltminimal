@@ -1,6 +1,6 @@
-import { classicTable } from './classic-table';
-import { harlemGlobetrottersTable } from './harlem-globetrotters';
-import { starlightEmTable } from './starlight-em-table';
+import { classicTable } from './tables/classic-table';
+import { harlemGlobetrottersTable } from './tables/harlem-globetrotters';
+import { starlightEmTable } from './tables/starlight-em-table';
 import { normalizeBoardDefinition } from './board-codec';
 import { createBoardDefinition } from '../game/physics-defaults';
 import type {

@@ -6,8 +6,8 @@ import {
   createMirroredRollovers,
   createMirroredStandupTargets,
   createSlingshotPair,
-} from './layout-primitives';
-import type { BoardLayoutDefinition } from './layout-schema';
+} from '../layout-primitives';
+import type { BoardLayoutDefinition } from '../layout-schema';
 
 const classicSlingshots = createSlingshotPair({
   leftCenter: absolutePoint(291, 1116),

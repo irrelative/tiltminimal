@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { classicTable } from '../src/boards/classic-table';
+import { classicTable } from '../src/boards/tables/classic-table';
 import { createInitialGameState } from '../src/game/game-state';
 import {
   applyRulesFrame,

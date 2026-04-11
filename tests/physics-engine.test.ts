@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import { createBlankTable } from '../src/boards/table-library';
-import { classicTable } from '../src/boards/classic-table';
+import { classicTable } from '../src/boards/tables/classic-table';
 import { getFlipperBySide } from '../src/boards/table-library';
 import type { InputState } from '../src/input/keyboard-input';
 import {

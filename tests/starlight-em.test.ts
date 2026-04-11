@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { BUILT_IN_TABLES } from '../src/boards/table-library';
 import { validateCompiledBoardLayout } from '../src/boards/layout-validation';
-import { starlightEmTable } from '../src/boards/starlight-em-table';
+import { starlightEmTable } from '../src/boards/tables/starlight-em-table';
 import { createInitialGameState } from '../src/game/game-state';
 import { stepGame } from '../src/game/physics-engine';
 import type { InputState } from '../src/input/keyboard-input';

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { harlemGlobetrottersTable } from '../src/boards/harlem-globetrotters';
+import { harlemGlobetrottersTable } from '../src/boards/tables/harlem-globetrotters';
 import { BUILT_IN_TABLES, getFlipperBySide } from '../src/boards/table-library';
 import { createInitialGameState } from '../src/game/game-state';
 import { stepGame } from '../src/game/physics-engine';
