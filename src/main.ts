@@ -1031,7 +1031,7 @@ function syncAnalysisPanel(): void {
 
       const title = document.createElement('p');
       title.className = 'analysis-warning-title';
-      title.textContent = 'Potential overlap';
+      title.textContent = warning.title;
 
       const message = document.createElement('p');
       message.className = 'analysis-warning-message';

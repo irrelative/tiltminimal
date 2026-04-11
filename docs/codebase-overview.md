@@ -122,8 +122,9 @@ Built-in tables can be overridden in storage and later reset. Custom tables are
 stored alongside them.
 
 The editor also includes an analysis panel that can run advisory checks against
-the active board. The first implemented pass reports potential overlapping
-elements.
+the active board. Current checks cover overlaps, out-of-bounds geometry,
+shooter lane obstruction, flipper keepout, spinner clearance, saucer eject
+clearance, and basic rules-event coverage.
 
 ## Runtime Game Flow
 

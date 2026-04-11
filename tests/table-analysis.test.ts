@@ -57,9 +57,12 @@ describe('analyzeBoard', () => {
 
     const warnings = analyzeBoard(board);
 
-    expect(warnings).toHaveLength(1);
-    expect(warnings[0]?.message).toContain('Guide 1');
-    expect(warnings[0]?.message).toContain('Spinner 1');
+    expect(warnings.some((warning) => warning.code === 'element-overlap')).toBe(
+      true,
+    );
+    expect(warnings.some((warning) => warning.code === 'spinner-obstructed')).toBe(
+      true,
+    );
   });
 
   it('ignores raised guides when checking for overlap warnings', () => {
@@ -78,5 +81,156 @@ describe('analyzeBoard', () => {
     const warnings = analyzeBoard(board);
 
     expect(warnings).toHaveLength(0);
+  });
+
+  it('reports elements that extend outside the board bounds', () => {
+    const board = createBlankTable();
+    board.bumpers = [
+      {
+        x: 20,
+        y: 60,
+        radius: 30,
+        score: 100,
+        material: 'rubberPost',
+      },
+    ];
+
+    const warnings = analyzeBoard(board);
+
+    expect(warnings.some((warning) => warning.code === 'element-out-of-bounds')).toBe(
+      true,
+    );
+  });
+
+  it('reports an obstructed shooter lane path', () => {
+    const board = createBlankTable();
+    board.guides = [
+      {
+        start: {
+          x: board.launchPosition.x - 40,
+          y: board.launchPosition.y - board.plunger.guideLength + 24,
+        },
+        end: {
+          x: board.launchPosition.x + 40,
+          y: board.launchPosition.y - board.plunger.guideLength + 24,
+        },
+        thickness: 18,
+        material: 'metalGuide',
+      },
+    ];
+
+    const warnings = analyzeBoard(board);
+
+    expect(warnings.some((warning) => warning.code === 'launcher-blocked')).toBe(
+      true,
+    );
+  });
+
+  it('reports guide geometry inside a flipper keepout area', () => {
+    const board = createBlankTable();
+    const leftFlipper = getFlipperBySide(board, 'left');
+    board.guides = [
+      {
+        start: { x: leftFlipper.x + 36, y: leftFlipper.y + 4 },
+        end: { x: leftFlipper.x + 128, y: leftFlipper.y + 10 },
+        thickness: 18,
+        material: 'metalGuide',
+      },
+    ];
+
+    const warnings = analyzeBoard(board);
+
+    expect(warnings.some((warning) => warning.code === 'flipper-keepout')).toBe(
+      true,
+    );
+  });
+
+  it('reports posts obstructing a spinner envelope', () => {
+    const board = createBlankTable();
+    board.spinners = [
+      {
+        x: 320,
+        y: 420,
+        length: 100,
+        thickness: 10,
+        angle: 0,
+        score: 100,
+        material: 'metalGuide',
+      },
+    ];
+    board.posts = [
+      {
+        x: 372,
+        y: 420,
+        radius: 16,
+        material: 'rubberPost',
+      },
+    ];
+
+    const warnings = analyzeBoard(board);
+
+    expect(warnings.some((warning) => warning.code === 'spinner-obstructed')).toBe(
+      true,
+    );
+  });
+
+  it('reports a blocked saucer eject path', () => {
+    const board = createBlankTable();
+    board.saucers = [
+      {
+        x: 320,
+        y: 360,
+        radius: 28,
+        score: 500,
+        holdSeconds: 0.5,
+        ejectSpeed: 900,
+        ejectAngle: 0,
+        material: 'metalGuide',
+      },
+    ];
+    board.posts = [
+      {
+        x: 390,
+        y: 360,
+        radius: 18,
+        material: 'rubberPost',
+      },
+    ];
+
+    const warnings = analyzeBoard(board);
+
+    expect(
+      warnings.some((warning) => warning.code === 'saucer-eject-obstructed'),
+    ).toBe(true);
+  });
+
+  it('warns when event-producing devices are not referenced by the rules script', () => {
+    const board = createBlankTable();
+    board.bumpers = [
+      {
+        x: 260,
+        y: 280,
+        radius: 40,
+        score: 100,
+        material: 'rubberPost',
+      },
+    ];
+    board.rulesScript = `
+return {
+  onGameStart() {},
+  onBallStart() {},
+  onEvent(event, ctx) {
+    if (event.type === 'ball-drained') {
+      ctx.endGame();
+    }
+  },
+};
+`;
+
+    const warnings = analyzeBoard(board);
+
+    expect(
+      warnings.some((warning) => warning.code === 'rules-event-unhandled'),
+    ).toBe(true);
   });
 });

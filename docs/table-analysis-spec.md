@@ -7,7 +7,9 @@ This document defines the current editor-side table analysis workflow.
 Table analysis is intended to catch potentially problematic geometry before a
 table is play-tested or shipped as a built-in board.
 
-The first implemented check is overlap detection.
+The current implementation focuses on pragmatic editor-time warnings for
+geometry and rule coverage issues that commonly make a table frustrating or
+obviously broken.
 
 ## Editor Workflow
 
@@ -35,8 +37,16 @@ Each analysis result is currently a warning with:
 Current warning code:
 
 - `element-overlap`
+- `element-out-of-bounds`
+- `launcher-blocked`
+- `flipper-keepout`
+- `spinner-obstructed`
+- `saucer-eject-obstructed`
+- `rules-event-unhandled`
 
-## Initial Overlap Check
+## Implemented Checks
+
+### Overlap detection
 
 The current overlap analysis checks for potential overlap between playfield
 elements by approximating each element as one or more sample circles and then
@@ -70,6 +80,50 @@ Reason:
 - flagging those as overlaps would produce noisy warnings for valid return-lane
   and overpass style geometry
 
+### Out-of-bounds geometry
+
+The analyzer warns when an element's sampled geometry extends beyond the table
+bounds.
+
+This is advisory rather than fatal because authors may still be in the middle
+of dragging a part back into place.
+
+### Shooter lane obstruction
+
+The analyzer checks the initial launch corridor above the plunger lane and warns
+if sampled playfield geometry blocks the ball's centerline path out of the
+shooter lane.
+
+### Flipper keepout
+
+The analyzer warns when guides, posts, targets, or slingshot geometry intrude
+into a flipper's sweep/feed area.
+
+This is a geometric heuristic based on sampled distance to the flipper across
+its motion range.
+
+### Spinner envelope obstruction
+
+The analyzer warns when nearby guide or post geometry intrudes into the
+rotational envelope of a spinner.
+
+### Saucer eject obstruction
+
+The analyzer traces the early segment of each saucer eject path and warns when
+it appears to immediately feed into other playfield geometry.
+
+### Rules coverage
+
+The analyzer warns when the table contains event-producing devices but the rules
+script does not appear to reference their event types.
+
+This check is intentionally heuristic:
+
+- explicit references to event names count as handled
+- scripts using the default-style generic `score` handling are treated as
+  broadly score-aware
+- the warning is advisory and does not attempt full script understanding
+
 ## Thresholding
 
 The overlap pass uses a small minimum penetration threshold rather than
@@ -80,14 +134,12 @@ kiss at a boundary.
 
 ## Intended Expansion
 
-This analysis system is expected to grow to cover more checks over time, such
-as:
+This analysis system is expected to grow further, for example into:
 
 - unreachable lanes
-- blocked plunge paths
-- out-of-bounds geometry
-- flipper keepout violations
-- suspicious saucer or spinner placement
+- drain harshness / lower-third flow checks
+- trapped-ball or livelock pocket detection
+- more exact rules-to-device consistency checks
 
-Those checks should reuse the same editor-facing warning model so the analysis
-panel remains a single place to review issues.
+New checks should continue to reuse the same editor-facing warning model so the
+analysis panel remains a single place to review issues.
