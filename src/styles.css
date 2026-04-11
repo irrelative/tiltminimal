@@ -305,6 +305,44 @@ h2 {
   white-space: pre;
 }
 
+.analysis-warnings {
+  display: grid;
+  gap: 10px;
+}
+
+.analysis-warning {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 207, 86, 0.22);
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 207, 86, 0.08),
+      rgba(255, 138, 61, 0.06)
+    ),
+    rgba(255, 255, 255, 0.03);
+}
+
+.analysis-warning-title,
+.analysis-warning-message {
+  margin: 0;
+}
+
+.analysis-warning-title {
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.analysis-warning-message {
+  color: var(--text);
+  line-height: 1.4;
+}
+
 .rules-script-editor {
   min-height: 420px;
   resize: vertical;

@@ -10,6 +10,7 @@ import {
   syncPlayRoutePanel as renderPlayRoutePanel,
 } from './app/play-session';
 import { cloneBoardDefinition } from './boards/board-codec';
+import { analyzeBoard } from './editor/table-analysis';
 import {
   buildAppRoutePath,
   getAppRouteFromPathname,
@@ -80,6 +81,7 @@ interface AppState {
   dragOffset: Point | null;
   draftPosition: Point | null;
   snapToGrid: boolean;
+  analysisRequested: boolean;
   loop: GameLoop | null;
   input: InputSource | null;
 }
@@ -118,6 +120,10 @@ const tableExportJson =
   queryRequired<HTMLTextAreaElement>('#table-export-json');
 const copyTableJsonButton =
   queryRequired<HTMLButtonElement>('#copy-table-json');
+const analyzeTableButton =
+  queryRequired<HTMLButtonElement>('#analyze-table');
+const analysisStatus = queryRequired<HTMLElement>('#analysis-status');
+const analysisWarnings = queryRequired<HTMLElement>('#analysis-warnings');
 const rulesScriptStatus = queryRequired<HTMLElement>('#rules-script-status');
 const rulesScriptEditor = queryRequired<HTMLTextAreaElement>(
   '#rules-script-editor',
@@ -156,6 +162,7 @@ const state: AppState = {
   dragOffset: null,
   draftPosition: null,
   snapToGrid: true,
+  analysisRequested: false,
   loop: null,
   input: null,
 };
@@ -359,6 +366,11 @@ function bootEditorRoute(): void {
       tableExportJson.focus();
       tableExportJson.select();
     }
+  });
+
+  analyzeTableButton.addEventListener('click', () => {
+    state.analysisRequested = true;
+    renderApp();
   });
 
   document
@@ -944,6 +956,7 @@ function renderApp(): void {
   syncTablePanel();
   syncSelectionPanel();
   syncExportPanel();
+  syncAnalysisPanel();
   syncRulesPanel();
   syncModeCopy();
   syncDebugMenu();
@@ -987,6 +1000,47 @@ function syncRulesPanel(): void {
   rulesScriptStatus.textContent = validationError
     ? `Rules have a compile error. Game falls back to the default rules until this is fixed: ${validationError}`
     : 'Rules script compiled successfully.';
+}
+
+function syncAnalysisPanel(): void {
+  if (state.mode !== 'edit') {
+    return;
+  }
+
+  analyzeTableButton.textContent = state.analysisRequested
+    ? 'Re-run analysis'
+    : 'Analyze table';
+
+  if (!state.analysisRequested) {
+    analysisStatus.textContent =
+      'Run analysis to find potentially problematic geometry.';
+    analysisWarnings.replaceChildren();
+    return;
+  }
+
+  const warnings = analyzeBoard(getActiveTable().board);
+  analysisStatus.textContent =
+    warnings.length === 0
+      ? 'No overlap warnings detected.'
+      : `${warnings.length} warning${warnings.length === 1 ? '' : 's'} found.`;
+
+  analysisWarnings.replaceChildren(
+    ...warnings.map((warning) => {
+      const item = document.createElement('article');
+      item.className = 'analysis-warning';
+
+      const title = document.createElement('p');
+      title.className = 'analysis-warning-title';
+      title.textContent = 'Potential overlap';
+
+      const message = document.createElement('p');
+      message.className = 'analysis-warning-message';
+      message.textContent = warning.message;
+
+      item.append(title, message);
+      return item;
+    }),
+  );
 }
 
 function syncTableList(): void {

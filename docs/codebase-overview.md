@@ -104,6 +104,7 @@ Current editor module roles:
 - `table-editor-mutate.ts`: movement, property updates, and deletion
 - `table-editor-handles.ts`: drag handles and rotation/guide endpoint behavior
 - `table-editor-shared.ts`: shared editor constants/helpers
+- `table-analysis.ts`: editor-side analysis passes and warning generation
 - `editor-types.ts`: editor-specific state types
 - `grid.ts`: grid size, snap behavior, and snap helpers
 
@@ -119,6 +120,10 @@ That module is responsible for:
 
 Built-in tables can be overridden in storage and later reset. Custom tables are
 stored alongside them.
+
+The editor also includes an analysis panel that can run advisory checks against
+the active board. The first implemented pass reports potential overlapping
+elements.
 
 ## Runtime Game Flow
 
