@@ -27,6 +27,10 @@ This module is the shared place for:
 - blank/default element factories
 - table id helpers
 
+Concrete built-in table content now lives under `src/boards/tables/`, keeping
+shared board tooling separate from shipped table implementations and
+table-specific rules scripts.
+
 `src/editor/table-storage.ts` remains responsible for:
 
 - local storage persistence

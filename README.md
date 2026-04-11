@@ -2,16 +2,16 @@
 
 A browser based pinball game. Some overall requirements:
 
-* High performance! Should leverage webgl to render the pinball board. Let's start with a 2d layout though.
+* High performance. The current implementation uses a 2D canvas renderer; WebGL remains future-facing rather than implemented today.
 * Board decoupled from game logic; there should be a way to create a new board layout that plugs into existing game system
 
 ## Current scaffold
 
-The repository now includes a small TypeScript + Vite scaffold with:
+The repository now includes a TypeScript + Vite browser game with:
 
 * a 2D canvas-based playfield
 * 2D ball physics with planar position/velocity and 2-axis rolling spin
-* a data-driven `classicTable` board definition
+* multiple built-in data-driven tables plus editable custom tables
 * separated game loop, physics, input, and rendering modules
 * Vitest and GitHub Actions wiring for basic verification
 
@@ -30,6 +30,7 @@ Use the `Makefile` entrypoints:
 
 * `src/boards/` shared board authoring, codec, and library modules
 * `src/boards/tables/` built-in table implementations and rules scripts
+* `src/editor/` board editor state, hit testing, mutation, and storage helpers
 * `src/game/` runtime state and physics
 * `src/render/` canvas rendering
 * `src/input/` player controls
@@ -37,6 +38,9 @@ Use the `Makefile` entrypoints:
 
 ## Additional docs
 
+* [docs/codebase-overview.md](docs/codebase-overview.md) explains the current
+  folder layout, runtime flow, route responsibilities, and important module
+  boundaries
 * [docs/physics-and-animation.md](docs/physics-and-animation.md) explains how
   the frame loop, physics solver, rolling spin, and renderer fit together
 * [docs/table-layout-authoring.md](docs/table-layout-authoring.md) explains the
