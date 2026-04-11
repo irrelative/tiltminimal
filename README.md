@@ -24,12 +24,14 @@ Use the `Makefile` entrypoints:
 * `make build`
 * `make lint`
 * `make test`
+* `make validate-table TABLE=classic-table`
 * `make fmt`
 
 ## Structure
 
 * `src/boards/` shared board authoring, codec, and library modules
 * `src/boards/tables/` built-in table implementations and rules scripts
+* `src/cli/` terminal entrypoints for validation and other repo tooling
 * `src/editor/` board editor state, hit testing, mutation, and storage helpers
 * `src/game/` runtime state and physics
 * `src/render/` canvas rendering
@@ -41,6 +43,8 @@ Use the `Makefile` entrypoints:
 * [docs/codebase-overview.md](docs/codebase-overview.md) explains the current
   folder layout, runtime flow, route responsibilities, and important module
   boundaries
+* [docs/table-validation-cli.md](docs/table-validation-cli.md) defines the
+  terminal entrypoint for validating built-in table implementations
 * [docs/board-component-dimensions.md](docs/board-component-dimensions.md)
   defines the dimensional meaning of every board component field
 * [docs/table-analysis-spec.md](docs/table-analysis-spec.md) defines the editor

@@ -16,6 +16,7 @@ The main source tree is under `src/`.
   library modules
 - `src/boards/tables/`: built-in table layouts, compiled built-in boards, and
   table-specific rules scripts
+- `src/cli/`: terminal-facing validation and utility entrypoints
 - `src/editor/`: table builder state, hit testing, drag handles, mutation, and
   local-storage persistence helpers
 - `src/game/`: runtime state, physics stepping, rules execution, materials, and
@@ -91,6 +92,21 @@ The distinction is intentional:
 
 - `src/boards/` is for reusable board tooling
 - `src/boards/tables/` is for built-in table content
+
+## CLI Tooling
+
+The repo now includes a small terminal-facing CLI surface under `src/cli/`.
+
+Current modules:
+
+- `table-validation.ts`: argument parsing, table selection, report generation,
+  and exit-code logic
+- `validate-table.ts`: command entrypoint used by `npm run validate-table`
+
+The first CLI command validates built-in tables by id and runs both:
+
+- compile-time layout validation from `src/boards/layout-validation.ts`
+- editor-style advisory analysis from `src/editor/table-analysis.ts`
 
 ## Editor And Persistence
 
