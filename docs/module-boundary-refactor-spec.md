@@ -115,13 +115,37 @@ The intended boundaries are:
 Consumers should continue importing from `src/editor/table-editor.ts`, not the
 individual leaf files, unless they are extending the editor internals directly.
 
+### Renderer module split
+
+`src/render/canvas-renderer.ts` is now a narrow façade around specialized
+renderer modules instead of a single large implementation file.
+
+Current split:
+
+- `src/render/canvas-renderer-shared.ts`
+- `src/render/canvas-renderer-board.ts`
+- `src/render/canvas-renderer-hud.ts`
+- `src/render/canvas-renderer-editor.ts`
+
+The intended boundaries are:
+
+- shared render geometry helpers, constants, and device path tracing
+- playfield and device drawing for live play and editor base rendering
+- game HUD drawing
+- editor-only overlays such as grid, selection chrome, and draft previews
+
+`src/render/canvas-renderer.ts` should remain responsible only for:
+
+- acquiring and sizing the canvas context
+- coordinating render order
+- delegating to the specialized renderer modules
+
 ## Follow-up Direction
 
 The next refactor pass should target:
 
 1. editor pointer/tool controllers
 2. route-specific setup for `/editor`, `/`, and `/rules`
-3. renderer overlay separation between playfield drawing and editor chrome
 
 ## Constraints
 

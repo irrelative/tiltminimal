@@ -25,6 +25,14 @@ simulation in this order:
 3. `getFrameAudioEvents(...)` in `src/audio/game-audio.ts`
 4. `renderer.renderGame(...)` in `src/render/canvas-renderer.ts`
 
+The `CanvasRenderer` class is now only the façade. The actual drawing work is
+split across:
+
+- `src/render/canvas-renderer-board.ts`
+- `src/render/canvas-renderer-hud.ts`
+- `src/render/canvas-renderer-editor.ts`
+- `src/render/canvas-renderer-shared.ts`
+
 That means rendering is always driven by the same state object that physics just
 produced. There is no separate animation timeline layered on top.
 
@@ -167,7 +175,7 @@ in `src/types/board-definition.ts` and default from
 `src/game/physics-defaults.ts`.
 
 The same flipper angle stored in `GameState.flippers[index].angle` is what the
-renderer uses in `src/render/canvas-renderer.ts`.
+board renderer uses in `src/render/canvas-renderer-board.ts`.
 
 ## Contacts And Bounce
 
@@ -222,7 +230,9 @@ Several table elements animate as a byproduct of gameplay state:
 This work happens in two places:
 
 - state mutation in `src/game/physics-engine.ts`
-- drawing in `src/render/canvas-renderer.ts`
+- drawing in `src/render/canvas-renderer-board.ts`,
+  `src/render/canvas-renderer-hud.ts`, and
+  `src/render/canvas-renderer-editor.ts`
 
 There is no duplicate animation model in the renderer.
 

@@ -1,0 +1,503 @@
+import { getSurfaceMaterial } from '../game/materials';
+import {
+  getPlungerGuideBottomY,
+  getPlungerGuideSegments,
+  getPlungerGuideTopY,
+  getPlungerLaneHalfWidth,
+} from '../game/plunger-geometry';
+import type { GameState } from '../game/game-state';
+import { getBoardTheme } from './board-themes';
+import type {
+  BoardDefinition,
+  FlipperDefinition,
+} from '../types/board-definition';
+import {
+  drawGuidePath,
+  drawOrientedPlate,
+  getRenderedFlipperAngle,
+  getRenderedSlingshotAngle,
+  traceFlipperPath,
+  traceSlingshotPath,
+  UI_FONT_FAMILY,
+} from './canvas-renderer-shared';
+import {
+  getFlipperBaseRadius,
+  getFlipperTipRadius,
+} from '../game/flipper-geometry';
+
+export const drawBoard = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+  state?: GameState,
+): void => {
+  drawBackground(context, board);
+  drawGuides(context, board, 'playfield');
+  drawPlunger(context, board, state);
+  drawPosts(context, board);
+  drawBumpers(context, board, state);
+  drawStandupTargets(context, board, state);
+  drawDropTargets(context, board, state);
+  drawSlingshots(context, board, state);
+  drawSaucers(context, board, state);
+  drawSpinners(context, board, state);
+  drawRollovers(context, board, state);
+
+  for (const [index, flipper] of board.flippers.entries()) {
+    drawFlipper(
+      context,
+      board,
+      flipper,
+      state
+        ? getRenderedFlipperAngle(state, flipper, index)
+        : flipper.restingAngle,
+    );
+  }
+
+  drawGuides(context, board, 'raised');
+};
+
+export const drawBall = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+  state: GameState,
+): void => {
+  const theme = getBoardTheme(board.themeId);
+  context.fillStyle = theme.ballFill;
+  context.beginPath();
+  context.arc(
+    state.ball.position.x,
+    state.ball.position.y,
+    state.ball.radius,
+    0,
+    Math.PI * 2,
+  );
+  context.fill();
+
+  context.strokeStyle = theme.ballStroke;
+  context.lineWidth = 2;
+  context.stroke();
+};
+
+const drawBackground = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+): void => {
+  const theme = getBoardTheme(board.themeId);
+  const gradient = context.createLinearGradient(0, 0, 0, board.height);
+  gradient.addColorStop(0, theme.backgroundTop);
+  gradient.addColorStop(0.38, theme.backgroundMid);
+  gradient.addColorStop(1, theme.backgroundBottom);
+
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, board.width, board.height);
+
+  context.fillStyle = theme.glowPrimary;
+  context.beginPath();
+  context.arc(180, 220, 180, 0, Math.PI * 2);
+  context.fill();
+
+  context.fillStyle = theme.glowSecondary;
+  context.beginPath();
+  context.arc(720, 1180, 260, 0, Math.PI * 2);
+  context.fill();
+};
+
+const drawGuides = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+  plane: 'playfield' | 'raised',
+): void => {
+  const theme = getBoardTheme(board.themeId);
+  for (const guide of board.guides) {
+    if ((guide.plane ?? 'playfield') !== plane) {
+      continue;
+    }
+
+    const material = getSurfaceMaterial(
+      guide.material,
+      board.surfaceMaterials,
+    );
+
+    context.save();
+    if (plane === 'raised') {
+      context.shadowColor = 'rgba(12, 18, 28, 0.24)';
+      context.shadowBlur = 10;
+      context.shadowOffsetY = -2;
+    }
+
+    context.strokeStyle =
+      material.name === 'rubberPost'
+        ? theme.guideRubberPrimary
+        : theme.guideMetalPrimary;
+    context.lineWidth = guide.thickness;
+    context.lineCap = 'round';
+    drawGuidePath(context, guide);
+    context.stroke();
+    context.restore();
+
+    context.strokeStyle =
+      material.name === 'rubberPost'
+        ? theme.guideRubberSecondary
+        : theme.guideMetalSecondary;
+    if (plane === 'raised') {
+      context.save();
+    }
+    context.lineWidth = Math.max(guide.thickness - 8, 4);
+    drawGuidePath(context, guide);
+    context.stroke();
+    if (plane === 'raised') {
+      context.restore();
+    }
+  }
+};
+
+const drawBumpers = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+  state?: GameState,
+): void => {
+  const theme = getBoardTheme(board.themeId);
+
+  board.bumpers.forEach((bumper, index) => {
+    context.fillStyle =
+      theme.bumperColors[index % theme.bumperColors.length] ??
+      theme.bumperColors[0];
+    context.beginPath();
+    context.arc(bumper.x, bumper.y, bumper.radius, 0, Math.PI * 2);
+    context.fill();
+
+    context.lineWidth = 8;
+    context.strokeStyle = theme.bumperRing;
+    context.stroke();
+
+    context.fillStyle = theme.bumperCap;
+    context.beginPath();
+    context.arc(bumper.x, bumper.y, bumper.radius * 0.45, 0, Math.PI * 2);
+    context.fill();
+
+    if (state) {
+      context.font = `600 20px ${UI_FONT_FAMILY}`;
+      context.textAlign = 'center';
+      context.fillStyle = theme.bumperText;
+      context.fillText(String(bumper.score), bumper.x, bumper.y + 8);
+    } else {
+      context.fillStyle = theme.bumperText;
+      context.beginPath();
+      context.arc(bumper.x, bumper.y, bumper.radius * 0.18, 0, Math.PI * 2);
+      context.fill();
+    }
+  });
+
+  context.textAlign = 'start';
+};
+
+const drawPosts = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+): void => {
+  const theme = getBoardTheme(board.themeId);
+  board.posts.forEach((post) => {
+    const material = getSurfaceMaterial(post.material, board.surfaceMaterials);
+
+    context.save();
+    context.fillStyle =
+      material.name === 'metalGuide'
+        ? theme.postMetalFill
+        : theme.postRubberFill;
+    context.beginPath();
+    context.arc(post.x, post.y, post.radius, 0, Math.PI * 2);
+    context.fill();
+    context.lineWidth = 5;
+    context.strokeStyle =
+      material.name === 'metalGuide'
+        ? theme.postMetalRing
+        : theme.postRubberRing;
+    context.stroke();
+    context.fillStyle =
+      material.name === 'metalGuide'
+        ? theme.postMetalCore
+        : theme.postRubberCore;
+    context.beginPath();
+    context.arc(
+      post.x,
+      post.y,
+      Math.max(post.radius * 0.26, 4),
+      0,
+      Math.PI * 2,
+    );
+    context.fill();
+    context.restore();
+  });
+};
+
+const drawPlunger = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+  state?: GameState,
+): void => {
+  const theme = getBoardTheme(board.themeId);
+  const pullback = state?.plunger.pullback ?? 0;
+  const laneWidth = getPlungerLaneHalfWidth(board.plunger) * 2;
+  const laneTop = getPlungerGuideTopY(board);
+  const laneBottom = getPlungerGuideBottomY(board);
+  const laneHeight = laneBottom - laneTop;
+  const guideSegments = getPlungerGuideSegments(board);
+
+  context.save();
+  context.fillStyle = theme.plungerLaneFill;
+  context.strokeStyle = theme.plungerLaneStroke;
+  context.lineWidth = 3;
+  context.beginPath();
+  context.rect(
+    board.plunger.x - laneWidth / 2,
+    laneTop,
+    laneWidth,
+    laneHeight,
+  );
+  context.fill();
+  context.stroke();
+
+  context.strokeStyle = theme.plungerGuidePrimary;
+  context.lineWidth = guideSegments[0].thickness;
+  context.lineCap = 'round';
+  for (const guide of guideSegments) {
+    context.beginPath();
+    context.moveTo(guide.start.x, guide.start.y);
+    context.lineTo(guide.end.x, guide.end.y);
+    context.stroke();
+  }
+
+  context.strokeStyle = theme.plungerGuideSecondary;
+  context.lineWidth = Math.max(guideSegments[0].thickness - 4, 4);
+  for (const guide of guideSegments) {
+    context.beginPath();
+    context.moveTo(guide.start.x, guide.start.y);
+    context.lineTo(guide.end.x, guide.end.y);
+    context.stroke();
+  }
+
+  drawOrientedPlate(
+    context,
+    {
+      x: board.plunger.x,
+      y: board.plunger.y + pullback,
+    },
+    board.plunger.thickness,
+    board.plunger.length,
+    Math.PI / 2,
+    theme.plungerBodyFill,
+    theme.plungerBodyStroke,
+  );
+
+  context.fillStyle = theme.plungerKnob;
+  context.beginPath();
+  context.arc(
+    board.plunger.x,
+    board.plunger.y -
+      board.plunger.length / 2 -
+      board.plunger.thickness / 2 +
+      pullback,
+    board.plunger.thickness * 0.32,
+    0,
+    Math.PI * 2,
+  );
+  context.fill();
+  context.restore();
+};
+
+const drawStandupTargets = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+  state?: GameState,
+): void => {
+  const theme = getBoardTheme(board.themeId);
+  board.standupTargets.forEach((target, index) => {
+    const lit = Boolean(
+      state && state.standupTargets[index]?.cooldownSeconds > 0,
+    );
+    drawOrientedPlate(
+      context,
+      target,
+      target.width,
+      target.height,
+      target.angle,
+      lit ? theme.standupLitFill : theme.standupFill,
+      theme.targetStroke,
+    );
+  });
+};
+
+const drawDropTargets = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+  state?: GameState,
+): void => {
+  const theme = getBoardTheme(board.themeId);
+  board.dropTargets.forEach((target, index) => {
+    const isDown = Boolean(state?.dropTargets[index]?.isDown);
+    const yOffset = isDown ? target.height * 0.6 : 0;
+
+    drawOrientedPlate(
+      context,
+      { x: target.x, y: target.y + yOffset },
+      target.width,
+      target.height,
+      target.angle,
+      isDown ? theme.dropDownFill : theme.dropUpFill,
+      theme.dropStroke,
+    );
+  });
+};
+
+const drawSaucers = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+  state?: GameState,
+): void => {
+  const theme = getBoardTheme(board.themeId);
+  board.saucers.forEach((saucer, index) => {
+    const occupied = Boolean(state?.saucers[index]?.occupied);
+
+    context.save();
+    context.fillStyle = occupied ? theme.saucerOccupiedFill : theme.saucerFill;
+    context.beginPath();
+    context.arc(saucer.x, saucer.y, saucer.radius, 0, Math.PI * 2);
+    context.fill();
+    context.fillStyle = occupied ? theme.saucerCoreOccupied : theme.saucerCore;
+    context.beginPath();
+    context.arc(saucer.x, saucer.y, saucer.radius * 0.62, 0, Math.PI * 2);
+    context.fill();
+    context.strokeStyle = theme.saucerRing;
+    context.lineWidth = 5;
+    context.stroke();
+    context.restore();
+  });
+};
+
+const drawSlingshots = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+  state?: GameState,
+): void => {
+  const theme = getBoardTheme(board.themeId);
+
+  board.slingshots.forEach((slingshot, index) => {
+    const compression = state?.slingshots[index]?.compression ?? 0;
+    const innerDepth = slingshot.height * (1 - compression * 0.28);
+    const renderAngle = getRenderedSlingshotAngle(board, slingshot);
+
+    context.save();
+    context.translate(slingshot.x, slingshot.y);
+    context.rotate(renderAngle);
+    traceSlingshotPath(context, slingshot.width, innerDepth);
+    context.fillStyle = theme.guideRubberPrimary;
+    context.fill();
+
+    context.lineWidth = 4;
+    context.strokeStyle = theme.guideRubberSecondary;
+    context.stroke();
+
+    context.beginPath();
+    context.moveTo(-slingshot.width / 2, 0);
+    context.lineTo(slingshot.width / 2, 0);
+    context.lineWidth = Math.max(6, slingshot.height * 0.36);
+    context.lineCap = 'round';
+    context.strokeStyle = theme.guideMetalSecondary;
+    context.stroke();
+    context.restore();
+  });
+};
+
+const drawSpinners = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+  state?: GameState,
+): void => {
+  const theme = getBoardTheme(board.themeId);
+  board.spinners.forEach((spinner, index) => {
+    const angle = spinner.angle + (state?.spinners[index]?.angle ?? 0);
+
+    drawOrientedPlate(
+      context,
+      spinner,
+      spinner.length,
+      spinner.thickness,
+      angle,
+      theme.spinnerFill,
+      theme.spinnerStroke,
+    );
+
+    context.save();
+    context.fillStyle = theme.spinnerCap;
+    context.beginPath();
+    context.arc(
+      spinner.x,
+      spinner.y,
+      spinner.thickness * 0.8,
+      0,
+      Math.PI * 2,
+    );
+    context.fill();
+    context.restore();
+  });
+};
+
+const drawRollovers = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+  state?: GameState,
+): void => {
+  const theme = getBoardTheme(board.themeId);
+  board.rollovers.forEach((rollover, index) => {
+    const lit = Boolean(state?.rollovers[index]?.lit);
+
+    context.save();
+    context.fillStyle = lit ? theme.rolloverLitFill : theme.rolloverFill;
+    context.beginPath();
+    context.arc(rollover.x, rollover.y, rollover.radius, 0, Math.PI * 2);
+    context.fill();
+    context.strokeStyle = lit
+      ? theme.rolloverStrokeLit
+      : theme.rolloverStroke;
+    context.lineWidth = 4;
+    context.stroke();
+    context.restore();
+  });
+};
+
+const drawFlipper = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+  flipper: FlipperDefinition,
+  angle: number,
+): void => {
+  const theme = getBoardTheme(board.themeId);
+  const baseRadius = getFlipperBaseRadius(flipper);
+  const tipRadius = getFlipperTipRadius(flipper);
+
+  context.save();
+  context.translate(flipper.x, flipper.y);
+  context.rotate(angle);
+  context.fillStyle = theme.flipperFill;
+  traceFlipperPath(context, flipper);
+  context.fill();
+
+  context.strokeStyle = theme.flipperStroke;
+  context.lineWidth = 4;
+  context.stroke();
+
+  context.fillStyle = theme.flipperCore;
+  context.beginPath();
+  context.arc(baseRadius * 0.6, 0, baseRadius * 0.32, 0, Math.PI * 2);
+  context.fill();
+  context.beginPath();
+  context.arc(
+    flipper.length - tipRadius * 0.35,
+    0,
+    tipRadius * 0.2,
+    0,
+    Math.PI * 2,
+  );
+  context.fill();
+  context.restore();
+};
