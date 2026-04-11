@@ -42,7 +42,8 @@ Use the `Makefile` entrypoints:
   folder layout, runtime flow, route responsibilities, and important module
   boundaries
 * [docs/table-analysis-spec.md](docs/table-analysis-spec.md) defines the editor
-  analysis workflow and the current overlap-warning implementation
+  analysis workflow and the current warning set for overlap, bounds,
+  shooter-lane, flipper, spinner, saucer-eject, and rules-coverage issues
 * [docs/physics-and-animation.md](docs/physics-and-animation.md) explains how
   the frame loop, physics solver, rolling spin, and renderer fit together
 * [docs/table-layout-authoring.md](docs/table-layout-authoring.md) explains the

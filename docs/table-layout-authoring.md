@@ -117,6 +117,15 @@ This is still a heuristic layer, not a full playability proof, but it now aims
 to reject the most common "looks plausible but does not actually play" failures
 that showed up in DSL-authored tables.
 
+This validation pass is distinct from the editor-side analysis panel:
+
+- `layout-validation.ts` runs as part of DSL compilation and is focused on
+  rejecting bad authored layouts early
+- `src/editor/table-analysis.ts` runs in the editor UI against any active board
+  and produces advisory warnings, including overlap, out-of-bounds geometry,
+  shooter-lane obstruction, flipper keepout, spinner clearance, saucer eject
+  obstruction, and basic rules-event coverage
+
 ## Current Scope
 
 The classic table now compiles through this layout system. That proves the

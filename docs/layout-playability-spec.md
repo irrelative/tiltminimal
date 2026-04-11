@@ -102,6 +102,18 @@ Behavior requirements:
 These checks are geometric heuristics. They do not replace shot simulation, but
 they are intended to fail fast on layouts that are visibly unplayable.
 
+Separate from this compile-time validation, the `/editor` route also exposes an
+analysis panel that can run advisory checks against built-in or custom boards.
+That editor analysis currently covers:
+
+- overlapping elements
+- out-of-bounds geometry
+- shooter lane obstruction
+- flipper keepout violations
+- spinner envelope obstruction
+- saucer eject obstruction
+- basic rules-event coverage heuristics
+
 ## Grid-Snapping Rule
 
 Built-in tables are snapped to the editor grid after compilation. Any primitive
