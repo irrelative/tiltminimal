@@ -91,6 +91,30 @@ and away from:
 - play-session construction details
 - large route-specific UI switch trees
 
+### Editor module split
+
+The editor module at `src/editor/table-editor.ts` is now a barrel rather than a
+single implementation file.
+
+Current split:
+
+- `src/editor/table-editor-selection.ts`
+- `src/editor/table-editor-add.ts`
+- `src/editor/table-editor-mutate.ts`
+- `src/editor/table-editor-handles.ts`
+- `src/editor/table-editor-shared.ts`
+
+The intended boundaries are:
+
+- selection and hit testing
+- element creation helpers
+- mutation/update/delete behavior
+- handle geometry and drag behavior
+- shared constants and geometry helpers
+
+Consumers should continue importing from `src/editor/table-editor.ts`, not the
+individual leaf files, unless they are extending the editor internals directly.
+
 ## Follow-up Direction
 
 The next refactor pass should target:
