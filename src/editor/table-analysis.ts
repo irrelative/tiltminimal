@@ -10,6 +10,7 @@ import {
 } from '../game/guide-geometry';
 import {
   getPlungerGuideTopY,
+  getPlungerLaneBounds,
 } from '../game/plunger-geometry';
 import type {
   BoardDefinition,
@@ -156,7 +157,10 @@ const analyzeLaunchCorridor = (
     start,
     end,
     board.ball.radius + 4,
-    elements.filter((element) => element.ref.kind !== 'flipper'),
+    elements.filter(
+      (element) =>
+        element.ref.kind !== 'flipper' && element.ref.kind !== 'plunger-lane',
+    ),
   );
 
   if (!blocker) {
@@ -380,7 +384,7 @@ const collectAnalyzableElements = (
   board: BoardDefinition,
   includeRaisedGuides: boolean,
 ): AnalyzableElement[] => {
-  const elements: AnalyzableElement[] = [];
+  const elements: AnalyzableElement[] = [createPlungerLaneElement(board)];
 
   board.bumpers.forEach((bumper, index) => {
     elements.push({
@@ -477,6 +481,31 @@ const collectAnalyzableElements = (
   });
 
   return elements;
+};
+
+const createPlungerLaneElement = (
+  board: BoardDefinition,
+): AnalyzableElement => {
+  const bounds = getPlungerLaneBounds(board);
+  const bottomY = Math.max(bounds.topY + 1, Math.min(bounds.bottomY, board.launchPosition.y));
+  const center = {
+    x: (bounds.minX + bounds.maxX) / 2,
+    y: (bounds.topY + bottomY) / 2,
+  };
+
+  return {
+    ref: {
+      kind: 'plunger-lane',
+      index: 0,
+      label: 'Plunger Lane',
+    },
+    samples: createOrientedCapsuleSamples(
+      center,
+      bottomY - bounds.topY,
+      bounds.maxX - bounds.minX,
+      Math.PI / 2,
+    ),
+  };
 };
 
 const createRef = (

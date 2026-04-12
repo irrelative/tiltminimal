@@ -207,7 +207,6 @@ const doubleCrossedRightLowerLanes = createInlaneOutlanePair({
   innerGuideEndOffset: { x: 80, y: 40 },
   entryPostOffsets: [
     { x: 72, y: -200, radius: 18, material: 'rubberPost' },
-    { x: 112, y: -320, radius: 16, material: 'metalGuide' },
   ],
 });
 

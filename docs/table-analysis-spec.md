@@ -59,6 +59,7 @@ mistakes, not to act as an exact constructive-geometry solver.
 
 The initial pass analyzes:
 
+- the plunger lane body
 - bumpers
 - posts
 - saucers
@@ -101,6 +102,11 @@ of dragging a part back into place.
 The analyzer checks the initial launch corridor above the plunger lane and warns
 if sampled playfield geometry blocks the ball's centerline path out of the
 shooter lane.
+
+Separately from the centerline launch-path check, the overlap pass also treats
+the plunger lane body as its own sampled geometry. That means posts, targets,
+guides, or other devices placed inside the shooter lane will now surface as
+regular `element-overlap` warnings against `Plunger Lane`.
 
 ### Flipper keepout
 

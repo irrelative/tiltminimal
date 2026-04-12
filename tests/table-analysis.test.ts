@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { createBlankTable } from '../src/boards/table-library';
+import { doubleCrossedTable } from '../src/boards/tables/double-crossed';
 import { analyzeBoard } from '../src/editor/table-analysis';
 import { getFlipperBySide } from '../src/boards/table-library';
 
@@ -178,6 +179,37 @@ describe('analyzeBoard', () => {
     expect(warnings.some((warning) => warning.code === 'launcher-blocked')).toBe(
       true,
     );
+  });
+
+  it('reports geometry that intrudes into the plunger lane body', () => {
+    const board = createBlankTable();
+    board.posts = [
+      {
+        x: board.launchPosition.x,
+        y: board.launchPosition.y - board.plunger.guideLength / 2,
+        radius: 18,
+        material: 'rubberPost',
+      },
+    ];
+
+    const warnings = analyzeBoard(board);
+    const overlap = warnings.find((warning) => warning.code === 'element-overlap');
+
+    expect(overlap).toBeDefined();
+    expect(overlap?.message).toContain('Plunger Lane');
+    expect(overlap?.message).toContain('Post 1');
+  });
+
+  it('keeps the double crossed shooter lane clear of body overlaps', () => {
+    const warnings = analyzeBoard(doubleCrossedTable);
+
+    expect(
+      warnings.some(
+        (warning) =>
+          warning.code === 'element-overlap' &&
+          warning.message.includes('Plunger Lane'),
+      ),
+    ).toBe(false);
   });
 
   it('reports guide geometry inside a flipper keepout area', () => {
