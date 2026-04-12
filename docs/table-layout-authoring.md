@@ -29,7 +29,8 @@ The layout layer solves that by adding:
 - `src/boards/layout-primitives.ts`: reusable helpers like flipper pairs and pop clusters
 - `src/boards/layout-compiler.ts`: compiles a layout into a board definition
 - `src/boards/layout-validation.ts`: validates the compiled board
-- `src/boards/tables/`: built-in table layouts, compiled boards, and table-specific rules scripts
+- `src/boards/tables/`: built-in table modules, ideally one file per table so
+  layout DSL, inline rules script, and compiled board export can live together
 
 ## Authoring Model
 
@@ -102,6 +103,24 @@ Guides can also now declare a `plane`:
 
 Built-in tables should generally use `compileBuiltInBoardLayout(...)`, which
 throws if validation returns any errors.
+
+## Single-File Table Pattern
+
+Built-in tables can now be authored in a single file.
+
+The preferred pattern is:
+
+1. define the table's rules script inline in the table module
+2. define the layout DSL object in that same module
+3. export the compiled board from that same module
+
+That keeps:
+
+- table geometry
+- table-specific rules
+- the exported runtime board
+
+in one place, while still reusing the shared compiler and primitive helpers.
 
 ## Validation
 

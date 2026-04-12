@@ -80,18 +80,20 @@ Files in `src/boards/` define reusable authoring and runtime support:
 
 Files in `src/boards/tables/` are concrete built-in content:
 
-- layout source files such as `classic-layout.ts` and
-  `starlight-em-layout.ts`
-- compiled built-in table entry files such as `classic-table.ts` and
-  `starlight-em-table.ts`
-- table-specific rules scripts such as `classic-rules-script.ts` and
-  `starlight-em-rules-script.ts`
+- self-contained built-in table modules such as `classic-table.ts` and
+  `starlight-em-table.ts` that can define:
+  - table-specific rules script
+  - optional layout DSL source
+  - compiled exported board
 - direct board-definition tables such as `harlem-globetrotters.ts`
 
 The distinction is intentional:
 
 - `src/boards/` is for reusable board tooling
 - `src/boards/tables/` is for built-in table content
+
+The preferred built-in pattern is now one source file per table, so a table's
+rules and geometry can be understood and edited together.
 
 ## CLI Tooling
 

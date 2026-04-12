@@ -62,9 +62,7 @@ This table should feel closer to a reel-score electromechanical game:
 
 ## Implementation Notes
 
-- Source layout: `src/boards/tables/starlight-em-layout.ts`
-- Compiled built-in board: `src/boards/tables/starlight-em-table.ts`
-- Rules script: `src/boards/tables/starlight-em-rules-script.ts`
+- Self-contained built-in table module: `src/boards/tables/starlight-em-table.ts`
 - Registered in: `src/boards/table-library.ts`
 - The layout now uses `createShooterLaneRight(...)`,
   `createTopArchLanes(...)`, `createInlaneOutlanePair(...)`, and
