@@ -27,6 +27,7 @@ Examples:
 
 ```sh
 npm run validate-table -- classic-table
+npm run validate-table -- double-crossed
 npm run validate-table -- starlight-em --fail-on-warnings
 npm run validate-table -- --all
 make validate-table TABLE=harlem-globetrotters
@@ -40,6 +41,7 @@ The CLI currently validates built-in tables registered in
 Supported ids include:
 
 - `classic-table`
+- `double-crossed`
 - `harlem-globetrotters`
 - `starlight-em`
 

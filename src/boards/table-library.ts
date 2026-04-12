@@ -1,4 +1,5 @@
 import { classicTable } from './tables/classic-table';
+import { doubleCrossedTable } from './tables/double-crossed';
 import { harlemGlobetrottersTable } from './tables/harlem-globetrotters';
 import { starlightEmTable } from './tables/starlight-em-table';
 import { normalizeBoardDefinition } from './board-codec';
@@ -28,6 +29,11 @@ export const BUILT_IN_TABLES: TableRecord[] = [
   {
     id: 'classic-table',
     board: normalizeBoardDefinition(classicTable),
+    builtIn: true,
+  },
+  {
+    id: 'double-crossed',
+    board: normalizeBoardDefinition(doubleCrossedTable),
     builtIn: true,
   },
   {

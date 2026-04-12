@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { classicTable } from '../src/boards/tables/classic-table';
+import { doubleCrossedTable } from '../src/boards/tables/double-crossed';
 import { harlemGlobetrottersTable } from '../src/boards/tables/harlem-globetrotters';
 import { EDITOR_GRID_SIZE } from '../src/editor/grid';
 import type { BoardDefinition, Point } from '../src/types/board-definition';
@@ -8,6 +9,10 @@ import type { BoardDefinition, Point } from '../src/types/board-definition';
 describe('built-in board layouts', () => {
   it('snaps the classic table layout to the editor grid', () => {
     expectBoardLayoutOnGrid(classicTable);
+  });
+
+  it('snaps the Double Crossed layout to the editor grid', () => {
+    expectBoardLayoutOnGrid(doubleCrossedTable);
   });
 
   it('snaps the Harlem Globetrotters layout to the editor grid', () => {

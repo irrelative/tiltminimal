@@ -33,6 +33,7 @@ describe('table validation cli parsing', () => {
     const usage = formatValidateTableUsage();
 
     expect(usage).toContain('classic-table');
+    expect(usage).toContain('double-crossed');
     expect(usage).toContain('harlem-globetrotters');
     expect(usage).toContain('starlight-em');
   });
