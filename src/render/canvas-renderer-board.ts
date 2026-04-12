@@ -30,11 +30,33 @@ export const drawBoard = (
   board: BoardDefinition,
   state?: GameState,
 ): void => {
+  drawStaticBoardBase(context, board, {
+    showBumperScores: Boolean(state),
+  });
+  drawDynamicBoard(context, board, state);
+  drawStaticBoardOverlay(context, board);
+};
+
+export const drawStaticBoardBase = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+  options: {
+    showBumperScores?: boolean;
+  } = {},
+): void => {
   drawBackground(context, board);
   drawGuides(context, board, 'playfield');
-  drawPlunger(context, board, state);
+  drawPlungerLane(context, board);
   drawPosts(context, board);
-  drawBumpers(context, board, state);
+  drawBumpers(context, board, options.showBumperScores ?? false);
+};
+
+export const drawDynamicBoard = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+  state?: GameState,
+): void => {
+  drawPlungerBody(context, board, state);
   drawStandupTargets(context, board, state);
   drawDropTargets(context, board, state);
   drawSlingshots(context, board, state);
@@ -52,7 +74,12 @@ export const drawBoard = (
         : flipper.restingAngle,
     );
   }
+};
 
+export const drawStaticBoardOverlay = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+): void => {
   drawGuides(context, board, 'raised');
 };
 
@@ -304,7 +331,7 @@ const drawGuides = (
 const drawBumpers = (
   context: CanvasRenderingContext2D,
   board: BoardDefinition,
-  state?: GameState,
+  showScoreText = false,
 ): void => {
   const theme = getBoardTheme(board.themeId);
 
@@ -325,7 +352,7 @@ const drawBumpers = (
     context.arc(bumper.x, bumper.y, bumper.radius * 0.45, 0, Math.PI * 2);
     context.fill();
 
-    if (state) {
+    if (showScoreText) {
       context.font = `600 20px ${UI_FONT_FAMILY}`;
       context.textAlign = 'center';
       context.fillStyle = theme.bumperText;
@@ -380,13 +407,11 @@ const drawPosts = (
   });
 };
 
-const drawPlunger = (
+const drawPlungerLane = (
   context: CanvasRenderingContext2D,
   board: BoardDefinition,
-  state?: GameState,
 ): void => {
   const theme = getBoardTheme(board.themeId);
-  const pullback = state?.plunger.pullback ?? 0;
   const laneWidth = getPlungerLaneHalfWidth(board.plunger) * 2;
   const laneTop = getPlungerGuideTopY(board);
   const laneBottom = getPlungerGuideBottomY(board);
@@ -426,6 +451,18 @@ const drawPlunger = (
     context.stroke();
   }
 
+  context.restore();
+};
+
+const drawPlungerBody = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+  state?: GameState,
+): void => {
+  const theme = getBoardTheme(board.themeId);
+  const pullback = state?.plunger.pullback ?? 0;
+
+  context.save();
   drawOrientedPlate(
     context,
     {

@@ -259,10 +259,15 @@ There is no duplicate animation model in the renderer.
 
 `CanvasRenderer.renderGame(...)` draws in this order:
 
-1. board backdrop
-2. translated table background and devices
-3. ball in world coordinates
-4. HUD
+1. cached static playfield base layer
+2. translated dynamic devices and flippers
+3. cached raised-guide overlay layer
+4. ball in world coordinates
+5. HUD
+
+For play mode, the renderer now caches the 2D context and prerenders the
+static board layers once per active board/theme combination. That removes the
+full static playfield redraw from the steady-state frame loop.
 
 The renderer does not extrapolate or interpolate state between frames. It
 renders the exact solved state from the simulation step. That keeps visuals and

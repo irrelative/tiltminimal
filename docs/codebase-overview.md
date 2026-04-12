@@ -229,6 +229,13 @@ but the free ball is rendered in world space after the shifted board pass. That
 is how the current table-nudge animation makes the cabinet move underneath the
 ball rather than teleporting the ball itself.
 
+For the play route, `CanvasRenderer` now also:
+
+- caches the 2D context instead of reacquiring it each frame
+- only resizes the main canvas when dimensions actually change
+- prerenders static playfield base and raised-guide overlay layers and reuses
+  them across frames for the active board/theme
+
 ## Input And Controls
 
 `src/input/keyboard-input.ts` owns both keyboard input and the mobile/touch
