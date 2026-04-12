@@ -58,6 +58,9 @@ export const clonePlayingGameState = (
     angularVelocity: {
       ...state.ball.angularVelocity,
     },
+    angularPosition: {
+      ...state.ball.angularPosition,
+    },
   },
   plunger: clonePlungerState(state.plunger),
   tableNudge: cloneTableNudgeState(state.tableNudge),
@@ -154,6 +157,13 @@ export const advanceElementStates = (
   board: BoardDefinition,
   deltaSeconds: number,
 ): void => {
+  state.ball.angularPosition.x = wrapAngle(
+    state.ball.angularPosition.x + state.ball.angularVelocity.x * deltaSeconds,
+  );
+  state.ball.angularPosition.y = wrapAngle(
+    state.ball.angularPosition.y + state.ball.angularVelocity.y * deltaSeconds,
+  );
+
   state.standupTargets.forEach((targetState) => {
     targetState.cooldownSeconds = Math.max(
       0,
@@ -420,6 +430,16 @@ const cloneSlingshotState = (state: SlingshotState): SlingshotState => ({
 const cloneRolloverState = (state: RolloverState): RolloverState => ({
   ...state,
 });
+
+const wrapAngle = (angle: number): number => {
+  const fullTurn = Math.PI * 2;
+
+  if (Math.abs(angle) <= fullTurn) {
+    return angle;
+  }
+
+  return angle % fullTurn;
+};
 
 const getTriggeredNudgeDirection = (
   state: TableNudgeState,

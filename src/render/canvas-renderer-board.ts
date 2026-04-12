@@ -74,6 +74,7 @@ export const drawBall = (
     Math.PI * 2,
   );
   context.fill();
+  drawBallSpinPips(context, state);
 
   context.strokeStyle = theme.ballStroke;
   context.lineWidth = 2;
@@ -153,6 +154,78 @@ const drawBallMotionStreak = (
   context.lineTo(end.x, end.y);
   context.stroke();
   context.restore();
+};
+
+const drawBallSpinPips = (
+  context: CanvasRenderingContext2D,
+  state: GameState,
+): void => {
+  const radius = state.ball.radius;
+  const speed = Math.hypot(
+    state.ball.linearVelocity.x,
+    state.ball.linearVelocity.y,
+  );
+  const pipAlpha = 0.24 + Math.min(0.38, speed / 3600);
+  const basePoint = rotateBallSurfacePoint(
+    { x: 0.34, y: -0.28, z: 0.9 },
+    state.ball.angularPosition,
+  );
+
+  drawBallSpinPip(context, state, basePoint, radius, pipAlpha);
+  drawBallSpinPip(
+    context,
+    state,
+    { x: -basePoint.x, y: -basePoint.y, z: -basePoint.z },
+    radius,
+    pipAlpha,
+  );
+};
+
+const drawBallSpinPip = (
+  context: CanvasRenderingContext2D,
+  state: GameState,
+  point: { x: number; y: number; z: number },
+  ballRadius: number,
+  alpha: number,
+): void => {
+  if (point.z <= -0.08) {
+    return;
+  }
+
+  const visibility = Math.max(0.12, (point.z + 1) / 2);
+  const pipRadius = ballRadius * (0.12 + visibility * 0.1);
+  const center = {
+    x: state.ball.position.x + point.x * ballRadius * 0.74,
+    y: state.ball.position.y + point.y * ballRadius * 0.74,
+  };
+
+  context.save();
+  context.fillStyle = `rgba(20, 28, 40, ${alpha * visibility})`;
+  context.beginPath();
+  context.arc(center.x, center.y, pipRadius, 0, Math.PI * 2);
+  context.fill();
+  context.restore();
+};
+
+const rotateBallSurfacePoint = (
+  point: { x: number; y: number; z: number },
+  angularPosition: GameState['ball']['angularPosition'],
+): { x: number; y: number; z: number } => {
+  const cosX = Math.cos(angularPosition.x);
+  const sinX = Math.sin(angularPosition.x);
+  const cosY = Math.cos(angularPosition.y);
+  const sinY = Math.sin(angularPosition.y);
+  const afterX = {
+    x: point.x,
+    y: point.y * cosX - point.z * sinX,
+    z: point.y * sinX + point.z * cosX,
+  };
+
+  return {
+    x: afterX.x * cosY + afterX.z * sinY,
+    y: afterX.y,
+    z: -afterX.x * sinY + afterX.z * cosY,
+  };
 };
 
 const drawBackground = (

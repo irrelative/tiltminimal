@@ -52,6 +52,8 @@ The ball is now treated as a 2D playfield object in `src/game/game-state.ts`.
 - `position.x`, `position.y`: the ball center on the table
 - `linearVelocity.x`, `linearVelocity.y`: planar velocity
 - `angularVelocity.x`, `angularVelocity.y`: rolling spin on the table
+- `angularPosition.x`, `angularPosition.y`: accumulated rolling orientation
+  used by the renderer for surface markers
 
 There is no third rendered or simulated spatial dimension for the ball. The old
 `z`-shaped state was removed because the game is fundamentally a 2D playfield
@@ -232,6 +234,9 @@ Several table elements animate as a byproduct of gameplay state:
 
 - the ball renders with a velocity-scaled two-layer streak so fast shots read
   with a clearly visible motion blur without requiring a separate trail history
+- the ball also renders two small surface pips projected from the accumulated
+  rolling orientation so spin is visible during cradles, catches, and slower
+  rolling motion
 - flippers rotate from live physics state
 - spinner reels accumulate `angle` and `angularVelocity`
 - drop targets render with a lowered offset when `isDown`

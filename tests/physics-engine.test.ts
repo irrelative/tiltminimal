@@ -273,6 +273,20 @@ describe('stepGame', () => {
     expect(result.state.ball.linearVelocity.x).toBeGreaterThan(0);
   });
 
+  it('advances the ball rolling orientation from angular velocity', () => {
+    const state = createInitialGameState(classicTable);
+    state.status = 'playing';
+    state.ball.position.x = 420;
+    state.ball.position.y = 520;
+    state.ball.angularVelocity.x = 3;
+    state.ball.angularVelocity.y = -2;
+
+    const next = stepGame(state, classicTable, idleInput, 1 / 30);
+
+    expect(next.ball.angularPosition.x).toBeGreaterThan(0.08);
+    expect(next.ball.angularPosition.y).toBeLessThan(-0.04);
+  });
+
   it('transfers tangential slip into spin on bumper contact', () => {
     const state = createInitialGameState(classicTable);
     state.status = 'playing';

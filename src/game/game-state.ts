@@ -14,6 +14,7 @@ export interface BallState {
   position: Vector2;
   linearVelocity: Vector2;
   angularVelocity: Vector2;
+  angularPosition: Vector2;
   radius: number;
   mass: number;
   momentOfInertia: number;
@@ -140,6 +141,10 @@ export const createBallState = (board: BoardDefinition): BallState => {
       y: 0,
     },
     angularVelocity: {
+      x: 0,
+      y: 0,
+    },
+    angularPosition: {
       x: 0,
       y: 0,
     },

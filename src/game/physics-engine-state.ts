@@ -68,6 +68,10 @@ export const stepWaitingLaunchState = (
         x: 0,
         y: 0,
       },
+      angularPosition: {
+        x: 0,
+        y: 0,
+      },
     },
     plunger: plungerFrame.next,
     tableNudge,
