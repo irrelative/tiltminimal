@@ -27,6 +27,11 @@ Major features:
 - right shooter lane with a full plunge into the upper field
 - standard inlane / outlane returns built from the DSL lane helpers
 
+The lower returns are authored symmetrically with guide-defined mouths and a
+single lower rubber post per side. The extra upper entry post was intentionally
+omitted so the right shooter-lane exit stays fully clear while the visible
+lower playfield remains mirrored.
+
 The table intentionally stays lighter than the more toy-heavy built-ins. It is
 meant to play like a straightforward original solid-state game where repeated
 lane completion and spinner feeding matter more than deep staged modes.
