@@ -62,6 +62,8 @@ export const drawBall = (
   state: GameState,
 ): void => {
   const theme = getBoardTheme(board.themeId);
+  drawBallMotionStreak(context, state);
+
   context.fillStyle = theme.ballFill;
   context.beginPath();
   context.arc(
@@ -76,6 +78,54 @@ export const drawBall = (
   context.strokeStyle = theme.ballStroke;
   context.lineWidth = 2;
   context.stroke();
+};
+
+const drawBallMotionStreak = (
+  context: CanvasRenderingContext2D,
+  state: GameState,
+): void => {
+  const speed = Math.hypot(
+    state.ball.linearVelocity.x,
+    state.ball.linearVelocity.y,
+  );
+  const minTrailSpeed = 140;
+
+  if (speed <= minTrailSpeed) {
+    return;
+  }
+
+  const trailRatio = Math.min(1, (speed - minTrailSpeed) / 1800);
+  const direction = {
+    x: state.ball.linearVelocity.x / speed,
+    y: state.ball.linearVelocity.y / speed,
+  };
+  const headInset = state.ball.radius * 0.2;
+  const tailLength = state.ball.radius * 0.75 + trailRatio * 34;
+  const start = {
+    x: state.ball.position.x - direction.x * (headInset + tailLength),
+    y: state.ball.position.y - direction.y * (headInset + tailLength),
+  };
+  const end = {
+    x: state.ball.position.x - direction.x * headInset,
+    y: state.ball.position.y - direction.y * headInset,
+  };
+  const gradient = context.createLinearGradient(start.x, start.y, end.x, end.y);
+
+  gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+  gradient.addColorStop(0.55, `rgba(255, 255, 255, ${0.03 + trailRatio * 0.06})`);
+  gradient.addColorStop(1, `rgba(255, 255, 255, ${0.12 + trailRatio * 0.12})`);
+
+  context.save();
+  context.strokeStyle = gradient;
+  context.lineWidth = state.ball.radius * (0.82 + trailRatio * 0.24);
+  context.lineCap = 'round';
+  context.shadowColor = `rgba(255, 255, 255, ${0.04 + trailRatio * 0.06})`;
+  context.shadowBlur = 8 + trailRatio * 8;
+  context.beginPath();
+  context.moveTo(start.x, start.y);
+  context.lineTo(end.x, end.y);
+  context.stroke();
+  context.restore();
 };
 
 const drawBackground = (
