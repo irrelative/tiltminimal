@@ -80,6 +80,14 @@ Reason:
 - flagging those as overlaps would produce noisy warnings for valid return-lane
   and overpass style geometry
 
+The overlap pass also ignores two intentional playfield authoring patterns:
+
+- guide-to-guide joins and connected rail chains
+- saucers sitting inside guide-defined pocket lips
+
+Those combinations are common in authored tables and were producing noisy
+warnings that did not correspond to actionable defects.
+
 ### Out-of-bounds geometry
 
 The analyzer warns when an element's sampled geometry extends beyond the table

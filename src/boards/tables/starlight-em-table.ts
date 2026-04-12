@@ -233,7 +233,7 @@ const starlightEmLayout: BoardLayoutDefinition = {
     { id: 'saucer-pocket', point: absolutePoint(690, 360) },
   ],
   posts: [
-    { position: absolutePoint(450, 1140), radius: 18, material: 'rubberPost' },
+    { position: absolutePoint(450, 1100), radius: 18, material: 'rubberPost' },
     ...starlightLeftLowerLanes.posts,
     ...starlightRightLowerLanes.posts,
   ],
@@ -314,7 +314,7 @@ const starlightEmLayout: BoardLayoutDefinition = {
       score: 3000,
       holdSeconds: 0.55,
       ejectSpeed: 920,
-      ejectAngle: Math.PI * 0.82,
+      ejectAngle: Math.PI * 0.7,
       material: 'metalGuide',
     },
   ],

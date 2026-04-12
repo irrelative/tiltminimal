@@ -83,6 +83,60 @@ describe('analyzeBoard', () => {
     expect(warnings).toHaveLength(0);
   });
 
+  it('ignores intentional guide-to-guide joins in overlap warnings', () => {
+    const board = createBlankTable();
+    board.guides = [
+      {
+        start: { x: 220, y: 420 },
+        end: { x: 320, y: 420 },
+        thickness: 18,
+        material: 'metalGuide',
+      },
+      {
+        start: { x: 320, y: 420 },
+        end: { x: 420, y: 320 },
+        thickness: 18,
+        material: 'metalGuide',
+      },
+    ];
+
+    const warnings = analyzeBoard(board);
+
+    expect(warnings.some((warning) => warning.code === 'element-overlap')).toBe(
+      false,
+    );
+  });
+
+  it('ignores saucers nested inside guide pockets for overlap warnings', () => {
+    const board = createBlankTable();
+    board.saucers = [
+      {
+        x: 320,
+        y: 360,
+        radius: 28,
+        score: 500,
+        holdSeconds: 0.5,
+        ejectSpeed: 900,
+        ejectAngle: 0,
+        material: 'metalGuide',
+      },
+    ];
+    board.guides = [
+      {
+        start: { x: 292, y: 390 },
+        end: { x: 360, y: 390 },
+        thickness: 18,
+        material: 'metalGuide',
+      },
+    ];
+
+    const warnings = analyzeBoard(board);
+
+    expect(warnings.some((warning) => warning.code === 'element-overlap')).toBe(
+      false,
+    );
+  });
+
   it('reports elements that extend outside the board bounds', () => {
     const board = createBlankTable();
     board.bumpers = [
@@ -202,6 +256,36 @@ describe('analyzeBoard', () => {
     expect(
       warnings.some((warning) => warning.code === 'saucer-eject-obstructed'),
     ).toBe(true);
+  });
+
+  it('ignores guide lips that only retain the saucer pocket', () => {
+    const board = createBlankTable();
+    board.saucers = [
+      {
+        x: 320,
+        y: 360,
+        radius: 28,
+        score: 500,
+        holdSeconds: 0.5,
+        ejectSpeed: 900,
+        ejectAngle: 0,
+        material: 'metalGuide',
+      },
+    ];
+    board.guides = [
+      {
+        start: { x: 318, y: 332 },
+        end: { x: 318, y: 396 },
+        thickness: 14,
+        material: 'metalGuide',
+      },
+    ];
+
+    const warnings = analyzeBoard(board);
+
+    expect(
+      warnings.some((warning) => warning.code === 'saucer-eject-obstructed'),
+    ).toBe(false);
   });
 
   it('warns when event-producing devices are not referenced by the rules script', () => {

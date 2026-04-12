@@ -7,7 +7,7 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
   height: 1400,
   drainY: 1425,
   launchPosition: {
-    x: 804,
+    x: 840,
     y: 1188,
   },
   materials: {
@@ -27,7 +27,7 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
   ],
   standupTargets: [
     {
-      x: 114,
+      x: 60,
       y: 760,
       width: 60,
       height: 18,
@@ -36,8 +36,8 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
       material: 'rubberPost',
     },
     {
-      x: 116,
-      y: 832,
+      x: 60,
+      y: 840,
       width: 60,
       height: 18,
       angle: Math.PI / 2,
@@ -45,8 +45,8 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
       material: 'rubberPost',
     },
     {
-      x: 118,
-      y: 904,
+      x: 60,
+      y: 920,
       width: 60,
       height: 18,
       angle: Math.PI / 2,
@@ -54,8 +54,8 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
       material: 'rubberPost',
     },
     {
-      x: 120,
-      y: 976,
+      x: 60,
+      y: 1000,
       width: 60,
       height: 18,
       angle: Math.PI / 2,
@@ -63,8 +63,8 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
       material: 'rubberPost',
     },
     {
-      x: 122,
-      y: 1048,
+      x: 60,
+      y: 1080,
       width: 60,
       height: 18,
       angle: Math.PI / 2,
@@ -72,8 +72,8 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
       material: 'rubberPost',
     },
     {
-      x: 748,
-      y: 792,
+      x: 600,
+      y: 880,
       width: 82,
       height: 18,
       angle: -1.15,
@@ -83,8 +83,8 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
   ],
   dropTargets: [
     {
-      x: 770,
-      y: 486,
+      x: 800,
+      y: 500,
       width: 52,
       height: 16,
       angle: Math.PI / 2,
@@ -92,8 +92,8 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
       material: 'rubberPost',
     },
     {
-      x: 770,
-      y: 544,
+      x: 800,
+      y: 580,
       width: 52,
       height: 16,
       angle: Math.PI / 2,
@@ -101,17 +101,17 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
       material: 'rubberPost',
     },
     {
-      x: 770,
-      y: 602,
-      width: 52,
-      height: 16,
-      angle: Math.PI / 2,
-      score: 500,
-      material: 'rubberPost',
-    },
-    {
-      x: 770,
+      x: 800,
       y: 660,
+      width: 52,
+      height: 16,
+      angle: Math.PI / 2,
+      score: 500,
+      material: 'rubberPost',
+    },
+    {
+      x: 800,
+      y: 740,
       width: 52,
       height: 16,
       angle: Math.PI / 2,
@@ -127,7 +127,7 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
       score: 5000,
       holdSeconds: 0.6,
       ejectSpeed: 980,
-      ejectAngle: Math.PI / 2,
+      ejectAngle: Math.PI,
       material: 'metalGuide',
     },
     {
@@ -143,8 +143,8 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
   ],
   spinners: [
     {
-      x: 168,
-      y: 560,
+      x: 240,
+      y: 440,
       length: 88,
       thickness: 10,
       angle: -0.35,
@@ -153,7 +153,7 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
     },
     {
       x: 450,
-      y: 642,
+      y: 700,
       length: 118,
       thickness: 10,
       angle: 0.03,
@@ -161,11 +161,11 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
       material: 'metalGuide',
     },
     {
-      x: 624,
-      y: 276,
+      x: 800,
+      y: 280,
       length: 88,
       thickness: 10,
-      angle: -0.88,
+      angle: -0.72,
       score: 100,
       material: 'metalGuide',
     },
@@ -193,8 +193,8 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
       material: 'metalGuide',
     },
     {
-      start: { x: 218, y: 1086 },
-      end: { x: 364, y: 1148 },
+      start: { x: 218, y: 1040 },
+      end: { x: 364, y: 1100 },
       thickness: 20,
       material: 'rubberPost',
     },
@@ -211,8 +211,8 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
       material: 'metalGuide',
     },
     {
-      start: { x: 680, y: 1086 },
-      end: { x: 534, y: 1148 },
+      start: { x: 700, y: 980 },
+      end: { x: 540, y: 1040 },
       thickness: 20,
       material: 'rubberPost',
     },
@@ -235,8 +235,8 @@ export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinit
       material: 'metalGuide',
     },
     {
-      start: { x: 786, y: 1190 },
-      end: { x: 814, y: 210 },
+      start: { x: 880, y: 1190 },
+      end: { x: 880, y: 210 },
       thickness: 12,
       material: 'metalGuide',
     },

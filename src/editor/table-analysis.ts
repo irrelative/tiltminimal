@@ -90,6 +90,10 @@ const analyzeElementOverlaps = (
     ) {
       const right = elements[rightIndex];
 
+      if (shouldIgnoreOverlapPair(left.ref, right.ref)) {
+        continue;
+      }
+
       if (!elementsPotentiallyOverlap(left.samples, right.samples)) {
         continue;
       }
@@ -266,7 +270,9 @@ const analyzeSaucerEjectPaths = (
         (element) =>
           !(
             element.ref.kind === 'saucer' && element.ref.index === saucerIndex
-          ) && element.ref.kind !== 'rollover',
+          ) &&
+          element.ref.kind !== 'rollover' &&
+          !isSaucerPocketGuide(element, saucer),
       ),
     );
 
@@ -282,6 +288,21 @@ const analyzeSaucerEjectPaths = (
       elements: [saucerRef, blocker],
     });
   });
+};
+
+const isSaucerPocketGuide = (
+  element: AnalyzableElement,
+  saucer: BoardDefinition['saucers'][number],
+): boolean => {
+  if (element.ref.kind !== 'guide') {
+    return false;
+  }
+
+  return element.samples.some(
+    (sample) =>
+      Math.hypot(sample.x - saucer.x, sample.y - saucer.y) <=
+      saucer.radius + sample.radius + 12,
+  );
 };
 
 const analyzeRulesCoverage = (
@@ -467,6 +488,19 @@ const createRef = (
   index,
   label: `${labelPrefix} ${index + 1}`,
 });
+
+const shouldIgnoreOverlapPair = (
+  left: TableAnalysisElementRef,
+  right: TableAnalysisElementRef,
+): boolean => {
+  const kinds = new Set([left.kind, right.kind]);
+
+  if (kinds.size === 1 && kinds.has('guide')) {
+    return true;
+  }
+
+  return kinds.has('guide') && kinds.has('saucer');
+};
 
 const formatFlipperLabel = (flipper: FlipperDefinition): string =>
   flipper.side === 'left' ? 'Left' : 'Right';

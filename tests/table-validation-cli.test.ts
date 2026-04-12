@@ -7,7 +7,7 @@ import {
   shouldFailValidation,
   validateTableRecord,
 } from '../src/cli/table-validation';
-import { createBlankTable } from '../src/boards/table-library';
+import { BUILT_IN_TABLES, createBlankTable } from '../src/boards/table-library';
 import type { TableRecord } from '../src/boards/table-library';
 
 describe('table validation cli parsing', () => {
@@ -87,5 +87,12 @@ describe('table validation cli resolution and reports', () => {
     expect(shouldFailValidation([report], { failOnWarnings: true })).toBe(
       true,
     );
+  });
+
+  it('keeps all built-in tables clean under fail-on-warnings', () => {
+    const reports = BUILT_IN_TABLES.map((table) => validateTableRecord(table));
+
+    expect(shouldFailValidation(reports, { failOnWarnings: true })).toBe(false);
+    expect(reports.every((report) => report.issues.length === 0)).toBe(true);
   });
 });
