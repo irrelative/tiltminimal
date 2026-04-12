@@ -230,8 +230,8 @@ This gives the game:
 
 Several table elements animate as a byproduct of gameplay state:
 
-- the ball renders with a subtle velocity-scaled streak so fast shots read with
-  a small amount of motion blur without requiring a separate trail history
+- the ball renders with a velocity-scaled two-layer streak so fast shots read
+  with a clearly visible motion blur without requiring a separate trail history
 - flippers rotate from live physics state
 - spinner reels accumulate `angle` and `angularVelocity`
 - drop targets render with a lowered offset when `isDown`

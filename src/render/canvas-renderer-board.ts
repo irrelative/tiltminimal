@@ -62,7 +62,7 @@ export const drawBall = (
   state: GameState,
 ): void => {
   const theme = getBoardTheme(board.themeId);
-  drawBallMotionStreak(context, state);
+  drawBallMotionStreak(context, theme, state);
 
   context.fillStyle = theme.ballFill;
   context.beginPath();
@@ -82,25 +82,26 @@ export const drawBall = (
 
 const drawBallMotionStreak = (
   context: CanvasRenderingContext2D,
+  theme: ReturnType<typeof getBoardTheme>,
   state: GameState,
 ): void => {
   const speed = Math.hypot(
     state.ball.linearVelocity.x,
     state.ball.linearVelocity.y,
   );
-  const minTrailSpeed = 140;
+  const minTrailSpeed = 80;
 
   if (speed <= minTrailSpeed) {
     return;
   }
 
-  const trailRatio = Math.min(1, (speed - minTrailSpeed) / 1800);
+  const trailRatio = Math.min(1, (speed - minTrailSpeed) / 1500);
   const direction = {
     x: state.ball.linearVelocity.x / speed,
     y: state.ball.linearVelocity.y / speed,
   };
-  const headInset = state.ball.radius * 0.2;
-  const tailLength = state.ball.radius * 0.75 + trailRatio * 34;
+  const headInset = state.ball.radius * 0.1;
+  const tailLength = state.ball.radius * 1.4 + trailRatio * 64;
   const start = {
     x: state.ball.position.x - direction.x * (headInset + tailLength),
     y: state.ball.position.y - direction.y * (headInset + tailLength),
@@ -109,18 +110,44 @@ const drawBallMotionStreak = (
     x: state.ball.position.x - direction.x * headInset,
     y: state.ball.position.y - direction.y * headInset,
   };
-  const gradient = context.createLinearGradient(start.x, start.y, end.x, end.y);
+  const haloGradient = context.createLinearGradient(start.x, start.y, end.x, end.y);
+  const coreGradient = context.createLinearGradient(start.x, start.y, end.x, end.y);
 
-  gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
-  gradient.addColorStop(0.55, `rgba(255, 255, 255, ${0.03 + trailRatio * 0.06})`);
-  gradient.addColorStop(1, `rgba(255, 255, 255, ${0.12 + trailRatio * 0.12})`);
+  haloGradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+  haloGradient.addColorStop(
+    0.45,
+    `rgba(255, 255, 255, ${0.08 + trailRatio * 0.1})`,
+  );
+  haloGradient.addColorStop(
+    1,
+    `rgba(255, 255, 255, ${0.22 + trailRatio * 0.18})`,
+  );
+  coreGradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+  coreGradient.addColorStop(
+    0.6,
+    `rgba(255, 252, 244, ${0.18 + trailRatio * 0.12})`,
+  );
+  coreGradient.addColorStop(
+    1,
+    `rgba(255, 255, 255, ${0.42 + trailRatio * 0.28})`,
+  );
 
   context.save();
-  context.strokeStyle = gradient;
-  context.lineWidth = state.ball.radius * (0.82 + trailRatio * 0.24);
+  context.globalCompositeOperation = 'screen';
   context.lineCap = 'round';
-  context.shadowColor = `rgba(255, 255, 255, ${0.04 + trailRatio * 0.06})`;
-  context.shadowBlur = 8 + trailRatio * 8;
+
+  context.strokeStyle = haloGradient;
+  context.lineWidth = state.ball.radius * (1.45 + trailRatio * 0.5);
+  context.shadowColor = theme.ballFill;
+  context.shadowBlur = 12 + trailRatio * 12;
+  context.beginPath();
+  context.moveTo(start.x, start.y);
+  context.lineTo(end.x, end.y);
+  context.stroke();
+
+  context.strokeStyle = coreGradient;
+  context.lineWidth = state.ball.radius * (0.7 + trailRatio * 0.22);
+  context.shadowBlur = 6 + trailRatio * 6;
   context.beginPath();
   context.moveTo(start.x, start.y);
   context.lineTo(end.x, end.y);
