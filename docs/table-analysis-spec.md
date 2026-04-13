@@ -108,6 +108,11 @@ the plunger lane body as its own sampled geometry. That means posts, targets,
 guides, or other devices placed inside the shooter lane will now surface as
 regular `element-overlap` warnings against `Plunger Lane`.
 
+This plunger-lane intrusion check is stricter than the general overlap pass:
+raised guides are still excluded from ordinary overlap noise, but they are
+explicitly checked against the shooter lane because a rail that crosses the
+lane body is still a launcher-layout defect.
+
 ### Flipper keepout
 
 The analyzer warns when guides, posts, targets, or slingshot geometry intrude

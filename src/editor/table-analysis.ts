@@ -68,6 +68,7 @@ export const analyzeBoard = (
 
   analyzeElementOverlaps(playfieldElements, warnings);
   analyzeOutOfBounds(board, allElements, warnings);
+  analyzePlungerLaneIntrusions(allElements, warnings);
   analyzeLaunchCorridor(board, playfieldElements, warnings);
   analyzeFlipperKeepouts(board, playfieldElements, warnings);
   analyzeSpinnerClearance(board, playfieldElements, warnings);
@@ -134,6 +135,35 @@ const analyzeOutOfBounds = (
       title: 'Out of bounds',
       message: `${element.ref.label} extends beyond the table bounds.`,
       elements: [element.ref],
+    });
+  }
+};
+
+const analyzePlungerLaneIntrusions = (
+  elements: AnalyzableElement[],
+  warnings: TableAnalysisWarning[],
+): void => {
+  const plungerLane = elements.find((element) => element.ref.kind === 'plunger-lane');
+
+  if (!plungerLane) {
+    return;
+  }
+
+  for (const element of elements) {
+    if (element.ref.kind === 'plunger-lane') {
+      continue;
+    }
+
+    if (!elementsPotentiallyOverlap(plungerLane.samples, element.samples)) {
+      continue;
+    }
+
+    warnings.push({
+      severity: 'warning',
+      code: 'element-overlap',
+      title: 'Potential overlap',
+      message: `${plungerLane.ref.label} overlaps ${element.ref.label}.`,
+      elements: [plungerLane.ref, element.ref],
     });
   }
 };

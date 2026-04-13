@@ -200,6 +200,33 @@ describe('analyzeBoard', () => {
     expect(overlap?.message).toContain('Post 1');
   });
 
+  it('reports raised guides that intrude into the plunger lane body', () => {
+    const board = createBlankTable();
+    board.guides = [
+      {
+        start: { x: board.launchPosition.x + 40, y: board.launchPosition.y - 40 },
+        end: {
+          x: board.launchPosition.x,
+          y: board.launchPosition.y - board.plunger.guideLength / 2,
+        },
+        thickness: 14,
+        material: 'metalGuide',
+        plane: 'raised',
+      },
+    ];
+
+    const warnings = analyzeBoard(board);
+
+    expect(
+      warnings.some(
+        (warning) =>
+          warning.code === 'element-overlap' &&
+          warning.message.includes('Plunger Lane') &&
+          warning.message.includes('Guide 1'),
+      ),
+    ).toBe(true);
+  });
+
   it('keeps the double crossed shooter lane clear of body overlaps', () => {
     const warnings = analyzeBoard(doubleCrossedTable);
 

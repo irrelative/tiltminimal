@@ -201,7 +201,7 @@ const doubleCrossedRightLowerLanes = createInlaneOutlanePair({
   side: 'right',
   flipperPivot: anchorPoint('right-flipper-pivot'),
   outerGuideStartOffset: { x: 176, y: -40 },
-  outerGuideEndOffset: { x: 120, y: -320 },
+  outerGuideEndOffset: { x: 160, y: -320 },
   innerGuideStartOffset: { x: 56, y: -200 },
   innerGuideEndOffset: { x: 80, y: 40 },
   entryPostOffsets: [

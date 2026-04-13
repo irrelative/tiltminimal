@@ -219,7 +219,7 @@ const classicTableLayout: BoardLayoutDefinition = {
     },
     {
       start: absolutePoint(810, 880),
-      end: absolutePoint(730, 1260),
+      end: absolutePoint(810, 1260),
       thickness: 14,
       material: 'metalGuide',
       plane: 'raised',

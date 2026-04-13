@@ -32,6 +32,10 @@ single lower rubber post per side. The extra upper entry post was intentionally
 omitted so the right shooter-lane exit stays fully clear while the visible
 lower playfield remains mirrored.
 
+The right outer return guide is kept fully outside the shooter-lane body rather
+than mirroring the left side exactly at its upper end. That break from exact
+mirroring is intentional and is limited to the shooter-lane side only.
+
 The table intentionally stays lighter than the more toy-heavy built-ins. It is
 meant to play like a straightforward original solid-state game where repeated
 lane completion and spinner feeding matter more than deep staged modes.
