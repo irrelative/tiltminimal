@@ -22,6 +22,8 @@ import { drawHud } from './canvas-renderer-hud';
 
 export class CanvasRenderer {
   private context: CanvasRenderingContext2D | null = null;
+  private lastDisplayWidth = 0;
+  private lastDisplayHeight = 0;
   private staticGameLayers:
     | {
         board: BoardDefinition;
@@ -90,6 +92,42 @@ export class CanvasRenderer {
     if (this.canvas.height !== board.height) {
       this.canvas.height = board.height;
     }
+
+    this.syncDisplaySize(board);
+  }
+
+  private syncDisplaySize(board: BoardDefinition): void {
+    const container = this.canvas.parentElement;
+
+    if (!container) {
+      return;
+    }
+
+    const availableWidth = container.clientWidth;
+    const availableHeight = container.clientHeight;
+
+    if (availableWidth <= 0 || availableHeight <= 0) {
+      return;
+    }
+
+    const scale = Math.min(
+      availableWidth / board.width,
+      availableHeight / board.height,
+    );
+    const displayWidth = Math.max(1, Math.floor(board.width * scale));
+    const displayHeight = Math.max(1, Math.floor(board.height * scale));
+
+    if (
+      displayWidth === this.lastDisplayWidth &&
+      displayHeight === this.lastDisplayHeight
+    ) {
+      return;
+    }
+
+    this.canvas.style.width = `${displayWidth}px`;
+    this.canvas.style.height = `${displayHeight}px`;
+    this.lastDisplayWidth = displayWidth;
+    this.lastDisplayHeight = displayHeight;
   }
 
   private getContext(): CanvasRenderingContext2D {

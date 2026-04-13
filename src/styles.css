@@ -538,6 +538,14 @@ body[data-route='play'] .playfield-frame {
   touch-action: none;
 }
 
+body[data-route='editor'] #game,
+body[data-route='rules'] #game {
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+}
+
 body[data-route='play'] #game {
   width: min(100%, calc((100svh - (var(--stage-padding) * 2) - 64px) * 9 / 14));
   height: auto;
