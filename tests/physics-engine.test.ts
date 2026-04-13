@@ -659,6 +659,38 @@ describe('stepGame', () => {
     }
   });
 
+  it('keeps a shallow-plunged ball captured when a relaunch starts from a left-offset lane state', () => {
+    const board = createBlankTable('Launcher Clip Recovery Board');
+    const lane = getPlungerLaneCenterBounds(board, board.ball.radius);
+    let state = createInitialGameState(board);
+    state.status = 'playing';
+    state.ball.position.x = lane.minX - board.ball.radius;
+    state.ball.position.y = board.launchPosition.y + 24;
+    state.ball.linearVelocity.x = -120;
+    state.ball.linearVelocity.y = 20;
+
+    state = stepGame(state, board, { ...idleInput, launchPressed: true }, 1 / 60);
+
+    expect(state.ball.position.x).toBeLessThanOrEqual(lane.maxX);
+    expect(state.ball.position.x).toBeGreaterThanOrEqual(lane.minX);
+
+    for (let frame = 0; frame < 45; frame += 1) {
+      state = stepGame(
+        state,
+        board,
+        frame < 12 ? { ...idleInput, launchPressed: true } : idleInput,
+        1 / 60,
+      );
+
+      if (state.ball.position.y < lane.topY) {
+        break;
+      }
+
+      expect(state.ball.position.x).toBeLessThanOrEqual(lane.maxX);
+      expect(state.ball.position.x).toBeGreaterThanOrEqual(lane.minX);
+    }
+  });
+
   it('bounces off a curved guide', () => {
     const board = createBlankTable('Curved Guide Board');
     board.guides = [

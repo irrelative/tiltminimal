@@ -148,6 +148,7 @@ export const stepPlayingState = (
     resolveGuideCollisions(next, board, board.physics.solver);
     resolvePostCollisions(next, board, board.physics.solver);
     resolvePlungerCollision(next, board, plungerFrame, board.physics.solver);
+    resolvePlungerGuideCollisions(next, board, board.physics.solver);
     constrainBallToLauncherLane(next, board);
     resolveStandupTargetCollisions(next, board, board.physics.solver, events);
     resolveDropTargetCollisions(next, board, board.physics.solver, events);

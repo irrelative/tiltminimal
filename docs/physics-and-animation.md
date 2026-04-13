@@ -84,6 +84,10 @@ Handled by `stepPlayingState(...)`.
 - The shooter lane is treated as a corridor while the ball is inside its guide
   span, so a returned ball cannot clip outside the relaunch track before it
   exits back onto the playfield.
+- During an active relaunch, shooter-lane guide contacts are resolved again
+  after the plunger strike and the lane capture window is widened on the inner
+  side. This prevents a shallow plunge followed by a harder replunge from
+  kicking the ball through the lane wall because of one-frame overlap error.
 - Gameplay devices emit events for the rules system.
 - A drain resets the ball back to the launch state.
 

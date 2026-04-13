@@ -239,7 +239,10 @@ export const constrainBallToLauncherLane = (
   const maxX = bounds.maxX + state.tableNudge.offset.x;
   const topY = bounds.topY + state.tableNudge.offset.y;
   const bottomY = bounds.bottomY + state.tableNudge.offset.y;
-  const leftCaptureMargin = state.ball.radius / 2;
+  const leftCaptureMargin =
+    state.plunger.pullback > 0 || state.plunger.releaseSpeed > 0
+      ? Math.max(state.ball.radius, board.plunger.thickness * 2)
+      : state.ball.radius / 2;
   const rightCaptureMargin = Math.max(
     state.ball.radius,
     board.plunger.thickness * 2,
