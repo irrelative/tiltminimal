@@ -250,7 +250,6 @@ export const createTopArchLanes = (options: {
   shoulderStartOffsetY?: number;
   sideEntryInset?: number;
   roofInset?: number;
-  cornerCapHeight?: number;
   material?: SurfaceMaterialName;
   guideThickness?: number;
 }): TopArchLanesLayout => {
@@ -267,7 +266,6 @@ export const createTopArchLanes = (options: {
     options.shoulderStartOffsetY ?? Math.max(72, options.radius * 3.1);
   const sideEntryInset = options.sideEntryInset ?? options.spacingX * 0.85;
   const roofInset = options.roofInset ?? options.spacingX * 0.5;
-  const cornerCapHeight = options.cornerCapHeight ?? Math.max(24, guideThickness * 2);
   const leftmostOffset = laneOffsets[0] ?? 0;
   const rightmostOffset = laneOffsets[laneOffsets.length - 1] ?? 0;
 
@@ -290,16 +288,6 @@ export const createTopArchLanes = (options: {
     },
     {
       start: offsetLayoutPoint(options.center, leftmostOffset - roofInset, roofOffsetY),
-      end: offsetLayoutPoint(
-        options.center,
-        leftmostOffset - roofInset,
-        roofOffsetY - cornerCapHeight,
-      ),
-      thickness: guideThickness,
-      material,
-    },
-    {
-      start: offsetLayoutPoint(options.center, leftmostOffset - roofInset, roofOffsetY),
       end: offsetLayoutPoint(options.center, 0, roofOffsetY),
       thickness: guideThickness,
       material,
@@ -307,20 +295,6 @@ export const createTopArchLanes = (options: {
     {
       start: offsetLayoutPoint(options.center, 0, roofOffsetY),
       end: offsetLayoutPoint(options.center, rightmostOffset + roofInset, roofOffsetY),
-      thickness: guideThickness,
-      material,
-    },
-    {
-      start: offsetLayoutPoint(
-        options.center,
-        rightmostOffset + roofInset,
-        roofOffsetY,
-      ),
-      end: offsetLayoutPoint(
-        options.center,
-        rightmostOffset + roofInset,
-        roofOffsetY - cornerCapHeight,
-      ),
       thickness: guideThickness,
       material,
     },

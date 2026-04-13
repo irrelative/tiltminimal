@@ -121,11 +121,6 @@ Inside each playing substep:
 The order is important because moving devices need their transient motion solved
 before ball contacts are evaluated.
 
-Guide collisions for straight line guides now use a swept test across the
-ball's substep motion segment in addition to the usual end-of-step overlap
-check. This prevents a fast launch from skipping entirely through a thin guide
-when the ball starts one side of the segment and ends the substep on the other.
-
 ## Table Nudging
 
 The game now models cabinet nudging as transient table motion rather than a

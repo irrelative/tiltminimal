@@ -76,51 +76,6 @@ describe('starlightEmTable', () => {
     expect(minY).toBeLessThan(280);
   });
 
-  it('keeps a shallow plunge followed by a relaunch inside the top arch', () => {
-    let state = createInitialGameState(starlightEmTable);
-    state = stepGame(
-      state,
-      starlightEmTable,
-      { ...idleInput, launchPressed: true },
-      0.03,
-    );
-
-    for (let step = 0; step < 120; step += 1) {
-      state = stepGame(state, starlightEmTable, idleInput, 1 / 120);
-
-      if (state.status === 'playing') {
-        break;
-      }
-    }
-
-    let seenDownward = false;
-    let downwardFrame = -1;
-
-    for (let step = 0; step < 600; step += 1) {
-      if (!seenDownward && state.status === 'playing' && state.ball.linearVelocity.y > 0) {
-        seenDownward = true;
-        downwardFrame = step;
-      }
-
-      const relaunchActive =
-        seenDownward &&
-        step >= downwardFrame + 4 &&
-        step < downwardFrame + 4 + 90;
-
-      state = stepGame(
-        state,
-        starlightEmTable,
-        relaunchActive ? { ...idleInput, launchPressed: true } : idleInput,
-        1 / 120,
-      );
-
-      if (state.ball.position.y < 260) {
-        expect(state.ball.position.x).toBeGreaterThanOrEqual(120);
-        expect(state.ball.position.x).toBeLessThanOrEqual(800);
-      }
-    }
-  });
-
   it('uses raised lower return guides instead of playfield-level flipper blockers', () => {
     const raisedGuides = starlightEmTable.guides.filter(
       (guide) => guide.plane === 'raised',

@@ -726,30 +726,6 @@ describe('stepGame', () => {
     expect(next.ball.position.x).toBeLessThan(state.ball.position.x + 4);
     expect(next.ball.position.y).toBeLessThan(state.ball.position.y + 4);
   });
-
-  it('uses swept collision so a fast ball cannot tunnel through a line guide', () => {
-    const board = createBlankTable('Swept Guide Board');
-    board.gravity = 0;
-    board.guides = [
-      {
-        start: { x: 450, y: 280 },
-        end: { x: 450, y: 520 },
-        thickness: 18,
-        material: 'metalGuide',
-      },
-    ];
-    const state = createInitialGameState(board);
-    state.status = 'playing';
-    state.ball.position.x = 490;
-    state.ball.position.y = 400;
-    state.ball.linearVelocity.x = -8000;
-    state.ball.linearVelocity.y = 0;
-
-    const next = stepGame(state, board, idleInput, 1 / 120);
-
-    expect(next.ball.position.x).toBeGreaterThan(440);
-    expect(next.ball.linearVelocity.x).toBeGreaterThan(-8000);
-  });
 });
 
 const placeBallOnFlipperSurface = (

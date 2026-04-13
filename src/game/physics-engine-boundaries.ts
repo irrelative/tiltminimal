@@ -1,12 +1,10 @@
 import type {
   BoardDefinition,
   GuideDefinition,
-  Point,
   SolverPhysicsDefinition,
 } from '../types/board-definition';
 import type { ContactData } from './contact-types';
 import type { GameState } from './game-state';
-import { getSweptGuideCollision } from './guide-sweep';
 import { projectPointToGuide } from './guide-geometry';
 import { getSurfaceMaterial } from './materials';
 import {
@@ -109,26 +107,17 @@ export const resolveGuideCollisions = (
   state: GameState,
   board: BoardDefinition,
   solver: SolverPhysicsDefinition,
-  previousBallPosition?: Point,
 ): void => {
   const tableOffset = state.tableNudge.offset;
-  let sweepStart = previousBallPosition;
 
   for (const guide of board.guides) {
-    const collided = resolveGuideCollision(
+    resolveGuideCollision(
       state,
       board,
       offsetGuide(guide, tableOffset),
       solver,
       state.tableNudge.velocity,
-      sweepStart,
     );
-
-    if (collided) {
-      sweepStart = {
-        ...state.ball.position,
-      };
-    }
   }
 };
 
@@ -136,26 +125,17 @@ export const resolvePlungerGuideCollisions = (
   state: GameState,
   board: BoardDefinition,
   solver: SolverPhysicsDefinition,
-  previousBallPosition?: Point,
 ): void => {
   const tableOffset = state.tableNudge.offset;
-  let sweepStart = previousBallPosition;
 
   for (const guide of getPlungerGuideSegments(board)) {
-    const collided = resolveGuideCollision(
+    resolveGuideCollision(
       state,
       board,
       offsetGuide(guide, tableOffset),
       solver,
       state.tableNudge.velocity,
-      sweepStart,
     );
-
-    if (collided) {
-      sweepStart = {
-        ...state.ball.position,
-      };
-    }
   }
 };
 
@@ -165,71 +145,32 @@ const resolveGuideCollision = (
   guide: GuideDefinition,
   solver: SolverPhysicsDefinition,
   surfaceVelocity: ContactData['surfaceVelocity'] = { x: 0, y: 0 },
-  previousBallPosition?: Point,
-): boolean => {
+): void => {
   const projection = projectPointToGuide(state.ball.position, guide);
   const overlap = state.ball.radius + guide.thickness / 2 - projection.distance;
+
+  if (overlap <= 0) {
+    return;
+  }
+
   const guideMaterial = getSurfaceMaterial(
     guide.material,
     board.surfaceMaterials,
   );
-
-  if (overlap > 0) {
-    const incomingNormalSpeed =
-      (state.ball.linearVelocity.x - surfaceVelocity.x) * projection.normal.x +
-      (state.ball.linearVelocity.y - surfaceVelocity.y) * projection.normal.y;
-    const contact = createStaticContact(
-      guideMaterial,
-      projection.point,
-      projection.normal,
-      overlap,
-      surfaceVelocity,
-    );
-
-    if (incomingNormalSpeed < 0 || overlap > solver.epsilon) {
-      resolveBallContact(state.ball, contact, solver);
-      return true;
-    }
-
-    return false;
-  }
-
-  if (!previousBallPosition) {
-    return false;
-  }
-
-  const swept = getSweptGuideCollision(
-    previousBallPosition,
-    state.ball.position,
-    guide,
-    state.ball.radius + guide.thickness / 2,
-    solver.epsilon,
-  );
-
-  if (!swept) {
-    return false;
-  }
-
-  state.ball.position.x = swept.position.x;
-  state.ball.position.y = swept.position.y;
-
+  const incomingNormalSpeed =
+    (state.ball.linearVelocity.x - surfaceVelocity.x) * projection.normal.x +
+    (state.ball.linearVelocity.y - surfaceVelocity.y) * projection.normal.y;
   const contact = createStaticContact(
     guideMaterial,
-    swept.point,
-    swept.normal,
-    solver.epsilon,
+    projection.point,
+    projection.normal,
+    overlap,
     surfaceVelocity,
   );
-  const incomingNormalSpeed =
-    (state.ball.linearVelocity.x - surfaceVelocity.x) * swept.normal.x +
-    (state.ball.linearVelocity.y - surfaceVelocity.y) * swept.normal.y;
 
-  if (incomingNormalSpeed < 0) {
+  if (incomingNormalSpeed < 0 || overlap > solver.epsilon) {
     resolveBallContact(state.ball, contact, solver);
-    return true;
   }
-
-  return false;
 };
 
 export const resolvePlungerCollision = (
