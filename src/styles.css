@@ -94,9 +94,11 @@ textarea {
 
 .workspace {
   min-height: calc(100svh - (var(--stage-padding) * 2));
+  height: calc(100svh - (var(--stage-padding) * 2));
   display: grid;
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
   gap: clamp(14px, 2vw, 24px);
+  align-items: stretch;
 }
 
 body[data-route='play'] .workspace {
@@ -107,6 +109,7 @@ body[data-route='play'] .workspace {
 
 .control-panel,
 .stage-shell {
+  min-height: 0;
   border: 1px solid var(--panel-border);
   border-radius: var(--radius);
   background: var(--panel);
@@ -115,6 +118,7 @@ body[data-route='play'] .workspace {
 }
 
 .control-panel {
+  height: 100%;
   display: grid;
   gap: 14px;
   padding: 18px;
@@ -353,6 +357,7 @@ h2 {
 }
 
 .stage-shell {
+  height: 100%;
   padding: 18px;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
@@ -548,9 +553,11 @@ body[data-route='play'] #game {
 @media (max-width: 1080px) {
   .workspace {
     grid-template-columns: 1fr;
+    height: auto;
   }
 
   .stage-shell {
+    height: auto;
     min-height: 70svh;
   }
 
