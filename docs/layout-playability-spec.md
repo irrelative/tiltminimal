@@ -84,6 +84,8 @@ Behavior requirements:
 - each top rollover lane must have at least one open approach from below
 - lane separators should divide adjacent lanes without sealing the whole bank
 - outer shoulders should connect naturally to orbit or shooter-lane feed guides
+- roof endpoints should include corner-closing geometry so a fast ball cannot
+  ride under the roof line and leak out through the upper shoulder corner
 
 ## Validation Guarantees
 

@@ -140,15 +140,33 @@ export const stepPlayingState = (
     }
 
     next.ball.linearVelocity.y += board.gravity * stepSeconds;
+    const previousBallPosition = {
+      ...next.ball.position,
+    };
     next.ball.position.x += next.ball.linearVelocity.x * stepSeconds;
     next.ball.position.y += next.ball.linearVelocity.y * stepSeconds;
 
     resolveWallCollisions(next, board, board.physics.solver);
-    resolvePlungerGuideCollisions(next, board, board.physics.solver);
-    resolveGuideCollisions(next, board, board.physics.solver);
+    resolvePlungerGuideCollisions(
+      next,
+      board,
+      board.physics.solver,
+      previousBallPosition,
+    );
+    resolveGuideCollisions(
+      next,
+      board,
+      board.physics.solver,
+      previousBallPosition,
+    );
     resolvePostCollisions(next, board, board.physics.solver);
     resolvePlungerCollision(next, board, plungerFrame, board.physics.solver);
-    resolvePlungerGuideCollisions(next, board, board.physics.solver);
+    resolvePlungerGuideCollisions(
+      next,
+      board,
+      board.physics.solver,
+      previousBallPosition,
+    );
     constrainBallToLauncherLane(next, board);
     resolveStandupTargetCollisions(next, board, board.physics.solver, events);
     resolveDropTargetCollisions(next, board, board.physics.solver, events);
