@@ -66,7 +66,7 @@ export const analyzeBoard = (
   const playfieldElements = collectAnalyzableElements(board, false);
   const allElements = collectAnalyzableElements(board, true);
 
-  analyzeElementOverlaps(playfieldElements, warnings);
+  analyzeElementOverlaps(board, playfieldElements, warnings);
   analyzeOutOfBounds(board, allElements, warnings);
   analyzePlungerLaneIntrusions(allElements, warnings);
   analyzeLaunchCorridor(board, playfieldElements, warnings);
@@ -79,6 +79,7 @@ export const analyzeBoard = (
 };
 
 const analyzeElementOverlaps = (
+  board: BoardDefinition,
   elements: AnalyzableElement[],
   warnings: TableAnalysisWarning[],
 ): void => {
@@ -93,6 +94,10 @@ const analyzeElementOverlaps = (
       const right = elements[rightIndex];
 
       if (shouldIgnoreOverlapPair(left.ref, right.ref)) {
+        continue;
+      }
+
+      if (isIntentionalAttachment(board, left.ref, right.ref)) {
         continue;
       }
 
@@ -143,7 +148,9 @@ const analyzePlungerLaneIntrusions = (
   elements: AnalyzableElement[],
   warnings: TableAnalysisWarning[],
 ): void => {
-  const plungerLane = elements.find((element) => element.ref.kind === 'plunger-lane');
+  const plungerLane = elements.find(
+    (element) => element.ref.kind === 'plunger-lane',
+  );
 
   if (!plungerLane) {
     return;
@@ -290,7 +297,10 @@ const analyzeSaucerEjectPaths = (
 ): void => {
   board.saucers.forEach((saucer, saucerIndex) => {
     const saucerRef = createRef('saucer', saucerIndex, 'Saucer');
-    const ejectDistance = Math.max(110, Math.min(190, saucer.ejectSpeed * 0.18));
+    const ejectDistance = Math.max(
+      110,
+      Math.min(190, saucer.ejectSpeed * 0.18),
+    );
     const start = { x: saucer.x, y: saucer.y };
     const end = {
       x: saucer.x + Math.cos(saucer.ejectAngle) * ejectDistance,
@@ -494,7 +504,11 @@ const collectAnalyzableElements = (
 
   board.flippers.forEach((flipper, index) => {
     elements.push({
-      ref: createRef('flipper', index, `${formatFlipperLabel(flipper)} Flipper`),
+      ref: createRef(
+        'flipper',
+        index,
+        `${formatFlipperLabel(flipper)} Flipper`,
+      ),
       samples: createFlipperSamples(flipper),
     });
   });
@@ -517,7 +531,10 @@ const createPlungerLaneElement = (
   board: BoardDefinition,
 ): AnalyzableElement => {
   const bounds = getPlungerLaneBounds(board);
-  const bottomY = Math.max(bounds.topY + 1, Math.min(bounds.bottomY, board.launchPosition.y));
+  const bottomY = Math.max(
+    bounds.topY + 1,
+    Math.min(bounds.bottomY, board.launchPosition.y),
+  );
   const center = {
     x: (bounds.minX + bounds.maxX) / 2,
     y: (bounds.topY + bottomY) / 2,
@@ -560,6 +577,184 @@ const shouldIgnoreOverlapPair = (
 
   return kinds.has('guide') && kinds.has('saucer');
 };
+
+const isIntentionalAttachment = (
+  board: BoardDefinition,
+  left: TableAnalysisElementRef,
+  right: TableAnalysisElementRef,
+): boolean =>
+  isGuidePostJoin(board, left, right) ||
+  isGuideSlingshotJoin(board, left, right);
+
+const isGuidePostJoin = (
+  board: BoardDefinition,
+  left: TableAnalysisElementRef,
+  right: TableAnalysisElementRef,
+): boolean => {
+  const pair = getGuideAndPost(board, left, right);
+
+  if (!pair) {
+    return false;
+  }
+
+  const { guide, post } = pair;
+
+  if (isArcGuide(guide)) {
+    return false;
+  }
+
+  const threshold = post.radius + guide.thickness / 2 + 2;
+
+  return (
+    getPointDistance(post, guide.start) <= threshold ||
+    getPointDistance(post, guide.end) <= threshold
+  );
+};
+
+const isGuideSlingshotJoin = (
+  board: BoardDefinition,
+  left: TableAnalysisElementRef,
+  right: TableAnalysisElementRef,
+): boolean => {
+  const pair = getGuideAndSlingshot(board, left, right);
+
+  if (!pair) {
+    return false;
+  }
+
+  const { guide, slingshot } = pair;
+
+  if (isArcGuide(guide)) {
+    return false;
+  }
+
+  if (guide.material !== slingshot.material) {
+    return false;
+  }
+
+  const threshold = guide.thickness / 2 + slingshot.height / 2 + 4;
+
+  return (
+    getDistanceToOrientedCapsule(
+      guide.start,
+      slingshot,
+      slingshot.width,
+      slingshot.height,
+      slingshot.angle,
+    ) <= threshold ||
+    getDistanceToOrientedCapsule(
+      guide.end,
+      slingshot,
+      slingshot.width,
+      slingshot.height,
+      slingshot.angle,
+    ) <= threshold
+  );
+};
+
+const getGuideAndPost = (
+  board: BoardDefinition,
+  left: TableAnalysisElementRef,
+  right: TableAnalysisElementRef,
+): {
+  guide: BoardDefinition['guides'][number];
+  post: BoardDefinition['posts'][number];
+} | null => {
+  if (left.kind === 'guide' && right.kind === 'post') {
+    return {
+      guide: board.guides[left.index]!,
+      post: board.posts[right.index]!,
+    };
+  }
+
+  if (left.kind === 'post' && right.kind === 'guide') {
+    return {
+      guide: board.guides[right.index]!,
+      post: board.posts[left.index]!,
+    };
+  }
+
+  return null;
+};
+
+const getGuideAndSlingshot = (
+  board: BoardDefinition,
+  left: TableAnalysisElementRef,
+  right: TableAnalysisElementRef,
+): {
+  guide: BoardDefinition['guides'][number];
+  slingshot: BoardDefinition['slingshots'][number];
+} | null => {
+  if (left.kind === 'guide' && right.kind === 'slingshot') {
+    return {
+      guide: board.guides[left.index]!,
+      slingshot: board.slingshots[right.index]!,
+    };
+  }
+
+  if (left.kind === 'slingshot' && right.kind === 'guide') {
+    return {
+      guide: board.guides[right.index]!,
+      slingshot: board.slingshots[left.index]!,
+    };
+  }
+
+  return null;
+};
+
+const getDistanceToOrientedCapsule = (
+  point: Point,
+  center: Point,
+  length: number,
+  thickness: number,
+  angle: number,
+): number => {
+  const halfLength = length / 2;
+  const start = {
+    x: center.x - Math.cos(angle) * halfLength,
+    y: center.y - Math.sin(angle) * halfLength,
+  };
+  const end = {
+    x: center.x + Math.cos(angle) * halfLength,
+    y: center.y + Math.sin(angle) * halfLength,
+  };
+
+  return Math.max(
+    0,
+    getPointToSegmentDistance(point, start, end) - thickness / 2,
+  );
+};
+
+const getPointToSegmentDistance = (
+  point: Point,
+  start: Point,
+  end: Point,
+): number => {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const lengthSquared = dx * dx + dy * dy;
+
+  if (lengthSquared <= Number.EPSILON) {
+    return getPointDistance(point, start);
+  }
+
+  const projection = Math.min(
+    1,
+    Math.max(
+      0,
+      ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared,
+    ),
+  );
+  const closest = {
+    x: start.x + dx * projection,
+    y: start.y + dy * projection,
+  };
+
+  return getPointDistance(point, closest);
+};
+
+const getPointDistance = (left: Point, right: Point): number =>
+  Math.hypot(left.x - right.x, left.y - right.y);
 
 const formatFlipperLabel = (flipper: FlipperDefinition): string =>
   flipper.side === 'left' ? 'Left' : 'Right';
@@ -610,8 +805,7 @@ const createFlipperSamples = (flipper: FlipperDefinition): SampleCircle[] => {
   const sampleCount = Math.max(
     5,
     Math.ceil(
-      flipper.length /
-        Math.max(flipper.thickness * 0.7, MIN_SAMPLE_SPACING),
+      flipper.length / Math.max(flipper.thickness * 0.7, MIN_SAMPLE_SPACING),
     ),
   );
   const samples: SampleCircle[] = [];
@@ -722,7 +916,8 @@ const getMinFlipperSweepDistance = (
   for (let index = 0; index <= sampleCount; index += 1) {
     const ratio = index / sampleCount;
     const angle =
-      flipper.restingAngle + (flipper.activeAngle - flipper.restingAngle) * ratio;
+      flipper.restingAngle +
+      (flipper.activeAngle - flipper.restingAngle) * ratio;
     minDistance = Math.min(
       minDistance,
       getDistanceToFlipperSurface(sample, flipper, angle),

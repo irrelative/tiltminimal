@@ -43,8 +43,8 @@ export const offsetLayoutPoint = (
   dy: number,
 ): LayoutPoint => {
   const nextOffset = {
-    x: ('offset' in point ? point.offset?.x ?? 0 : 0) + dx,
-    y: ('offset' in point ? point.offset?.y ?? 0 : 0) + dy,
+    x: ('offset' in point ? (point.offset?.x ?? 0) : 0) + dx,
+    y: ('offset' in point ? (point.offset?.y ?? 0) : 0) + dy,
   };
 
   if ('anchor' in point && point.kind === 'anchor') {
@@ -194,7 +194,8 @@ export const createShooterLaneRight = (options: {
   const plungerThickness = options.plunger?.thickness ?? 24;
   const laneHalfWidth = plungerThickness / 2 + 12;
   const guideTopY = options.launchY - options.guideLength;
-  const material = options.material ?? options.plunger?.material ?? 'metalGuide';
+  const material =
+    options.material ?? options.plunger?.material ?? 'metalGuide';
   const wallThickness = options.wallThickness ?? 14;
   const innerX = options.launchX - laneHalfWidth;
   const outerX = options.launchX + laneHalfWidth;
@@ -259,7 +260,8 @@ export const createTopArchLanes = (options: {
   );
   const material = options.material ?? 'metalGuide';
   const guideThickness = options.guideThickness ?? 14;
-  const roofOffsetY = options.roofOffsetY ?? -Math.max(54, options.radius * 2.5);
+  const roofOffsetY =
+    options.roofOffsetY ?? -Math.max(54, options.radius * 2.5);
   const separatorBottomOffsetY =
     options.separatorBottomOffsetY ?? Math.max(28, options.radius * 1.15);
   const shoulderStartOffsetY =
@@ -282,19 +284,31 @@ export const createTopArchLanes = (options: {
         leftmostOffset - sideEntryInset,
         shoulderStartOffsetY,
       ),
-      end: offsetLayoutPoint(options.center, leftmostOffset - roofInset, roofOffsetY),
+      end: offsetLayoutPoint(
+        options.center,
+        leftmostOffset - roofInset,
+        roofOffsetY,
+      ),
       thickness: guideThickness,
       material,
     },
     {
-      start: offsetLayoutPoint(options.center, leftmostOffset - roofInset, roofOffsetY),
+      start: offsetLayoutPoint(
+        options.center,
+        leftmostOffset - roofInset,
+        roofOffsetY,
+      ),
       end: offsetLayoutPoint(options.center, 0, roofOffsetY),
       thickness: guideThickness,
       material,
     },
     {
       start: offsetLayoutPoint(options.center, 0, roofOffsetY),
-      end: offsetLayoutPoint(options.center, rightmostOffset + roofInset, roofOffsetY),
+      end: offsetLayoutPoint(
+        options.center,
+        rightmostOffset + roofInset,
+        roofOffsetY,
+      ),
       thickness: guideThickness,
       material,
     },
@@ -323,7 +337,11 @@ export const createTopArchLanes = (options: {
     }
 
     guides.push({
-      start: offsetLayoutPoint(options.center, (left + right) / 2, roofOffsetY + 8),
+      start: offsetLayoutPoint(
+        options.center,
+        (left + right) / 2,
+        roofOffsetY + 8,
+      ),
       end: offsetLayoutPoint(
         options.center,
         (left + right) / 2,
@@ -349,8 +367,10 @@ export const createInlaneOutlanePair = (options: {
   side: FlipperSide;
   flipperPivot: LayoutPoint;
   outerGuideStartOffset: { x: number; y: number };
+  outerGuideBreakOffset?: { x: number; y: number };
   outerGuideEndOffset: { x: number; y: number };
   innerGuideStartOffset: { x: number; y: number };
+  innerGuideBreakOffset?: { x: number; y: number };
   innerGuideEndOffset: { x: number; y: number };
   slingGuideStartOffset?: { x: number; y: number };
   slingGuideEndOffset?: { x: number; y: number };
@@ -366,66 +386,126 @@ export const createInlaneOutlanePair = (options: {
   innerMaterial?: SurfaceMaterialName;
   slingMaterial?: SurfaceMaterialName;
   outerThickness?: number;
+  outerMouthThickness?: number;
+  outerReturnThickness?: number;
   innerThickness?: number;
+  innerMouthThickness?: number;
+  innerReturnThickness?: number;
   slingThickness?: number;
-}): InlaneOutlanePairLayout => ({
-  guides: [
-    {
+}): InlaneOutlanePairLayout => {
+  const guides: GuideLayoutDefinition[] = [];
+
+  const addSegmentedGuide = (segment: {
+    startOffset: { x: number; y: number };
+    breakOffset?: { x: number; y: number };
+    endOffset: { x: number; y: number };
+    material: SurfaceMaterialName;
+    thickness: number;
+    mouthThickness?: number;
+    returnThickness?: number;
+    plane: GuidePlane;
+  }): void => {
+    if (!segment.breakOffset) {
+      guides.push({
+        start: offsetLayoutPoint(
+          options.flipperPivot,
+          segment.startOffset.x,
+          segment.startOffset.y,
+        ),
+        end: offsetLayoutPoint(
+          options.flipperPivot,
+          segment.endOffset.x,
+          segment.endOffset.y,
+        ),
+        thickness: segment.thickness,
+        material: segment.material,
+        plane: segment.plane,
+      });
+      return;
+    }
+
+    guides.push(
+      {
+        start: offsetLayoutPoint(
+          options.flipperPivot,
+          segment.startOffset.x,
+          segment.startOffset.y,
+        ),
+        end: offsetLayoutPoint(
+          options.flipperPivot,
+          segment.breakOffset.x,
+          segment.breakOffset.y,
+        ),
+        thickness: segment.mouthThickness ?? segment.thickness,
+        material: segment.material,
+        plane: 'playfield',
+      },
+      {
+        start: offsetLayoutPoint(
+          options.flipperPivot,
+          segment.breakOffset.x,
+          segment.breakOffset.y,
+        ),
+        end: offsetLayoutPoint(
+          options.flipperPivot,
+          segment.endOffset.x,
+          segment.endOffset.y,
+        ),
+        thickness: segment.returnThickness ?? segment.thickness,
+        material: segment.material,
+        plane: segment.plane,
+      },
+    );
+  };
+
+  addSegmentedGuide({
+    startOffset: options.outerGuideStartOffset,
+    breakOffset: options.outerGuideBreakOffset,
+    endOffset: options.outerGuideEndOffset,
+    material: options.outerMaterial ?? 'metalGuide',
+    thickness: options.outerThickness ?? 14,
+    mouthThickness: options.outerMouthThickness,
+    returnThickness: options.outerReturnThickness,
+    plane: options.outerPlane ?? 'raised',
+  });
+  addSegmentedGuide({
+    startOffset: options.innerGuideStartOffset,
+    breakOffset: options.innerGuideBreakOffset,
+    endOffset: options.innerGuideEndOffset,
+    material: options.innerMaterial ?? 'metalGuide',
+    thickness: options.innerThickness ?? 18,
+    mouthThickness: options.innerMouthThickness,
+    returnThickness: options.innerReturnThickness,
+    plane: options.innerPlane ?? 'raised',
+  });
+
+  if (options.slingGuideStartOffset && options.slingGuideEndOffset) {
+    guides.push({
       start: offsetLayoutPoint(
         options.flipperPivot,
-        options.outerGuideStartOffset.x,
-        options.outerGuideStartOffset.y,
+        options.slingGuideStartOffset.x,
+        options.slingGuideStartOffset.y,
       ),
       end: offsetLayoutPoint(
         options.flipperPivot,
-        options.outerGuideEndOffset.x,
-        options.outerGuideEndOffset.y,
+        options.slingGuideEndOffset.x,
+        options.slingGuideEndOffset.y,
       ),
-      thickness: options.outerThickness ?? 14,
-      material: options.outerMaterial ?? 'metalGuide',
-      plane: options.outerPlane ?? 'raised',
-    },
-    {
-      start: offsetLayoutPoint(
-        options.flipperPivot,
-        options.innerGuideStartOffset.x,
-        options.innerGuideStartOffset.y,
-      ),
-      end: offsetLayoutPoint(
-        options.flipperPivot,
-        options.innerGuideEndOffset.x,
-        options.innerGuideEndOffset.y,
-      ),
-      thickness: options.innerThickness ?? 18,
-      material: options.innerMaterial ?? 'metalGuide',
-      plane: options.innerPlane ?? 'raised',
-    },
-    ...(options.slingGuideStartOffset && options.slingGuideEndOffset
-      ? [
-          {
-            start: offsetLayoutPoint(
-              options.flipperPivot,
-              options.slingGuideStartOffset.x,
-              options.slingGuideStartOffset.y,
-            ),
-            end: offsetLayoutPoint(
-              options.flipperPivot,
-              options.slingGuideEndOffset.x,
-              options.slingGuideEndOffset.y,
-            ),
-            thickness: options.slingThickness ?? 20,
-            material: options.slingMaterial ?? 'rubberPost',
-            plane: 'playfield' as const,
-          },
-        ]
-      : []),
-  ],
-  posts: (options.entryPostOffsets ?? []).map((post) => ({
-    position: offsetLayoutPoint(options.flipperPivot, post.x, post.y),
-    radius: post.radius,
-    material: post.material ?? 'metalGuide',
-  })),
-});
+      thickness: options.slingThickness ?? 20,
+      material: options.slingMaterial ?? 'rubberPost',
+      plane: 'playfield',
+    });
+  }
+
+  return {
+    guides,
+    posts: (options.entryPostOffsets ?? []).map((post) => ({
+      position: offsetLayoutPoint(options.flipperPivot, post.x, post.y),
+      radius: post.radius,
+      material: post.material ?? 'metalGuide',
+    })),
+  };
+};
 
 export interface SlingshotPairLayout {
   slingshots: SlingshotLayoutDefinition[];

@@ -81,10 +81,12 @@ Reason:
 - flagging those as overlaps would produce noisy warnings for valid return-lane
   and overpass style geometry
 
-The overlap pass also ignores two intentional playfield authoring patterns:
+The overlap pass also ignores a few intentional playfield authoring patterns:
 
 - guide-to-guide joins and connected rail chains
 - saucers sitting inside guide-defined pocket lips
+- guide endpoints that intentionally terminate at a post
+- rubber sling-approach guides that intentionally meet a slingshot body
 
 Those combinations are common in authored tables and were producing noisy
 warnings that did not correspond to actionable defects.

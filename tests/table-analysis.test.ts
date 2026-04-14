@@ -61,9 +61,9 @@ describe('analyzeBoard', () => {
     expect(warnings.some((warning) => warning.code === 'element-overlap')).toBe(
       true,
     );
-    expect(warnings.some((warning) => warning.code === 'spinner-obstructed')).toBe(
-      true,
-    );
+    expect(
+      warnings.some((warning) => warning.code === 'spinner-obstructed'),
+    ).toBe(true);
   });
 
   it('ignores raised guides when checking for overlap warnings', () => {
@@ -106,6 +106,72 @@ describe('analyzeBoard', () => {
     expect(warnings.some((warning) => warning.code === 'element-overlap')).toBe(
       false,
     );
+  });
+
+  it('ignores guide endpoints that intentionally terminate at a post', () => {
+    const board = createBlankTable();
+    board.posts = [
+      {
+        x: 320,
+        y: 420,
+        radius: 18,
+        material: 'rubberPost',
+      },
+    ];
+    board.guides = [
+      {
+        start: { x: 220, y: 420 },
+        end: { x: 320, y: 420 },
+        thickness: 16,
+        material: 'metalGuide',
+      },
+    ];
+
+    const warnings = analyzeBoard(board);
+
+    expect(
+      warnings.some(
+        (warning) =>
+          warning.code === 'element-overlap' &&
+          warning.message.includes('Post 1') &&
+          warning.message.includes('Guide 1'),
+      ),
+    ).toBe(false);
+  });
+
+  it('ignores rubber approach guides that intentionally meet a slingshot', () => {
+    const board = createBlankTable();
+    board.slingshots = [
+      {
+        x: 320,
+        y: 1040,
+        width: 120,
+        height: 36,
+        angle: 0.5,
+        score: 10,
+        strength: 500,
+        material: 'rubberPost',
+      },
+    ];
+    board.guides = [
+      {
+        start: { x: 240, y: 960 },
+        end: { x: 280, y: 1040 },
+        thickness: 18,
+        material: 'rubberPost',
+      },
+    ];
+
+    const warnings = analyzeBoard(board);
+
+    expect(
+      warnings.some(
+        (warning) =>
+          warning.code === 'element-overlap' &&
+          warning.message.includes('Slingshot 1') &&
+          warning.message.includes('Guide 1'),
+      ),
+    ).toBe(false);
   });
 
   it('ignores saucers nested inside guide pockets for overlap warnings', () => {
@@ -152,9 +218,9 @@ describe('analyzeBoard', () => {
 
     const warnings = analyzeBoard(board);
 
-    expect(warnings.some((warning) => warning.code === 'element-out-of-bounds')).toBe(
-      true,
-    );
+    expect(
+      warnings.some((warning) => warning.code === 'element-out-of-bounds'),
+    ).toBe(true);
   });
 
   it('reports an obstructed shooter lane path', () => {
@@ -176,9 +242,9 @@ describe('analyzeBoard', () => {
 
     const warnings = analyzeBoard(board);
 
-    expect(warnings.some((warning) => warning.code === 'launcher-blocked')).toBe(
-      true,
-    );
+    expect(
+      warnings.some((warning) => warning.code === 'launcher-blocked'),
+    ).toBe(true);
   });
 
   it('reports geometry that intrudes into the plunger lane body', () => {
@@ -193,7 +259,9 @@ describe('analyzeBoard', () => {
     ];
 
     const warnings = analyzeBoard(board);
-    const overlap = warnings.find((warning) => warning.code === 'element-overlap');
+    const overlap = warnings.find(
+      (warning) => warning.code === 'element-overlap',
+    );
 
     expect(overlap).toBeDefined();
     expect(overlap?.message).toContain('Plunger Lane');
@@ -204,7 +272,10 @@ describe('analyzeBoard', () => {
     const board = createBlankTable();
     board.guides = [
       {
-        start: { x: board.launchPosition.x + 40, y: board.launchPosition.y - 40 },
+        start: {
+          x: board.launchPosition.x + 40,
+          y: board.launchPosition.y - 40,
+        },
         end: {
           x: board.launchPosition.x,
           y: board.launchPosition.y - board.plunger.guideLength / 2,
@@ -282,9 +353,9 @@ describe('analyzeBoard', () => {
 
     const warnings = analyzeBoard(board);
 
-    expect(warnings.some((warning) => warning.code === 'spinner-obstructed')).toBe(
-      true,
-    );
+    expect(
+      warnings.some((warning) => warning.code === 'spinner-obstructed'),
+    ).toBe(true);
   });
 
   it('reports a blocked saucer eject path', () => {

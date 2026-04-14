@@ -79,10 +79,16 @@ These return high-level layout objects, not runtime board data.
 
 Lower-playfield authoring is now intentionally split:
 
-- `createInlaneOutlanePair(...)` builds the raised return rails, divider rails,
-  and lane-entry posts
+- `createInlaneOutlanePair(...)` builds the lane mouths, raised return rails,
+  divider rails, optional sling-approach rubber, and lane-entry posts
 - `createSlingshotPair(...)` builds the active lower slings as first-class
   devices with kick behavior
+
+For tables that need a canonical lower third, prefer using
+`outerGuideBreakOffset` and `innerGuideBreakOffset` in
+`createInlaneOutlanePair(...)`. That produces an upper `playfield` guide for
+the visible lane mouth and a lower return guide for the raised wireform-like
+section that crosses the flipper area.
 
 Guides can also now declare a `plane`:
 

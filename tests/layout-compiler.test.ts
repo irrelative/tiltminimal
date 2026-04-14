@@ -55,7 +55,10 @@ describe('compileBoardLayout', () => {
 
     const result = compileBoardLayout(layout, { snapToGrid: false });
 
-    expect(result.context.anchors['playfield-center']).toEqual({ x: 450, y: 700 });
+    expect(result.context.anchors['playfield-center']).toEqual({
+      x: 450,
+      y: 700,
+    });
     expect(result.context.anchors['mid-bank']).toEqual({ x: 450, y: 580 });
     expect(result.board.launchPosition.x).toBeCloseTo(770, 5);
     expect(result.board.standupTargets[0]).toMatchObject({
@@ -156,10 +159,16 @@ describe('compileBoardLayout', () => {
       side: 'left',
       flipperPivot: absolutePoint(270, 1220),
       outerGuideStartOffset: { x: -176, y: -38 },
+      outerGuideBreakOffset: { x: -154, y: -156 },
       outerGuideEndOffset: { x: -120, y: -322 },
       innerGuideStartOffset: { x: -56, y: -216 },
+      innerGuideBreakOffset: { x: -72, y: -116 },
       innerGuideEndOffset: { x: -84, y: 48 },
-      entryPostOffsets: [{ x: -72, y: -200, radius: 18, material: 'rubberPost' }],
+      slingGuideStartOffset: { x: -64, y: -132 },
+      slingGuideEndOffset: { x: 4, y: -54 },
+      entryPostOffsets: [
+        { x: -72, y: -200, radius: 18, material: 'rubberPost' },
+      ],
     });
     const slingshots = createSlingshotPair({
       leftCenter: absolutePoint(292, 1120),
@@ -197,9 +206,12 @@ describe('compileBoardLayout', () => {
 
     const result = compileBoardLayout(layout, { snapToGrid: false });
 
-    expect(result.board.guides).toHaveLength(2);
-    expect(result.board.guides[0]?.plane).toBe('raised');
+    expect(result.board.guides).toHaveLength(5);
+    expect(result.board.guides[0]?.plane).toBe('playfield');
     expect(result.board.guides[1]?.plane).toBe('raised');
+    expect(result.board.guides[2]?.plane).toBe('playfield');
+    expect(result.board.guides[3]?.plane).toBe('raised');
+    expect(result.board.guides[4]?.plane).toBe('playfield');
     expect(result.board.posts).toHaveLength(1);
     expect(result.board.slingshots).toHaveLength(2);
   });

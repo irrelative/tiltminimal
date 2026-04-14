@@ -48,11 +48,24 @@ The lower playfield is now intended to be built from two separate primitives:
 
 `createInlaneOutlanePair(...)` is responsible for:
 
+- playfield-level lane mouths
+- optional segmented lower return rails
 - raised outer return rail
 - raised inner divider rail
+- optional sling-approach rubber guide
 - optional entry posts
 
 It should not be relied on to create the active slingshot itself.
+
+When a lane helper uses `outerGuideBreakOffset` or `innerGuideBreakOffset`, the
+primitive emits:
+
+- an upper `playfield` mouth guide from the start offset to the break offset
+- a lower return guide from the break offset to the end offset
+
+This makes it possible to author canonical inlane / outlane mouths without
+giving up the raised lower return rails that need to visually cross the flipper
+area.
 
 `createSlingshotPair(...)` is responsible for:
 
@@ -66,6 +79,10 @@ It should not be relied on to create the active slingshot itself.
 For DSL-authored solid-state and EM-style tables:
 
 - build the return rails and lane dividers with `createInlaneOutlanePair(...)`
+- prefer segmented lane mouths over one long raised guide when the table needs
+  a readable inlane / outlane package
+- use the optional sling-approach rubber guide to visually tie the lane mouth
+  into the active sling body
 - build the active lower slings with `createSlingshotPair(...)`
 - keep the slingshot faces clear of raised rails and flipper keepout zones
 - prefer flipper-relative anchor offsets over hardcoded absolute lower-third

@@ -29,9 +29,13 @@ Major features:
 - a right shooter lane that full-plunges into the upper field
 - a 4-lane top arch with open entries rather than sealed rollover circles
 - lower inlane/outlane packages built relative to the flipper pivots
+- segmented lower lane mouths that separate the visible inlane / outlane entry
+  guides from the raised lower return rails
 - active lower slings generated separately from the lane rails so the lower
   third behaves like a real EM/solid-state slingshot area instead of a passive
   rubber guide
+- short rubber sling-approach guides tying each lane package into the active
+  sling body
 - raised lower return rails so the return hardware can visually cross the
   flipper region without being modeled as a flat playfield blocker
 - upper left and upper right lane loops feeding back to the pops and saucer
@@ -69,3 +73,7 @@ This table should feel closer to a reel-score electromechanical game:
   `createSlingshotPair(...)` so the launcher feed, top rollover bank, lower
   lanes, and lower slings are generated from semantic primitives rather than
   hand-placed guide fragments.
+- The lower third intentionally snaps to the editor grid, so the lane package is
+  authored in coarse canonical geometry rather than fine-grained freehand
+  offsets. That keeps the built-in table editable without losing the EM lane
+  structure.
