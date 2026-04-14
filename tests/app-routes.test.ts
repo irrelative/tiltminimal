@@ -21,16 +21,22 @@ describe('app routes', () => {
     expect(stripBasePath('/tiltminimal/rules', '/tiltminimal/')).toBe(
       '/rules',
     );
+    expect(stripBasePath('/tiltminimal/physics', '/tiltminimal/')).toBe(
+      '/physics',
+    );
     expect(stripBasePath('/tiltminimal/', '/tiltminimal/')).toBe('/');
   });
 
-  it('detects editor and rules routes under a project-site base path', () => {
+  it('detects editor, rules, and physics routes under a project-site base path', () => {
     expect(getAppRouteFromPathname('/tiltminimal/editor', '/tiltminimal/')).toBe(
       'editor',
     );
     expect(getAppRouteFromPathname('/tiltminimal/rules', '/tiltminimal/')).toBe(
       'rules',
     );
+    expect(
+      getAppRouteFromPathname('/tiltminimal/physics', '/tiltminimal/'),
+    ).toBe('physics');
     expect(getAppRouteFromPathname('/tiltminimal/', '/tiltminimal/')).toBe(
       'play',
     );
@@ -43,6 +49,9 @@ describe('app routes', () => {
     );
     expect(buildAppRoutePath('rules', '/tiltminimal/')).toBe(
       '/tiltminimal/rules',
+    );
+    expect(buildAppRoutePath('physics', '/tiltminimal/')).toBe(
+      '/tiltminimal/physics',
     );
   });
 });

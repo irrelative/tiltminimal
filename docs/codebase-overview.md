@@ -29,10 +29,11 @@ The main source tree is under `src/`.
 
 ## Routes And App Modes
 
-The application has three routes:
+The application has four routes:
 
 - `/`: play mode
 - `/editor`: board editor
+- `/physics`: physics-only sandbox
 - `/rules`: rules script editor
 
 Route parsing and route-path generation live in `src/app/routes.ts`.
@@ -44,12 +45,14 @@ It is responsible for:
 - querying DOM elements
 - loading persisted tables
 - creating shared renderer/audio instances
-- booting either play, editor, or rules mode
+- booting either play, editor, physics, or rules mode
 
 Supporting app modules currently include:
 
 - `src/app/play-session.ts`: standalone play-session setup and play-route panel
   synchronization
+- `src/app/physics-sandbox-session.ts`: physics-route setup, status wiring, and
+  sandbox panel synchronization
 - `src/app/editor-selection-panel.ts`: editor-side form rendering for the
   current selection
 
@@ -157,7 +160,11 @@ The main per-frame runtime pipeline is:
 Important files:
 
 - `src/game/game-loop.ts`: owns the animation frame loop
+- `src/game/physics-sandbox-loop.ts`: owns the `/physics` route animation frame
+  loop
 - `src/game/physics-engine.ts`: public physics-step entrypoint
+- `src/game/physics-sandbox.ts`: sandbox-specific state and ball-spawn/runtime
+  stepping
 - `src/game/rules-engine.ts`: rules script execution
 - `src/audio/game-audio.ts`: audio event synthesis
 - `src/render/canvas-renderer.ts`: renderer façade
@@ -165,6 +172,11 @@ Important files:
 `GameLoop` owns the live `GameState` during play. It polls the current
 `InputSource`, advances the physics frame, applies rules, plays audio events,
 and renders the latest state.
+
+The physics sandbox route uses a separate runtime loop and does not apply the
+rules step or the normal waiting-launch / next-ball lifecycle. It reuses the
+same input and collision systems, but maintains sandbox-specific ball state and
+renders every active sandbox ball.
 
 ## Physics Layout
 
@@ -235,6 +247,8 @@ For the play route, `CanvasRenderer` now also:
 - only resizes the main canvas when dimensions actually change
 - prerenders static playfield base and raised-guide overlay layers and reuses
   them across frames for the active board/theme
+- supports a physics-sandbox render path that draws the shared board/device
+  state plus every active sandbox ball
 
 ## Input And Controls
 

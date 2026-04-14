@@ -6,6 +6,7 @@ import {
   getPlungerLaneHalfWidth,
 } from '../game/plunger-geometry';
 import type { GameState } from '../game/game-state';
+import type { BallState } from '../game/game-state';
 import { getBoardTheme } from './board-themes';
 import type {
   BoardDefinition,
@@ -88,20 +89,22 @@ export const drawBall = (
   board: BoardDefinition,
   state: GameState,
 ): void => {
+  drawBallState(context, board, state.ball);
+};
+
+export const drawBallState = (
+  context: CanvasRenderingContext2D,
+  board: BoardDefinition,
+  ball: BallState,
+): void => {
   const theme = getBoardTheme(board.themeId);
-  drawBallMotionStreak(context, theme, state);
+  drawBallMotionStreak(context, theme, ball);
 
   context.fillStyle = theme.ballFill;
   context.beginPath();
-  context.arc(
-    state.ball.position.x,
-    state.ball.position.y,
-    state.ball.radius,
-    0,
-    Math.PI * 2,
-  );
+  context.arc(ball.position.x, ball.position.y, ball.radius, 0, Math.PI * 2);
   context.fill();
-  drawBallSpinPips(context, state);
+  drawBallSpinPips(context, ball);
 
   context.strokeStyle = theme.ballStroke;
   context.lineWidth = 2;
@@ -111,12 +114,9 @@ export const drawBall = (
 const drawBallMotionStreak = (
   context: CanvasRenderingContext2D,
   theme: ReturnType<typeof getBoardTheme>,
-  state: GameState,
+  ball: BallState,
 ): void => {
-  const speed = Math.hypot(
-    state.ball.linearVelocity.x,
-    state.ball.linearVelocity.y,
-  );
+  const speed = Math.hypot(ball.linearVelocity.x, ball.linearVelocity.y);
   const minTrailSpeed = 80;
 
   if (speed <= minTrailSpeed) {
@@ -125,18 +125,18 @@ const drawBallMotionStreak = (
 
   const trailRatio = Math.min(1, (speed - minTrailSpeed) / 1500);
   const direction = {
-    x: state.ball.linearVelocity.x / speed,
-    y: state.ball.linearVelocity.y / speed,
+    x: ball.linearVelocity.x / speed,
+    y: ball.linearVelocity.y / speed,
   };
-  const headInset = state.ball.radius * 0.1;
-  const tailLength = state.ball.radius * 1.4 + trailRatio * 64;
+  const headInset = ball.radius * 0.1;
+  const tailLength = ball.radius * 1.4 + trailRatio * 64;
   const start = {
-    x: state.ball.position.x - direction.x * (headInset + tailLength),
-    y: state.ball.position.y - direction.y * (headInset + tailLength),
+    x: ball.position.x - direction.x * (headInset + tailLength),
+    y: ball.position.y - direction.y * (headInset + tailLength),
   };
   const end = {
-    x: state.ball.position.x - direction.x * headInset,
-    y: state.ball.position.y - direction.y * headInset,
+    x: ball.position.x - direction.x * headInset,
+    y: ball.position.y - direction.y * headInset,
   };
   const haloGradient = context.createLinearGradient(start.x, start.y, end.x, end.y);
   const coreGradient = context.createLinearGradient(start.x, start.y, end.x, end.y);
@@ -165,7 +165,7 @@ const drawBallMotionStreak = (
   context.lineCap = 'round';
 
   context.strokeStyle = haloGradient;
-  context.lineWidth = state.ball.radius * (1.45 + trailRatio * 0.5);
+  context.lineWidth = ball.radius * (1.45 + trailRatio * 0.5);
   context.shadowColor = theme.ballFill;
   context.shadowBlur = 12 + trailRatio * 12;
   context.beginPath();
@@ -174,7 +174,7 @@ const drawBallMotionStreak = (
   context.stroke();
 
   context.strokeStyle = coreGradient;
-  context.lineWidth = state.ball.radius * (0.7 + trailRatio * 0.22);
+  context.lineWidth = ball.radius * (0.7 + trailRatio * 0.22);
   context.shadowBlur = 6 + trailRatio * 6;
   context.beginPath();
   context.moveTo(start.x, start.y);
@@ -185,23 +185,20 @@ const drawBallMotionStreak = (
 
 const drawBallSpinPips = (
   context: CanvasRenderingContext2D,
-  state: GameState,
+  ball: BallState,
 ): void => {
-  const radius = state.ball.radius;
-  const speed = Math.hypot(
-    state.ball.linearVelocity.x,
-    state.ball.linearVelocity.y,
-  );
+  const radius = ball.radius;
+  const speed = Math.hypot(ball.linearVelocity.x, ball.linearVelocity.y);
   const pipAlpha = 0.24 + Math.min(0.38, speed / 3600);
   const basePoint = rotateBallSurfacePoint(
     { x: 0.34, y: -0.28, z: 0.9 },
-    state.ball.angularPosition,
+    ball.angularPosition,
   );
 
-  drawBallSpinPip(context, state, basePoint, radius, pipAlpha);
+  drawBallSpinPip(context, ball, basePoint, radius, pipAlpha);
   drawBallSpinPip(
     context,
-    state,
+    ball,
     { x: -basePoint.x, y: -basePoint.y, z: -basePoint.z },
     radius,
     pipAlpha,
@@ -210,7 +207,7 @@ const drawBallSpinPips = (
 
 const drawBallSpinPip = (
   context: CanvasRenderingContext2D,
-  state: GameState,
+  ball: BallState,
   point: { x: number; y: number; z: number },
   ballRadius: number,
   alpha: number,
@@ -222,8 +219,8 @@ const drawBallSpinPip = (
   const visibility = Math.max(0.12, (point.z + 1) / 2);
   const pipRadius = ballRadius * (0.12 + visibility * 0.1);
   const center = {
-    x: state.ball.position.x + point.x * ballRadius * 0.74,
-    y: state.ball.position.y + point.y * ballRadius * 0.74,
+    x: ball.position.x + point.x * ballRadius * 0.74,
+    y: ball.position.y + point.y * ballRadius * 0.74,
   };
 
   context.save();

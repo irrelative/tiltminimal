@@ -101,7 +101,8 @@ textarea {
   align-items: stretch;
 }
 
-body[data-route='play'] .workspace {
+body[data-route='play'] .workspace,
+body[data-route='physics'] .workspace {
   grid-template-columns: 1fr;
   min-height: calc(100svh - (var(--stage-padding) * 2));
   height: calc(100svh - (var(--stage-padding) * 2));
@@ -125,7 +126,8 @@ body[data-route='play'] .workspace {
   overflow: auto;
 }
 
-body[data-route='play'] .control-panel {
+body[data-route='play'] .control-panel,
+body[data-route='physics'] .control-panel {
   display: none;
 }
 
@@ -365,7 +367,8 @@ h2 {
   overflow: hidden;
 }
 
-body[data-route='play'] .stage-shell {
+body[data-route='play'] .stage-shell,
+body[data-route='physics'] .stage-shell {
   max-width: 1080px;
   min-height: calc(100svh - (var(--stage-padding) * 2));
   max-height: calc(100svh - (var(--stage-padding) * 2));
@@ -384,7 +387,8 @@ body[data-route='play'] .stage-shell {
   padding: 8px 6px 0;
 }
 
-body[data-route='play'] .stage-toolbar {
+body[data-route='play'] .stage-toolbar,
+body[data-route='physics'] .stage-toolbar {
   grid-column: 2;
   grid-row: 1;
   height: 100%;
@@ -403,14 +407,17 @@ body[data-route='play'] .stage-toolbar {
   gap: 8px;
 }
 
-body[data-route='play'] .toolbar-main {
+body[data-route='play'] .toolbar-main,
+body[data-route='physics'] .toolbar-main {
   padding: 12px 14px;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.04);
 }
 
-.play-route-panel {
+.runtime-route-panel,
+.play-route-panel,
+.physics-route-panel {
   min-width: min(100%, 18rem);
   display: grid;
   gap: 8px;
@@ -447,8 +454,20 @@ body[data-route='play'] .toolbar-main {
   font-weight: 700;
 }
 
+body[data-route='editor'] .runtime-route-panel,
 body[data-route='editor'] .play-route-panel,
-body[data-route='rules'] .play-route-panel {
+body[data-route='editor'] .physics-route-panel,
+body[data-route='rules'] .runtime-route-panel,
+body[data-route='rules'] .play-route-panel,
+body[data-route='rules'] .physics-route-panel {
+  display: none;
+}
+
+body[data-route='play'] .physics-route-panel {
+  display: none;
+}
+
+body[data-route='physics'] .play-route-panel {
   display: none;
 }
 
@@ -519,7 +538,8 @@ body[data-route='rules'] .play-route-panel {
   overflow: hidden;
 }
 
-body[data-route='play'] .playfield-frame {
+body[data-route='play'] .playfield-frame,
+body[data-route='physics'] .playfield-frame {
   grid-column: 1;
   grid-row: 1;
   height: 100%;
@@ -546,11 +566,20 @@ body[data-route='rules'] #game {
   max-height: 100%;
 }
 
-body[data-route='play'] #game {
+body[data-route='play'] #game,
+body[data-route='physics'] #game {
   width: min(100%, calc((100svh - (var(--stage-padding) * 2) - 64px) * 9 / 14));
   height: auto;
   max-width: 100%;
   max-height: 100%;
+}
+
+.compact-field-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.runtime-button-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 #delete-selection {
@@ -574,14 +603,16 @@ body[data-route='play'] #game {
     align-items: start;
   }
 
-  body[data-route='play'] .stage-shell {
+  body[data-route='play'] .stage-shell,
+  body[data-route='physics'] .stage-shell {
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(0, 1fr);
     height: auto;
     max-height: none;
   }
 
-  body[data-route='play'] .stage-toolbar {
+  body[data-route='play'] .stage-toolbar,
+  body[data-route='physics'] .stage-toolbar {
     grid-column: 1;
     grid-row: 1;
     height: auto;
@@ -589,7 +620,8 @@ body[data-route='play'] #game {
     overflow: visible;
   }
 
-  body[data-route='play'] .playfield-frame {
+  body[data-route='play'] .playfield-frame,
+  body[data-route='physics'] .playfield-frame {
     grid-column: 1;
     grid-row: 2;
   }
@@ -602,7 +634,9 @@ body[data-route='play'] #game {
     width: 100%;
   }
 
-  .play-route-panel {
+  .runtime-route-panel,
+  .play-route-panel,
+  .physics-route-panel {
     width: 100%;
   }
 
@@ -630,6 +664,10 @@ body[data-route='play'] #game {
   .button-row,
   .tool-grid,
   .field-list {
+    grid-template-columns: 1fr;
+  }
+
+  .runtime-button-row {
     grid-template-columns: 1fr;
   }
 }

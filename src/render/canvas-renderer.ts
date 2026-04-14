@@ -1,10 +1,11 @@
 import type { EditorSelection } from '../editor/editor-types';
-import type { GameState } from '../game/game-state';
+import type { BallState, GameState } from '../game/game-state';
 import type { InputState } from '../input/keyboard-input';
 import type { BoardDefinition } from '../types/board-definition';
 import { getBoardTheme } from './board-themes';
 import {
   drawBall,
+  drawBallState,
   drawBoard,
   drawDynamicBoard,
   drawStaticBoardBase,
@@ -82,6 +83,37 @@ export class CanvasRenderer {
     drawEditorSelection(context, board, selection);
     drawDraft(context, draftPosition);
     drawEditorHud(context, board, options);
+  }
+
+  renderPhysicsSandbox(
+    board: BoardDefinition,
+    displayState: GameState,
+    balls: BallState[],
+  ): void {
+    const context = this.getContext();
+    this.syncCanvasSize(board);
+    context.clearRect(0, 0, board.width, board.height);
+    const staticLayers = this.ensureStaticGameLayers(board);
+
+    context.save();
+    context.translate(
+      displayState.tableNudge.offset.x,
+      displayState.tableNudge.offset.y,
+    );
+    if (staticLayers) {
+      context.drawImage(staticLayers.baseCanvas, 0, 0);
+      drawDynamicBoard(context, board, displayState);
+      context.drawImage(staticLayers.overlayCanvas, 0, 0);
+    } else {
+      context.fillStyle = getBoardTheme(board.themeId).backgroundMid;
+      context.fillRect(0, 0, board.width, board.height);
+      drawBoard(context, board, displayState);
+    }
+    context.restore();
+
+    balls.forEach((ball) => {
+      drawBallState(context, board, ball);
+    });
   }
 
   private syncCanvasSize(board: BoardDefinition): void {

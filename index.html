@@ -229,7 +229,10 @@
                 selected element.
               </p>
             </div>
-            <section class="play-route-panel" aria-label="Play table selection">
+            <section
+              class="runtime-route-panel"
+              aria-label="Runtime table selection"
+            >
               <p class="eyebrow">Table</p>
               <label class="field">
                 <span>Choose board</span>
@@ -264,6 +267,76 @@
                 </div>
               </dl>
             </section>
+            <section
+              class="physics-route-panel"
+              aria-label="Physics sandbox controls"
+            >
+              <p class="eyebrow">Physics Sandbox</p>
+              <p class="meta-text">
+                Click the playfield to spawn. Flippers and nudges still work.
+              </p>
+              <label class="field">
+                <span>Spawn mode</span>
+                <select id="physics-spawn-mode">
+                  <option value="replace">Replace ball</option>
+                  <option value="add">Add ball</option>
+                </select>
+              </label>
+              <div class="field-list compact-field-list">
+                <label class="field">
+                  <span>vx</span>
+                  <input id="physics-vx" type="number" value="0" step="10" />
+                </label>
+                <label class="field">
+                  <span>vy</span>
+                  <input id="physics-vy" type="number" value="0" step="10" />
+                </label>
+                <label class="field">
+                  <span>wx</span>
+                  <input id="physics-wx" type="number" value="0" step="0.1" />
+                </label>
+                <label class="field">
+                  <span>wy</span>
+                  <input id="physics-wy" type="number" value="0" step="0.1" />
+                </label>
+              </div>
+              <div class="button-row runtime-button-row">
+                <button id="physics-pause-toggle" type="button">
+                  Pause
+                </button>
+                <button id="physics-clear-balls" type="button">
+                  Clear balls
+                </button>
+                <button id="physics-reset" type="button">Reset sandbox</button>
+              </div>
+              <p id="physics-status" class="meta-text">
+                Click the playfield to spawn a ball.
+              </p>
+            </section>
+            <section
+              class="physics-route-panel"
+              aria-label="Physics sandbox debug"
+            >
+              <p class="eyebrow">Sandbox Debug</p>
+              <dl class="play-debug-stats">
+                <div>
+                  <dt>Status</dt>
+                  <dd id="physics-debug-status">0 active balls</dd>
+                </div>
+                <div>
+                  <dt>Position</dt>
+                  <dd id="physics-debug-position">—</dd>
+                </div>
+                <div>
+                  <dt>Velocity</dt>
+                  <dd id="physics-debug-velocity">—</dd>
+                </div>
+                <div>
+                  <dt>Roll Spin</dt>
+                  <dd id="physics-debug-spin">—</dd>
+                </div>
+              </dl>
+            </section>
             <nav class="debug-menu" aria-label="Debug menu">
               <p class="eyebrow">Debug Menu</p>
               <div class="debug-links">
@@ -280,6 +353,9 @@
                   href="#debug-play-test"
                 >
                   Play test
+                </a>
+                <a id="debug-link-physics" class="debug-link" href="./physics">
+                  Physics
                 </a>
                 <a id="debug-link-rules" class="debug-link" href="./rules">
                   Rules

@@ -45,6 +45,9 @@ Use the `Makefile` entrypoints:
   boundaries
 * [docs/table-validation-cli.md](docs/table-validation-cli.md) defines the
   terminal entrypoint for validating built-in table implementations
+* [docs/physics-sandbox-spec.md](docs/physics-sandbox-spec.md) defines the
+  dedicated `/physics` route for click-to-spawn physics testing outside the
+  normal game/rules lifecycle
 * [docs/board-component-dimensions.md](docs/board-component-dimensions.md)
   defines the dimensional meaning of every board component field
 * [docs/table-analysis-spec.md](docs/table-analysis-spec.md) defines the editor
@@ -77,6 +80,7 @@ Use the `Makefile` entrypoints:
 * Deployed routes:
   * Game: `https://irrelative.github.io/tiltminimal/`
   * Editor: `https://irrelative.github.io/tiltminimal/editor`
+  * Physics Sandbox: `https://irrelative.github.io/tiltminimal/physics`
   * Rules: `https://irrelative.github.io/tiltminimal/rules`
 * Deployment is handled by `.github/workflows/deploy-pages.yml`, which builds with the Pages-provided base path and publishes the `dist/` output.
 

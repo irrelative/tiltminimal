@@ -1,4 +1,4 @@
-export type AppRoute = 'editor' | 'play' | 'rules';
+export type AppRoute = 'editor' | 'play' | 'rules' | 'physics';
 
 export const normalizeBasePath = (basePath: string): string => {
   const trimmed = basePath.trim();
@@ -48,6 +48,10 @@ export const getAppRouteFromPathname = (
 
   if (routePath === '/rules' || routePath === '/rules/') {
     return 'rules';
+  }
+
+  if (routePath === '/physics' || routePath === '/physics/') {
+    return 'physics';
   }
 
   return 'play';

@@ -9,6 +9,10 @@ import {
   startStandalonePlaySession,
   syncPlayRoutePanel as renderPlayRoutePanel,
 } from './app/play-session';
+import {
+  startPhysicsSandboxSession,
+  syncPhysicsRoutePanel as renderPhysicsRoutePanel,
+} from './app/physics-sandbox-session';
 import { cloneBoardDefinition } from './boards/board-codec';
 import { analyzeBoard } from './editor/table-analysis';
 import {
@@ -53,6 +57,7 @@ import {
 import { snapPointToGrid } from './editor/grid';
 import { GameAudio } from './audio/game-audio';
 import { GameLoop } from './game/game-loop';
+import type { PhysicsSandboxLoop } from './game/physics-sandbox-loop';
 import { createInitialGameState } from './game/game-state';
 import { validateRulesScript } from './game/rules-engine';
 import { PlayInput, type InputSource } from './input/keyboard-input';
@@ -62,7 +67,7 @@ import type { BoardDefinition, Point } from './types/board-definition';
 import { isArcGuide } from './game/guide-geometry';
 import './styles.css';
 
-type AppMode = 'edit' | 'play' | 'rules';
+type AppMode = 'edit' | 'play' | 'rules' | 'physics';
 type DebugDestination = 'board-editor' | 'play-test';
 
 const DEBUG_HASHES: Record<DebugDestination, string> = {
@@ -83,6 +88,7 @@ interface AppState {
   snapToGrid: boolean;
   analysisRequested: boolean;
   loop: GameLoop | null;
+  sandboxLoop: PhysicsSandboxLoop | null;
   input: InputSource | null;
 }
 
@@ -140,8 +146,30 @@ const playDebugStatus = queryRequired<HTMLElement>('#play-debug-status');
 const playDebugPosition = queryRequired<HTMLElement>('#play-debug-position');
 const playDebugVelocity = queryRequired<HTMLElement>('#play-debug-velocity');
 const playDebugSpin = queryRequired<HTMLElement>('#play-debug-spin');
+const physicsSpawnMode =
+  queryRequired<HTMLSelectElement>('#physics-spawn-mode');
+const physicsVxInput = queryRequired<HTMLInputElement>('#physics-vx');
+const physicsVyInput = queryRequired<HTMLInputElement>('#physics-vy');
+const physicsWxInput = queryRequired<HTMLInputElement>('#physics-wx');
+const physicsWyInput = queryRequired<HTMLInputElement>('#physics-wy');
+const physicsPauseToggle =
+  queryRequired<HTMLButtonElement>('#physics-pause-toggle');
+const physicsClearBallsButton =
+  queryRequired<HTMLButtonElement>('#physics-clear-balls');
+const physicsResetButton =
+  queryRequired<HTMLButtonElement>('#physics-reset');
+const physicsStatus = queryRequired<HTMLElement>('#physics-status');
+const physicsDebugStatus =
+  queryRequired<HTMLElement>('#physics-debug-status');
+const physicsDebugPosition =
+  queryRequired<HTMLElement>('#physics-debug-position');
+const physicsDebugVelocity =
+  queryRequired<HTMLElement>('#physics-debug-velocity');
+const physicsDebugSpin = queryRequired<HTMLElement>('#physics-debug-spin');
 const debugLinkEditor = queryRequired<HTMLAnchorElement>('#debug-link-editor');
 const debugLinkPlay = queryRequired<HTMLAnchorElement>('#debug-link-play');
+const debugLinkPhysics =
+  queryRequired<HTMLAnchorElement>('#debug-link-physics');
 const debugLinkRules = queryRequired<HTMLAnchorElement>('#debug-link-rules');
 
 const renderer = new CanvasRenderer(canvas);
@@ -154,7 +182,13 @@ const state: AppState = {
   tables: loadedState.tables,
   activeTableId: loadedState.activeTableId,
   mode:
-    appRoute === 'editor' ? 'edit' : appRoute === 'rules' ? 'rules' : 'play',
+    appRoute === 'editor'
+      ? 'edit'
+      : appRoute === 'rules'
+        ? 'rules'
+        : appRoute === 'physics'
+          ? 'physics'
+          : 'play',
   tool: 'select',
   selection: { kind: 'none' },
   dragging: false,
@@ -164,6 +198,7 @@ const state: AppState = {
   snapToGrid: true,
   analysisRequested: false,
   loop: null,
+  sandboxLoop: null,
   input: null,
 };
 
@@ -177,6 +212,8 @@ if (appRoute === 'editor') {
   bootEditorRoute();
 } else if (appRoute === 'rules') {
   bootRulesRoute();
+} else if (appRoute === 'physics') {
+  bootPhysicsRoute();
 } else {
   bootPlayRoute();
 }
@@ -189,6 +226,8 @@ function bootEditorRoute(): void {
   debugLinkEditor.textContent = 'Board editor';
   debugLinkPlay.href = DEBUG_HASHES['play-test'];
   debugLinkPlay.textContent = 'Play test';
+  debugLinkPhysics.href = buildAppRoutePath('physics', appBasePath);
+  debugLinkPhysics.textContent = 'Physics';
   debugLinkRules.href = buildAppRoutePath('rules', appBasePath);
   debugLinkRules.textContent = 'Rules';
 
@@ -861,12 +900,102 @@ function bootPlayRoute(): void {
   debugLinkEditor.textContent = 'Open editor';
   debugLinkPlay.href = buildAppRoutePath('play', appBasePath);
   debugLinkPlay.textContent = 'Game';
+  debugLinkPhysics.href = buildAppRoutePath('physics', appBasePath);
+  debugLinkPhysics.textContent = 'Physics';
   debugLinkRules.href = buildAppRoutePath('rules', appBasePath);
   debugLinkRules.textContent = 'Rules';
   debugLinkEditor.classList.remove('is-active');
   debugLinkEditor.setAttribute('aria-current', 'false');
   debugLinkPlay.classList.add('is-active');
   debugLinkPlay.setAttribute('aria-current', 'page');
+  debugLinkPhysics.classList.remove('is-active');
+  debugLinkPhysics.setAttribute('aria-current', 'false');
+  debugLinkRules.classList.remove('is-active');
+  debugLinkRules.setAttribute('aria-current', 'false');
+}
+
+function bootPhysicsRoute(): void {
+  state.mode = 'physics';
+
+  playTableSelect.addEventListener('change', () => {
+    state.activeTableId = playTableSelect.value;
+    setActiveTableId(state.activeTableId);
+    syncPhysicsRoutePanel();
+    restartPhysicsSandbox();
+  });
+
+  physicsSpawnMode.addEventListener('change', () => {
+    state.sandboxLoop?.setSpawnMode(
+      physicsSpawnMode.value === 'add' ? 'add' : 'replace',
+    );
+  });
+
+  physicsVxInput.addEventListener('input', () => {
+    const value = Number(physicsVxInput.value);
+
+    if (Number.isFinite(value)) {
+      state.sandboxLoop?.setLinearVelocity('x', value);
+    }
+  });
+
+  physicsVyInput.addEventListener('input', () => {
+    const value = Number(physicsVyInput.value);
+
+    if (Number.isFinite(value)) {
+      state.sandboxLoop?.setLinearVelocity('y', value);
+    }
+  });
+
+  physicsWxInput.addEventListener('input', () => {
+    const value = Number(physicsWxInput.value);
+
+    if (Number.isFinite(value)) {
+      state.sandboxLoop?.setAngularVelocity('x', value);
+    }
+  });
+
+  physicsWyInput.addEventListener('input', () => {
+    const value = Number(physicsWyInput.value);
+
+    if (Number.isFinite(value)) {
+      state.sandboxLoop?.setAngularVelocity('y', value);
+    }
+  });
+
+  physicsPauseToggle.addEventListener('click', () => {
+    state.sandboxLoop?.togglePaused();
+  });
+
+  physicsClearBallsButton.addEventListener('click', () => {
+    state.sandboxLoop?.clearBalls();
+  });
+
+  physicsResetButton.addEventListener('click', () => {
+    state.sandboxLoop?.reset();
+    syncPhysicsSandboxInputs();
+  });
+
+  canvas.addEventListener('pointerdown', onPhysicsCanvasPointerDown);
+
+  syncPhysicsRoutePanel();
+  restartPhysicsSandbox();
+
+  modeCopy.textContent =
+    'Click anywhere valid on the playfield to inject a ball. Use the side panel to set initial linear and roll-spin vectors. Flippers and nudges still work, but gameplay rules and ball-count lifecycle are disabled.';
+  debugLinkEditor.href = buildAppRoutePath('editor', appBasePath);
+  debugLinkEditor.textContent = 'Open editor';
+  debugLinkPlay.href = buildAppRoutePath('play', appBasePath);
+  debugLinkPlay.textContent = 'Game';
+  debugLinkPhysics.href = buildAppRoutePath('physics', appBasePath);
+  debugLinkPhysics.textContent = 'Physics';
+  debugLinkRules.href = buildAppRoutePath('rules', appBasePath);
+  debugLinkRules.textContent = 'Rules';
+  debugLinkEditor.classList.remove('is-active');
+  debugLinkEditor.setAttribute('aria-current', 'false');
+  debugLinkPlay.classList.remove('is-active');
+  debugLinkPlay.setAttribute('aria-current', 'false');
+  debugLinkPhysics.classList.add('is-active');
+  debugLinkPhysics.setAttribute('aria-current', 'page');
   debugLinkRules.classList.remove('is-active');
   debugLinkRules.setAttribute('aria-current', 'false');
 }
@@ -943,6 +1072,8 @@ function bootRulesRoute(): void {
   debugLinkEditor.textContent = 'Board editor';
   debugLinkPlay.href = buildAppRoutePath('play', appBasePath);
   debugLinkPlay.textContent = 'Game';
+  debugLinkPhysics.href = buildAppRoutePath('physics', appBasePath);
+  debugLinkPhysics.textContent = 'Physics';
   debugLinkRules.href = buildAppRoutePath('rules', appBasePath);
   debugLinkRules.textContent = 'Rules';
 
@@ -1107,6 +1238,13 @@ function syncModeCopy(): void {
     return;
   }
 
+  if (state.mode === 'physics') {
+    modeTitle.textContent = 'Physics sandbox';
+    modeCopy.textContent =
+      'Inject balls with explicit initial vectors to test raw physics against the current table. Rules, scoring, and ball progression are bypassed on this route.';
+    return;
+  }
+
   if (state.mode === 'rules') {
     modeTitle.textContent = 'Editing rules';
     modeCopy.textContent =
@@ -1124,12 +1262,18 @@ function syncModeCopy(): void {
 function syncDebugMenu(): void {
   const editorActive = state.mode === 'edit';
   const playActive = state.mode === 'play';
+  const physicsActive = state.mode === 'physics';
   const rulesActive = state.mode === 'rules';
 
   debugLinkEditor.classList.toggle('is-active', editorActive);
   debugLinkEditor.setAttribute('aria-current', editorActive ? 'page' : 'false');
   debugLinkPlay.classList.toggle('is-active', playActive);
   debugLinkPlay.setAttribute('aria-current', playActive ? 'page' : 'false');
+  debugLinkPhysics.classList.toggle('is-active', physicsActive);
+  debugLinkPhysics.setAttribute(
+    'aria-current',
+    physicsActive ? 'page' : 'false',
+  );
   debugLinkRules.classList.toggle('is-active', rulesActive);
   debugLinkRules.setAttribute('aria-current', rulesActive ? 'page' : 'false');
 }
@@ -1457,6 +1601,8 @@ function nextCustomTableName(): string {
 }
 
 function restartStandalonePlay(): void {
+  state.sandboxLoop?.stop();
+  state.sandboxLoop = null;
   state.loop?.stop();
 
   const session = startStandalonePlaySession({
@@ -1482,6 +1628,78 @@ function syncPlayRoutePanel(): void {
     playTableSelect,
     playTableMeta,
     getFeatureCount,
+  });
+}
+
+function restartPhysicsSandbox(): void {
+  state.loop?.stop();
+  state.loop = null;
+  state.sandboxLoop?.stop();
+
+  const session = startPhysicsSandboxSession({
+    activeTable: getActiveTable(),
+    canvas,
+    renderer,
+    modeTitle,
+    statusMessage: physicsStatus,
+    pauseButton: physicsPauseToggle,
+    debugStatus: physicsDebugStatus,
+    debugPosition: physicsDebugPosition,
+    debugVelocity: physicsDebugVelocity,
+    debugSpin: physicsDebugSpin,
+  });
+
+  state.input = session.input;
+  state.sandboxLoop = session.loop;
+  syncPhysicsSandboxInputs();
+}
+
+function syncPhysicsRoutePanel(): void {
+  renderPhysicsRoutePanel({
+    tables: state.tables,
+    activeTableId: state.activeTableId,
+    tableSelect: playTableSelect,
+    tableMeta: playTableMeta,
+    getFeatureCount,
+  });
+}
+
+function syncPhysicsSandboxInputs(): void {
+  const sandboxState = state.sandboxLoop?.getState();
+
+  if (!sandboxState) {
+    return;
+  }
+
+  physicsSpawnMode.value = sandboxState.spawnMode;
+  physicsVxInput.value = `${sandboxState.spawnLinearVelocity.x}`;
+  physicsVyInput.value = `${sandboxState.spawnLinearVelocity.y}`;
+  physicsWxInput.value = `${sandboxState.spawnAngularVelocity.x}`;
+  physicsWyInput.value = `${sandboxState.spawnAngularVelocity.y}`;
+  physicsPauseToggle.textContent = sandboxState.paused ? 'Resume' : 'Pause';
+}
+
+function onPhysicsCanvasPointerDown(event: PointerEvent): void {
+  if (state.mode !== 'physics') {
+    return;
+  }
+
+  if (event.pointerType === 'touch') {
+    return;
+  }
+
+  const sandboxLoop = state.sandboxLoop;
+
+  if (!sandboxLoop) {
+    return;
+  }
+
+  const tableOffset = sandboxLoop.getCurrentTableOffset();
+  const point = getBoardPoint(event);
+
+  sandboxLoop.spawnBall({
+    x: point.x - tableOffset.x,
+    y: point.y - tableOffset.y,
   });
 }
 
