@@ -31,11 +31,15 @@ Major features:
 - lower inlane/outlane packages built relative to the flipper pivots
 - segmented lower lane mouths that separate the visible inlane / outlane entry
   guides from the raised lower return rails
+- post-defined lane mouths so the inlane / outlane channels remain legible
+  without relying on artwork inserts
 - active lower slings generated separately from the lane rails so the lower
   third behaves like a real EM/solid-state slingshot area instead of a passive
   rubber guide
 - short rubber sling-approach guides tying each lane package into the active
   sling body
+- triangular sling bodies with explicit front-face cues and end-post visuals
+  rather than generic diagonal wedges
 - raised lower return rails so the return hardware can visually cross the
   flipper region without being modeled as a flat playfield blocker
 - upper left and upper right lane loops feeding back to the pops and saucer
@@ -77,3 +81,5 @@ This table should feel closer to a reel-score electromechanical game:
   authored in coarse canonical geometry rather than fine-grained freehand
   offsets. That keeps the built-in table editable without losing the EM lane
   structure.
+- `Starlight EM` is expected to clear the editor-side geometry analysis without
+  overlap, trap-risk, or launch-path warnings.

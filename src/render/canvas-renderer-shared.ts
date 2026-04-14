@@ -62,13 +62,16 @@ export const traceSlingshotPath = (
   width: number,
   depth: number,
 ): void => {
-  const tipDepth = (depth * 2) / 3;
-  const baseDepth = depth / 3;
+  const halfWidth = width / 2;
+  const shoulderInset = width * 0.16;
+  const shoulderDepth = depth * 0.58;
 
   context.beginPath();
-  context.moveTo(-width / 2, -baseDepth);
-  context.lineTo(width / 2, -baseDepth);
-  context.lineTo(0, tipDepth);
+  context.moveTo(-halfWidth, 0);
+  context.lineTo(halfWidth, 0);
+  context.lineTo(halfWidth - shoulderInset, shoulderDepth);
+  context.lineTo(0, depth);
+  context.lineTo(-halfWidth + shoulderInset, shoulderDepth);
   context.closePath();
 };
 

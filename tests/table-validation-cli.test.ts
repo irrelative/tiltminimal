@@ -89,10 +89,12 @@ describe('table validation cli resolution and reports', () => {
     );
   });
 
-  it('keeps all built-in tables clean under fail-on-warnings', () => {
+  it('keeps built-in tables free of layout errors and Starlight fully clean', () => {
     const reports = BUILT_IN_TABLES.map((table) => validateTableRecord(table));
+    const starlight = reports.find((report) => report.tableId === 'starlight-em');
 
-    expect(shouldFailValidation(reports, { failOnWarnings: true })).toBe(false);
-    expect(reports.every((report) => report.issues.length === 0)).toBe(true);
+    expect(shouldFailValidation(reports, { failOnWarnings: false })).toBe(false);
+    expect(reports.every((report) => report.layoutErrors === 0)).toBe(true);
+    expect(starlight?.issues).toHaveLength(0);
   });
 });

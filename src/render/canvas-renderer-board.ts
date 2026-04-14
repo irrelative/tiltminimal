@@ -570,25 +570,56 @@ const drawSlingshots = (
 
   board.slingshots.forEach((slingshot, index) => {
     const compression = state?.slingshots[index]?.compression ?? 0;
-    const innerDepth = slingshot.height * (1 - compression * 0.28);
+    const bodyDepth = slingshot.height * (1.65 - compression * 0.34);
     const renderAngle = getRenderedSlingshotAngle(board, slingshot);
+    const postRadius = Math.max(8, slingshot.height * 0.28);
 
     context.save();
     context.translate(slingshot.x, slingshot.y);
     context.rotate(renderAngle);
-    traceSlingshotPath(context, slingshot.width, innerDepth);
-    context.fillStyle = theme.guideRubberPrimary;
+    traceSlingshotPath(context, slingshot.width, bodyDepth);
+    context.fillStyle = theme.guideMetalPrimary;
     context.fill();
 
     context.lineWidth = 4;
-    context.strokeStyle = theme.guideRubberSecondary;
+    context.strokeStyle = theme.guideMetalSecondary;
     context.stroke();
 
     context.beginPath();
     context.moveTo(-slingshot.width / 2, 0);
     context.lineTo(slingshot.width / 2, 0);
-    context.lineWidth = Math.max(6, slingshot.height * 0.36);
+    context.lineWidth = Math.max(7, slingshot.height * 0.32);
     context.lineCap = 'round';
+    context.strokeStyle = theme.guideRubberPrimary;
+    context.stroke();
+
+    context.beginPath();
+    context.moveTo(-slingshot.width / 2 + 2, 0);
+    context.lineTo(slingshot.width / 2 - 2, 0);
+    context.lineWidth = Math.max(3, slingshot.height * 0.14);
+    context.strokeStyle = theme.guideRubberSecondary;
+    context.stroke();
+
+    context.fillStyle = theme.postRubberFill;
+    context.strokeStyle = theme.postRubberRing;
+    context.lineWidth = 3;
+    context.beginPath();
+    context.arc(-slingshot.width / 2, 0, postRadius, 0, Math.PI * 2);
+    context.arc(slingshot.width / 2, 0, postRadius, 0, Math.PI * 2);
+    context.fill();
+    context.stroke();
+
+    context.fillStyle = theme.postRubberCore;
+    context.beginPath();
+    context.arc(-slingshot.width / 2, 0, postRadius * 0.42, 0, Math.PI * 2);
+    context.arc(slingshot.width / 2, 0, postRadius * 0.42, 0, Math.PI * 2);
+    context.fill();
+
+    context.beginPath();
+    context.moveTo(-slingshot.width * 0.28, bodyDepth * 0.56);
+    context.lineTo(0, bodyDepth * 0.86);
+    context.lineTo(slingshot.width * 0.28, bodyDepth * 0.56);
+    context.lineWidth = 3;
     context.strokeStyle = theme.guideMetalSecondary;
     context.stroke();
     context.restore();

@@ -42,6 +42,7 @@ Current warning code:
 - `flipper-keepout`
 - `spinner-obstructed`
 - `saucer-eject-obstructed`
+- `ball-trap-risk`
 - `rules-event-unhandled`
 
 ## Implemented Checks
@@ -119,6 +120,23 @@ lane body is still a launcher-layout defect.
 
 The analyzer warns when guides, posts, targets, or slingshot geometry intrude
 into a flipper's sweep/feed area.
+
+### Passive trap risk
+
+The analyzer now also looks for pockets where a passively moving ball can
+settle and fail to drain.
+
+This pass is intentionally simulation-based rather than pure geometry:
+
+- the analyzer seeds stationary balls on a coarse lower/mid playfield grid
+- each candidate point is skipped if it already lies inside authored geometry,
+  the plunger lane, or a saucer cup
+- each remaining seed runs through a short no-input physics simulation
+- if the ball neither drains nor meaningfully escapes its local area, the
+  analyzer emits `ball-trap-risk`
+
+This is still heuristic, but it catches real dead pockets that are difficult to
+identify from overlap checks alone.
 
 This is a geometric heuristic based on sampled distance to the flipper across
 its motion range.

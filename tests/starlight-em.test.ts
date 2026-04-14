@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { BUILT_IN_TABLES } from '../src/boards/table-library';
 import { validateCompiledBoardLayout } from '../src/boards/layout-validation';
 import { starlightEmTable } from '../src/boards/tables/starlight-em-table';
+import { analyzeBoard } from '../src/editor/table-analysis';
 import { createInitialGameState } from '../src/game/game-state';
 import { stepGame } from '../src/game/physics-engine';
 import type { InputState } from '../src/input/keyboard-input';
@@ -108,6 +109,10 @@ describe('starlightEmTable', () => {
     );
 
     expect(nearestGuideDistance).toBeGreaterThan(centerSpinner.length / 2);
+  });
+
+  it('clears the editor-side geometry analysis checks', () => {
+    expect(analyzeBoard(starlightEmTable)).toHaveLength(0);
   });
 });
 

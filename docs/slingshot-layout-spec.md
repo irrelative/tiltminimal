@@ -36,6 +36,15 @@ For lower-playfield tables, the rendered slingshot body is oriented toward the
 nearest flipper tip so mirrored left/right slings visually point into the
 flipper area instead of drawing the same wedge handedness on both sides.
 
+The renderer now draws the slingshot as:
+
+- a triangular body behind the active face
+- a distinct front rubber face
+- small end-post cues at the face endpoints
+
+This keeps the collision model simple while making the lower third read much
+closer to a real table sling assembly.
+
 This is still a 2D approximation, but it is materially more accurate than the
 previous approach where a slingshot region was just another diagonal guide.
 

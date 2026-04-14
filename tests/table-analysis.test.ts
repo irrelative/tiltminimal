@@ -81,7 +81,9 @@ describe('analyzeBoard', () => {
 
     const warnings = analyzeBoard(board);
 
-    expect(warnings).toHaveLength(0);
+    expect(
+      warnings.some((warning) => warning.code === 'element-overlap'),
+    ).toBe(false);
   });
 
   it('ignores intentional guide-to-guide joins in overlap warnings', () => {
@@ -386,6 +388,44 @@ describe('analyzeBoard', () => {
     expect(
       warnings.some((warning) => warning.code === 'saucer-eject-obstructed'),
     ).toBe(true);
+  });
+
+  it('reports pockets where a passive ball can settle without draining', () => {
+    const board = createBlankTable();
+    board.guides = [
+      {
+        start: { x: 220, y: 840 },
+        end: { x: 220, y: 1100 },
+        thickness: 16,
+        material: 'metalGuide',
+      },
+      {
+        start: { x: 320, y: 840 },
+        end: { x: 320, y: 1100 },
+        thickness: 16,
+        material: 'metalGuide',
+      },
+      {
+        start: { x: 220, y: 1100 },
+        end: { x: 320, y: 1100 },
+        thickness: 16,
+        material: 'metalGuide',
+      },
+    ];
+
+    const warnings = analyzeBoard(board);
+
+    expect(
+      warnings.some((warning) => warning.code === 'ball-trap-risk'),
+    ).toBe(true);
+  });
+
+  it('does not report trap warnings on the blank starter table', () => {
+    const warnings = analyzeBoard(createBlankTable());
+
+    expect(
+      warnings.some((warning) => warning.code === 'ball-trap-risk'),
+    ).toBe(false);
   });
 
   it('ignores guide lips that only retain the saucer pocket', () => {

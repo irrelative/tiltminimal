@@ -12,6 +12,9 @@ import {
   getPlungerGuideTopY,
   getPlungerLaneBounds,
 } from '../game/plunger-geometry';
+import { createInitialGameState } from '../game/game-state';
+import { stepGame } from '../game/physics-engine';
+import type { InputState } from '../input/keyboard-input';
 import type {
   BoardDefinition,
   FlipperDefinition,
@@ -24,6 +27,25 @@ const MIN_SAMPLE_SPACING = 16;
 const FLIPPER_KEEPOUT_MARGIN = 14;
 const SPINNER_CLEARANCE_MARGIN = 4;
 const PATH_SAMPLE_STEP = 14;
+const TRAP_SAMPLE_SPACING_X = 72;
+const TRAP_SAMPLE_SPACING_Y = 88;
+const TRAP_SIM_SECONDS = 6;
+const TRAP_SETTLE_SECONDS = 2.5;
+const TRAP_MAX_WARNINGS = 3;
+const TRAP_MAX_SPAN = 42;
+const TRAP_MAX_SPEED = 28;
+const TRAP_DUPLICATE_DISTANCE = 56;
+const TRAP_CLEARANCE_MARGIN = 6;
+const TRAP_ENCLOSURE_DISTANCE = 78;
+
+const idleInput: InputState = {
+  leftPressed: false,
+  rightPressed: false,
+  launchPressed: false,
+  nudgeLeftPressed: false,
+  nudgeRightPressed: false,
+  nudgeUpPressed: false,
+};
 
 export type TableAnalysisWarningCode =
   | 'element-overlap'
@@ -32,6 +54,7 @@ export type TableAnalysisWarningCode =
   | 'flipper-keepout'
   | 'spinner-obstructed'
   | 'saucer-eject-obstructed'
+  | 'ball-trap-risk'
   | 'rules-event-unhandled';
 
 export interface TableAnalysisElementRef {
@@ -73,6 +96,7 @@ export const analyzeBoard = (
   analyzeFlipperKeepouts(board, playfieldElements, warnings);
   analyzeSpinnerClearance(board, playfieldElements, warnings);
   analyzeSaucerEjectPaths(board, playfieldElements, warnings);
+  analyzeBallTrapRisks(board, allElements, warnings);
   analyzeRulesCoverage(board, warnings);
 
   return warnings;
@@ -334,6 +358,48 @@ const analyzeSaucerEjectPaths = (
   });
 };
 
+const analyzeBallTrapRisks = (
+  board: BoardDefinition,
+  elements: AnalyzableElement[],
+  warnings: TableAnalysisWarning[],
+): void => {
+  const candidates = collectTrapSamplePoints(board, elements);
+  const reportedPositions: Point[] = [];
+
+  for (const point of candidates) {
+    const trap = simulateTrapCandidate(board, elements, point);
+
+    if (!trap) {
+      continue;
+    }
+
+    if (
+      reportedPositions.some(
+        (reported) =>
+          getPointDistance(reported, trap.position) <= TRAP_DUPLICATE_DISTANCE,
+      )
+    ) {
+      continue;
+    }
+
+    reportedPositions.push(trap.position);
+    warnings.push({
+      severity: 'warning',
+      code: 'ball-trap-risk',
+      title: 'Ball trap risk',
+      message: `A ball settling near (${Math.round(
+        trap.position.x,
+      )}, ${Math.round(
+        trap.position.y,
+      )}) appears to stop without draining.`,
+    });
+
+    if (reportedPositions.length >= TRAP_MAX_WARNINGS) {
+      break;
+    }
+  }
+};
+
 const isSaucerPocketGuide = (
   element: AnalyzableElement,
   saucer: BoardDefinition['saucers'][number],
@@ -527,6 +593,215 @@ const collectAnalyzableElements = (
   return elements;
 };
 
+const collectTrapSamplePoints = (
+  board: BoardDefinition,
+  elements: AnalyzableElement[],
+): Point[] => {
+  const points: Point[] = [];
+  const minX = board.ball.radius + 18;
+  const maxX = board.width - board.ball.radius - 18;
+  const minY = Math.max(board.height * 0.52, board.ball.radius + 24);
+  const maxY = Math.min(board.drainY - board.ball.radius * 4, board.height - 80);
+
+  for (let y = minY; y <= maxY; y += TRAP_SAMPLE_SPACING_Y) {
+    for (let x = minX; x <= maxX; x += TRAP_SAMPLE_SPACING_X) {
+      const point = { x, y };
+
+      if (!isPointPlayableTrapSeed(point, board, elements)) {
+        continue;
+      }
+
+      points.push(point);
+    }
+  }
+
+  return points.sort((left, right) => right.y - left.y);
+};
+
+const isPointPlayableTrapSeed = (
+  point: Point,
+  board: BoardDefinition,
+  elements: AnalyzableElement[],
+): boolean => {
+  if (isPointInsidePlungerLane(point, board)) {
+    return false;
+  }
+
+  if (
+    board.saucers.some(
+      (saucer) =>
+        getPointDistance(point, saucer) <=
+        saucer.radius + board.ball.radius + TRAP_CLEARANCE_MARGIN,
+    )
+  ) {
+    return false;
+  }
+
+  return !elements.some((element) =>
+    element.samples.some(
+      (sample) =>
+        getPointDistance(point, sample) <=
+        sample.radius + board.ball.radius + TRAP_CLEARANCE_MARGIN,
+    ),
+  );
+};
+
+const isPointInsidePlungerLane = (
+  point: Point,
+  board: BoardDefinition,
+): boolean => {
+  const lane = getPlungerLaneBounds(board);
+
+  return (
+    point.x >= lane.minX - board.ball.radius &&
+    point.x <= lane.maxX + board.ball.radius &&
+    point.y >= lane.topY - board.ball.radius &&
+    point.y <= lane.bottomY + board.ball.radius
+  );
+};
+
+const simulateTrapCandidate = (
+  board: BoardDefinition,
+  elements: AnalyzableElement[],
+  start: Point,
+): { position: Point } | null => {
+  let state = createInitialGameState(board);
+  state = {
+    ...state,
+    status: 'playing',
+    ball: {
+      ...state.ball,
+      position: { ...start },
+      linearVelocity: { x: 0, y: 0 },
+      angularVelocity: { x: 0, y: 0 },
+      angularPosition: { x: 0, y: 0 },
+    },
+  };
+
+  let minX = Number.POSITIVE_INFINITY;
+  let maxX = Number.NEGATIVE_INFINITY;
+  let minY = Number.POSITIVE_INFINITY;
+  let maxY = Number.NEGATIVE_INFINITY;
+  const totalSteps = Math.ceil(TRAP_SIM_SECONDS * 60);
+  const settleStartStep = Math.floor(TRAP_SETTLE_SECONDS * 60);
+
+  for (let step = 0; step < totalSteps; step += 1) {
+    state = stepGame(state, board, idleInput, 1 / 60);
+
+    if (state.status === 'waiting-launch') {
+      return null;
+    }
+
+    if (step < settleStartStep) {
+      continue;
+    }
+
+    minX = Math.min(minX, state.ball.position.x);
+    maxX = Math.max(maxX, state.ball.position.x);
+    minY = Math.min(minY, state.ball.position.y);
+    maxY = Math.max(maxY, state.ball.position.y);
+  }
+
+  if (!Number.isFinite(minX)) {
+    return null;
+  }
+
+  const span = Math.max(maxX - minX, maxY - minY);
+  const speed = Math.hypot(
+    state.ball.linearVelocity.x,
+    state.ball.linearVelocity.y,
+  );
+
+  if (
+    span > TRAP_MAX_SPAN ||
+    speed > TRAP_MAX_SPEED ||
+    state.ball.position.y >= board.drainY - board.ball.radius * 2 ||
+    state.ball.position.y < board.height * 0.55
+  ) {
+    return null;
+  }
+
+  if (
+    board.saucers.some(
+      (saucer) =>
+        getPointDistance(state.ball.position, saucer) <=
+        saucer.radius + board.ball.radius + 4,
+    )
+  ) {
+    return null;
+  }
+
+  if (!isTrapPocketEnclosed(state.ball.position, board, elements)) {
+    return null;
+  }
+
+  if (isBallRestingOnFlipper(state.ball.position, board)) {
+    return null;
+  }
+
+  return {
+    position: { ...state.ball.position },
+  };
+};
+
+const isBallRestingOnFlipper = (
+  point: Point,
+  board: BoardDefinition,
+): boolean =>
+  board.flippers.some(
+    (flipper) =>
+      getDistanceToFlipperSurface(point, flipper, flipper.restingAngle) <=
+      board.ball.radius + 18,
+  );
+
+const isTrapPocketEnclosed = (
+  point: Point,
+  board: BoardDefinition,
+  elements: AnalyzableElement[],
+): boolean =>
+  hasBarrierInDirection(point, { x: -1, y: 0 }, board, elements) &&
+  hasBarrierInDirection(point, { x: 1, y: 0 }, board, elements) &&
+  hasBarrierInDirection(point, { x: 0, y: 1 }, board, elements);
+
+const hasBarrierInDirection = (
+  point: Point,
+  direction: Point,
+  board: BoardDefinition,
+  elements: AnalyzableElement[],
+): boolean => {
+  const perpendicular = { x: -direction.y, y: direction.x };
+  const edgeDistance =
+    direction.x < 0
+      ? point.x
+      : direction.x > 0
+        ? board.width - point.x
+        : board.height - point.y;
+
+  if (edgeDistance <= TRAP_ENCLOSURE_DISTANCE) {
+    return true;
+  }
+
+  return elements.some((element) =>
+    element.samples.some((sample) => {
+      const delta = {
+        x: sample.x - point.x,
+        y: sample.y - point.y,
+      };
+      const along =
+        delta.x * direction.x + delta.y * direction.y;
+      const lateral = Math.abs(
+        delta.x * perpendicular.x + delta.y * perpendicular.y,
+      );
+
+      return (
+        along >= 0 &&
+        along <= TRAP_ENCLOSURE_DISTANCE &&
+        lateral <= sample.radius + board.ball.radius + 6
+      );
+    }),
+  );
+};
+
 const createPlungerLaneElement = (
   board: BoardDefinition,
 ): AnalyzableElement => {
@@ -604,10 +879,26 @@ const isGuidePostJoin = (
   }
 
   const threshold = post.radius + guide.thickness / 2 + 2;
+  const joinsEndpoint =
+    getPointDistance(post, guide.start) <= threshold ||
+    getPointDistance(post, guide.end) <= threshold;
+
+  if (joinsEndpoint) {
+    return true;
+  }
+
+  if (guide.material !== post.material) {
+    return false;
+  }
+
+  const projection = getPointProjectionOnSegment(post, guide.start, guide.end);
+  const attachmentExtension = (post.radius + guide.thickness / 2 + 6) /
+    Math.max(getPointDistance(guide.start, guide.end), 1);
 
   return (
-    getPointDistance(post, guide.start) <= threshold ||
-    getPointDistance(post, guide.end) <= threshold
+    (projection >= -attachmentExtension &&
+      projection <= 1 + attachmentExtension &&
+      getPointToSegmentDistance(post, guide.start, guide.end) <= threshold)
   );
 };
 
@@ -751,6 +1042,22 @@ const getPointToSegmentDistance = (
   };
 
   return getPointDistance(point, closest);
+};
+
+const getPointProjectionOnSegment = (
+  point: Point,
+  start: Point,
+  end: Point,
+): number => {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const lengthSquared = dx * dx + dy * dy;
+
+  if (lengthSquared <= Number.EPSILON) {
+    return 0;
+  }
+
+  return ((point.x - start.x) * dx + (point.y - start.y) * dy) / lengthSquared;
 };
 
 const getPointDistance = (left: Point, right: Point): number =>
