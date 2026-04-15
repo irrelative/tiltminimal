@@ -82,6 +82,7 @@ Use the `Makefile` entrypoints:
   * Editor: `https://irrelative.github.io/tiltminimal/editor`
   * Physics Sandbox: `https://irrelative.github.io/tiltminimal/physics`
   * Rules: `https://irrelative.github.io/tiltminimal/rules`
+* On narrower screens, route navigation collapses into a hamburger menu in the app toolbar.
 * Deployment is handled by `.github/workflows/deploy-pages.yml`, which builds with the Pages-provided base path and publishes the `dist/` output.
 
 ## Play Controls

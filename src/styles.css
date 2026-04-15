@@ -407,12 +407,55 @@ body[data-route='physics'] .stage-toolbar {
   gap: 8px;
 }
 
+.toolbar-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 body[data-route='play'] .toolbar-main,
 body[data-route='physics'] .toolbar-main {
   padding: 12px 14px;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.04);
+}
+
+.nav-toggle {
+  display: none;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-toggle-bar {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--text);
+  transition:
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+
+body[data-nav-open='true'] .nav-toggle-bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+body[data-nav-open='true'] .nav-toggle-bar:nth-child(2) {
+  opacity: 0;
+}
+
+body[data-nav-open='true'] .nav-toggle-bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
 }
 
 .runtime-route-panel,
@@ -630,8 +673,21 @@ body[data-route='physics'] #game {
     text-align: left;
   }
 
+  .nav-toggle {
+    display: inline-flex;
+    flex-direction: column;
+  }
+
   .debug-menu {
     width: 100%;
+  }
+
+  body[data-nav-open='false'] .debug-menu {
+    display: none;
+  }
+
+  body[data-nav-open='true'] .debug-menu {
+    display: grid;
   }
 
   .runtime-route-panel,

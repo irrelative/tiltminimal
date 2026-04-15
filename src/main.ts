@@ -79,6 +79,7 @@ interface AppState {
   tables: TableRecord[];
   activeTableId: string;
   mode: AppMode;
+  navMenuOpen: boolean;
   tool: EditorTool;
   selection: EditorSelection;
   dragging: boolean;
@@ -138,6 +139,7 @@ const copyRulesScriptButton =
   queryRequired<HTMLButtonElement>('#copy-rules-script');
 const modeTitle = queryRequired<HTMLElement>('#mode-title');
 const modeCopy = queryRequired<HTMLElement>('#mode-copy');
+const navToggleButton = queryRequired<HTMLButtonElement>('#nav-toggle');
 const playTableSelect = queryRequired<HTMLSelectElement>('#play-table-select');
 const playTableMeta = queryRequired<HTMLElement>('#play-table-meta');
 const playResetBallButton =
@@ -189,6 +191,7 @@ const state: AppState = {
         : appRoute === 'physics'
           ? 'physics'
           : 'play',
+  navMenuOpen: false,
   tool: 'select',
   selection: { kind: 'none' },
   dragging: false,
@@ -203,6 +206,7 @@ const state: AppState = {
 };
 
 document.body.dataset.route = appRoute;
+document.body.dataset.navOpen = 'false';
 
 if (BUILT_IN_TABLES.length === 0) {
   throw new Error('Expected at least one built-in table.');
@@ -217,6 +221,20 @@ if (appRoute === 'editor') {
 } else {
   bootPlayRoute();
 }
+
+navToggleButton.addEventListener('click', () => {
+  setNavMenuOpen(!state.navMenuOpen);
+});
+
+[debugLinkEditor, debugLinkPlay, debugLinkPhysics, debugLinkRules].forEach(
+  (link) => {
+    link.addEventListener('click', () => {
+      if (window.matchMedia('(max-width: 1080px)').matches) {
+        setNavMenuOpen(false);
+      }
+    });
+  },
+);
 
 function bootEditorRoute(): void {
   panelTitle.textContent = 'Table editor';
@@ -1276,6 +1294,21 @@ function syncDebugMenu(): void {
   );
   debugLinkRules.classList.toggle('is-active', rulesActive);
   debugLinkRules.setAttribute('aria-current', rulesActive ? 'page' : 'false');
+  navToggleButton.setAttribute('aria-expanded', state.navMenuOpen ? 'true' : 'false');
+  navToggleButton.setAttribute(
+    'aria-label',
+    state.navMenuOpen ? 'Close navigation menu' : 'Open navigation menu',
+  );
+}
+
+function setNavMenuOpen(open: boolean): void {
+  state.navMenuOpen = open;
+  document.body.dataset.navOpen = open ? 'true' : 'false';
+  navToggleButton.setAttribute('aria-expanded', open ? 'true' : 'false');
+  navToggleButton.setAttribute(
+    'aria-label',
+    open ? 'Close navigation menu' : 'Open navigation menu',
+  );
 }
 
 function getActiveTable(): TableRecord {
