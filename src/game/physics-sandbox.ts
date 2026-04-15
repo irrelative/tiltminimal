@@ -1,5 +1,6 @@
 import type { InputState } from '../input/keyboard-input';
 import type { BoardDefinition, Point } from '../types/board-definition';
+import { resolveBallBallCollisions } from './ball-ball-collision';
 import {
   createBallState,
   createInitialGameState,
@@ -176,6 +177,24 @@ export const spawnPhysicsSandboxBall = (
     };
   }
 
+  if (
+    state.balls.some(
+      (ball) =>
+        Math.hypot(
+          point.x - ball.state.ball.position.x,
+          point.y - ball.state.ball.position.y,
+        ) <= board.ball.radius + ball.state.ball.radius,
+    )
+  ) {
+    return {
+      spawned: false,
+      state: {
+        ...state,
+        statusMessage: 'Spawn blocked: point overlaps an active ball.',
+      },
+    };
+  }
+
   const nextBall: PhysicsSandboxBall = {
     id: state.nextBallId,
     state: createPhysicsSandboxBallGameState(
@@ -239,6 +258,13 @@ export const stepPhysicsSandbox = (
     });
     displayState = copySandboxDynamics(displayState, steppedBall.state, board);
   }
+
+  resolveBallBallCollisions(
+    balls
+      .filter((ball) => isBallFreeForBallCollision(ball.state))
+      .map((ball) => ball.state.ball),
+    board.physics.solver,
+  );
 
   const selectedBallId =
     state.selectedBallId !== null &&
@@ -628,3 +654,6 @@ const stepSandboxBallState = (
     drained: false,
   };
 };
+
+const isBallFreeForBallCollision = (state: GameState): boolean =>
+  !state.saucers.some((saucer) => saucer.occupied);

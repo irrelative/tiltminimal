@@ -87,6 +87,7 @@ A spawn is blocked when the clicked point would place the ball:
 - outside the playable table bounds
 - inside the plunger lane body
 - inside a saucer pocket
+- overlapping an already active sandbox ball
 - overlapping solid geometry such as guides, posts, bumpers, targets,
   spinners, slingshots, plunger guides, or flippers
 
@@ -116,8 +117,10 @@ Each frame on `/physics`:
 2. advance sandbox-only device state
 3. advance every active sandbox ball through the existing collision/material
    logic
-4. remove sandbox balls that drain below the table
-5. render the board plus every active sandbox ball
+4. resolve active free balls against each other with iterative pairwise
+   ball-ball collision passes
+5. remove sandbox balls that drain below the table
+6. render the board plus every active sandbox ball
 
 The sandbox remains active even when zero balls remain.
 

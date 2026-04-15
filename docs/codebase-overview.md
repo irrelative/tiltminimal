@@ -189,6 +189,8 @@ Physics is no longer one monolithic file. The public entrypoint is still
   spinners, and rollovers
 - `physics-engine-flippers.ts`: flipper sweep collision sampling and passive
   vs active contact behavior
+- `ball-ball-collision.ts`: pairwise multiball collision resolution used by the
+  physics sandbox route
 - `physics-engine-types.ts`: shared engine constants and result types
 - `physics-motion.ts`: time-based advancement of plunger/flipper/device motion
 - `physics-helpers.ts`: shared collision helpers and geometry utilities

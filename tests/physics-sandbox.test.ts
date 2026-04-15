@@ -103,6 +103,23 @@ describe('physics sandbox', () => {
     expect(result.state.statusMessage).toContain('Spawn blocked');
   });
 
+  it('rejects spawning a ball on top of an active sandbox ball', () => {
+    const board = createBlankTable('Sandbox');
+    let state = createPhysicsSandboxState(board);
+
+    state = setPhysicsSandboxSpawnMode(state, 'add');
+    state = spawnPhysicsSandboxBall(state, board, { x: 120, y: 120 }).state;
+
+    const result = spawnPhysicsSandboxBall(state, board, {
+      x: 128,
+      y: 120,
+    });
+
+    expect(result.spawned).toBe(false);
+    expect(result.state.balls).toHaveLength(1);
+    expect(result.state.statusMessage).toContain('active ball');
+  });
+
   it('removes drained balls without resetting the sandbox', () => {
     const board = createBlankTable('Sandbox');
     let state = createPhysicsSandboxState(board);
@@ -173,5 +190,22 @@ describe('physics sandbox', () => {
 
     expect(state.displayState.tableNudge.offset.x).toBeGreaterThan(0);
     expect(state.balls[0]?.state.ball.linearVelocity.x ?? 0).toBeGreaterThan(0);
+  });
+
+  it('resolves collisions between active sandbox balls', () => {
+    const board = createBlankTable('Sandbox');
+    let state = createPhysicsSandboxState(board);
+
+    state = setPhysicsSandboxSpawnMode(state, 'add');
+    state = setPhysicsSandboxLinearVelocity(state, 'x', 320);
+    state = spawnPhysicsSandboxBall(state, board, { x: 180, y: 200 }).state;
+    state = setPhysicsSandboxLinearVelocity(state, 'x', -320);
+    state = spawnPhysicsSandboxBall(state, board, { x: 214, y: 200 }).state;
+
+    state = stepPhysicsSandbox(state, board, idleInput, 1 / 60);
+
+    expect(state.balls).toHaveLength(2);
+    expect(state.balls[0]?.state.ball.linearVelocity.x ?? 0).toBeLessThan(0);
+    expect(state.balls[1]?.state.ball.linearVelocity.x ?? 0).toBeGreaterThan(0);
   });
 });

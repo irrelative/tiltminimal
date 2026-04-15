@@ -212,6 +212,29 @@ Surface response comes from:
 - defaults in `src/game/physics-defaults.ts`
 - material lookups in `src/game/materials.ts`
 
+## Multiball Contacts
+
+The dedicated physics sandbox at `/physics` now also supports ball-ball
+collisions.
+
+Those contacts are resolved separately from ball-vs-world contacts in
+`src/game/ball-ball-collision.ts`.
+
+The current staged implementation:
+
+- is sandbox-only rather than gameplay-wide
+- treats balls as circle-circle contacts
+- resolves overlap correction first
+- applies normal impulse for bounce
+- applies a bounded tangential impulse so the existing 2-axis rolling-spin
+  model can influence glancing multiball hits
+- runs a few iterative pair passes per frame for better stability when several
+  balls gather in one area
+
+This is intentionally a pragmatic first step. Normal gameplay is still driven
+by a single-ball lifecycle, so sandbox multiball lets the lower-level
+collision behavior be validated before rules/gameplay are expanded.
+
 ## Rolling Spin Model
 
 The current spin model is a 2-axis rolling approximation.
