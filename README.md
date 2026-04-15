@@ -48,9 +48,6 @@ Use the `Makefile` entrypoints:
 * [docs/physics-sandbox-spec.md](docs/physics-sandbox-spec.md) defines the
   dedicated `/physics` route for click-to-spawn physics testing outside the
   normal game/rules lifecycle
-* [docs/multiball-collision-spec.md](docs/multiball-collision-spec.md)
-  defines the staged multiple-ball collision model currently enabled in the
-  physics sandbox
 * [docs/board-component-dimensions.md](docs/board-component-dimensions.md)
   defines the dimensional meaning of every board component field
 * [docs/table-analysis-spec.md](docs/table-analysis-spec.md) defines the editor
