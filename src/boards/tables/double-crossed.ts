@@ -1,11 +1,9 @@
 import {
   absolutePoint,
   anchorPoint,
-  createFlipperPair,
-  createInlaneOutlanePair,
+  createLowerPlayfieldPair,
   createPopTriangle,
   createShooterLaneRight,
-  createSlingshotPair,
   createTopArchLanes,
   offsetLayoutPoint,
 } from '../layout-primitives';
@@ -185,39 +183,43 @@ const doubleCrossedTopArch = createTopArchLanes({
   roofInset: 60,
 });
 
-const doubleCrossedLeftLowerLanes = createInlaneOutlanePair({
-  side: 'left',
-  flipperPivot: anchorPoint('left-flipper-pivot'),
-  outerGuideStartOffset: { x: -176, y: -40 },
-  outerGuideEndOffset: { x: -120, y: -320 },
-  innerGuideStartOffset: { x: -56, y: -200 },
-  innerGuideEndOffset: { x: -80, y: 40 },
-  entryPostOffsets: [
-    { x: -72, y: -200, radius: 18, material: 'rubberPost' },
-  ],
-});
-
-const doubleCrossedRightLowerLanes = createInlaneOutlanePair({
-  side: 'right',
-  flipperPivot: anchorPoint('right-flipper-pivot'),
-  outerGuideStartOffset: { x: 176, y: -40 },
-  outerGuideEndOffset: { x: 160, y: -320 },
-  innerGuideStartOffset: { x: 56, y: -200 },
-  innerGuideEndOffset: { x: 80, y: 40 },
-  entryPostOffsets: [
-    { x: 72, y: -200, radius: 18, material: 'rubberPost' },
-  ],
-});
-
-const doubleCrossedSlingshots = createSlingshotPair({
-  leftCenter: offsetLayoutPoint(anchorPoint('left-flipper-pivot'), 20, -140),
-  rightCenter: offsetLayoutPoint(anchorPoint('right-flipper-pivot'), -20, -140),
-  width: 148,
-  height: 24,
-  leftAngle: 0.4,
-  rightAngle: Math.PI - 0.4,
-  score: 10,
-  strength: 540,
+const doubleCrossedLowerPlayfield = createLowerPlayfieldPair({
+  leftFlipperPivot: anchorPoint('left-flipper-pivot'),
+  rightFlipperPivot: anchorPoint('right-flipper-pivot'),
+  leftLane: {
+    outerGuideStartOffset: { x: -176, y: -40 },
+    outerGuideEndOffset: { x: -120, y: -320 },
+    innerGuideStartOffset: { x: -56, y: -200 },
+    innerGuideEndOffset: { x: -80, y: 40 },
+    entryPostOffsets: [{ x: -72, y: -200, radius: 18, material: 'rubberPost' }],
+  },
+  rightLane: {
+    outerGuideStartOffset: { x: 176, y: -40 },
+    outerGuideEndOffset: { x: 160, y: -320 },
+    innerGuideStartOffset: { x: 56, y: -200 },
+    innerGuideEndOffset: { x: 80, y: 40 },
+    entryPostOffsets: [{ x: 72, y: -200, radius: 18, material: 'rubberPost' }],
+  },
+  slingshots: {
+    leftCenterOffset: { x: 20, y: -140 },
+    rightCenterOffset: { x: -20, y: -140 },
+    width: 148,
+    height: 24,
+    leftAngle: 0.4,
+    rightAngle: Math.PI - 0.4,
+    score: 10,
+    strength: 540,
+  },
+  flippers: {
+    leftX: 280,
+    rightX: 640,
+    y: 1240,
+    length: 150,
+    thickness: 20,
+    restingAngleOffset: 0.28,
+    activeAngleOffset: -0.42,
+    material: 'flipperRubber',
+  },
 });
 
 const doubleCrossedLayout: BoardLayoutDefinition = {
@@ -248,8 +250,7 @@ const doubleCrossedLayout: BoardLayoutDefinition = {
     { id: 'cross-center', point: absolutePoint(480, 760) },
   ],
   posts: [
-    ...doubleCrossedLeftLowerLanes.posts,
-    ...doubleCrossedRightLowerLanes.posts,
+    ...doubleCrossedLowerPlayfield.posts,
     {
       position: offsetLayoutPoint(anchorPoint('cross-center'), 0, 200),
       radius: 18,
@@ -334,24 +335,14 @@ const doubleCrossedLayout: BoardLayoutDefinition = {
       material: 'metalGuide',
     },
   ],
-  slingshots: doubleCrossedSlingshots.slingshots,
+  slingshots: doubleCrossedLowerPlayfield.slingshots,
   rollovers: doubleCrossedTopArch.rollovers,
   guides: [
     ...doubleCrossedShooterLane.guides,
     ...doubleCrossedTopArch.guides,
-    ...doubleCrossedLeftLowerLanes.guides,
-    ...doubleCrossedRightLowerLanes.guides,
+    ...doubleCrossedLowerPlayfield.guides,
   ],
-  flippers: createFlipperPair({
-    leftX: 280,
-    rightX: 640,
-    y: 1240,
-    length: 150,
-    thickness: 20,
-    restingAngleOffset: 0.28,
-    activeAngleOffset: -0.42,
-    material: 'flipperRubber',
-  }),
+  flippers: doubleCrossedLowerPlayfield.flippers,
 };
 
 export const doubleCrossedTable =

@@ -1,10 +1,8 @@
 import {
   absolutePoint,
   anchorPoint,
-  createFlipperPair,
-  createInlaneOutlanePair,
+  createLowerPlayfieldPair,
   createShooterLaneRight,
-  createSlingshotPair,
   createTopArchLanes,
   offsetLayoutPoint,
 } from '../layout-primitives';
@@ -163,59 +161,67 @@ const starlightTopArch = createTopArchLanes({
   roofInset: 66,
 });
 
-const starlightLeftLowerLanes = createInlaneOutlanePair({
-  side: 'left',
-  flipperPivot: anchorPoint('left-flipper-pivot'),
-  outerGuideStartOffset: { x: -150, y: -380 },
-  outerGuideBreakOffset: { x: -150, y: -200 },
-  outerGuideEndOffset: { x: -122, y: 40 },
-  innerGuideStartOffset: { x: -46, y: -320 },
-  innerGuideBreakOffset: { x: -54, y: -210 },
-  innerGuideEndOffset: { x: -70, y: 36 },
-  slingGuideStartOffset: { x: -36, y: -214 },
-  slingGuideEndOffset: { x: -10, y: -160 },
-  outerMouthThickness: 12,
-  outerReturnThickness: 14,
-  innerMouthThickness: 12,
-  innerReturnThickness: 16,
-  entryPostOffsets: [
-    { x: -150, y: -404, radius: 14, material: 'metalGuide' },
-    { x: -46, y: -320, radius: 14, material: 'metalGuide' },
-    { x: -40, y: -214, radius: 18, material: 'rubberPost' },
-  ],
-});
-
-const starlightRightLowerLanes = createInlaneOutlanePair({
-  side: 'right',
-  flipperPivot: anchorPoint('right-flipper-pivot'),
-  outerGuideStartOffset: { x: 90, y: -380 },
-  outerGuideBreakOffset: { x: 90, y: -200 },
-  outerGuideEndOffset: { x: 96, y: 40 },
-  innerGuideStartOffset: { x: 46, y: -320 },
-  innerGuideBreakOffset: { x: 54, y: -210 },
-  innerGuideEndOffset: { x: 56, y: 36 },
-  slingGuideStartOffset: { x: 36, y: -214 },
-  slingGuideEndOffset: { x: 10, y: -160 },
-  outerMouthThickness: 12,
-  outerReturnThickness: 14,
-  innerMouthThickness: 12,
-  innerReturnThickness: 16,
-  entryPostOffsets: [
-    { x: 90, y: -404, radius: 14, material: 'metalGuide' },
-    { x: 46, y: -320, radius: 14, material: 'metalGuide' },
-    { x: 40, y: -214, radius: 18, material: 'rubberPost' },
-  ],
-});
-
-const starlightSlingshots = createSlingshotPair({
-  leftCenter: offsetLayoutPoint(anchorPoint('left-flipper-pivot'), 18, -138),
-  rightCenter: offsetLayoutPoint(anchorPoint('right-flipper-pivot'), -18, -138),
-  width: 132,
-  height: 40,
-  leftAngle: 0.5,
-  rightAngle: Math.PI - 0.5,
-  score: 10,
-  strength: 560,
+const starlightLowerPlayfield = createLowerPlayfieldPair({
+  leftFlipperPivot: anchorPoint('left-flipper-pivot'),
+  rightFlipperPivot: anchorPoint('right-flipper-pivot'),
+  leftLane: {
+    outerGuideStartOffset: { x: -150, y: -380 },
+    outerGuideBreakOffset: { x: -150, y: -200 },
+    outerGuideEndOffset: { x: -122, y: 40 },
+    innerGuideStartOffset: { x: -46, y: -320 },
+    innerGuideBreakOffset: { x: -54, y: -210 },
+    innerGuideEndOffset: { x: -70, y: 36 },
+    slingGuideStartOffset: { x: -36, y: -214 },
+    slingGuideEndOffset: { x: -10, y: -160 },
+    outerMouthThickness: 12,
+    outerReturnThickness: 14,
+    innerMouthThickness: 12,
+    innerReturnThickness: 16,
+    entryPostOffsets: [
+      { x: -150, y: -404, radius: 14, material: 'metalGuide' },
+      { x: -46, y: -320, radius: 14, material: 'metalGuide' },
+      { x: -40, y: -214, radius: 18, material: 'rubberPost' },
+    ],
+  },
+  rightLane: {
+    outerGuideStartOffset: { x: 90, y: -380 },
+    outerGuideBreakOffset: { x: 90, y: -200 },
+    outerGuideEndOffset: { x: 96, y: 40 },
+    innerGuideStartOffset: { x: 46, y: -320 },
+    innerGuideBreakOffset: { x: 54, y: -210 },
+    innerGuideEndOffset: { x: 56, y: 36 },
+    slingGuideStartOffset: { x: 36, y: -214 },
+    slingGuideEndOffset: { x: 10, y: -160 },
+    outerMouthThickness: 12,
+    outerReturnThickness: 14,
+    innerMouthThickness: 12,
+    innerReturnThickness: 16,
+    entryPostOffsets: [
+      { x: 90, y: -404, radius: 14, material: 'metalGuide' },
+      { x: 46, y: -320, radius: 14, material: 'metalGuide' },
+      { x: 40, y: -214, radius: 18, material: 'rubberPost' },
+    ],
+  },
+  slingshots: {
+    leftCenterOffset: { x: 18, y: -138 },
+    rightCenterOffset: { x: -18, y: -138 },
+    width: 132,
+    height: 40,
+    leftAngle: 0.5,
+    rightAngle: Math.PI - 0.5,
+    score: 10,
+    strength: 560,
+  },
+  flippers: {
+    leftX: 270,
+    rightX: 630,
+    y: 1220,
+    length: 150,
+    thickness: 20,
+    restingAngleOffset: 0.28,
+    activeAngleOffset: -0.42,
+    material: 'flipperRubber',
+  },
 });
 
 const starlightEmLayout: BoardLayoutDefinition = {
@@ -248,8 +254,7 @@ const starlightEmLayout: BoardLayoutDefinition = {
   ],
   posts: [
     { position: absolutePoint(450, 1100), radius: 18, material: 'rubberPost' },
-    ...starlightLeftLowerLanes.posts,
-    ...starlightRightLowerLanes.posts,
+    ...starlightLowerPlayfield.posts,
   ],
   bumpers: [
     {
@@ -350,11 +355,10 @@ const starlightEmLayout: BoardLayoutDefinition = {
       material: 'metalGuide',
     },
   ],
-  slingshots: starlightSlingshots.slingshots,
+  slingshots: starlightLowerPlayfield.slingshots,
   rollovers: starlightTopArch.rollovers,
   guides: [
-    ...starlightLeftLowerLanes.guides,
-    ...starlightRightLowerLanes.guides,
+    ...starlightLowerPlayfield.guides,
     {
       start: absolutePoint(132, 872),
       end: absolutePoint(116, 644),
@@ -394,16 +398,7 @@ const starlightEmLayout: BoardLayoutDefinition = {
     ...starlightTopArch.guides,
     ...starlightShooterLane.guides,
   ],
-  flippers: createFlipperPair({
-    leftX: 270,
-    rightX: 630,
-    y: 1220,
-    length: 150,
-    thickness: 20,
-    restingAngleOffset: 0.28,
-    activeAngleOffset: -0.42,
-    material: 'flipperRubber',
-  }),
+  flippers: starlightLowerPlayfield.flippers,
 };
 
 export const starlightEmTable = compileBuiltInBoardLayout(starlightEmLayout);

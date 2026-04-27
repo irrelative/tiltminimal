@@ -74,8 +74,17 @@ Current helpers include:
 - `createTopArchLanes(...)`
 - `createInlaneOutlanePair(...)`
 - `createSlingshotPair(...)`
+- `createLowerPlayfieldPair(...)`
 
 These return high-level layout objects, not runtime board data.
+
+Layout fragments are reusable authoring-time buckets that contain the same
+arrays the layout compiler already accepts, such as `guides`, `posts`,
+`slingshots`, `rollovers`, and `flippers`. Use `mergeLayoutFragments(...)` when
+a table needs to combine several composed pieces while preserving bucket order.
+Fragments are flattened by spreading their arrays into the ordinary
+`BoardLayoutDefinition` fields; they are not a separate runtime component
+system.
 
 Lower-playfield authoring is now intentionally split:
 
@@ -83,6 +92,8 @@ Lower-playfield authoring is now intentionally split:
   divider rails, optional sling-approach rubber, and lane-entry posts
 - `createSlingshotPair(...)` builds the active lower slings as first-class
   devices with kick behavior
+- `createLowerPlayfieldPair(...)` composes the inlane / outlane helpers,
+  active slingshots, and flipper pair into one lower-third fragment
 
 For tables that need a canonical lower third, prefer using
 `outerGuideBreakOffset` and `innerGuideBreakOffset` in

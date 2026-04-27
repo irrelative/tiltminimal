@@ -73,10 +73,10 @@ This table should feel closer to a reel-score electromechanical game:
 - Self-contained built-in table module: `src/boards/tables/starlight-em-table.ts`
 - Registered in: `src/boards/table-library.ts`
 - The layout now uses `createShooterLaneRight(...)`,
-  `createTopArchLanes(...)`, `createInlaneOutlanePair(...)`, and
-  `createSlingshotPair(...)` so the launcher feed, top rollover bank, lower
-  lanes, and lower slings are generated from semantic primitives rather than
-  hand-placed guide fragments.
+  `createTopArchLanes(...)`, and `createLowerPlayfieldPair(...)` so the
+  launcher feed, top rollover bank, lower lanes, lower slings, and lower
+  flippers are generated from semantic fragments rather than hand-placed guide
+  fragments.
 - The lower third intentionally snaps to the editor grid, so the lane package is
   authored in coarse canonical geometry rather than fine-grained freehand
   offsets. That keeps the built-in table editable without losing the EM lane

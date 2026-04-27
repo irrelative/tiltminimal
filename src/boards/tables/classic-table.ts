@@ -1,10 +1,9 @@
 import {
   absolutePoint,
   anchorPoint,
-  createFlipperPair,
+  createLowerPlayfieldPair,
   createMirroredRollovers,
   createMirroredStandupTargets,
-  createSlingshotPair,
 } from '../layout-primitives';
 import type { BoardLayoutDefinition } from '../layout-schema';
 import { compileBuiltInBoardLayout } from '../layout-compiler';
@@ -108,15 +107,41 @@ return {
 };
 `;
 
-const classicSlingshots = createSlingshotPair({
-  leftCenter: absolutePoint(291, 1116),
-  rightCenter: absolutePoint(609, 1116),
-  width: 152,
-  height: 24,
-  leftAngle: 0.375,
-  rightAngle: Math.PI - 0.375,
-  score: 10,
-  strength: 560,
+const classicLowerPlayfield = createLowerPlayfieldPair({
+  leftFlipperPivot: absolutePoint(270, 1220),
+  rightFlipperPivot: absolutePoint(630, 1220),
+  leftLane: {
+    outerGuideStartOffset: { x: -180, y: -340 },
+    outerGuideEndOffset: { x: -100, y: 40 },
+    innerGuideStartOffset: { x: -20, y: -220 },
+    innerGuideEndOffset: { x: -56, y: 64 },
+  },
+  rightLane: {
+    outerGuideStartOffset: { x: 180, y: -340 },
+    outerGuideEndOffset: { x: 180, y: 40 },
+    innerGuideStartOffset: { x: 20, y: -220 },
+    innerGuideEndOffset: { x: 56, y: 64 },
+  },
+  slingshots: {
+    leftCenterOffset: { x: 21, y: -104 },
+    rightCenterOffset: { x: -21, y: -104 },
+    width: 152,
+    height: 24,
+    leftAngle: 0.375,
+    rightAngle: Math.PI - 0.375,
+    score: 10,
+    strength: 560,
+  },
+  flippers: {
+    leftX: 270,
+    rightX: 630,
+    y: 1220,
+    length: 150,
+    thickness: 20,
+    restingAngleOffset: 0.28,
+    activeAngleOffset: -0.42,
+    material: 'flipperRubber',
+  },
 });
 
 const classicTableLayout: BoardLayoutDefinition = {
@@ -195,53 +220,15 @@ const classicTableLayout: BoardLayoutDefinition = {
       material: 'metalGuide',
     },
   ],
-  slingshots: classicSlingshots.slingshots,
+  slingshots: classicLowerPlayfield.slingshots,
   rollovers: createMirroredRollovers({
     center: anchorPoint('top-rollover-center'),
     offsetsX: [-150, 0, 150],
     radius: 24,
     score: 25,
   }),
-  guides: [
-    {
-      start: absolutePoint(90, 880),
-      end: absolutePoint(170, 1260),
-      thickness: 14,
-      material: 'metalGuide',
-      plane: 'raised',
-    },
-    {
-      start: absolutePoint(250, 1000),
-      end: absolutePoint(214, 1284),
-      thickness: 18,
-      material: 'metalGuide',
-      plane: 'raised',
-    },
-    {
-      start: absolutePoint(810, 880),
-      end: absolutePoint(810, 1260),
-      thickness: 14,
-      material: 'metalGuide',
-      plane: 'raised',
-    },
-    {
-      start: absolutePoint(650, 1000),
-      end: absolutePoint(686, 1284),
-      thickness: 18,
-      material: 'metalGuide',
-      plane: 'raised',
-    },
-  ],
-  flippers: createFlipperPair({
-    leftX: 270,
-    rightX: 630,
-    y: 1220,
-    length: 150,
-    thickness: 20,
-    restingAngleOffset: 0.28,
-    activeAngleOffset: -0.42,
-    material: 'flipperRubber',
-  }),
+  guides: classicLowerPlayfield.guides,
+  flippers: classicLowerPlayfield.flippers,
 };
 
 export const classicTable = compileBuiltInBoardLayout(classicTableLayout);

@@ -6,6 +6,8 @@ import {
   anchorPoint,
   createFlipperPair,
   createInlaneOutlanePair,
+  createLowerPlayfieldPair,
+  mergeLayoutFragments,
   createPopTriangle,
   createShooterLaneRight,
   createSlingshotPair,
@@ -214,5 +216,86 @@ describe('compileBoardLayout', () => {
     expect(result.board.guides[4]?.plane).toBe('playfield');
     expect(result.board.posts).toHaveLength(1);
     expect(result.board.slingshots).toHaveLength(2);
+  });
+
+  it('composes lower-playfield fragments with lanes, slingshots, and flippers', () => {
+    const lowerPlayfield = createLowerPlayfieldPair({
+      leftFlipperPivot: absolutePoint(270, 1220),
+      rightFlipperPivot: absolutePoint(630, 1220),
+      leftLane: {
+        outerGuideStartOffset: { x: -176, y: -38 },
+        outerGuideBreakOffset: { x: -154, y: -156 },
+        outerGuideEndOffset: { x: -120, y: -322 },
+        innerGuideStartOffset: { x: -56, y: -216 },
+        innerGuideBreakOffset: { x: -72, y: -116 },
+        innerGuideEndOffset: { x: -84, y: 48 },
+        entryPostOffsets: [
+          { x: -72, y: -200, radius: 18, material: 'rubberPost' },
+        ],
+      },
+      rightLane: {
+        outerGuideStartOffset: { x: 176, y: -38 },
+        outerGuideBreakOffset: { x: 154, y: -156 },
+        outerGuideEndOffset: { x: 120, y: -322 },
+        innerGuideStartOffset: { x: 56, y: -216 },
+        innerGuideBreakOffset: { x: 72, y: -116 },
+        innerGuideEndOffset: { x: 84, y: 48 },
+        entryPostOffsets: [
+          { x: 72, y: -200, radius: 18, material: 'rubberPost' },
+        ],
+      },
+      slingshots: {
+        leftCenterOffset: { x: 22, y: -100 },
+        rightCenterOffset: { x: -22, y: -100 },
+        width: 148,
+        height: 24,
+        leftAngle: 0.4,
+        rightAngle: Math.PI - 0.4,
+        score: 10,
+        strength: 560,
+      },
+      flippers: {
+        leftX: 270,
+        rightX: 630,
+        y: 1220,
+        length: 150,
+        thickness: 20,
+        restingAngleOffset: 0.28,
+        activeAngleOffset: -0.42,
+      },
+    });
+    const fragment = mergeLayoutFragments(lowerPlayfield, {
+      posts: [
+        {
+          position: absolutePoint(450, 1100),
+          radius: 18,
+          material: 'rubberPost',
+        },
+      ],
+    });
+    const layout: BoardLayoutDefinition = {
+      name: 'Lower Playfield Fragment Test',
+      width: 900,
+      height: 1400,
+      drainY: 1425,
+      launchPosition: absolutePoint(770, 1180),
+      materials: {
+        playfield: 'playfieldWood',
+        walls: 'metalGuide',
+      },
+      posts: fragment.posts,
+      guides: fragment.guides,
+      slingshots: fragment.slingshots,
+      flippers: fragment.flippers ?? [],
+    };
+
+    const result = compileBoardLayout(layout, { snapToGrid: false });
+
+    expect(result.board.guides).toHaveLength(8);
+    expect(result.board.posts).toHaveLength(3);
+    expect(result.board.slingshots).toHaveLength(2);
+    expect(result.board.flippers).toHaveLength(2);
+    expect(result.board.slingshots[0]).toMatchObject({ x: 292, y: 1120 });
+    expect(result.board.slingshots[1]).toMatchObject({ x: 608, y: 1120 });
   });
 });

@@ -7,6 +7,7 @@ import type {
   RolloverLayoutDefinition,
   SlingshotLayoutDefinition,
   StandupTargetLayoutDefinition,
+  BoardLayoutFragment,
 } from './layout-schema';
 import type {
   FlipperSide,
@@ -169,6 +170,23 @@ export const createMirroredStandupTargets = (options: {
     },
   ];
 };
+
+export const mergeLayoutFragments = (
+  ...fragments: BoardLayoutFragment[]
+): BoardLayoutFragment => ({
+  posts: fragments.flatMap((fragment) => fragment.posts ?? []),
+  bumpers: fragments.flatMap((fragment) => fragment.bumpers ?? []),
+  standupTargets: fragments.flatMap(
+    (fragment) => fragment.standupTargets ?? [],
+  ),
+  dropTargets: fragments.flatMap((fragment) => fragment.dropTargets ?? []),
+  saucers: fragments.flatMap((fragment) => fragment.saucers ?? []),
+  spinners: fragments.flatMap((fragment) => fragment.spinners ?? []),
+  slingshots: fragments.flatMap((fragment) => fragment.slingshots ?? []),
+  rollovers: fragments.flatMap((fragment) => fragment.rollovers ?? []),
+  guides: fragments.flatMap((fragment) => fragment.guides ?? []),
+  flippers: fragments.flatMap((fragment) => fragment.flippers ?? []),
+});
 
 export interface ShooterLaneRightLayout {
   launchPosition: LayoutPoint;
@@ -543,6 +561,74 @@ export const createSlingshotPair = (options: {
     },
   ],
 });
+
+type LowerLaneOptions = Omit<
+  Parameters<typeof createInlaneOutlanePair>[0],
+  'side' | 'flipperPivot'
+>;
+
+export interface LowerPlayfieldPairLayout extends BoardLayoutFragment {
+  guides: GuideLayoutDefinition[];
+  posts: PostLayoutDefinition[];
+  slingshots: SlingshotLayoutDefinition[];
+  flippers: FlipperLayoutDefinition[];
+}
+
+export const createLowerPlayfieldPair = (options: {
+  leftFlipperPivot: LayoutPoint;
+  rightFlipperPivot: LayoutPoint;
+  leftLane: LowerLaneOptions;
+  rightLane: LowerLaneOptions;
+  slingshots: {
+    leftCenterOffset: { x: number; y: number };
+    rightCenterOffset: { x: number; y: number };
+    width: number;
+    height: number;
+    leftAngle: number;
+    rightAngle: number;
+    score: number;
+    strength: number;
+    material?: SurfaceMaterialName;
+  };
+  flippers: Parameters<typeof createFlipperPair>[0];
+}): LowerPlayfieldPairLayout => {
+  const leftLane = createInlaneOutlanePair({
+    side: 'left',
+    flipperPivot: options.leftFlipperPivot,
+    ...options.leftLane,
+  });
+  const rightLane = createInlaneOutlanePair({
+    side: 'right',
+    flipperPivot: options.rightFlipperPivot,
+    ...options.rightLane,
+  });
+  const slingshots = createSlingshotPair({
+    leftCenter: offsetLayoutPoint(
+      options.leftFlipperPivot,
+      options.slingshots.leftCenterOffset.x,
+      options.slingshots.leftCenterOffset.y,
+    ),
+    rightCenter: offsetLayoutPoint(
+      options.rightFlipperPivot,
+      options.slingshots.rightCenterOffset.x,
+      options.slingshots.rightCenterOffset.y,
+    ),
+    width: options.slingshots.width,
+    height: options.slingshots.height,
+    leftAngle: options.slingshots.leftAngle,
+    rightAngle: options.slingshots.rightAngle,
+    score: options.slingshots.score,
+    strength: options.slingshots.strength,
+    material: options.slingshots.material,
+  });
+
+  return {
+    guides: [...leftLane.guides, ...rightLane.guides],
+    posts: [...leftLane.posts, ...rightLane.posts],
+    slingshots: slingshots.slingshots,
+    flippers: createFlipperPair(options.flippers),
+  };
+};
 
 const createFlipperLayout = (
   side: FlipperSide,

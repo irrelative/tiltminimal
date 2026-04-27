@@ -50,7 +50,7 @@ previous approach where a slingshot region was just another diagonal guide.
 
 ## DSL Primitives
 
-The lower playfield is now intended to be built from two separate primitives:
+The lower playfield can be built from two separate primitives:
 
 - `createInlaneOutlanePair(...)`
 - `createSlingshotPair(...)`
@@ -83,6 +83,18 @@ area.
 - score and kick strength defaults
 - mirrored lower-playfield slings aligned to the flipper area
 
+For full lower-third packages, prefer `createLowerPlayfieldPair(...)`. It
+composes:
+
+- left and right inlane / outlane geometry
+- active left and right slingshots
+- the lower flipper pair
+
+The helper returns a layout fragment containing `guides`, `posts`,
+`slingshots`, and `flippers`. Tables still spread those arrays into the normal
+flat `BoardLayoutDefinition` fields, so the compiler, runtime board model, and
+editor continue to work with explicit board elements.
+
 ## Authoring Guidance
 
 For DSL-authored solid-state and EM-style tables:
@@ -93,6 +105,8 @@ For DSL-authored solid-state and EM-style tables:
 - use the optional sling-approach rubber guide to visually tie the lane mouth
   into the active sling body
 - build the active lower slings with `createSlingshotPair(...)`
+- use `createLowerPlayfieldPair(...)` when the lanes, active slings, and
+  lower flippers are meant to move as one reusable lower-third pattern
 - keep the slingshot faces clear of raised rails and flipper keepout zones
 - prefer flipper-relative anchor offsets over hardcoded absolute lower-third
   coordinates

@@ -54,40 +54,31 @@ interface PositionedLayoutElement {
 }
 
 export interface BumperLayoutDefinition
-  extends Omit<BumperDefinition, 'x' | 'y'>,
-    PositionedLayoutElement {}
+  extends Omit<BumperDefinition, 'x' | 'y'>, PositionedLayoutElement {}
 
 export interface PostLayoutDefinition
-  extends Omit<PostDefinition, 'x' | 'y'>,
-    PositionedLayoutElement {}
+  extends Omit<PostDefinition, 'x' | 'y'>, PositionedLayoutElement {}
 
 export interface StandupTargetLayoutDefinition
-  extends Omit<StandupTargetDefinition, 'x' | 'y'>,
-    PositionedLayoutElement {}
+  extends Omit<StandupTargetDefinition, 'x' | 'y'>, PositionedLayoutElement {}
 
 export interface DropTargetLayoutDefinition
-  extends Omit<DropTargetDefinition, 'x' | 'y'>,
-    PositionedLayoutElement {}
+  extends Omit<DropTargetDefinition, 'x' | 'y'>, PositionedLayoutElement {}
 
 export interface SaucerLayoutDefinition
-  extends Omit<SaucerDefinition, 'x' | 'y'>,
-    PositionedLayoutElement {}
+  extends Omit<SaucerDefinition, 'x' | 'y'>, PositionedLayoutElement {}
 
 export interface SpinnerLayoutDefinition
-  extends Omit<SpinnerDefinition, 'x' | 'y'>,
-    PositionedLayoutElement {}
+  extends Omit<SpinnerDefinition, 'x' | 'y'>, PositionedLayoutElement {}
 
 export interface SlingshotLayoutDefinition
-  extends Omit<SlingshotDefinition, 'x' | 'y'>,
-    PositionedLayoutElement {}
+  extends Omit<SlingshotDefinition, 'x' | 'y'>, PositionedLayoutElement {}
 
 export interface RolloverLayoutDefinition
-  extends Omit<RolloverDefinition, 'x' | 'y'>,
-    PositionedLayoutElement {}
+  extends Omit<RolloverDefinition, 'x' | 'y'>, PositionedLayoutElement {}
 
 export interface FlipperLayoutDefinition
-  extends Omit<FlipperDefinition, 'x' | 'y'>,
-    PositionedLayoutElement {}
+  extends Omit<FlipperDefinition, 'x' | 'y'>, PositionedLayoutElement {}
 
 export interface LineGuideLayoutDefinition {
   kind?: 'line';
@@ -112,6 +103,19 @@ export interface ArcGuideLayoutDefinition {
 export type GuideLayoutDefinition =
   | LineGuideLayoutDefinition
   | ArcGuideLayoutDefinition;
+
+export interface BoardLayoutFragment {
+  posts?: PostLayoutDefinition[];
+  bumpers?: BumperLayoutDefinition[];
+  standupTargets?: StandupTargetLayoutDefinition[];
+  dropTargets?: DropTargetLayoutDefinition[];
+  saucers?: SaucerLayoutDefinition[];
+  spinners?: SpinnerLayoutDefinition[];
+  slingshots?: SlingshotLayoutDefinition[];
+  rollovers?: RolloverLayoutDefinition[];
+  guides?: GuideLayoutDefinition[];
+  flippers?: FlipperLayoutDefinition[];
+}
 
 export interface BoardLayoutDefinition {
   name: string;
