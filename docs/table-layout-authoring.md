@@ -75,6 +75,7 @@ Current helpers include:
 - `createInlaneOutlanePair(...)`
 - `createSlingshotPair(...)`
 - `createLowerPlayfieldPair(...)`
+- `createStandardLowerPlayfieldPair(...)`
 
 These return high-level layout objects, not runtime board data.
 
@@ -87,9 +88,9 @@ Fragments are flattened by spreading their arrays into the ordinary
 system.
 
 The table editor also exposes an "Add lower playfield" tool that inserts the
-same composed lower-third pattern into the current resolved board. Because the
-editor stores runtime board data, that tool adds ordinary guides, slingshots,
-and flippers rather than preserving a fragment object.
+standard lower-third pattern into the current resolved board. Because the editor
+stores runtime board data, that tool adds ordinary lane guides, lane-entry
+posts, slingshots, and flippers rather than preserving a fragment object.
 
 Lower-playfield authoring is now intentionally split:
 
@@ -99,6 +100,10 @@ Lower-playfield authoring is now intentionally split:
   devices with kick behavior
 - `createLowerPlayfieldPair(...)` composes the inlane / outlane helpers,
   active slingshots, and flipper pair into one lower-third fragment
+- `createStandardLowerPlayfieldPair(...)` applies the canonical
+  lower-third geometry used by the editor tool, including segmented inlane and
+  outlane mouths, raised return rails, lane-entry posts, sling-approach rubber,
+  active slingshots, and flippers
 
 For tables that need a canonical lower third, prefer using
 `outerGuideBreakOffset` and `innerGuideBreakOffset` in

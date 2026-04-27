@@ -26,8 +26,8 @@ describe('hitTestSelection', () => {
     const result = addLowerPlayfield(board, { x: 450, y: 1220 });
 
     expect(result.selection).toEqual({ kind: 'slingshot', index: 0 });
-    expect(result.board.guides).toHaveLength(4);
-    expect(result.board.posts).toHaveLength(0);
+    expect(result.board.guides).toHaveLength(10);
+    expect(result.board.posts).toHaveLength(6);
     expect(result.board.slingshots).toHaveLength(2);
     expect(result.board.flippers).toHaveLength(2);
     expect(result.board.flippers[0]).toMatchObject({
@@ -40,8 +40,16 @@ describe('hitTestSelection', () => {
       x: 630,
       y: 1220,
     });
-    expect(result.board.slingshots[0]).toMatchObject({ x: 291, y: 1116 });
-    expect(result.board.slingshots[1]).toMatchObject({ x: 609, y: 1116 });
+    expect(result.board.slingshots[0]).toMatchObject({
+      x: 288,
+      y: 1082,
+      angle: 0.5,
+    });
+    expect(result.board.slingshots[1]).toMatchObject({
+      x: 612,
+      y: 1082,
+      angle: Math.PI - 0.5,
+    });
   });
 
   it('selects a guide when clicking near its segment', () => {

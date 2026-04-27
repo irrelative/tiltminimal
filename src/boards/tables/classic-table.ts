@@ -1,9 +1,9 @@
 import {
   absolutePoint,
   anchorPoint,
-  createLowerPlayfieldPair,
   createMirroredRollovers,
   createMirroredStandupTargets,
+  createStandardLowerPlayfieldPair,
 } from '../layout-primitives';
 import type { BoardLayoutDefinition } from '../layout-schema';
 import { compileBuiltInBoardLayout } from '../layout-compiler';
@@ -107,28 +107,13 @@ return {
 };
 `;
 
-const classicLowerPlayfield = createLowerPlayfieldPair({
+const classicLowerPlayfield = createStandardLowerPlayfieldPair({
   leftFlipperPivot: absolutePoint(270, 1220),
   rightFlipperPivot: absolutePoint(630, 1220),
-  leftLane: {
-    outerGuideStartOffset: { x: -180, y: -340 },
-    outerGuideEndOffset: { x: -100, y: 40 },
-    innerGuideStartOffset: { x: -20, y: -220 },
-    innerGuideEndOffset: { x: -56, y: 64 },
-  },
-  rightLane: {
-    outerGuideStartOffset: { x: 180, y: -340 },
-    outerGuideEndOffset: { x: 180, y: 40 },
-    innerGuideStartOffset: { x: 20, y: -220 },
-    innerGuideEndOffset: { x: 56, y: 64 },
-  },
   slingshots: {
-    leftCenterOffset: { x: 21, y: -104 },
-    rightCenterOffset: { x: -21, y: -104 },
     width: 152,
     height: 24,
-    leftAngle: 0.375,
-    rightAngle: Math.PI - 0.375,
+    angle: 0.5,
     score: 10,
     strength: 560,
   },
@@ -160,6 +145,7 @@ const classicTableLayout: BoardLayoutDefinition = {
     { id: 'top-rollover-center', point: absolutePoint(450, 170) },
     { id: 'standup-center', point: absolutePoint(450, 760) },
   ],
+  posts: classicLowerPlayfield.posts,
   bumpers: [
     {
       position: absolutePoint(300, 350),

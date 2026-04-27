@@ -630,6 +630,77 @@ export const createLowerPlayfieldPair = (options: {
   };
 };
 
+export const createStandardLowerPlayfieldPair = (options: {
+  leftFlipperPivot: LayoutPoint;
+  rightFlipperPivot: LayoutPoint;
+  flippers: Parameters<typeof createFlipperPair>[0];
+  slingshots?: Partial<{
+    width: number;
+    height: number;
+    angle: number;
+    score: number;
+    strength: number;
+    material: SurfaceMaterialName;
+  }>;
+}): LowerPlayfieldPairLayout => {
+  const slingAngle = options.slingshots?.angle ?? 0.5;
+
+  return createLowerPlayfieldPair({
+    leftFlipperPivot: options.leftFlipperPivot,
+    rightFlipperPivot: options.rightFlipperPivot,
+    leftLane: {
+      outerGuideStartOffset: { x: -150, y: -380 },
+      outerGuideBreakOffset: { x: -150, y: -200 },
+      outerGuideEndOffset: { x: -122, y: 40 },
+      innerGuideStartOffset: { x: -46, y: -320 },
+      innerGuideBreakOffset: { x: -54, y: -210 },
+      innerGuideEndOffset: { x: -70, y: 36 },
+      slingGuideStartOffset: { x: -36, y: -214 },
+      slingGuideEndOffset: { x: -10, y: -160 },
+      outerMouthThickness: 12,
+      outerReturnThickness: 14,
+      innerMouthThickness: 12,
+      innerReturnThickness: 16,
+      entryPostOffsets: [
+        { x: -150, y: -404, radius: 14, material: 'metalGuide' },
+        { x: -46, y: -320, radius: 14, material: 'metalGuide' },
+        { x: -40, y: -214, radius: 18, material: 'rubberPost' },
+      ],
+    },
+    rightLane: {
+      outerGuideStartOffset: { x: 90, y: -380 },
+      outerGuideBreakOffset: { x: 90, y: -200 },
+      outerGuideEndOffset: { x: 96, y: 40 },
+      innerGuideStartOffset: { x: 46, y: -320 },
+      innerGuideBreakOffset: { x: 54, y: -210 },
+      innerGuideEndOffset: { x: 70, y: 36 },
+      slingGuideStartOffset: { x: 36, y: -214 },
+      slingGuideEndOffset: { x: 10, y: -160 },
+      outerMouthThickness: 12,
+      outerReturnThickness: 14,
+      innerMouthThickness: 12,
+      innerReturnThickness: 16,
+      entryPostOffsets: [
+        { x: 90, y: -404, radius: 14, material: 'metalGuide' },
+        { x: 46, y: -320, radius: 14, material: 'metalGuide' },
+        { x: 40, y: -214, radius: 18, material: 'rubberPost' },
+      ],
+    },
+    slingshots: {
+      leftCenterOffset: { x: 18, y: -138 },
+      rightCenterOffset: { x: -18, y: -138 },
+      width: options.slingshots?.width ?? 132,
+      height: options.slingshots?.height ?? 40,
+      leftAngle: slingAngle,
+      rightAngle: Math.PI - slingAngle,
+      score: options.slingshots?.score ?? 10,
+      strength: options.slingshots?.strength ?? 560,
+      material: options.slingshots?.material,
+    },
+    flippers: options.flippers,
+  });
+};
+
 const createFlipperLayout = (
   side: FlipperSide,
   x: number,

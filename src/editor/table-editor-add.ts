@@ -13,7 +13,7 @@ import {
 import { resolveLayoutPoint } from '../boards/layout-anchors';
 import {
   absolutePoint,
-  createLowerPlayfieldPair,
+  createStandardLowerPlayfieldPair,
 } from '../boards/layout-primitives';
 import type {
   BoardDefinition,
@@ -212,31 +212,9 @@ export const addLowerPlayfield = (
   };
   const leftPivot = { x: center.x - 180, y: center.y };
   const rightPivot = { x: center.x + 180, y: center.y };
-  const fragment = createLowerPlayfieldPair({
+  const fragment = createStandardLowerPlayfieldPair({
     leftFlipperPivot: absolutePoint(leftPivot.x, leftPivot.y),
     rightFlipperPivot: absolutePoint(rightPivot.x, rightPivot.y),
-    leftLane: {
-      outerGuideStartOffset: { x: -180, y: -340 },
-      outerGuideEndOffset: { x: -100, y: 40 },
-      innerGuideStartOffset: { x: -20, y: -220 },
-      innerGuideEndOffset: { x: -56, y: 64 },
-    },
-    rightLane: {
-      outerGuideStartOffset: { x: 180, y: -340 },
-      outerGuideEndOffset: { x: 180, y: 40 },
-      innerGuideStartOffset: { x: 20, y: -220 },
-      innerGuideEndOffset: { x: 56, y: 64 },
-    },
-    slingshots: {
-      leftCenterOffset: { x: 21, y: -104 },
-      rightCenterOffset: { x: -21, y: -104 },
-      width: 152,
-      height: 24,
-      leftAngle: 0.375,
-      rightAngle: Math.PI - 0.375,
-      score: 10,
-      strength: 560,
-    },
     flippers: {
       leftX: leftPivot.x,
       rightX: rightPivot.x,

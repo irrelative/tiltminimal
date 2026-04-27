@@ -83,7 +83,7 @@ area.
 - score and kick strength defaults
 - mirrored lower-playfield slings aligned to the flipper area
 
-For full lower-third packages, prefer `createLowerPlayfieldPair(...)`. It
+For custom full lower-third packages, use `createLowerPlayfieldPair(...)`. It
 composes:
 
 - left and right inlane / outlane geometry
@@ -95,6 +95,13 @@ The helper returns a layout fragment containing `guides`, `posts`,
 flat `BoardLayoutDefinition` fields, so the compiler, runtime board model, and
 editor continue to work with explicit board elements.
 
+For the common lower-third layout, prefer `createStandardLowerPlayfieldPair(...)`.
+It includes both inlane and outlane mouths, raised return rails, lane-entry
+posts, short sling-approach rubber, active slingshots, and the lower flipper
+pair. The editor's "Add lower playfield" tool uses this standard package. Its
+right outlane is kept inside the shooter lane corridor, matching the right-side
+launcher layout used by the built-in tables.
+
 ## Authoring Guidance
 
 For DSL-authored solid-state and EM-style tables:
@@ -105,8 +112,10 @@ For DSL-authored solid-state and EM-style tables:
 - use the optional sling-approach rubber guide to visually tie the lane mouth
   into the active sling body
 - build the active lower slings with `createSlingshotPair(...)`
-- use `createLowerPlayfieldPair(...)` when the lanes, active slings, and
-  lower flippers are meant to move as one reusable lower-third pattern
+- use `createStandardLowerPlayfieldPair(...)` for the default
+  inlane / outlane / slingshot / flipper package
+- use `createLowerPlayfieldPair(...)` when a table needs custom asymmetric lane
+  geometry while keeping those lower-third parts grouped
 - keep the slingshot faces clear of raised rails and flipper keepout zones
 - prefer flipper-relative anchor offsets over hardcoded absolute lower-third
   coordinates

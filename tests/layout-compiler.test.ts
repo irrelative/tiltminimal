@@ -7,6 +7,7 @@ import {
   createFlipperPair,
   createInlaneOutlanePair,
   createLowerPlayfieldPair,
+  createStandardLowerPlayfieldPair,
   mergeLayoutFragments,
   createPopTriangle,
   createShooterLaneRight,
@@ -297,5 +298,61 @@ describe('compileBoardLayout', () => {
     expect(result.board.flippers).toHaveLength(2);
     expect(result.board.slingshots[0]).toMatchObject({ x: 292, y: 1120 });
     expect(result.board.slingshots[1]).toMatchObject({ x: 608, y: 1120 });
+  });
+
+  it('builds the standard lower playfield with inlanes, outlanes, slingshots, and flippers', () => {
+    const lowerPlayfield = createStandardLowerPlayfieldPair({
+      leftFlipperPivot: absolutePoint(270, 1220),
+      rightFlipperPivot: absolutePoint(630, 1220),
+      flippers: {
+        leftX: 270,
+        rightX: 630,
+        y: 1220,
+        length: 150,
+        thickness: 20,
+        restingAngleOffset: 0.28,
+        activeAngleOffset: -0.42,
+      },
+    });
+    const layout: BoardLayoutDefinition = {
+      name: 'Standard Lower Playfield Test',
+      width: 900,
+      height: 1400,
+      drainY: 1425,
+      launchPosition: absolutePoint(770, 1180),
+      materials: {
+        playfield: 'playfieldWood',
+        walls: 'metalGuide',
+      },
+      posts: lowerPlayfield.posts,
+      guides: lowerPlayfield.guides,
+      slingshots: lowerPlayfield.slingshots,
+      flippers: lowerPlayfield.flippers,
+    };
+
+    const result = compileBoardLayout(layout, { snapToGrid: false });
+
+    expect(result.board.guides).toHaveLength(10);
+    expect(result.board.posts).toHaveLength(6);
+    expect(result.board.slingshots).toHaveLength(2);
+    expect(result.board.flippers).toHaveLength(2);
+    expect(result.board.guides.slice(0, 4).map((guide) => guide.plane)).toEqual(
+      ['playfield', 'raised', 'playfield', 'raised'],
+    );
+    expect(result.board.guides.slice(5, 9).map((guide) => guide.plane)).toEqual(
+      ['playfield', 'raised', 'playfield', 'raised'],
+    );
+    expect(result.board.guides[4]?.material).toBe('rubberPost');
+    expect(result.board.guides[9]?.material).toBe('rubberPost');
+    expect(result.board.slingshots[0]).toMatchObject({
+      x: 288,
+      y: 1082,
+      angle: 0.5,
+    });
+    expect(result.board.slingshots[1]).toMatchObject({
+      x: 612,
+      y: 1082,
+      angle: Math.PI - 0.5,
+    });
   });
 });
