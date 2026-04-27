@@ -4,6 +4,7 @@ export {
   addDropTarget,
   addFlipper,
   addGuide,
+  addLowerPlayfield,
   addPost,
   addRollover,
   addSaucer,

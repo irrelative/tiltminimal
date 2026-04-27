@@ -10,7 +10,17 @@ import {
   createDefaultSpinner,
   createDefaultStandupTarget,
 } from '../boards/table-library';
-import type { BoardDefinition, FlipperSide, Point } from '../types/board-definition';
+import { resolveLayoutPoint } from '../boards/layout-anchors';
+import {
+  absolutePoint,
+  createLowerPlayfieldPair,
+} from '../boards/layout-primitives';
+import type {
+  BoardDefinition,
+  FlipperSide,
+  GuideDefinition,
+  Point,
+} from '../types/board-definition';
 import type { EditorSelection } from './editor-types';
 
 interface AddResult {
@@ -191,3 +201,126 @@ export const addFlipper = (
     selection: { kind: 'flipper', index: nextBoard.flippers.length - 1 },
   };
 };
+
+export const addLowerPlayfield = (
+  board: BoardDefinition,
+  point: Point,
+): AddResult => {
+  const center = {
+    x: clamp(point.x, 220, board.width - 220),
+    y: clamp(point.y, 760, board.height - 100),
+  };
+  const leftPivot = { x: center.x - 180, y: center.y };
+  const rightPivot = { x: center.x + 180, y: center.y };
+  const fragment = createLowerPlayfieldPair({
+    leftFlipperPivot: absolutePoint(leftPivot.x, leftPivot.y),
+    rightFlipperPivot: absolutePoint(rightPivot.x, rightPivot.y),
+    leftLane: {
+      outerGuideStartOffset: { x: -180, y: -340 },
+      outerGuideEndOffset: { x: -100, y: 40 },
+      innerGuideStartOffset: { x: -20, y: -220 },
+      innerGuideEndOffset: { x: -56, y: 64 },
+    },
+    rightLane: {
+      outerGuideStartOffset: { x: 180, y: -340 },
+      outerGuideEndOffset: { x: 180, y: 40 },
+      innerGuideStartOffset: { x: 20, y: -220 },
+      innerGuideEndOffset: { x: 56, y: 64 },
+    },
+    slingshots: {
+      leftCenterOffset: { x: 21, y: -104 },
+      rightCenterOffset: { x: -21, y: -104 },
+      width: 152,
+      height: 24,
+      leftAngle: 0.375,
+      rightAngle: Math.PI - 0.375,
+      score: 10,
+      strength: 560,
+    },
+    flippers: {
+      leftX: leftPivot.x,
+      rightX: rightPivot.x,
+      y: center.y,
+      length: 150,
+      thickness: 20,
+      restingAngleOffset: 0.28,
+      activeAngleOffset: -0.42,
+      material: 'flipperRubber',
+    },
+  });
+  const context = {
+    width: board.width,
+    height: board.height,
+    anchors: {},
+  };
+  const firstSlingshotIndex = board.slingshots.length;
+  const nextBoard = {
+    ...board,
+    posts: [
+      ...board.posts,
+      ...fragment.posts.map((post) => ({
+        ...resolveLayoutPoint(post.position, context),
+        radius: post.radius,
+        material: post.material,
+      })),
+    ],
+    guides: [
+      ...board.guides,
+      ...fragment.guides.map((guide): GuideDefinition => {
+        if (guide.kind === 'arc') {
+          return {
+            kind: 'arc',
+            center: resolveLayoutPoint(guide.center, context),
+            radius: guide.radius,
+            startAngle: guide.startAngle,
+            endAngle: guide.endAngle,
+            thickness: guide.thickness,
+            material: guide.material,
+            plane: guide.plane,
+          };
+        }
+
+        return {
+          kind: 'line',
+          start: resolveLayoutPoint(guide.start, context),
+          end: resolveLayoutPoint(guide.end, context),
+          thickness: guide.thickness,
+          material: guide.material,
+          plane: guide.plane,
+        };
+      }),
+    ],
+    slingshots: [
+      ...board.slingshots,
+      ...fragment.slingshots.map((slingshot) => ({
+        ...resolveLayoutPoint(slingshot.position, context),
+        width: slingshot.width,
+        height: slingshot.height,
+        angle: slingshot.angle,
+        score: slingshot.score,
+        strength: slingshot.strength,
+        material: slingshot.material,
+      })),
+    ],
+    flippers: [
+      ...board.flippers,
+      ...fragment.flippers.map((flipper) => ({
+        side: flipper.side,
+        ...resolveLayoutPoint(flipper.position, context),
+        length: flipper.length,
+        thickness: flipper.thickness,
+        restingAngle: flipper.restingAngle,
+        activeAngle: flipper.activeAngle,
+        material: flipper.material,
+      })),
+    ],
+  };
+
+  return {
+    board: nextBoard,
+    selection: { kind: 'slingshot', index: firstSlingshotIndex },
+  };
+};
+
+const clamp = (value: number, min: number, max: number): number =>
+  Math.min(Math.max(value, min), max);

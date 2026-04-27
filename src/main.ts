@@ -25,6 +25,7 @@ import {
   addDropTarget,
   addFlipper,
   addGuide,
+  addLowerPlayfield,
   addPost,
   addRollover,
   addSaucer,
@@ -584,6 +585,23 @@ function bootEditorRoute(): void {
       state.dragging = true;
       state.dragMode = 'move-selection';
       state.dragOffset = { x: 0, y: 0 };
+      state.draftPosition = null;
+      replaceActiveBoard(result.board, false);
+      renderApp();
+      return;
+    }
+
+    if (state.tool === 'add-lower-playfield') {
+      const result = addLowerPlayfield(
+        getActiveTable().board,
+        getSnappedEditorPoint(point),
+      );
+
+      state.selection = result.selection;
+      state.tool = 'select';
+      state.dragging = false;
+      state.dragMode = null;
+      state.dragOffset = null;
       state.draftPosition = null;
       replaceActiveBoard(result.board, false);
       renderApp();

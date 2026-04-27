@@ -86,6 +86,11 @@ Fragments are flattened by spreading their arrays into the ordinary
 `BoardLayoutDefinition` fields; they are not a separate runtime component
 system.
 
+The table editor also exposes an "Add lower playfield" tool that inserts the
+same composed lower-third pattern into the current resolved board. Because the
+editor stores runtime board data, that tool adds ordinary guides, slingshots,
+and flippers rather than preserving a fragment object.
+
 Lower-playfield authoring is now intentionally split:
 
 - `createInlaneOutlanePair(...)` builds the lane mouths, raised return rails,

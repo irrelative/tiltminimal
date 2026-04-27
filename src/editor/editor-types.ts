@@ -36,6 +36,7 @@ export type EditorTool =
   | 'add-saucer'
   | 'add-spinner'
   | 'add-slingshot'
+  | 'add-lower-playfield'
   | 'add-rollover'
   | 'add-left-flipper'
   | 'add-right-flipper';

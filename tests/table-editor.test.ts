@@ -11,6 +11,7 @@ import {
   hitTestGuideHandle,
   hitTestOrientedRotateHandle,
   hitTestSelection,
+  addLowerPlayfield,
   moveSelection,
   moveGuideHandle,
   rotateSelection,
@@ -18,6 +19,31 @@ import {
 } from '../src/editor/table-editor';
 
 describe('hitTestSelection', () => {
+  it('adds a composed lower playfield package', () => {
+    const board = createBlankTable();
+    board.flippers = [];
+
+    const result = addLowerPlayfield(board, { x: 450, y: 1220 });
+
+    expect(result.selection).toEqual({ kind: 'slingshot', index: 0 });
+    expect(result.board.guides).toHaveLength(4);
+    expect(result.board.posts).toHaveLength(0);
+    expect(result.board.slingshots).toHaveLength(2);
+    expect(result.board.flippers).toHaveLength(2);
+    expect(result.board.flippers[0]).toMatchObject({
+      side: 'left',
+      x: 270,
+      y: 1220,
+    });
+    expect(result.board.flippers[1]).toMatchObject({
+      side: 'right',
+      x: 630,
+      y: 1220,
+    });
+    expect(result.board.slingshots[0]).toMatchObject({ x: 291, y: 1116 });
+    expect(result.board.slingshots[1]).toMatchObject({ x: 609, y: 1116 });
+  });
+
   it('selects a guide when clicking near its segment', () => {
     const board = createBlankTable();
     board.guides = [
