@@ -69,6 +69,38 @@ describe('resolveBallContact', () => {
       Math.abs(rigidBall.linearVelocity.y),
     );
   });
+
+  it('uses material compliance to soften separation and rebound', () => {
+    const rigidBall = createBallState(classicTable);
+    rigidBall.linearVelocity.x = -120;
+
+    const compliantBall = createBallState(classicTable);
+    compliantBall.linearVelocity.x = -120;
+
+    resolveBallContact(
+      rigidBall,
+      createContact('rubberPost', {
+        material: {
+          ...getSurfaceMaterial('rubberPost'),
+          compliance: 0,
+        },
+      }),
+    );
+    resolveBallContact(
+      compliantBall,
+      createContact('rubberPost', {
+        material: {
+          ...getSurfaceMaterial('rubberPost'),
+          compliance: 0.5,
+        },
+      }),
+    );
+
+    expect(compliantBall.position.x).toBeLessThan(rigidBall.position.x);
+    expect(compliantBall.linearVelocity.x).toBeLessThan(
+      rigidBall.linearVelocity.x,
+    );
+  });
 });
 
 const createContact = (
@@ -83,13 +115,11 @@ const createContact = (
     tangent: getContactTangent(normal),
     overlap: overrides.overlap ?? 3,
     surfaceVelocity: overrides.surfaceVelocity ?? { x: 0, y: 0 },
-    material: getSurfaceMaterial(materialName),
+    material: overrides.material ?? getSurfaceMaterial(materialName),
     surfaceEffectiveMass: overrides.surfaceEffectiveMass,
     restitutionScale: overrides.restitutionScale,
   };
 };
 
-const getSpinMagnitude = (
-  ball: ReturnType<typeof createBallState>,
-): number =>
+const getSpinMagnitude = (ball: ReturnType<typeof createBallState>): number =>
   Math.hypot(ball.angularVelocity.x, ball.angularVelocity.y);

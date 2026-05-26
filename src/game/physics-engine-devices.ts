@@ -4,7 +4,10 @@ import type {
 } from '../types/board-definition';
 import type { GameState } from './game-state';
 import { getSurfaceMaterial } from './materials';
-import { MIN_SLINGSHOT_TRIGGER_SPEED, SLINGSHOT_REARM_SECONDS } from './physics-engine-types';
+import {
+  MIN_SLINGSHOT_TRIGGER_SPEED,
+  SLINGSHOT_REARM_SECONDS,
+} from './physics-engine-types';
 import {
   createStaticContact,
   getOrientedElementCollision,
@@ -49,7 +52,11 @@ export const resolveStandupTargetCollisions = (
       (state.ball.linearVelocity.y - state.tableNudge.velocity.y) *
         collision.normal.y;
 
-    if (incomingNormalSpeed < 0 || collision.overlap > solver.epsilon) {
+    const isIncomingHit = incomingNormalSpeed < 0;
+    const shouldResolveContact =
+      isIncomingHit || collision.overlap > solver.epsilon;
+
+    if (shouldResolveContact) {
       resolveBallContact(
         state.ball,
         createStaticContact(
@@ -63,7 +70,7 @@ export const resolveStandupTargetCollisions = (
       );
     }
 
-    if (targetState.cooldownSeconds <= 0) {
+    if (isIncomingHit && targetState.cooldownSeconds <= 0) {
       events.push({
         type: 'standup-target-hit',
         index,
@@ -111,7 +118,11 @@ export const resolveDropTargetCollisions = (
       (state.ball.linearVelocity.y - state.tableNudge.velocity.y) *
         collision.normal.y;
 
-    if (incomingNormalSpeed < 0 || collision.overlap > solver.epsilon) {
+    const isIncomingHit = incomingNormalSpeed < 0;
+    const shouldResolveContact =
+      isIncomingHit || collision.overlap > solver.epsilon;
+
+    if (shouldResolveContact) {
       resolveBallContact(
         state.ball,
         createStaticContact(
@@ -123,13 +134,15 @@ export const resolveDropTargetCollisions = (
         ),
         solver,
       );
-      events.push({
-        type: 'drop-target-hit',
-        index,
-        score: target.score,
-        tick: state.tick,
-      });
-      targetState.isDown = true;
+      if (isIncomingHit) {
+        events.push({
+          type: 'drop-target-hit',
+          index,
+          score: target.score,
+          tick: state.tick,
+        });
+        targetState.isDown = true;
+      }
     }
   });
 };
@@ -282,14 +295,19 @@ export const resolveBumperCollisions = (
       state.tableNudge.velocity,
     );
 
-    if (approachSpeed < 0 || overlap > solver.epsilon) {
+    const isIncomingHit = approachSpeed < 0;
+
+    if (isIncomingHit || overlap > solver.epsilon) {
       resolveBallContact(state.ball, contact, solver);
-      events.push({
-        type: 'bumper-hit',
-        index,
-        score: bumper.score,
-        tick: state.tick,
-      });
+
+      if (isIncomingHit) {
+        events.push({
+          type: 'bumper-hit',
+          index,
+          score: bumper.score,
+          tick: state.tick,
+        });
+      }
     }
   }
 };

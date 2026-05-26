@@ -2,6 +2,7 @@ import type { InputState } from '../input/keyboard-input';
 import type { BoardDefinition } from '../types/board-definition';
 import type { GameState } from './game-state';
 import { resetBall } from './game-state';
+import { getSurfaceMaterial } from './materials';
 import {
   constrainBallToLauncherLane,
   resolveGuideCollisions,
@@ -140,6 +141,7 @@ export const stepPlayingState = (
     }
 
     next.ball.linearVelocity.y += board.gravity * stepSeconds;
+    applyPlayfieldRollingResistance(next, board, stepSeconds);
     next.ball.position.x += next.ball.linearVelocity.x * stepSeconds;
     next.ball.position.y += next.ball.linearVelocity.y * stepSeconds;
 
@@ -185,4 +187,36 @@ export const stepPlayingState = (
     state: next,
     events,
   };
+};
+
+const applyPlayfieldRollingResistance = (
+  state: GameState,
+  board: BoardDefinition,
+  deltaSeconds: number,
+): void => {
+  const material = getSurfaceMaterial(
+    board.materials.playfield,
+    board.surfaceMaterials,
+  );
+  const speed = Math.hypot(
+    state.ball.linearVelocity.x,
+    state.ball.linearVelocity.y,
+  );
+
+  if (speed > 0) {
+    const deceleration = board.gravity * material.rollingResistance;
+    const nextSpeed = Math.max(0, speed - deceleration * deltaSeconds);
+    const scale = nextSpeed / speed;
+
+    state.ball.linearVelocity.x *= scale;
+    state.ball.linearVelocity.y *= scale;
+  }
+
+  const spinDamping = Math.max(
+    0,
+    1 - material.rollingResistance * 2 * deltaSeconds,
+  );
+
+  state.ball.angularVelocity.x *= spinDamping;
+  state.ball.angularVelocity.y *= spinDamping;
 };

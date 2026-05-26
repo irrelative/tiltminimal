@@ -1,5 +1,9 @@
 import type { BallState } from './game-state';
-import type { ContactData, ContactImpulseResult, Vector2 } from './contact-types';
+import type {
+  ContactData,
+  ContactImpulseResult,
+  Vector2,
+} from './contact-types';
 import { physicsDefaults } from './physics-defaults';
 import type { SolverPhysicsDefinition } from '../types/board-definition';
 
@@ -8,8 +12,11 @@ export const resolveBallContact = (
   contact: ContactData,
   solver: SolverPhysicsDefinition = physicsDefaults.tuning.solver,
 ): ContactImpulseResult => {
-  ball.position.x += contact.normal.x * contact.overlap;
-  ball.position.y += contact.normal.y * contact.overlap;
+  const compliance = clamp(contact.material.compliance, 0, 0.95);
+  const correctionScale = 1 - compliance;
+
+  ball.position.x += contact.normal.x * contact.overlap * correctionScale;
+  ball.position.y += contact.normal.y * contact.overlap * correctionScale;
 
   const relativeNormalSpeed = getRelativeNormalSpeed(ball, contact);
   let normalImpulse = 0;
@@ -22,7 +29,9 @@ export const resolveBallContact = (
         ? 1 / contact.surfaceEffectiveMass
         : 0;
     const effectiveRestitution =
-      contact.material.restitution * (contact.restitutionScale ?? 1);
+      contact.material.restitution *
+      (contact.restitutionScale ?? 1) *
+      (1 - compliance * 0.25);
 
     normalImpulse =
       (-(1 + effectiveRestitution) * relativeNormalSpeed) /
@@ -32,10 +41,15 @@ export const resolveBallContact = (
   }
 
   const relativeTangentSpeed = getRelativeTangentSpeed(ball, contact);
-  const tangentImpulse = getTangentImpulse(ball, contact, {
-    normalImpulse,
-    relativeTangentSpeed,
-  }, solver);
+  const tangentImpulse = getTangentImpulse(
+    ball,
+    contact,
+    {
+      normalImpulse,
+      relativeTangentSpeed,
+    },
+    solver,
+  );
 
   if (Math.abs(tangentImpulse) > solver.epsilon) {
     applyTangentImpulse(ball, contact, tangentImpulse);
@@ -47,10 +61,7 @@ export const resolveBallContact = (
   ) {
     const spinDampingFactor = Math.max(
       0,
-      1 -
-        contact.material.spinDamping *
-          (contact.spinDampingScale ?? 1) *
-          0.12,
+      1 - contact.material.spinDamping * (contact.spinDampingScale ?? 1) * 0.12,
     );
     ball.angularVelocity.x *= spinDampingFactor;
     ball.angularVelocity.y *= spinDampingFactor;
@@ -115,9 +126,7 @@ const getTangentImpulse = (
       ? contact.material.staticFriction
       : contact.material.dynamicFriction;
   const effectiveFriction =
-    frictionCoefficient *
-    contact.material.grip *
-    (contact.frictionScale ?? 1);
+    frictionCoefficient * contact.material.grip * (contact.frictionScale ?? 1);
   const tangentialMass =
     1 / ball.mass + (ball.radius * ball.radius) / ball.momentOfInertia;
   const desiredImpulse = -inputs.relativeTangentSpeed / tangentialMass;

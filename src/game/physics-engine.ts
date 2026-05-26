@@ -2,7 +2,10 @@ import type { InputState } from '../input/keyboard-input';
 import type { BoardDefinition } from '../types/board-definition';
 import type { GameState } from './game-state';
 import { cloneRulesState } from './rules-types';
-import { stepPlayingState, stepWaitingLaunchState } from './physics-engine-state';
+import {
+  stepPlayingState,
+  stepWaitingLaunchState,
+} from './physics-engine-state';
 import type { PhysicsStepResult } from './physics-engine-types';
 
 export const stepGame = (
@@ -18,8 +21,6 @@ export const stepGameFrame = (
   input: InputState,
   deltaSeconds: number,
 ): PhysicsStepResult => {
-  const dt = Math.min(deltaSeconds, 1 / 30);
-
   if (state.status === 'game-over') {
     return {
       state: {
@@ -39,7 +40,7 @@ export const stepGameFrame = (
     );
   }
 
-  return stepPlayingState(state, board, input, Math.max(dt, 0));
+  return stepPlayingState(state, board, input, Math.max(deltaSeconds, 0));
 };
 
 export const getLaunchChargeRatio = (

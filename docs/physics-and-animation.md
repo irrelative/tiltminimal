@@ -115,8 +115,10 @@ Inside each playing substep:
 4. Stateful device animation advances.
 5. Saucer possession may take over the ball.
 6. Gravity updates ball velocity.
-7. Velocity updates ball position.
-8. Collision and trigger passes run.
+7. Playfield rolling resistance damps linear velocity and rolling spin using
+   the current playfield material.
+8. Velocity updates ball position.
+9. Collision and trigger passes run.
 
 The order is important because moving devices need their transient motion solved
 before ball contacts are evaluated.
@@ -205,6 +207,7 @@ That solver handles:
 - tangential impulse using static or dynamic friction
 - rolling spin transfer
 - spin damping based on surface material
+- material compliance, which softens contact correction and rebound
 
 Surface response comes from:
 

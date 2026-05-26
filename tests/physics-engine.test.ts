@@ -197,6 +197,19 @@ describe('stepGame', () => {
     ).toBeLessThanOrEqual(0);
   });
 
+  it('advances the full elapsed time on long playing frames', () => {
+    const state = createInitialGameState(classicTable);
+    state.status = 'playing';
+    state.ball.position.x = 420;
+    state.ball.position.y = 520;
+    state.ball.linearVelocity.x = 0;
+    state.ball.linearVelocity.y = 0;
+
+    const next = stepGame(state, classicTable, idleInput, 0.1);
+
+    expect(next.ball.position.y - state.ball.position.y).toBeGreaterThan(7);
+  });
+
   it('collides against the rounded flipper tip', () => {
     const state = createInitialGameState(classicTable);
     state.status = 'playing';
@@ -297,6 +310,32 @@ describe('stepGame', () => {
     const next = stepGame(state, classicTable, idleInput, 1 / 60);
 
     expect(getBallSpinMagnitude(next)).toBeGreaterThan(0);
+  });
+
+  it('does not score a bumper hit while correcting separating overlap', () => {
+    const board = createBlankTable('Separating Bumper Board');
+    board.bumpers = [
+      {
+        x: 240,
+        y: 260,
+        radius: 24,
+        score: 100,
+        material: 'rubberPost',
+      },
+    ];
+    const state = createInitialGameState(board);
+    state.status = 'playing';
+    state.ball.position.x = 240 + state.ball.radius + 24 - 1;
+    state.ball.position.y = 260;
+    state.ball.linearVelocity.x = 40;
+    state.ball.linearVelocity.y = 0;
+
+    const result = stepGameFrame(state, board, idleInput, 1 / 60);
+
+    expect(result.events).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ type: 'bumper-hit' })]),
+    );
+    expect(result.state.ball.position.x).toBeGreaterThan(state.ball.position.x);
   });
 
   it('bounces the ball off a post without emitting scoring events', () => {
@@ -443,6 +482,35 @@ describe('stepGame', () => {
     expect(next.state.standupTargets[0]?.cooldownSeconds).toBeGreaterThan(0);
   });
 
+  it('does not score a standup target while the ball is separating', () => {
+    const board = createBlankTable('Separating Standup Board');
+    board.standupTargets = [
+      {
+        x: 450,
+        y: 400,
+        width: 60,
+        height: 16,
+        angle: 0,
+        score: 75,
+        material: 'rubberPost',
+      },
+    ];
+    const state = createInitialGameState(board);
+    state.status = 'playing';
+    state.ball.position.x = 450;
+    state.ball.position.y = 390;
+    state.ball.linearVelocity.y = -120;
+
+    const next = stepGameFrame(state, board, idleInput, 1 / 60);
+
+    expect(next.events).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'standup-target-hit' }),
+      ]),
+    );
+    expect(next.state.standupTargets[0]?.cooldownSeconds).toBe(0);
+  });
+
   it('fires a slingshot kick and emits a scoring event on impact', () => {
     const board = createBlankTable('Slingshot Board');
     board.slingshots = [
@@ -510,6 +578,75 @@ describe('stepGame', () => {
       ]),
     );
     expect(next.state.dropTargets[0]?.isDown).toBe(true);
+  });
+
+  it('does not drop a target while correcting separating overlap', () => {
+    const board = createBlankTable('Separating Drop Board');
+    board.dropTargets = [
+      {
+        x: 450,
+        y: 400,
+        width: 54,
+        height: 16,
+        angle: 0,
+        score: 100,
+        material: 'rubberPost',
+      },
+    ];
+    const state = createInitialGameState(board);
+    state.status = 'playing';
+    state.ball.position.x = 450;
+    state.ball.position.y = 390;
+    state.ball.linearVelocity.y = -120;
+
+    const next = stepGameFrame(state, board, idleInput, 1 / 60);
+
+    expect(next.events).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'drop-target-hit' }),
+      ]),
+    );
+    expect(next.state.dropTargets[0]?.isDown).toBe(false);
+  });
+
+  it('applies playfield rolling resistance to ball motion', () => {
+    const slickBoard = createBlankTable('Slick Board');
+    const resistantBoard = createBlankTable('Resistant Board');
+    slickBoard.surfaceMaterials.playfieldWood = {
+      ...slickBoard.surfaceMaterials.playfieldWood,
+      rollingResistance: 0,
+    };
+    resistantBoard.surfaceMaterials.playfieldWood = {
+      ...resistantBoard.surfaceMaterials.playfieldWood,
+      rollingResistance: 1,
+    };
+
+    const slickState = createInitialGameState(slickBoard);
+    slickState.status = 'playing';
+    slickState.ball.position.x = 200;
+    slickState.ball.position.y = 520;
+    slickState.ball.linearVelocity.x = 1000;
+
+    const resistantState = createInitialGameState(resistantBoard);
+    resistantState.status = 'playing';
+    resistantState.ball.position.x = slickState.ball.position.x;
+    resistantState.ball.position.y = slickState.ball.position.y;
+    resistantState.ball.linearVelocity.x = slickState.ball.linearVelocity.x;
+
+    const slickNext = stepGame(slickState, slickBoard, idleInput, 0.1);
+    const resistantNext = stepGame(
+      resistantState,
+      resistantBoard,
+      idleInput,
+      0.1,
+    );
+
+    expect(resistantNext.ball.linearVelocity.x).toBeLessThan(
+      slickNext.ball.linearVelocity.x,
+    );
+    expect(resistantNext.ball.position.x).toBeLessThan(
+      slickNext.ball.position.x,
+    );
   });
 
   it('captures and ejects the ball from a saucer', () => {
@@ -617,7 +754,8 @@ describe('stepGame', () => {
     const state = createInitialGameState(board);
     state.status = 'playing';
     state.ball.position.x = leftGuide.start.x - state.ball.radius + 1;
-    state.ball.position.y = board.launchPosition.y - board.plunger.guideLength / 2;
+    state.ball.position.y =
+      board.launchPosition.y - board.plunger.guideLength / 2;
     state.ball.linearVelocity.x = 220;
     state.ball.linearVelocity.y = 40;
 
@@ -669,7 +807,12 @@ describe('stepGame', () => {
     state.ball.linearVelocity.x = -120;
     state.ball.linearVelocity.y = 20;
 
-    state = stepGame(state, board, { ...idleInput, launchPressed: true }, 1 / 60);
+    state = stepGame(
+      state,
+      board,
+      { ...idleInput, launchPressed: true },
+      1 / 60,
+    );
 
     expect(state.ball.position.x).toBeLessThanOrEqual(lane.maxX);
     expect(state.ball.position.x).toBeGreaterThanOrEqual(lane.minX);
@@ -797,9 +940,12 @@ const placeBallOnBumperSurface = (
 
 const getBallSpinMagnitude = (
   state: ReturnType<typeof createInitialGameState>,
-): number => Math.hypot(state.ball.angularVelocity.x, state.ball.angularVelocity.y);
+): number =>
+  Math.hypot(state.ball.angularVelocity.x, state.ball.angularVelocity.y);
 
-const getBallSpeed = (state: ReturnType<typeof createInitialGameState>): number =>
+const getBallSpeed = (
+  state: ReturnType<typeof createInitialGameState>,
+): number =>
   Math.hypot(state.ball.linearVelocity.x, state.ball.linearVelocity.y);
 
 const advanceFrames = <TBoard extends typeof classicTable>(
