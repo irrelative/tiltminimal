@@ -98,7 +98,7 @@ describe('table validation cli resolution and reports', () => {
     expect(shouldFailValidation([report], { failOnWarnings: true })).toBe(true);
   });
 
-  it('keeps built-in tables free of layout errors while reporting playability failures', () => {
+  it('keeps Classic clean while reporting remaining built-in playability failures', () => {
     const reports = BUILT_IN_TABLES.map((table) => validateTableRecord(table));
     const classic = reports.find(
       (report) => report.tableId === 'classic-table',
@@ -107,10 +107,6 @@ describe('table validation cli resolution and reports', () => {
     expect(shouldFailValidation(reports, { failOnWarnings: false })).toBe(true);
     expect(reports.every((report) => report.layoutErrors === 0)).toBe(true);
     expect(reports.some((report) => report.playabilityErrors > 0)).toBe(true);
-    expect(
-      classic?.issues.some(
-        (issue) => issue.code === 'plunge-does-not-enter-play',
-      ),
-    ).toBe(true);
+    expect(classic?.issues).toHaveLength(0);
   });
 });

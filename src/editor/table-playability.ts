@@ -68,6 +68,7 @@ const TRAP_MAX_SPEED = 30;
 const LIVE_PLAY_EXIT_MARGIN = 32;
 const CHANNEL_SPAN_X = 48;
 const CHANNEL_SPAN_Y = 180;
+const DROP_PERTURBATION_SPEEDS = [-120, 120, -60, 60];
 
 export const analyzePlayability = (
   board: BoardDefinition,
@@ -149,6 +150,10 @@ export const simulatePlunge = (
     maxX = Math.max(maxX, state.ball.position.x);
     minY = Math.min(minY, state.ball.position.y);
 
+    if (state.status === 'waiting-launch') {
+      break;
+    }
+
     if (isOutsideShooterLane(state.ball.position, board)) {
       exitedShooterLane = true;
     }
@@ -179,8 +184,9 @@ export const simulatePlunge = (
 export const simulateDroppedBall = (
   board: BoardDefinition,
   point: Point,
+  initialVelocity: Point = { x: 0, y: 0 },
 ): DroppedBallSimulationResult => {
-  let state = createPlayingStateAtPoint(board, point);
+  let state = createPlayingStateAtPoint(board, point, initialVelocity);
   let minX = Number.POSITIVE_INFINITY;
   let maxX = Number.NEGATIVE_INFINITY;
   let minY = Number.POSITIVE_INFINITY;
@@ -258,6 +264,22 @@ const analyzeDroppedBallSeeds = (
       continue;
     }
 
+    const stableTrap = DROP_PERTURBATION_SPEEDS.every((velocityX) => {
+      const perturbed = simulateDroppedBall(board, point, {
+        x: velocityX,
+        y: 0,
+      });
+
+      return (
+        perturbed.outcome === 'trapped' ||
+        perturbed.outcome === 'livelock-risk'
+      );
+    });
+
+    if (!stableTrap) {
+      continue;
+    }
+
     issues.push({
       severity: 'warning',
       code:
@@ -330,7 +352,14 @@ const isPlayableDropSeed = (board: BoardDefinition, point: Point): boolean => {
     return false;
   }
 
-  if (isInsideShooterLane(point, board)) {
+  if (
+    isInsideShooterLane(point, board) ||
+    isInsideShooterLaneEnvelope(point, board)
+  ) {
+    return false;
+  }
+
+  if (point.y < board.height * 0.08) {
     return false;
   }
 
@@ -398,6 +427,7 @@ const isPlayableDropSeed = (board: BoardDefinition, point: Point): boolean => {
 const createPlayingStateAtPoint = (
   board: BoardDefinition,
   point: Point,
+  initialVelocity: Point,
 ): GameState => {
   const state = createInitialGameState(board);
 
@@ -407,7 +437,7 @@ const createPlayingStateAtPoint = (
     ball: {
       ...state.ball,
       position: { ...point },
-      linearVelocity: { x: 0, y: 0 },
+      linearVelocity: { ...initialVelocity },
       angularVelocity: { x: 0, y: 0 },
       angularPosition: { x: 0, y: 0 },
     },
@@ -451,6 +481,23 @@ const isInsideShooterLane = (point: Point, board: BoardDefinition): boolean => {
     point.x >= lane.minX - board.ball.radius &&
     point.x <= lane.maxX + board.ball.radius &&
     point.y >= lane.topY - board.ball.radius &&
+    point.y <= lane.bottomY + board.ball.radius
+  );
+};
+
+const isInsideShooterLaneEnvelope = (
+  point: Point,
+  board: BoardDefinition,
+): boolean => {
+  if (board.plunger.x <= board.width / 2) {
+    return false;
+  }
+
+  const lane = getPlungerLaneBounds(board);
+
+  return (
+    point.x >= lane.minX - board.ball.radius * 3 &&
+    point.y >= Math.max(0, lane.topY - board.plunger.guideLength * 0.75) &&
     point.y <= lane.bottomY + board.ball.radius
   );
 };

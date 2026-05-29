@@ -182,8 +182,8 @@ const classicStandupBank = createMirroredTargetBank({
 
 const classicShooterExitGuides: GuideLayoutDefinition[] = [
   {
-    start: absolutePoint(720, 200),
-    end: absolutePoint(800, 400),
+    start: absolutePoint(820, 438),
+    end: absolutePoint(704, 246),
     thickness: 14,
     material: 'metalGuide',
   },
@@ -204,8 +204,8 @@ const classicTableLayout: BoardLayoutDefinition = {
   },
   physics: {
     plunger: {
-      minReleaseSpeed: 1600,
-      maxReleaseSpeed: 4200,
+      minReleaseSpeed: 5200,
+      maxReleaseSpeed: 6000,
       bodyMass: 0.9,
     },
   },

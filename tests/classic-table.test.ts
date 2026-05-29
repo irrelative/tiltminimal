@@ -66,7 +66,7 @@ describe('classicTable', () => {
       state,
       classicTable,
       { ...idleInput, launchPressed: true },
-      1.2,
+      classicTable.physics.plunger.maxPullSeconds,
     );
 
     let launched = releaseUntilLaunched(state);

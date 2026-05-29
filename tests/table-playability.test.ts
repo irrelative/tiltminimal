@@ -24,12 +24,16 @@ describe('table playability analysis', () => {
     );
   });
 
-  it('can verify a strong Classic plunge exits the shooter lane', () => {
-    const result = simulatePlunge(classicTable, 0.85);
+  it('can verify a full Classic plunge exits the shooter lane', () => {
+    const result = simulatePlunge(classicTable, 1);
 
     expect(result.launched).toBe(true);
     expect(result.exitedShooterLane).toBe(true);
     expect(result.minX).toBeLessThan(650);
+  });
+
+  it('keeps Classic free of deep playability issues', () => {
+    expect(analyzePlayability(classicTable, { mode: 'deep' })).toHaveLength(0);
   });
 
   it('classifies a clear dropped ball as draining', () => {
@@ -42,20 +46,26 @@ describe('table playability analysis', () => {
     const board = createBlankTable('Trap Pocket');
     board.guides = [
       {
-        start: { x: 220, y: 840 },
-        end: { x: 220, y: 1100 },
+        start: { x: 330, y: 820 },
+        end: { x: 330, y: 1100 },
         thickness: 16,
         material: 'metalGuide',
       },
       {
-        start: { x: 320, y: 840 },
-        end: { x: 320, y: 1100 },
+        start: { x: 430, y: 820 },
+        end: { x: 430, y: 1100 },
         thickness: 16,
         material: 'metalGuide',
       },
       {
-        start: { x: 220, y: 1100 },
-        end: { x: 320, y: 1100 },
+        start: { x: 330, y: 1100 },
+        end: { x: 430, y: 1100 },
+        thickness: 16,
+        material: 'metalGuide',
+      },
+      {
+        start: { x: 330, y: 820 },
+        end: { x: 430, y: 820 },
         thickness: 16,
         material: 'metalGuide',
       },
