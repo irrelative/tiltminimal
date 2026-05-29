@@ -118,9 +118,11 @@ describe('stepGame', () => {
     const next = stepGame(state, classicTable, idleInput, 1 / 60);
     const settled = advanceFrames(next, classicTable, 10);
 
-    expect(getBallSpeed(next)).toBeGreaterThan(40);
-    expect(settled.ball.position.x - state.ball.position.x).toBeGreaterThan(16);
-    expect(settled.ball.position.y).toBeLessThan(state.ball.position.y + 32);
+    expect(getBallSpeed(next)).toBeGreaterThan(90);
+    expect(next.ball.linearVelocity.y).toBeLessThan(-40);
+    expect(getBallSpeed(settled)).toBeGreaterThan(90);
+    expect(settled.ball.position.x - state.ball.position.x).toBeGreaterThan(12);
+    expect(settled.ball.position.y).toBeLessThan(state.ball.position.y + 12);
   });
 
   it('keeps a dead-bounce moving on a resting right flipper instead of killing speed', () => {
@@ -133,9 +135,11 @@ describe('stepGame', () => {
     const next = stepGame(state, classicTable, idleInput, 1 / 60);
     const settled = advanceFrames(next, classicTable, 10);
 
-    expect(getBallSpeed(next)).toBeGreaterThan(40);
-    expect(state.ball.position.x - settled.ball.position.x).toBeGreaterThan(16);
-    expect(settled.ball.position.y).toBeLessThan(state.ball.position.y + 32);
+    expect(getBallSpeed(next)).toBeGreaterThan(90);
+    expect(next.ball.linearVelocity.y).toBeLessThan(-40);
+    expect(getBallSpeed(settled)).toBeGreaterThan(90);
+    expect(state.ball.position.x - settled.ball.position.x).toBeGreaterThan(12);
+    expect(settled.ball.position.y).toBeLessThan(state.ball.position.y + 12);
   });
 
   it('animates the left flipper through intermediate angles before reaching full extension', () => {
