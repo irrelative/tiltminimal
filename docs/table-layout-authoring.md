@@ -68,10 +68,13 @@ Current helpers include:
 
 - `createFlipperPair(...)`
 - `createPopTriangle(...)`
+- `createPopBumperCluster(...)`
 - `createMirroredRollovers(...)`
 - `createMirroredStandupTargets(...)`
+- `createMirroredTargetBank(...)`
 - `createShooterLaneRight(...)`
 - `createTopArchLanes(...)`
+- `createOrbitLanePair(...)`
 - `createInlaneOutlanePair(...)`
 - `createSlingshotPair(...)`
 - `createLowerPlayfieldPair(...)`
@@ -110,6 +113,13 @@ For tables that need a canonical lower third, prefer using
 `createInlaneOutlanePair(...)`. That produces an upper `playfield` guide for
 the visible lane mouth and a lower return guide for the raised wireform-like
 section that crosses the flipper area.
+
+For agent-generated tables, use the semantic pinball primitives before
+authoring raw geometry. `createPopBumperCluster(...)`,
+`createMirroredTargetBank(...)`, and `createOrbitLanePair(...)` describe common
+pinball anatomy in terms of clusters, banks, and shot lanes. Raw guide lines
+should be reserved for table-specific shot shaping after the canonical lower
+third, shooter lane, top arch, target banks, and pop cluster have been placed.
 
 Guides can also now declare a `plane`:
 
@@ -178,13 +188,14 @@ This validation pass is distinct from the editor-side analysis panel:
 
 ## Current Scope
 
-The classic table now compiles through this layout system. That proves the
-compiler and primitives are real, but the editor still works against the
-resolved runtime board format.
+The classic table and `Starlight EM` now compile through this layout system and
+serve as reference layouts for GPT-authored tables. The editor still works
+against the resolved runtime board format.
 
 The next logical steps are:
 
-- add more canonical primitives such as lower-lane packages, target banks, and orbit families
+- add more canonical primitives for ramps, captive balls, and asymmetric shot
+  families
 - grow validation from geometric heuristics into shot simulation acceptance checks
 - compile more built-in tables through the layout layer
 - expose a layout-source view alongside the raw board JSON export

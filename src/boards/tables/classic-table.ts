@@ -1,9 +1,11 @@
 import {
   absolutePoint,
   anchorPoint,
-  createMirroredRollovers,
-  createMirroredStandupTargets,
+  createMirroredTargetBank,
+  createPopBumperCluster,
+  createShooterLaneRight,
   createStandardLowerPlayfieldPair,
+  createTopArchLanes,
 } from '../layout-primitives';
 import type { BoardLayoutDefinition } from '../layout-schema';
 import { compileBuiltInBoardLayout } from '../layout-compiler';
@@ -111,8 +113,6 @@ const classicLowerPlayfield = createStandardLowerPlayfieldPair({
   leftFlipperPivot: absolutePoint(270, 1220),
   rightFlipperPivot: absolutePoint(630, 1220),
   slingshots: {
-    width: 152,
-    height: 24,
     angle: 0.5,
     score: 10,
     strength: 560,
@@ -129,6 +129,54 @@ const classicLowerPlayfield = createStandardLowerPlayfieldPair({
   },
 });
 
+const classicShooterLane = createShooterLaneRight({
+  boardWidth: 900,
+  launchX: 760,
+  launchY: 1180,
+  guideLength: 620,
+  feedTopY: 280,
+  innerMergeX: 692,
+  innerMergeY: 332,
+  outerExitX: 800,
+  outerBendX: 808,
+  outerBendY: 396,
+});
+
+const classicTopArch = createTopArchLanes({
+  center: anchorPoint('top-arch-center'),
+  laneCount: 3,
+  spacingX: 150,
+  radius: 24,
+  score: 25,
+  roofOffsetY: -58,
+  separatorBottomOffsetY: 28,
+  shoulderStartOffsetY: 86,
+  sideEntryInset: 112,
+  roofInset: 66,
+});
+
+const classicPopCluster = createPopBumperCluster({
+  top: anchorPoint('pop-cluster-top'),
+  spacingX: 240,
+  spacingY: 180,
+  radius: 44,
+  scores: [100, 100, 250],
+  material: 'rubberPost',
+});
+
+const classicStandupBank = createMirroredTargetBank({
+  kind: 'standup',
+  center: anchorPoint('target-bank-center'),
+  targetsPerBank: 1,
+  sideOffsetX: 220,
+  spacingY: 80,
+  width: 60,
+  height: 16,
+  angleOffset: 0.2,
+  score: 50,
+  material: 'rubberPost',
+});
+
 const classicTableLayout: BoardLayoutDefinition = {
   name: 'Classic Table',
   template: 'solid-state-two-flipper',
@@ -136,45 +184,22 @@ const classicTableLayout: BoardLayoutDefinition = {
   height: 1400,
   rulesScript: classicRulesScript,
   drainY: 1425,
-  launchPosition: absolutePoint(770, 1180),
+  launchPosition: classicShooterLane.launchPosition,
+  plunger: classicShooterLane.plunger,
   materials: {
     playfield: 'playfieldWood',
     walls: 'metalGuide',
   },
-  anchors: [
-    { id: 'top-rollover-center', point: absolutePoint(450, 170) },
-    { id: 'standup-center', point: absolutePoint(450, 760) },
-  ],
-  posts: classicLowerPlayfield.posts,
-  bumpers: [
-    {
-      position: absolutePoint(300, 350),
-      radius: 44,
-      score: 100,
-      material: 'rubberPost',
+  physics: {
+    plunger: {
+      minReleaseSpeed: 1600,
+      maxReleaseSpeed: 4200,
+      bodyMass: 0.9,
     },
-    {
-      position: absolutePoint(600, 420),
-      radius: 44,
-      score: 100,
-      material: 'rubberPost',
-    },
-    {
-      position: absolutePoint(450, 600),
-      radius: 52,
-      score: 250,
-      material: 'rubberPost',
-    },
-  ],
-  standupTargets: createMirroredStandupTargets({
-    center: anchorPoint('standup-center'),
-    offsetX: 220,
-    width: 60,
-    height: 16,
-    angleOffset: 0.2,
-    score: 50,
-    material: 'rubberPost',
-  }),
+  },
+  posts: [...classicLowerPlayfield.posts, ...classicPopCluster.posts],
+  bumpers: classicPopCluster.bumpers,
+  standupTargets: classicStandupBank.standupTargets,
   dropTargets: [
     {
       position: absolutePoint(450, 470),
@@ -192,7 +217,7 @@ const classicTableLayout: BoardLayoutDefinition = {
       score: 500,
       holdSeconds: 0.5,
       ejectSpeed: 980,
-      ejectAngle: Math.PI / 2,
+      ejectAngle: Math.PI * 0.15,
       material: 'metalGuide',
     },
   ],
@@ -207,13 +232,13 @@ const classicTableLayout: BoardLayoutDefinition = {
     },
   ],
   slingshots: classicLowerPlayfield.slingshots,
-  rollovers: createMirroredRollovers({
-    center: anchorPoint('top-rollover-center'),
-    offsetsX: [-150, 0, 150],
-    radius: 24,
-    score: 25,
-  }),
-  guides: classicLowerPlayfield.guides,
+  rollovers: classicTopArch.rollovers,
+  guides: [
+    ...classicLowerPlayfield.guides,
+    ...classicPopCluster.guides,
+    ...classicTopArch.guides,
+    ...classicShooterLane.guides,
+  ],
   flippers: classicLowerPlayfield.flippers,
 };
 

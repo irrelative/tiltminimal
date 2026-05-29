@@ -58,6 +58,8 @@ Use the `Makefile` entrypoints:
 * [docs/table-layout-authoring.md](docs/table-layout-authoring.md) explains the
   higher-level layout DSL, compiler, and validation flow for built-in and
   agent-generated tables
+* [docs/gpt-table-generation.md](docs/gpt-table-generation.md) defines the
+  required anatomy-first workflow for GPT-authored table layouts
 * [docs/layout-playability-spec.md](docs/layout-playability-spec.md) defines
   the semantic shooter-lane and top-arch primitives plus the current
   playability validation guarantees for DSL-authored tables

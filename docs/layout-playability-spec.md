@@ -85,6 +85,25 @@ Behavior requirements:
 - lane separators should divide adjacent lanes without sealing the whole bank
 - outer shoulders should connect naturally to orbit or shooter-lane feed guides
 
+## Canonical Midfield Primitives
+
+`createPopBumperCluster(...)`, `createMirroredTargetBank(...)`, and
+`createOrbitLanePair(...)` are the first semantic midfield helpers for
+agent-authored layouts.
+
+They are responsible for:
+
+- placing common pop, target, and orbit structures as table anatomy
+- keeping mirrored shot families balanced by default
+- reducing raw guide authoring to table-specific shaping
+
+Behavior requirements:
+
+- target banks should face inward toward playable shot lanes
+- pop clusters should leave ball-width paths around nearby guides and posts
+- orbit guides should connect lower side entries to upper shoulders without
+  blocking the shooter lane
+
 ## Validation Guarantees
 
 `validateCompiledBoardLayout(...)` currently enforces:
@@ -129,11 +148,13 @@ This means:
 
 ## Current Reference Table
 
-`Starlight EM` is the reference layout for this behavior. It uses the shooter
-lane, top arch, and lower-lane primitives and is covered by tests that require:
+`Classic Table` and `Starlight EM` are the reference layouts for this behavior.
+They use the shooter lane, top arch, lower-lane, and semantic midfield
+primitives and are covered by tests that require:
 
 - no `launcher-blocked` validation error
 - no `rollover-unreachable` validation error
 - no `flipper-keepout` validation error
 - no `spinner-obstructed` validation error
 - a full plunge that reaches the upper playfield
+- no editor-side geometry analysis warnings

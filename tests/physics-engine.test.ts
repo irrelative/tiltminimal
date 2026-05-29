@@ -15,7 +15,10 @@ import {
   getPlungerLaneCenterBounds,
 } from '../src/game/plunger-geometry';
 import { stepGame, stepGameFrame } from '../src/game/physics-engine';
-import type { FlipperDefinition } from '../src/types/board-definition';
+import type {
+  BoardDefinition,
+  FlipperDefinition,
+} from '../src/types/board-definition';
 
 const idleInput: InputState = {
   leftPressed: false,
@@ -27,44 +30,45 @@ const idleInput: InputState = {
 };
 const leftFlipper = getFlipperBySide(classicTable, 'left');
 const rightFlipper = getFlipperBySide(classicTable, 'right');
+const launcherTestTable = createBlankTable('Launcher Test');
 
 describe('stepGame', () => {
   it('keeps the ball locked in the launcher while space is held', () => {
-    const state = createInitialGameState(classicTable);
+    const state = createInitialGameState(launcherTestTable);
 
     const next = stepGame(
       state,
-      classicTable,
+      launcherTestTable,
       { ...idleInput, launchPressed: true },
       0.5,
     );
 
     expect(next.status).toBe('waiting-launch');
     expect(next.plunger.pullback).toBeGreaterThan(0);
-    expect(next.ball.position.x).toBe(classicTable.launchPosition.x);
-    expect(next.ball.position.y).toBe(classicTable.launchPosition.y);
+    expect(next.ball.position.x).toBe(launcherTestTable.launchPosition.x);
+    expect(next.ball.position.y).toBe(launcherTestTable.launchPosition.y);
     expect(next.ball.linearVelocity.x).toBe(0);
     expect(next.ball.linearVelocity.y).toBe(0);
   });
 
   it('launches the ball harder after a longer charge', () => {
-    let shortCharge = createInitialGameState(classicTable);
+    let shortCharge = createInitialGameState(launcherTestTable);
     shortCharge = stepGame(
       shortCharge,
-      classicTable,
+      launcherTestTable,
       { ...idleInput, launchPressed: true },
       0.2,
     );
-    const shortLaunch = releaseUntilLaunched(shortCharge, classicTable);
+    const shortLaunch = releaseUntilLaunched(shortCharge, launcherTestTable);
 
-    let longCharge = createInitialGameState(classicTable);
+    let longCharge = createInitialGameState(launcherTestTable);
     longCharge = stepGame(
       longCharge,
-      classicTable,
+      launcherTestTable,
       { ...idleInput, launchPressed: true },
       1.2,
     );
-    const longLaunch = releaseUntilLaunched(longCharge, classicTable);
+    const longLaunch = releaseUntilLaunched(longCharge, launcherTestTable);
 
     expect(shortLaunch.status).toBe('playing');
     expect(longLaunch.status).toBe('playing');
@@ -75,19 +79,19 @@ describe('stepGame', () => {
   });
 
   it('waits for the plunger to physically reach the ball after release', () => {
-    let charged = createInitialGameState(classicTable);
+    let charged = createInitialGameState(launcherTestTable);
     charged = stepGame(
       charged,
-      classicTable,
+      launcherTestTable,
       { ...idleInput, launchPressed: true },
       0.3,
     );
 
-    const released = stepGame(charged, classicTable, idleInput, 1 / 60);
+    const released = stepGame(charged, launcherTestTable, idleInput, 1 / 60);
 
     expect(released.status).toBe('waiting-launch');
     expect(released.plunger.pullback).toBeLessThan(charged.plunger.pullback);
-    expect(released.ball.position.y).toBe(classicTable.launchPosition.y);
+    expect(released.ball.position.y).toBe(launcherTestTable.launchPosition.y);
     expect(released.ball.linearVelocity.y).toBe(0);
   });
 
@@ -948,7 +952,7 @@ const getBallSpeed = (
 ): number =>
   Math.hypot(state.ball.linearVelocity.x, state.ball.linearVelocity.y);
 
-const advanceFrames = <TBoard extends typeof classicTable>(
+const advanceFrames = <TBoard extends BoardDefinition>(
   state: ReturnType<typeof createInitialGameState>,
   board: TBoard,
   frameCount: number,
@@ -962,7 +966,7 @@ const advanceFrames = <TBoard extends typeof classicTable>(
   return current;
 };
 
-const releaseUntilLaunched = <TBoard extends typeof classicTable>(
+const releaseUntilLaunched = <TBoard extends BoardDefinition>(
   state: ReturnType<typeof createInitialGameState>,
   board: TBoard,
 ) => {

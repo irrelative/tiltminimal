@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { harlemGlobetrottersTable } from '../src/boards/tables/harlem-globetrotters';
 import { BUILT_IN_TABLES, getFlipperBySide } from '../src/boards/table-library';
+import { physicsDefaults } from '../src/game/physics-defaults';
 import { createInitialGameState } from '../src/game/game-state';
 import { stepGame } from '../src/game/physics-engine';
 import type { InputState } from '../src/input/keyboard-input';
@@ -48,9 +49,7 @@ describe('harlemGlobetrottersTable', () => {
 
     expect(
       harlemGlobetrottersTable.physics.plunger.maxReleaseSpeed,
-    ).toBeGreaterThan(
-      BUILT_IN_TABLES[0]!.board.physics.plunger.maxReleaseSpeed,
-    );
+    ).toBeGreaterThan(physicsDefaults.tuning.plunger.maxReleaseSpeed);
     expect(launched.status).toBe('playing');
     expect(launched.ball.linearVelocity.y).toBeLessThan(0);
     expect(Math.abs(launched.ball.linearVelocity.y)).toBeGreaterThan(

@@ -1,5 +1,6 @@
 import type {
   BumperLayoutDefinition,
+  DropTargetLayoutDefinition,
   FlipperLayoutDefinition,
   GuideLayoutDefinition,
   LayoutPoint,
@@ -112,6 +113,102 @@ export const createPopTriangle = (options: {
   ];
 };
 
+export interface PopBumperClusterLayout extends BoardLayoutFragment {
+  bumpers: BumperLayoutDefinition[];
+  posts: PostLayoutDefinition[];
+  guides: GuideLayoutDefinition[];
+}
+
+export const createPopBumperCluster = (options: {
+  top: LayoutPoint;
+  spacingX: number;
+  spacingY: number;
+  radius: number;
+  scores?: [number, number, number];
+  material?: SurfaceMaterialName;
+  guardPosts?: {
+    radius?: number;
+    material?: SurfaceMaterialName;
+    topOffsetY?: number;
+    sideOffsetX?: number;
+    sideOffsetY?: number;
+  };
+  guardGuides?: {
+    thickness?: number;
+    material?: SurfaceMaterialName;
+    sideOffsetX?: number;
+    sideStartY?: number;
+    sideEndY?: number;
+  };
+}): PopBumperClusterLayout => {
+  const bumpers = createPopTriangle(options);
+  const posts: PostLayoutDefinition[] = [];
+  const guides: GuideLayoutDefinition[] = [];
+
+  if (options.guardPosts) {
+    const radius =
+      options.guardPosts.radius ?? Math.max(12, options.radius / 3);
+    const material = options.guardPosts.material ?? 'rubberPost';
+    const topOffsetY =
+      options.guardPosts.topOffsetY ?? -Math.max(56, options.radius * 1.4);
+    const sideOffsetX =
+      options.guardPosts.sideOffsetX ?? options.spacingX / 2 + options.radius;
+    const sideOffsetY =
+      options.guardPosts.sideOffsetY ?? options.spacingY + options.radius * 1.2;
+
+    posts.push(
+      {
+        position: offsetLayoutPoint(options.top, 0, topOffsetY),
+        radius,
+        material,
+      },
+      {
+        position: offsetLayoutPoint(options.top, -sideOffsetX, sideOffsetY),
+        radius,
+        material,
+      },
+      {
+        position: offsetLayoutPoint(options.top, sideOffsetX, sideOffsetY),
+        radius,
+        material,
+      },
+    );
+  }
+
+  if (options.guardGuides) {
+    const thickness = options.guardGuides.thickness ?? 12;
+    const material = options.guardGuides.material ?? 'metalGuide';
+    const sideOffsetX =
+      options.guardGuides.sideOffsetX ??
+      options.spacingX / 2 + options.radius * 2;
+    const sideStartY =
+      options.guardGuides.sideStartY ?? Math.max(24, options.radius * 0.6);
+    const sideEndY =
+      options.guardGuides.sideEndY ?? options.spacingY + options.radius * 1.8;
+
+    guides.push(
+      {
+        start: offsetLayoutPoint(options.top, -sideOffsetX, sideStartY),
+        end: offsetLayoutPoint(options.top, -sideOffsetX, sideEndY),
+        thickness,
+        material,
+      },
+      {
+        start: offsetLayoutPoint(options.top, sideOffsetX, sideStartY),
+        end: offsetLayoutPoint(options.top, sideOffsetX, sideEndY),
+        thickness,
+        material,
+      },
+    );
+  }
+
+  return {
+    bumpers,
+    posts,
+    guides,
+  };
+};
+
 export const createFlipperPair = (options: {
   y: number;
   leftX: number;
@@ -169,6 +266,79 @@ export const createMirroredStandupTargets = (options: {
       material,
     },
   ];
+};
+
+export interface MirroredTargetBankLayout extends BoardLayoutFragment {
+  standupTargets: StandupTargetLayoutDefinition[];
+  dropTargets: DropTargetLayoutDefinition[];
+}
+
+export const createMirroredTargetBank = (options: {
+  kind?: 'standup' | 'drop';
+  center: LayoutPoint;
+  targetsPerBank?: number;
+  sideOffsetX: number;
+  spacingY: number;
+  width: number;
+  height: number;
+  angleOffset?: number;
+  staggerX?: number;
+  score: number;
+  material?: SurfaceMaterialName;
+}): MirroredTargetBankLayout => {
+  const targetKind = options.kind ?? 'standup';
+  const material = options.material ?? 'rubberPost';
+  const targetsPerBank = options.targetsPerBank ?? 3;
+  const angleOffset = options.angleOffset ?? 0;
+  const staggerX = options.staggerX ?? 0;
+  const leftTargets: Array<
+    StandupTargetLayoutDefinition | DropTargetLayoutDefinition
+  > = [];
+  const rightTargets: Array<
+    StandupTargetLayoutDefinition | DropTargetLayoutDefinition
+  > = [];
+
+  for (let index = 0; index < targetsPerBank; index += 1) {
+    const centeredIndex = index - (targetsPerBank - 1) / 2;
+    const yOffset = centeredIndex * options.spacingY;
+    const xStagger = centeredIndex * staggerX;
+
+    leftTargets.push({
+      position: offsetLayoutPoint(
+        options.center,
+        -options.sideOffsetX + xStagger,
+        yOffset,
+      ),
+      width: options.width,
+      height: options.height,
+      angle: Math.PI / 2 - angleOffset,
+      score: options.score,
+      material,
+    });
+    rightTargets.push({
+      position: offsetLayoutPoint(
+        options.center,
+        options.sideOffsetX - xStagger,
+        yOffset,
+      ),
+      width: options.width,
+      height: options.height,
+      angle: -Math.PI / 2 + angleOffset,
+      score: options.score,
+      material,
+    });
+  }
+
+  const targets = [...leftTargets, ...rightTargets];
+
+  return {
+    standupTargets:
+      targetKind === 'standup'
+        ? (targets as StandupTargetLayoutDefinition[])
+        : [],
+    dropTargets:
+      targetKind === 'drop' ? (targets as DropTargetLayoutDefinition[]) : [],
+  };
 };
 
 export const mergeLayoutFragments = (
@@ -250,6 +420,79 @@ export const createShooterLaneRight = (options: {
         material,
       },
     ],
+  };
+};
+
+export interface OrbitLanePairLayout extends BoardLayoutFragment {
+  guides: GuideLayoutDefinition[];
+  posts: PostLayoutDefinition[];
+}
+
+export const createOrbitLanePair = (options: {
+  leftEntry: LayoutPoint;
+  rightEntry: LayoutPoint;
+  leftShoulder: LayoutPoint;
+  rightShoulder: LayoutPoint;
+  leftReturn?: LayoutPoint;
+  rightReturn?: LayoutPoint;
+  guideThickness?: number;
+  material?: SurfaceMaterialName;
+  entryPosts?: {
+    radius?: number;
+    material?: SurfaceMaterialName;
+  };
+}): OrbitLanePairLayout => {
+  const material = options.material ?? 'metalGuide';
+  const guideThickness = options.guideThickness ?? 14;
+  const guides: GuideLayoutDefinition[] = [
+    {
+      start: options.leftEntry,
+      end: options.leftShoulder,
+      thickness: guideThickness,
+      material,
+    },
+    {
+      start: options.rightEntry,
+      end: options.rightShoulder,
+      thickness: guideThickness,
+      material,
+    },
+  ];
+
+  if (options.leftReturn) {
+    guides.push({
+      start: options.leftShoulder,
+      end: options.leftReturn,
+      thickness: guideThickness,
+      material,
+    });
+  }
+
+  if (options.rightReturn) {
+    guides.push({
+      start: options.rightShoulder,
+      end: options.rightReturn,
+      thickness: guideThickness,
+      material,
+    });
+  }
+
+  return {
+    guides,
+    posts: options.entryPosts
+      ? [
+          {
+            position: options.leftEntry,
+            radius: options.entryPosts.radius ?? 14,
+            material: options.entryPosts.material ?? material,
+          },
+          {
+            position: options.rightEntry,
+            radius: options.entryPosts.radius ?? 14,
+            material: options.entryPosts.material ?? material,
+          },
+        ]
+      : [],
   };
 };
 

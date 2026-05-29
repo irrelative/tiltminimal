@@ -7,6 +7,9 @@ import {
   createFlipperPair,
   createInlaneOutlanePair,
   createLowerPlayfieldPair,
+  createMirroredTargetBank,
+  createOrbitLanePair,
+  createPopBumperCluster,
   createStandardLowerPlayfieldPair,
   mergeLayoutFragments,
   createPopTriangle,
@@ -62,6 +65,21 @@ describe('compileBoardLayout', () => {
       x: 450,
       y: 700,
     });
+    expect(result.context.anchors['top-arch-center']?.x).toBeCloseTo(450, 5);
+    expect(result.context.anchors['top-arch-center']?.y).toBeCloseTo(176, 5);
+    expect(result.context.anchors['left-target-bank-center']?.x).toBeCloseTo(
+      198,
+      5,
+    );
+    expect(result.context.anchors['left-target-bank-center']?.y).toBeCloseTo(
+      760,
+      5,
+    );
+    expect(result.context.anchors['right-orbit-entry']?.x).toBeCloseTo(
+      769.5,
+      5,
+    );
+    expect(result.context.anchors['right-orbit-entry']?.y).toBeCloseTo(896, 5);
     expect(result.context.anchors['mid-bank']).toEqual({ x: 450, y: 580 });
     expect(result.board.launchPosition.x).toBeCloseTo(770, 5);
     expect(result.board.standupTargets[0]).toMatchObject({
@@ -108,6 +126,163 @@ describe('compileBoardLayout', () => {
     expect(result.board.bumpers[1]).toMatchObject({ x: 360, y: 400 });
     expect(result.board.bumpers[2]).toMatchObject({ x: 540, y: 400 });
     expect(result.board.flippers).toHaveLength(2);
+  });
+
+  it('expands canonical pop clusters with optional guards', () => {
+    const cluster = createPopBumperCluster({
+      top: absolutePoint(450, 320),
+      spacingX: 220,
+      spacingY: 160,
+      radius: 40,
+      scores: [100, 150, 200],
+      guardPosts: { radius: 12 },
+      guardGuides: { thickness: 10 },
+    });
+    const layout: BoardLayoutDefinition = {
+      name: 'Pop Cluster Test',
+      width: 900,
+      height: 1400,
+      drainY: 1425,
+      launchPosition: absolutePoint(770, 1180),
+      materials: {
+        playfield: 'playfieldWood',
+        walls: 'metalGuide',
+      },
+      bumpers: cluster.bumpers,
+      posts: cluster.posts,
+      guides: cluster.guides,
+      flippers: createFlipperPair({
+        leftX: 270,
+        rightX: 630,
+        y: 1220,
+        length: 150,
+        thickness: 20,
+        restingAngleOffset: 0.28,
+        activeAngleOffset: -0.42,
+      }),
+    };
+
+    const result = compileBoardLayout(layout, { snapToGrid: false });
+
+    expect(result.board.bumpers).toHaveLength(3);
+    expect(result.board.posts).toHaveLength(3);
+    expect(result.board.guides).toHaveLength(2);
+    expect(result.board.bumpers[1]).toMatchObject({ x: 340, y: 480 });
+    expect(result.board.bumpers[2]).toMatchObject({ x: 560, y: 480 });
+    expect(result.board.posts[0]?.material).toBe('rubberPost');
+    expect(result.board.guides[0]?.material).toBe('metalGuide');
+  });
+
+  it('expands mirrored target banks for standup and drop targets', () => {
+    const standupBank = createMirroredTargetBank({
+      kind: 'standup',
+      center: absolutePoint(450, 720),
+      targetsPerBank: 2,
+      sideOffsetX: 220,
+      spacingY: 70,
+      width: 60,
+      height: 16,
+      angleOffset: 0.1,
+      staggerX: 12,
+      score: 500,
+    });
+    const dropBank = createMirroredTargetBank({
+      kind: 'drop',
+      center: absolutePoint(450, 460),
+      targetsPerBank: 1,
+      sideOffsetX: 70,
+      spacingY: 70,
+      width: 54,
+      height: 16,
+      score: 1000,
+    });
+    const layout: BoardLayoutDefinition = {
+      name: 'Target Bank Test',
+      width: 900,
+      height: 1400,
+      drainY: 1425,
+      launchPosition: absolutePoint(770, 1180),
+      materials: {
+        playfield: 'playfieldWood',
+        walls: 'metalGuide',
+      },
+      standupTargets: standupBank.standupTargets,
+      dropTargets: dropBank.dropTargets,
+      flippers: createFlipperPair({
+        leftX: 270,
+        rightX: 630,
+        y: 1220,
+        length: 150,
+        thickness: 20,
+        restingAngleOffset: 0.28,
+        activeAngleOffset: -0.42,
+      }),
+    };
+
+    const result = compileBoardLayout(layout, { snapToGrid: false });
+
+    expect(result.board.standupTargets).toHaveLength(4);
+    expect(result.board.dropTargets).toHaveLength(2);
+    expect(result.board.standupTargets[0]).toMatchObject({
+      x: 224,
+      y: 685,
+      material: 'rubberPost',
+    });
+    expect(result.board.standupTargets[2]).toMatchObject({
+      x: 676,
+      y: 685,
+      material: 'rubberPost',
+    });
+    expect(result.board.dropTargets[0]).toMatchObject({ x: 380, y: 460 });
+    expect(result.board.dropTargets[1]).toMatchObject({ x: 520, y: 460 });
+  });
+
+  it('expands orbit lane pairs with optional entry posts', () => {
+    const orbits = createOrbitLanePair({
+      leftEntry: absolutePoint(130, 900),
+      rightEntry: absolutePoint(770, 900),
+      leftShoulder: absolutePoint(200, 260),
+      rightShoulder: absolutePoint(700, 260),
+      leftReturn: absolutePoint(320, 150),
+      rightReturn: absolutePoint(580, 150),
+      entryPosts: { radius: 14 },
+    });
+    const layout: BoardLayoutDefinition = {
+      name: 'Orbit Pair Test',
+      width: 900,
+      height: 1400,
+      drainY: 1425,
+      launchPosition: absolutePoint(770, 1180),
+      materials: {
+        playfield: 'playfieldWood',
+        walls: 'metalGuide',
+      },
+      posts: orbits.posts,
+      guides: orbits.guides,
+      flippers: createFlipperPair({
+        leftX: 270,
+        rightX: 630,
+        y: 1220,
+        length: 150,
+        thickness: 20,
+        restingAngleOffset: 0.28,
+        activeAngleOffset: -0.42,
+      }),
+    };
+
+    const result = compileBoardLayout(layout, { snapToGrid: false });
+
+    expect(result.board.guides).toHaveLength(4);
+    expect(result.board.posts).toHaveLength(2);
+    expect(result.board.guides[0]).toMatchObject({
+      start: { x: 130, y: 900 },
+      end: { x: 200, y: 260 },
+      material: 'metalGuide',
+    });
+    expect(result.board.guides[3]).toMatchObject({
+      start: { x: 700, y: 260 },
+      end: { x: 580, y: 150 },
+    });
   });
 
   it('expands shooter-lane and top-arch primitives into board geometry', () => {
