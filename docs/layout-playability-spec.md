@@ -31,6 +31,8 @@ Behavior requirements:
 
 - the launch position must remain centered inside the plunger lane
 - the post-lane exit path above the plunger guides must stay open
+- a full plunge must transfer the ball horizontally out of the shooter lane into
+  the live playfield, not merely move the ball up and down inside the lane
 - generated geometry must remain valid after grid snapping
 - table-specific plunger tuning may be overridden when a layout needs a harder
   full plunge
@@ -156,5 +158,5 @@ primitives and are covered by tests that require:
 - no `rollover-unreachable` validation error
 - no `flipper-keepout` validation error
 - no `spinner-obstructed` validation error
-- a full plunge that reaches the upper playfield
+- a full plunge that reaches the upper playfield and exits the shooter lane
 - no editor-side geometry analysis warnings

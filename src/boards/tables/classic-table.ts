@@ -7,7 +7,10 @@ import {
   createStandardLowerPlayfieldPair,
   createTopArchLanes,
 } from '../layout-primitives';
-import type { BoardLayoutDefinition } from '../layout-schema';
+import type {
+  BoardLayoutDefinition,
+  GuideLayoutDefinition,
+} from '../layout-schema';
 import { compileBuiltInBoardLayout } from '../layout-compiler';
 
 const classicRulesScript = `
@@ -177,6 +180,15 @@ const classicStandupBank = createMirroredTargetBank({
   material: 'rubberPost',
 });
 
+const classicShooterExitGuides: GuideLayoutDefinition[] = [
+  {
+    start: absolutePoint(720, 200),
+    end: absolutePoint(800, 400),
+    thickness: 14,
+    material: 'metalGuide',
+  },
+];
+
 const classicTableLayout: BoardLayoutDefinition = {
   name: 'Classic Table',
   template: 'solid-state-two-flipper',
@@ -237,6 +249,7 @@ const classicTableLayout: BoardLayoutDefinition = {
     ...classicLowerPlayfield.guides,
     ...classicPopCluster.guides,
     ...classicTopArch.guides,
+    ...classicShooterExitGuides,
     ...classicShooterLane.guides,
   ],
   flippers: classicLowerPlayfield.flippers,

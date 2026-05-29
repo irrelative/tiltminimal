@@ -4,6 +4,7 @@ import { validateCompiledBoardLayout } from '../src/boards/layout-validation';
 import { classicTable } from '../src/boards/tables/classic-table';
 import { analyzeBoard } from '../src/editor/table-analysis';
 import { createInitialGameState } from '../src/game/game-state';
+import { getPlungerLaneHalfWidth } from '../src/game/plunger-geometry';
 import { stepGame } from '../src/game/physics-engine';
 import type { InputState } from '../src/input/keyboard-input';
 
@@ -59,7 +60,7 @@ describe('classicTable', () => {
     expect(analyzeBoard(classicTable)).toHaveLength(0);
   });
 
-  it('can full-plunge the ball into the upper playfield', () => {
+  it('can full-plunge the ball out of the shooter lane into the playfield', () => {
     let state = createInitialGameState(classicTable);
     state = stepGame(
       state,
@@ -69,14 +70,20 @@ describe('classicTable', () => {
     );
 
     let launched = releaseUntilLaunched(state);
+    let minX = launched.ball.position.x;
     let minY = launched.ball.position.y;
 
     for (let step = 0; step < 120; step += 1) {
       launched = stepGame(launched, classicTable, idleInput, 1 / 60);
+      minX = Math.min(minX, launched.ball.position.x);
       minY = Math.min(minY, launched.ball.position.y);
     }
 
+    const shooterLaneExitX =
+      classicTable.plunger.x - getPlungerLaneHalfWidth(classicTable.plunger);
+
     expect(minY).toBeLessThan(280);
+    expect(minX).toBeLessThan(shooterLaneExitX - classicTable.ball.radius * 2);
   });
 
   it('uses raised lower return guides instead of playfield-level flipper blockers', () => {

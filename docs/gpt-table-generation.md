@@ -45,6 +45,7 @@ Generated tables should compile with `compileBuiltInBoardLayout(...)` and pass
 both layout validation and editor-side analysis. At minimum, check for:
 
 - no blocked shooter lane
+- full plunges leave the shooter lane horizontally and enter live play
 - no unreachable top rollovers
 - no flipper keepout errors
 - no obstructed spinner envelopes
