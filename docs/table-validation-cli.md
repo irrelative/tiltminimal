@@ -21,6 +21,7 @@ Use either:
 
 - `npm run validate-table -- <built-in-table-id>`
 - `npm run validate-table -- --all`
+- `npm run validate-table -- <built-in-table-id> --deep-playability`
 - `make validate-table TABLE=<built-in-table-id>`
 
 Examples:
@@ -29,6 +30,7 @@ Examples:
 npm run validate-table -- classic-table
 npm run validate-table -- double-crossed
 npm run validate-table -- starlight-em --fail-on-warnings
+npm run validate-table -- classic-table --deep-playability
 npm run validate-table -- --all
 make validate-table TABLE=harlem-globetrotters
 ```
@@ -51,11 +53,13 @@ For each selected table, the CLI runs:
 
 1. `validateCompiledBoardLayout(...)` from `src/boards/layout-validation.ts`
 2. `analyzeBoard(...)` from `src/editor/table-analysis.ts`
+3. `analyzePlayability(...)` from `src/editor/table-playability.ts`
 
 That means the CLI reports both:
 
 - layout validation diagnostics
 - editor-style advisory analysis warnings
+- simulation-based playability errors and warnings
 
 ## Output
 
@@ -65,23 +69,26 @@ For each table, the CLI prints:
 - layout error count
 - layout warning count
 - analysis warning count
+- playability error and warning counts
 - each issue with its source and code
 
 Issue sources are:
 
 - `layout`
 - `analysis`
+- `playability`
 
 ## Exit Status
 
 Default behavior:
 
-- exits non-zero if any layout errors are found
+- exits non-zero if any layout or playability errors are found
 - does not fail on warnings alone
 
 Optional behavior:
 
 - `--fail-on-warnings` makes any warning or error produce a non-zero exit code
+- `--deep-playability` uses denser dropped-ball sampling for manual review
 
 ## Constraints
 

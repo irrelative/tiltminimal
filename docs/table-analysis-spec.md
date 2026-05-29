@@ -182,3 +182,19 @@ This analysis system is expected to grow further, for example into:
 
 New checks should continue to reuse the same editor-facing warning model so the
 analysis panel remains a single place to review issues.
+
+## Playability Simulation
+
+The CLI also runs `analyzePlayability(...)` from
+`src/editor/table-playability.ts`. This pass is separate from the editor panel
+and focuses on dynamic scenarios that static geometry cannot prove:
+
+- multiple plunger strengths must enter live play instead of staying in the
+  shooter lane
+- seeded dropped balls should drain, remain active, rest near a flipper, or
+  enter intentional captures
+- passive traps and narrow lane livelocks are reported as playability warnings
+
+Normal mode keeps sampling coarse enough for routine validation. The CLI's
+`--deep-playability` mode uses denser dropped-ball sampling for manual table
+authoring review.

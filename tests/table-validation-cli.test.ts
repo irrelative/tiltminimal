@@ -18,8 +18,19 @@ describe('table validation cli parsing', () => {
       help: false,
       all: false,
       failOnWarnings: true,
+      playabilityMode: 'normal',
       tableIds: ['classic-table'],
       error: null,
+    });
+  });
+
+  it('parses deep playability mode', () => {
+    expect(
+      parseValidateTableCliArgs(['classic-table', '--deep-playability']),
+    ).toMatchObject({
+      error: null,
+      playabilityMode: 'deep',
+      tableIds: ['classic-table'],
     });
   });
 
@@ -84,17 +95,22 @@ describe('table validation cli resolution and reports', () => {
     expect(shouldFailValidation([report], { failOnWarnings: false })).toBe(
       true,
     );
-    expect(shouldFailValidation([report], { failOnWarnings: true })).toBe(
-      true,
-    );
+    expect(shouldFailValidation([report], { failOnWarnings: true })).toBe(true);
   });
 
-  it('keeps built-in tables free of layout errors and Starlight fully clean', () => {
+  it('keeps built-in tables free of layout errors while reporting playability failures', () => {
     const reports = BUILT_IN_TABLES.map((table) => validateTableRecord(table));
-    const starlight = reports.find((report) => report.tableId === 'starlight-em');
+    const classic = reports.find(
+      (report) => report.tableId === 'classic-table',
+    );
 
-    expect(shouldFailValidation(reports, { failOnWarnings: false })).toBe(false);
+    expect(shouldFailValidation(reports, { failOnWarnings: false })).toBe(true);
     expect(reports.every((report) => report.layoutErrors === 0)).toBe(true);
-    expect(starlight?.issues).toHaveLength(0);
+    expect(reports.some((report) => report.playabilityErrors > 0)).toBe(true);
+    expect(
+      classic?.issues.some(
+        (issue) => issue.code === 'plunge-does-not-enter-play',
+      ),
+    ).toBe(true);
   });
 });

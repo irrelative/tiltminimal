@@ -37,7 +37,11 @@ if (parsed.help) {
       processLike.process.exitCode = 1;
     }
   } else {
-    const reports = resolved.tables.map(validateTableRecord);
+    const reports = resolved.tables.map((table) =>
+      validateTableRecord(table, {
+        playabilityMode: parsed.playabilityMode,
+      }),
+    );
     console.log(formatValidationReport(reports));
 
     if (shouldFailValidation(reports, parsed) && processLike.process) {

@@ -1,23 +1,26 @@
-import {
-  BUILT_IN_TABLES,
-  type TableRecord,
-} from '../boards/table-library';
+import { BUILT_IN_TABLES, type TableRecord } from '../boards/table-library';
 import { validateCompiledBoardLayout } from '../boards/layout-validation';
 import {
   analyzeBoard,
   type TableAnalysisWarning,
 } from '../editor/table-analysis';
+import {
+  analyzePlayability,
+  type PlayabilityIssue,
+  type PlayabilityMode,
+} from '../editor/table-playability';
 
 export interface ValidateTableCliOptions {
   help: boolean;
   all: boolean;
   failOnWarnings: boolean;
+  playabilityMode: PlayabilityMode;
   tableIds: string[];
   error: string | null;
 }
 
 export interface TableValidationIssue {
-  source: 'layout' | 'analysis';
+  source: 'layout' | 'analysis' | 'playability';
   severity: 'error' | 'warning';
   code: string;
   message: string;
@@ -30,6 +33,8 @@ export interface TableValidationReport {
   layoutErrors: number;
   layoutWarnings: number;
   analysisWarnings: number;
+  playabilityErrors: number;
+  playabilityWarnings: number;
 }
 
 export const parseValidateTableCliArgs = (
@@ -39,6 +44,7 @@ export const parseValidateTableCliArgs = (
   let help = false;
   let all = false;
   let failOnWarnings = false;
+  let playabilityMode: PlayabilityMode = 'normal';
 
   for (const arg of args) {
     if (arg === '--help' || arg === '-h') {
@@ -56,11 +62,17 @@ export const parseValidateTableCliArgs = (
       continue;
     }
 
+    if (arg === '--deep-playability') {
+      playabilityMode = 'deep';
+      continue;
+    }
+
     if (arg.startsWith('-')) {
       return {
         help: false,
         all: false,
         failOnWarnings: false,
+        playabilityMode: 'normal',
         tableIds: [],
         error: `Unknown flag: ${arg}`,
       };
@@ -74,6 +86,7 @@ export const parseValidateTableCliArgs = (
       help: false,
       all: false,
       failOnWarnings,
+      playabilityMode,
       tableIds: [],
       error: 'Provide a built-in table id or use --all.',
     };
@@ -84,6 +97,7 @@ export const parseValidateTableCliArgs = (
       help: false,
       all,
       failOnWarnings,
+      playabilityMode,
       tableIds: [],
       error: 'Use either explicit table ids or --all, not both.',
     };
@@ -93,6 +107,7 @@ export const parseValidateTableCliArgs = (
     help,
     all,
     failOnWarnings,
+    playabilityMode,
     tableIds,
     error: null,
   };
@@ -138,9 +153,15 @@ export const resolveBuiltInTablesForValidation = (
 
 export const validateTableRecord = (
   table: TableRecord,
+  options: Pick<ValidateTableCliOptions, 'playabilityMode'> = {
+    playabilityMode: 'normal',
+  },
 ): TableValidationReport => {
   const layoutDiagnostics = validateCompiledBoardLayout(table.board);
   const analysisWarnings = analyzeBoard(table.board);
+  const playabilityIssues = analyzePlayability(table.board, {
+    mode: options.playabilityMode,
+  });
   const issues: TableValidationIssue[] = [
     ...layoutDiagnostics.map((diagnostic) => ({
       source: 'layout' as const,
@@ -149,6 +170,7 @@ export const validateTableRecord = (
       message: diagnostic.message,
     })),
     ...analysisWarnings.map((warning) => mapAnalysisWarningToIssue(warning)),
+    ...playabilityIssues.map((issue) => mapPlayabilityIssueToIssue(issue)),
   ];
 
   return {
@@ -162,6 +184,12 @@ export const validateTableRecord = (
       (diagnostic) => diagnostic.severity === 'warning',
     ).length,
     analysisWarnings: analysisWarnings.length,
+    playabilityErrors: playabilityIssues.filter(
+      (issue) => issue.severity === 'error',
+    ).length,
+    playabilityWarnings: playabilityIssues.filter(
+      (issue) => issue.severity === 'warning',
+    ).length,
   };
 };
 
@@ -173,6 +201,7 @@ export const formatValidateTableUsage = (
     '  npm run validate-table -- <built-in-table-id>',
     '  npm run validate-table -- --all',
     '  npm run validate-table -- <built-in-table-id> --fail-on-warnings',
+    '  npm run validate-table -- <built-in-table-id> --deep-playability',
     '',
     'Built-in table ids:',
     ...tables.map((table) => `  - ${table.id}`),
@@ -190,6 +219,7 @@ export const formatValidationReport = (
         `${report.tableId} (${report.tableName})`,
         `  layout: ${report.layoutErrors} error${report.layoutErrors === 1 ? '' : 's'}, ${report.layoutWarnings} warning${report.layoutWarnings === 1 ? '' : 's'}`,
         `  analysis: ${report.analysisWarnings} warning${report.analysisWarnings === 1 ? '' : 's'}`,
+        `  playability: ${report.playabilityErrors} error${report.playabilityErrors === 1 ? '' : 's'}, ${report.playabilityWarnings} warning${report.playabilityWarnings === 1 ? '' : 's'}`,
       ];
 
       for (const issue of report.issues) {
@@ -212,8 +242,11 @@ export const shouldFailValidation = (
   options: Pick<ValidateTableCliOptions, 'failOnWarnings'>,
 ): boolean => {
   const hasLayoutErrors = reports.some((report) => report.layoutErrors > 0);
+  const hasPlayabilityErrors = reports.some(
+    (report) => report.playabilityErrors > 0,
+  );
 
-  if (hasLayoutErrors) {
+  if (hasLayoutErrors || hasPlayabilityErrors) {
     return true;
   }
 
@@ -231,4 +264,13 @@ const mapAnalysisWarningToIssue = (
   severity: warning.severity,
   code: warning.code,
   message: warning.message,
+});
+
+const mapPlayabilityIssueToIssue = (
+  issue: PlayabilityIssue,
+): TableValidationIssue => ({
+  source: 'playability',
+  severity: issue.severity,
+  code: issue.code,
+  message: issue.message,
 });
