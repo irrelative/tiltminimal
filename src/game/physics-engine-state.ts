@@ -3,6 +3,7 @@ import type { BoardDefinition } from '../types/board-definition';
 import type { GameState } from './game-state';
 import { resetBall } from './game-state';
 import { getSurfaceMaterial } from './materials';
+import { getPlungerLaneBounds } from './plunger-geometry';
 import {
   constrainBallToLauncherLane,
   resolveGuideCollisions,
@@ -54,6 +55,7 @@ export const stepWaitingLaunchState = (
     ...state,
     tick: state.tick + 1,
     status: 'waiting-launch',
+    launcherExited: false,
     ball: {
       ...state.ball,
       position: {
@@ -145,6 +147,10 @@ export const stepPlayingState = (
     next.ball.position.x += next.ball.linearVelocity.x * stepSeconds;
     next.ball.position.y += next.ball.linearVelocity.y * stepSeconds;
 
+    if (hasExitedShooterLane(next, board)) {
+      next.launcherExited = true;
+    }
+
     resolveWallCollisions(next, board, board.physics.solver);
     resolvePlungerGuideCollisions(next, board, board.physics.solver);
     resolveGuideCollisions(next, board, board.physics.solver);
@@ -187,6 +193,20 @@ export const stepPlayingState = (
     state: next,
     events,
   };
+};
+
+const hasExitedShooterLane = (
+  state: GameState,
+  board: BoardDefinition,
+): boolean => {
+  const guideTopY = board.launchPosition.y - board.plunger.guideLength;
+  const lane = getPlungerLaneBounds(board);
+
+  return (
+    state.ball.position.y + state.ball.radius < guideTopY ||
+    state.ball.position.x < lane.minX - state.ball.radius * 2 ||
+    state.ball.position.x > lane.maxX + state.ball.radius * 2
+  );
 };
 
 export const applyPlayfieldRollingResistance = (

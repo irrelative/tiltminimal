@@ -76,6 +76,8 @@ export interface TableNudgeState {
 
 export interface GameState {
   ball: BallState;
+  // Once a launch reaches live play, the shooter lane behaves as a one-way exit.
+  launcherExited: boolean;
   score: number;
   tick: number;
   status: 'waiting-launch' | 'playing' | 'game-over';
@@ -93,6 +95,7 @@ export interface GameState {
 
 export const createInitialGameState = (board: BoardDefinition): GameState => ({
   ball: createBallState(board),
+  launcherExited: false,
   score: 0,
   tick: 0,
   status: 'waiting-launch',
@@ -114,6 +117,7 @@ export const resetBall = (
 ): GameState => ({
   ...state,
   ball: createBallState(board),
+  launcherExited: false,
   status: 'waiting-launch',
   plunger: createPlungerState(),
   tableNudge: createTableNudgeState(),

@@ -58,6 +58,8 @@ Use the `Makefile` entrypoints:
 * [docs/table-layout-authoring.md](docs/table-layout-authoring.md) explains the
   higher-level layout DSL, compiler, and validation flow for built-in and
   agent-generated tables
+* [docs/conventional-layout-guidelines.md](docs/conventional-layout-guidelines.md)
+  defines the minimum shot anatomy expected from built-in playfields
 * [docs/gpt-table-generation.md](docs/gpt-table-generation.md) defines the
   required anatomy-first workflow for GPT-authored table layouts
 * [docs/layout-playability-spec.md](docs/layout-playability-spec.md) defines

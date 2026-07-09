@@ -29,7 +29,7 @@ describe('classicTable', () => {
     expect(classicTable.materials.playfield).toBe('playfieldWood');
     expect(classicTable.rulesScript).toContain('BALLS_PER_GAME');
     expect(classicTable.bumpers).toHaveLength(3);
-    expect(classicTable.standupTargets).toHaveLength(2);
+    expect(classicTable.standupTargets).toHaveLength(6);
     expect(classicTable.dropTargets).toHaveLength(1);
     expect(classicTable.saucers).toHaveLength(1);
     expect(classicTable.spinners).toHaveLength(1);

@@ -230,7 +230,7 @@ export const constrainBallToLauncherLane = (
   state: GameState,
   board: BoardDefinition,
 ): void => {
-  if (board.plunger.x <= board.width / 2) {
+  if (state.launcherExited || board.plunger.x <= board.width / 2) {
     return;
   }
 

@@ -27,6 +27,7 @@ describe('doubleCrossedTable', () => {
     expect(doubleCrossedTable.spinners).toHaveLength(2);
     expect(doubleCrossedTable.slingshots).toHaveLength(2);
     expect(doubleCrossedTable.rollovers).toHaveLength(4);
+    expect(doubleCrossedTable.posts.length).toBeGreaterThanOrEqual(5);
     expect(doubleCrossedTable.flippers).toHaveLength(2);
   });
 

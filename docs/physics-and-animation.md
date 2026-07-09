@@ -90,6 +90,9 @@ Handled by `stepPlayingState(...)`.
   kicking the ball through the lane wall because of one-frame overlap error.
 - Gameplay devices emit events for the rules system.
 - A drain resets the ball back to the launch state.
+- Once a ball clears the top of the shooter lane, it cannot be recaptured by
+  that lane until the next ball. This models the one-way launcher exit found
+  in conventional table geometry.
 
 ## Why The Engine Substeps
 

@@ -251,6 +251,10 @@ const doubleCrossedLayout: BoardLayoutDefinition = {
   ],
   posts: [
     ...doubleCrossedLowerPlayfield.posts,
+    { position: absolutePoint(180, 660), radius: 14, material: 'metalGuide' },
+    { position: absolutePoint(380, 660), radius: 14, material: 'metalGuide' },
+    { position: absolutePoint(580, 660), radius: 14, material: 'metalGuide' },
+    { position: absolutePoint(780, 660), radius: 14, material: 'metalGuide' },
     {
       position: offsetLayoutPoint(anchorPoint('cross-center'), 0, 200),
       radius: 18,

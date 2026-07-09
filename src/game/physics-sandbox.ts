@@ -426,6 +426,7 @@ export const getPhysicsSandboxSpawnBlockedReason = (
 const createSandboxDisplayState = (board: BoardDefinition): GameState => ({
   ...createInitialGameState(board),
   status: 'playing',
+  launcherExited: true,
 });
 
 const createPhysicsSandboxBallGameState = (

@@ -170,7 +170,7 @@ const classicPopCluster = createPopBumperCluster({
 const classicStandupBank = createMirroredTargetBank({
   kind: 'standup',
   center: anchorPoint('target-bank-center'),
-  targetsPerBank: 1,
+  targetsPerBank: 3,
   sideOffsetX: 220,
   spacingY: 80,
   width: 60,
@@ -224,18 +224,18 @@ const classicTableLayout: BoardLayoutDefinition = {
   ],
   saucers: [
     {
-      position: absolutePoint(450, 240),
+      position: absolutePoint(610, 270),
       radius: 30,
       score: 500,
       holdSeconds: 0.5,
       ejectSpeed: 980,
-      ejectAngle: Math.PI * 0.15,
+      ejectAngle: Math.PI * 0.45,
       material: 'metalGuide',
     },
   ],
   spinners: [
     {
-      position: absolutePoint(450, 820),
+      position: absolutePoint(520, 800),
       length: 96,
       thickness: 10,
       angle: 0,
