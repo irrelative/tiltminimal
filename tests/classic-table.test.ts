@@ -56,7 +56,7 @@ describe('classicTable', () => {
     expect(errorCodes).not.toContain('spinner-obstructed');
   });
 
-  it('clears the editor-side geometry analysis checks', () => {
+  it('clears the geometry analysis checks', () => {
     expect(analyzeBoard(classicTable)).toHaveLength(0);
   });
 

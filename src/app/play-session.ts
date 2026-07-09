@@ -1,4 +1,4 @@
-import type { TableRecord } from '../boards/table-library';
+import type { BuiltInTable } from '../boards/table-library';
 import { cloneBoardDefinition } from '../boards/board-codec';
 import type { GameAudio } from '../audio/game-audio';
 import { createInitialGameState } from '../game/game-state';
@@ -8,7 +8,7 @@ import type { CanvasRenderer } from '../render/canvas-renderer';
 import type { BoardDefinition } from '../types/board-definition';
 
 interface SyncPlayRoutePanelOptions {
-  tables: TableRecord[];
+  tables: BuiltInTable[];
   activeTableId: string;
   playTableSelect: HTMLSelectElement;
   playTableMeta: HTMLElement;
@@ -16,7 +16,7 @@ interface SyncPlayRoutePanelOptions {
 }
 
 interface StartStandalonePlaySessionOptions {
-  activeTable: TableRecord;
+  activeTable: BuiltInTable;
   canvas: HTMLCanvasElement;
   renderer: CanvasRenderer;
   gameAudio: GameAudio;

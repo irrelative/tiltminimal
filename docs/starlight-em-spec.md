@@ -77,9 +77,9 @@ This table should feel closer to a reel-score electromechanical game:
   launcher feed, top rollover bank, lower lanes, lower slings, and lower
   flippers are generated from semantic fragments rather than hand-placed guide
   fragments.
-- The lower third intentionally snaps to the editor grid, so the lane package is
+- The lower third intentionally snaps to the board grid, so the lane package is
   authored in coarse canonical geometry rather than fine-grained freehand
   offsets. That keeps the built-in table editable without losing the EM lane
   structure.
-- `Starlight EM` is expected to clear the editor-side geometry analysis without
+- `Starlight EM` is expected to clear geometry analysis without
   overlap, trap-risk, or launch-path warnings.

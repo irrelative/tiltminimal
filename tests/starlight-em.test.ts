@@ -33,11 +33,9 @@ describe('starlightEmTable', () => {
   });
 
   it('is exposed in the built-in table library', () => {
-    expect(
-      BUILT_IN_TABLES.some(
-        (table) => table.id === 'starlight-em' && table.builtIn,
-      ),
-    ).toBe(true);
+    expect(BUILT_IN_TABLES.some((table) => table.id === 'starlight-em')).toBe(
+      true,
+    );
   });
 
   it('passes playability validation for the launcher and top arch', () => {
@@ -111,7 +109,7 @@ describe('starlightEmTable', () => {
     expect(nearestGuideDistance).toBeGreaterThan(centerSpinner.length / 2);
   });
 
-  it('clears the editor-side geometry analysis checks', () => {
+  it('clears the geometry analysis checks', () => {
     expect(analyzeBoard(starlightEmTable)).toHaveLength(0);
   });
 });

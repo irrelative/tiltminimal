@@ -13,7 +13,7 @@ on phones and tablets.
 ## Control Mapping
 
 Touch interaction is active on the playfield canvas in the standalone play
-route and in editor play-test mode.
+route.
 
 ### Flippers
 
@@ -70,5 +70,4 @@ This touch scheme does not currently model:
 - Runtime consumer: `src/game/game-loop.ts`
 - Play route wiring: `src/main.ts`
 
-The mobile touch layer is intentionally play-only. The editor keeps its own
-pointer interactions for selecting and moving table elements.
+The mobile touch layer is intentionally play-only.

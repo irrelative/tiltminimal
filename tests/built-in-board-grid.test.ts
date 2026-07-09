@@ -3,19 +3,19 @@ import { describe, expect, it } from 'vitest';
 import { classicTable } from '../src/boards/tables/classic-table';
 import { doubleCrossedTable } from '../src/boards/tables/double-crossed';
 import { harlemGlobetrottersTable } from '../src/boards/tables/harlem-globetrotters';
-import { EDITOR_GRID_SIZE } from '../src/boards/grid';
+import { BOARD_GRID_SIZE } from '../src/boards/grid';
 import type { BoardDefinition, Point } from '../src/types/board-definition';
 
 describe('built-in board layouts', () => {
-  it('snaps the classic table layout to the editor grid', () => {
+  it('snaps the classic table layout to the board grid', () => {
     expectBoardLayoutOnGrid(classicTable);
   });
 
-  it('snaps the Double Crossed layout to the editor grid', () => {
+  it('snaps the Double Crossed layout to the board grid', () => {
     expectBoardLayoutOnGrid(doubleCrossedTable);
   });
 
-  it('snaps the Harlem Globetrotters layout to the editor grid', () => {
+  it('snaps the Harlem Globetrotters layout to the board grid', () => {
     expectBoardLayoutOnGrid(harlemGlobetrottersTable);
   });
 });
@@ -45,6 +45,6 @@ const expectBoardLayoutOnGrid = (board: BoardDefinition): void => {
 };
 
 const expectPointOnGrid = (point: Point): void => {
-  expect(point.x % EDITOR_GRID_SIZE).toBe(0);
-  expect(point.y % EDITOR_GRID_SIZE).toBe(0);
+  expect(point.x % BOARD_GRID_SIZE).toBe(0);
+  expect(point.y % BOARD_GRID_SIZE).toBe(0);
 };

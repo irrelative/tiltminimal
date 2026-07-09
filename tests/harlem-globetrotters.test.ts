@@ -31,9 +31,7 @@ describe('harlemGlobetrottersTable', () => {
 
   it('is exposed in the built-in table library', () => {
     expect(
-      BUILT_IN_TABLES.some(
-        (table) => table.id === 'harlem-globetrotters' && table.builtIn,
-      ),
+      BUILT_IN_TABLES.some((table) => table.id === 'harlem-globetrotters'),
     ).toBe(true);
   });
 

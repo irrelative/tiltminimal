@@ -166,18 +166,8 @@ meaning of the geometry values.
 
 ## Defaults
 
-Default dimensions for newly added editor elements live primarily in:
-
-- `src/boards/table-library.ts`
-
-Examples:
-
-- default flipper length/thickness
-- default target width/height
-- default post and bumper radii
-- default spinner length/thickness
-- default slingshot width/height
-- default guide thickness and default curved-guide radius
+Shared default physics values live in `src/game/physics-defaults.ts`. Built-in
+table dimensions are explicit in each table module or shared layout primitive.
 
 ## Practical Authoring Rule
 

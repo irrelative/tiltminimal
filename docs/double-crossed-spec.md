@@ -64,7 +64,7 @@ The required bar is:
 - layout validation from `src/boards/layout-validation.ts`
 - rules coverage for the devices it ships with
 
-The editor-style analysis warnings from the validation CLI are still heuristic.
+The geometry analysis warnings from the validation CLI are still heuristic.
 They should stay reviewable and should not indicate blocked launch geometry,
 unreachable top lanes, or missing rules coverage.
 

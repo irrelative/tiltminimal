@@ -1,40 +1,5 @@
-import { cloneGuide, normalizeGuide } from '../game/guide-geometry';
-import { createBoardDefinition } from '../game/physics-defaults';
-import type {
-  BoardDefinition,
-  LegacyLaunchPhysicsDefinition,
-  SurfaceMaterial,
-  SurfaceMaterialName,
-} from '../types/board-definition';
-
-type LegacyBoardDefinition = Omit<
-  Partial<BoardDefinition>,
-  'flippers' | 'surfaceMaterials' | 'physics' | 'guides'
-> & {
-  guides?: BoardDefinition['guides'];
-  standupTargets?: BoardDefinition['standupTargets'];
-  dropTargets?: BoardDefinition['dropTargets'];
-  saucers?: BoardDefinition['saucers'];
-  spinners?: BoardDefinition['spinners'];
-  slingshots?: BoardDefinition['slingshots'];
-  rollovers?: BoardDefinition['rollovers'];
-  surfaceMaterials?: Partial<
-    Record<SurfaceMaterialName, Partial<SurfaceMaterial>>
-  >;
-  physics?: {
-    launch?: Partial<LegacyLaunchPhysicsDefinition>;
-    plunger?: Partial<BoardDefinition['physics']['plunger']>;
-    flipper?: Partial<BoardDefinition['physics']['flipper']>;
-    solver?: Partial<BoardDefinition['physics']['solver']>;
-    nudge?: Partial<BoardDefinition['physics']['nudge']>;
-  };
-  flippers:
-    | BoardDefinition['flippers']
-    | {
-        left: Omit<BoardDefinition['flippers'][number], 'side'>;
-        right: Omit<BoardDefinition['flippers'][number], 'side'>;
-      };
-};
+import { cloneGuide } from '../game/guide-geometry';
+import type { BoardDefinition } from '../types/board-definition';
 
 export const cloneBoardDefinition = (
   board: BoardDefinition,
@@ -76,64 +41,6 @@ export const cloneBoardDefinition = (
   guides: board.guides.map(cloneGuide),
   flippers: board.flippers.map((flipper) => ({ ...flipper })),
 });
-
-export const normalizeBoardDefinition = (
-  board: BoardDefinition | LegacyBoardDefinition,
-): BoardDefinition => {
-  const source = board as LegacyBoardDefinition;
-  const flippers = Array.isArray(source.flippers)
-    ? source.flippers
-    : [
-        { side: 'left' as const, ...source.flippers.left },
-        { side: 'right' as const, ...source.flippers.right },
-      ];
-
-  return createBoardDefinition({
-    name: source.name ?? 'Untitled Table',
-    themeId: source.themeId,
-    width: source.width ?? 900,
-    height: source.height ?? 1400,
-    rulesScript: source.rulesScript,
-    gravity: source.gravity,
-    tableAngle: source.tableAngle,
-    drainY: source.drainY ?? 1425,
-    ball: source.ball,
-    launchPosition:
-      source.launchPosition ??
-      ({
-        x: 770,
-        y: 1180,
-      } satisfies BoardDefinition['launchPosition']),
-    plunger: source.plunger,
-    materials:
-      source.materials ??
-      ({
-        playfield: 'playfieldWood',
-        walls: 'metalGuide',
-      } satisfies BoardDefinition['materials']),
-    surfaceMaterials: source.surfaceMaterials,
-    physics: {
-      launch: source.physics?.launch,
-      plunger: source.physics?.plunger,
-      flipper: source.physics?.flipper,
-      solver: source.physics?.solver,
-      nudge: source.physics?.nudge,
-    },
-    posts: source.posts ?? [],
-    bumpers: source.bumpers ?? [],
-    standupTargets: source.standupTargets ?? [],
-    dropTargets: source.dropTargets ?? [],
-    saucers: source.saucers ?? [],
-    spinners: source.spinners ?? [],
-    slingshots: source.slingshots ?? [],
-    rollovers: source.rollovers ?? [],
-    guides: (source.guides ?? []).map(normalizeGuide),
-    flippers: flippers.map((flipper) => ({
-      ...flipper,
-      side: flipper.side === 'right' ? 'right' : 'left',
-    })),
-  });
-};
 
 const cloneSurfaceMaterials = (
   materials: BoardDefinition['surfaceMaterials'],

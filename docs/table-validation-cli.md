@@ -6,7 +6,7 @@ implementations.
 ## Goal
 
 The CLI makes it possible to run the same validation and analysis checks used
-by the codebase without opening the browser editor.
+by the codebase without opening the browser.
 
 This is intended for:
 
@@ -58,7 +58,7 @@ For each selected table, the CLI runs:
 That means the CLI reports both:
 
 - layout validation diagnostics
-- editor-style advisory analysis warnings
+- advisory geometry analysis warnings
 - simulation-based playability errors and warnings
 
 ## Output

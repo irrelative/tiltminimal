@@ -136,7 +136,7 @@ currently covers:
 
 ## Grid-Snapping Rule
 
-Built-in tables are snapped to the editor grid after compilation. Any primitive
+Built-in tables are snapped to the board grid after compilation. Any primitive
 used for built-in tables should therefore be authored so its critical guide
 positions remain valid after snapping.
 
@@ -158,4 +158,4 @@ primitives and are covered by tests that require:
 - no `flipper-keepout` validation error
 - no `spinner-obstructed` validation error
 - a full plunge that reaches the upper playfield and exits the shooter lane
-- no editor-side geometry analysis warnings
+- no geometry analysis warnings

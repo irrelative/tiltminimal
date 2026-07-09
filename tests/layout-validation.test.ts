@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createBlankTable } from '../src/boards/table-library';
+import { createBlankTable } from './helpers/board-fixture';
 import { validateCompiledBoardLayout } from '../src/boards/layout-validation';
 
 describe('validateCompiledBoardLayout', () => {

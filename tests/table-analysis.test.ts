@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createBlankTable } from '../src/boards/table-library';
+import { createBlankTable } from './helpers/board-fixture';
 import { doubleCrossedTable } from '../src/boards/tables/double-crossed';
 import { analyzeBoard } from '../src/validation/table-analysis';
 import { getFlipperBySide } from '../src/boards/table-library';
@@ -81,9 +81,9 @@ describe('analyzeBoard', () => {
 
     const warnings = analyzeBoard(board);
 
-    expect(
-      warnings.some((warning) => warning.code === 'element-overlap'),
-    ).toBe(false);
+    expect(warnings.some((warning) => warning.code === 'element-overlap')).toBe(
+      false,
+    );
   });
 
   it('ignores intentional guide-to-guide joins in overlap warnings', () => {
@@ -415,17 +415,17 @@ describe('analyzeBoard', () => {
 
     const warnings = analyzeBoard(board);
 
-    expect(
-      warnings.some((warning) => warning.code === 'ball-trap-risk'),
-    ).toBe(true);
+    expect(warnings.some((warning) => warning.code === 'ball-trap-risk')).toBe(
+      true,
+    );
   });
 
   it('does not report trap warnings on the blank starter table', () => {
     const warnings = analyzeBoard(createBlankTable());
 
-    expect(
-      warnings.some((warning) => warning.code === 'ball-trap-risk'),
-    ).toBe(false);
+    expect(warnings.some((warning) => warning.code === 'ball-trap-risk')).toBe(
+      false,
+    );
   });
 
   it('ignores guide lips that only retain the saucer pocket', () => {

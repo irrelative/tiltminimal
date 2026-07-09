@@ -63,16 +63,16 @@ The board system has two layers:
 
 Files in `src/boards/` define reusable authoring and runtime support:
 
-- `board-codec.ts`: cloning and normalization of board definitions
-- `table-library.ts`: built-in table registration and default element factories
+- `board-codec.ts`: cloning of board definitions
+- `table-library.ts`: built-in table registration
 - `layout-schema.ts`: higher-level layout DSL types
 - `layout-primitives.ts`: reusable layout-building helpers
 - `layout-anchors.ts`: anchor resolution
 - `layout-templates.ts`: template-derived defaults and geometry
 - `layout-compiler.ts`: compilation from DSL layout to concrete board
 - `layout-validation.ts`: playability and structural validation
-- `snap-board-layout.ts`: snapping compiled/static board geometry to the editor
-  grid
+- `snap-board-layout.ts`: snapping compiled/static board geometry to the shared
+  board grid
 
 ### Built-in tables
 
@@ -187,8 +187,7 @@ set of runtime modules, and executes lifecycle hooks such as:
 - `onEvent`
 - `onTick`
 
-The rules editor performs syntax validation without executing top-level script
-code. A script is evaluated only when a game starts. If runtime compilation
+Rules scripts are evaluated only when a game starts. If runtime compilation
 fails, the engine falls back to the default rules module.
 
 ## Rendering Layout
@@ -241,11 +240,8 @@ These are worth calling out explicitly:
   The repo has helper modules, but this is not yet a fully componentized app.
 - Built-in tables are not all authored the same way: some come from the layout
   DSL compiler and some are still direct `BoardDefinition` files.
-- Rules are editable as script strings rather than through a typed AST or
+- Rules are authored as script strings rather than through a typed AST or
   visual rule builder.
-- The editor and play views intentionally share the same board schema and
-  renderer foundation, so most geometry changes made in the editor flow
-  directly into runtime play.
 
 ## Where To Start
 
@@ -259,8 +255,7 @@ For common tasks, these are the fastest entry points:
 - changing rules behavior:
   `src/game/rules-engine.ts` and the table rules scripts in
   `src/boards/tables/`
-- changing editor interactions:
-- changing play or editor rendering:
+- changing rendering:
   `src/render/canvas-renderer.ts` and the specialized renderer files
 - changing route behavior or screen wiring:
   `src/main.ts`, `src/app/routes.ts`, and `src/app/`

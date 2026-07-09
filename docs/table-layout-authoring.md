@@ -90,12 +90,7 @@ Fragments are flattened by spreading their arrays into the ordinary
 `BoardLayoutDefinition` fields; they are not a separate runtime component
 system.
 
-The table editor also exposes an "Add lower playfield" tool that inserts the
-standard lower-third pattern into the current resolved board. Because the editor
-stores runtime board data, that tool adds ordinary lane guides, lane-entry
-posts, slingshots, and flippers rather than preserving a fragment object.
-
-Lower-playfield authoring is now intentionally split:
+Lower-playfield authoring is intentionally split:
 
 - `createInlaneOutlanePair(...)` builds the lane mouths, raised return rails,
   divider rails, optional sling-approach rubber, and lane-entry posts
@@ -103,8 +98,8 @@ Lower-playfield authoring is now intentionally split:
   devices with kick behavior
 - `createLowerPlayfieldPair(...)` composes the inlane / outlane helpers,
   active slingshots, and flipper pair into one lower-third fragment
-- `createStandardLowerPlayfieldPair(...)` applies the canonical
-  lower-third geometry used by the editor tool, including segmented inlane and
+- `createStandardLowerPlayfieldPair(...)` applies canonical lower-third
+  geometry, including segmented inlane and
   outlane mouths, raised return rails, lane-entry posts, sling-approach rubber,
   active slingshots, and flippers
 
@@ -135,7 +130,7 @@ Guides can also now declare a `plane`:
 2. resolve all `LayoutPoint` values into concrete positions
 3. build a `BoardDefinitionInput`
 4. create a runtime `BoardDefinition`
-5. optionally snap the result to the editor grid
+5. optionally snap the result to the board grid
 6. run layout validation
 
 Built-in tables should generally use `compileBuiltInBoardLayout(...)`, which
@@ -177,7 +172,7 @@ This is still a heuristic layer, not a full playability proof, but it now aims
 to reject the most common "looks plausible but does not actually play" failures
 that showed up in DSL-authored tables.
 
-This validation pass is distinct from the editor-side analysis panel:
+This validation pass is distinct from CLI geometry analysis:
 
 - `layout-validation.ts` runs as part of DSL compilation and is focused on
   rejecting bad authored layouts early
@@ -188,9 +183,8 @@ This validation pass is distinct from the editor-side analysis panel:
 
 ## Current Scope
 
-The classic table and `Starlight EM` now compile through this layout system and
-serve as reference layouts for GPT-authored tables. The editor still works
-against the resolved runtime board format.
+The classic table and `Starlight EM` compile through this layout system and
+serve as reference layouts for code-authored tables.
 
 The next logical steps are:
 
@@ -198,4 +192,3 @@ The next logical steps are:
   families
 - grow validation from geometric heuristics into shot simulation acceptance checks
 - compile more built-in tables through the layout layer
-- expose a layout-source view alongside the raw board JSON export

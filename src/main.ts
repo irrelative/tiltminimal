@@ -1,4 +1,4 @@
-import { BUILT_IN_TABLES, type TableRecord } from './boards/table-library';
+import { BUILT_IN_TABLES, type BuiltInTable } from './boards/table-library';
 import { buildAppRoutePath, getAppRouteFromPathname } from './app/routes';
 import {
   startStandalonePlaySession,
@@ -34,7 +34,7 @@ const state: {
   loop: GameLoop | null;
   sandbox: PhysicsSandboxLoop | null;
 } = { tableId: BUILT_IN_TABLES[0]?.id ?? '', loop: null, sandbox: null };
-const table = (): TableRecord =>
+const table = (): BuiltInTable =>
   BUILT_IN_TABLES.find((item) => item.id === state.tableId) ??
   BUILT_IN_TABLES[0]!;
 const features = (board: BoardDefinition): number =>

@@ -50,8 +50,8 @@ Use the `Makefile` entrypoints:
   normal game/rules lifecycle
 * [docs/board-component-dimensions.md](docs/board-component-dimensions.md)
   defines the dimensional meaning of every board component field
-* [docs/table-analysis-spec.md](docs/table-analysis-spec.md) defines the editor
-  analysis workflow and the current warning set for overlap, bounds,
+* [docs/table-analysis-spec.md](docs/table-analysis-spec.md) defines the CLI
+  geometry analysis workflow and the current warning set for overlap, bounds,
   shooter-lane, flipper, spinner, saucer-eject, and rules-coverage issues
 * [docs/physics-and-animation.md](docs/physics-and-animation.md) explains how
   the frame loop, physics solver, rolling spin, and renderer fit together

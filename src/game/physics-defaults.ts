@@ -232,15 +232,12 @@ const resolvePlungerPhysics = (
 ): PhysicsDefinition['plunger'] => ({
   maxPullSeconds:
     input.physics?.plunger?.maxPullSeconds ??
-    input.physics?.launch?.maxChargeSeconds ??
     physicsDefaults.tuning.plunger.maxPullSeconds,
   minReleaseSpeed:
     input.physics?.plunger?.minReleaseSpeed ??
-    input.physics?.launch?.minLaunchSpeed ??
     physicsDefaults.tuning.plunger.minReleaseSpeed,
   maxReleaseSpeed:
     input.physics?.plunger?.maxReleaseSpeed ??
-    input.physics?.launch?.maxLaunchSpeed ??
     physicsDefaults.tuning.plunger.maxReleaseSpeed,
   bodyMass:
     input.physics?.plunger?.bodyMass ?? physicsDefaults.tuning.plunger.bodyMass,

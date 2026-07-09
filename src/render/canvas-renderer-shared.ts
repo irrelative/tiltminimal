@@ -4,9 +4,12 @@ import {
 } from '../game/flipper-geometry';
 import { isArcGuide } from '../game/guide-geometry';
 import type { GameState } from '../game/game-state';
-import type { BoardDefinition, FlipperDefinition, GuideDefinition } from '../types/board-definition';
+import type {
+  BoardDefinition,
+  FlipperDefinition,
+  GuideDefinition,
+} from '../types/board-definition';
 
-export const EDITOR_INK = '#22304a';
 export const UI_FONT_FAMILY =
   "Futura, 'Avenir Next', Avenir, 'Trebuchet MS', sans-serif";
 

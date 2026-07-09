@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createBlankTable } from '../src/boards/table-library';
+import { createBlankTable } from './helpers/board-fixture';
 import { classicTable } from '../src/boards/tables/classic-table';
 import {
   analyzePlayability,

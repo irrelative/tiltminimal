@@ -7,8 +7,9 @@ import {
   shouldFailValidation,
   validateTableRecord,
 } from '../src/cli/table-validation';
-import { BUILT_IN_TABLES, createBlankTable } from '../src/boards/table-library';
-import type { TableRecord } from '../src/boards/table-library';
+import { BUILT_IN_TABLES } from '../src/boards/table-library';
+import { createBlankTable } from './helpers/board-fixture';
+import type { BuiltInTable } from '../src/boards/table-library';
 
 describe('table validation cli parsing', () => {
   it('parses explicit table ids and fail-on-warnings', () => {
@@ -83,9 +84,8 @@ describe('table validation cli resolution and reports', () => {
         material: 'rubberPost',
       },
     ];
-    const record: TableRecord = {
+    const record: BuiltInTable = {
       id: 'invalid-test',
-      builtIn: false,
       board: invalidBoard,
     };
 
@@ -100,8 +100,12 @@ describe('table validation cli resolution and reports', () => {
 
   it('keeps every built-in table free of validation errors', () => {
     const reports = BUILT_IN_TABLES.map((table) => validateTableRecord(table));
-    expect(shouldFailValidation(reports, { failOnWarnings: false })).toBe(false);
+    expect(shouldFailValidation(reports, { failOnWarnings: false })).toBe(
+      false,
+    );
     expect(reports.every((report) => report.layoutErrors === 0)).toBe(true);
-    expect(reports.every((report) => report.playabilityErrors === 0)).toBe(true);
+    expect(reports.every((report) => report.playabilityErrors === 0)).toBe(
+      true,
+    );
   });
 });

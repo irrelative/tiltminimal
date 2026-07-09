@@ -1,4 +1,4 @@
-import { BUILT_IN_TABLES, type TableRecord } from '../boards/table-library';
+import { BUILT_IN_TABLES, type BuiltInTable } from '../boards/table-library';
 import { validateCompiledBoardLayout } from '../boards/layout-validation';
 import {
   analyzeBoard,
@@ -115,8 +115,8 @@ export const parseValidateTableCliArgs = (
 
 export const resolveBuiltInTablesForValidation = (
   options: Pick<ValidateTableCliOptions, 'all' | 'tableIds'>,
-  tables: TableRecord[] = BUILT_IN_TABLES,
-): { tables: TableRecord[]; error: string | null } => {
+  tables: BuiltInTable[] = BUILT_IN_TABLES,
+): { tables: BuiltInTable[]; error: string | null } => {
   if (options.all) {
     return {
       tables,
@@ -124,7 +124,7 @@ export const resolveBuiltInTablesForValidation = (
     };
   }
 
-  const selected: TableRecord[] = [];
+  const selected: BuiltInTable[] = [];
   const missing: string[] = [];
 
   for (const id of options.tableIds) {
@@ -152,7 +152,7 @@ export const resolveBuiltInTablesForValidation = (
 };
 
 export const validateTableRecord = (
-  table: TableRecord,
+  table: BuiltInTable,
   options: Pick<ValidateTableCliOptions, 'playabilityMode'> = {
     playabilityMode: 'normal',
   },
@@ -194,7 +194,7 @@ export const validateTableRecord = (
 };
 
 export const formatValidateTableUsage = (
-  tables: TableRecord[] = BUILT_IN_TABLES,
+  tables: BuiltInTable[] = BUILT_IN_TABLES,
 ): string => {
   const lines = [
     'Usage:',

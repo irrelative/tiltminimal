@@ -131,18 +131,6 @@ body[data-route='physics'] .control-panel {
   display: none;
 }
 
-.rules-only {
-  display: none;
-}
-
-body[data-route='rules'] .rules-only {
-  display: grid;
-}
-
-body[data-route='rules'] .editor-only {
-  display: none;
-}
-
 .panel-header,
 .panel-section {
   padding: 16px;
@@ -183,8 +171,7 @@ h2 {
 .lede,
 .section-heading p,
 .meta-text,
-.toolbar-copy,
-#selection-label {
+.toolbar-copy {
   margin: 0;
   color: var(--muted);
   line-height: 1.4;
@@ -200,12 +187,7 @@ h2 {
   gap: 6px;
 }
 
-.table-select {
-  min-height: 164px;
-}
-
 .button-row,
-.tool-grid,
 .field-list {
   display: grid;
   gap: 10px;
@@ -215,38 +197,16 @@ h2 {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.accent-button,
-.tool-button.is-active {
+.accent-button {
   background:
     linear-gradient(135deg, rgba(255, 207, 86, 0.24), rgba(255, 138, 61, 0.22)),
     rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 207, 86, 0.34);
 }
 
-.tool-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.tool-button {
-  min-height: 46px;
-  padding: 10px 12px;
-}
-
 .field {
   display: grid;
   gap: 6px;
-}
-
-.toggle-field {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--text);
-}
-
-.toggle-field input {
-  width: auto;
-  margin: 0;
 }
 
 .field span {
@@ -260,102 +220,6 @@ h2 {
 
 .field-list .field[data-span='full'] {
   grid-column: 1 / -1;
-}
-
-.field-list .field[data-type='readonly'] {
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.export-panel {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.export-panel summary {
-  cursor: pointer;
-  list-style: none;
-  padding: 12px 14px;
-  color: var(--text);
-}
-
-.export-panel summary::-webkit-details-marker {
-  display: none;
-}
-
-.export-panel summary::after {
-  content: '+';
-  float: right;
-  color: var(--cool);
-}
-
-.export-panel[open] summary::after {
-  content: '−';
-}
-
-.export-panel-body {
-  display: grid;
-  gap: 10px;
-  padding: 0 14px 14px;
-}
-
-.export-json {
-  min-height: 220px;
-  resize: vertical;
-  font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
-  font-size: 0.85rem;
-  line-height: 1.45;
-  white-space: pre;
-}
-
-.analysis-warnings {
-  display: grid;
-  gap: 10px;
-}
-
-.analysis-warning {
-  display: grid;
-  gap: 6px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 207, 86, 0.22);
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 207, 86, 0.08),
-      rgba(255, 138, 61, 0.06)
-    ),
-    rgba(255, 255, 255, 0.03);
-}
-
-.analysis-warning-title,
-.analysis-warning-message {
-  margin: 0;
-}
-
-.analysis-warning-title {
-  color: var(--accent);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.analysis-warning-message {
-  color: var(--text);
-  line-height: 1.4;
-}
-
-.rules-script-editor {
-  min-height: 420px;
-  resize: vertical;
-  font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', monospace;
-  font-size: 0.86rem;
-  line-height: 1.5;
-  white-space: pre;
 }
 
 .stage-shell {
@@ -497,15 +361,6 @@ body[data-nav-open='true'] .nav-toggle-bar:nth-child(3) {
   font-weight: 700;
 }
 
-body[data-route='editor'] .runtime-route-panel,
-body[data-route='editor'] .play-route-panel,
-body[data-route='editor'] .physics-route-panel,
-body[data-route='rules'] .runtime-route-panel,
-body[data-route='rules'] .play-route-panel,
-body[data-route='rules'] .physics-route-panel {
-  display: none;
-}
-
 body[data-route='play'] .physics-route-panel {
   display: none;
 }
@@ -599,14 +454,6 @@ body[data-route='physics'] .playfield-frame {
   aspect-ratio: 9 / 14;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
   touch-action: none;
-}
-
-body[data-route='editor'] #game,
-body[data-route='rules'] #game {
-  width: auto;
-  height: 100%;
-  max-width: 100%;
-  max-height: 100%;
 }
 
 body[data-route='play'] #game,
@@ -718,7 +565,6 @@ body[data-route='physics'] #game {
   }
 
   .button-row,
-  .tool-grid,
   .field-list {
     grid-template-columns: 1fr;
   }

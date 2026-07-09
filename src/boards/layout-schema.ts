@@ -6,7 +6,6 @@ import type {
   FlipperDefinition,
   GuidePlane,
   GuideDefinition,
-  LegacyLaunchPhysicsDefinition,
   PhysicsDefinition,
   PlungerDefinition,
   Point,
@@ -138,7 +137,6 @@ export interface BoardLayoutDefinition {
     Record<SurfaceMaterialName, Partial<SurfaceMaterial>>
   >;
   physics?: {
-    launch?: Partial<LegacyLaunchPhysicsDefinition>;
     plunger?: Partial<PhysicsDefinition['plunger']>;
     flipper?: Partial<PhysicsDefinition['flipper']>;
     solver?: Partial<PhysicsDefinition['solver']>;

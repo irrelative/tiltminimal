@@ -45,14 +45,6 @@ export type SurfaceMaterialName =
   | 'rubberPost'
   | 'flipperRubber';
 
-export interface LegacyLaunchPhysicsDefinition {
-  maxChargeSeconds: number;
-  minLaunchSpeed: number;
-  maxLaunchSpeed: number;
-  minLaunchDrift: number;
-  maxLaunchDrift: number;
-}
-
 export interface PlungerPhysicsDefinition {
   maxPullSeconds: number;
   minReleaseSpeed: number;
@@ -266,7 +258,6 @@ export interface BoardDefinitionInput {
     Record<SurfaceMaterialName, Partial<SurfaceMaterial>>
   >;
   physics?: {
-    launch?: Partial<LegacyLaunchPhysicsDefinition>;
     plunger?: Partial<PlungerPhysicsDefinition>;
     flipper?: Partial<FlipperPhysicsDefinition>;
     solver?: Partial<SolverPhysicsDefinition>;

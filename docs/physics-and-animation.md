@@ -313,17 +313,6 @@ That separation keeps:
 - physics responsible for "what happened"
 - rules responsible for "what it means"
 
-## Editor Relationship
-
-The editor uses the same board schema and renderer, but not the live game loop.
-
-- board geometry comes from the same `BoardDefinition`
-- grid and snap behavior are editor-only concerns
-- play test runs the same runtime loop as the game route
-
-That means changes made in the builder feed directly into the same physics and
-animation systems used in play.
-
 ## Current Limits
 
 The current design is intentionally pragmatic, not a full rigid-body simulator.

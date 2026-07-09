@@ -1,13 +1,9 @@
-import {
-  EDITOR_GRID_SIZE,
-  snapPointToGrid,
-  snapValueToGrid,
-} from './grid';
+import { BOARD_GRID_SIZE, snapPointToGrid, snapValueToGrid } from './grid';
 import type { BoardDefinition } from '../types/board-definition';
 
 export const snapBoardLayoutToGrid = (
   board: BoardDefinition,
-  gridSize = EDITOR_GRID_SIZE,
+  gridSize = BOARD_GRID_SIZE,
 ): BoardDefinition => {
   const snapped: BoardDefinition = {
     ...board,

@@ -32,11 +32,9 @@ describe('doubleCrossedTable', () => {
   });
 
   it('is exposed in the built-in table library', () => {
-    expect(
-      BUILT_IN_TABLES.some(
-        (table) => table.id === 'double-crossed' && table.builtIn,
-      ),
-    ).toBe(true);
+    expect(BUILT_IN_TABLES.some((table) => table.id === 'double-crossed')).toBe(
+      true,
+    );
   });
 
   it('passes layout validation without errors', () => {

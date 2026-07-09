@@ -1,4 +1,4 @@
-import type { TableRecord } from '../boards/table-library';
+import type { BuiltInTable } from '../boards/table-library';
 import { cloneBoardDefinition } from '../boards/board-codec';
 import { PlayInput } from '../input/keyboard-input';
 import type { CanvasRenderer } from '../render/canvas-renderer';
@@ -9,7 +9,7 @@ import {
 } from '../game/physics-sandbox-loop';
 
 interface SyncPhysicsRoutePanelOptions {
-  tables: TableRecord[];
+  tables: BuiltInTable[];
   activeTableId: string;
   tableSelect: HTMLSelectElement;
   tableMeta: HTMLElement;
@@ -17,7 +17,7 @@ interface SyncPhysicsRoutePanelOptions {
 }
 
 interface StartPhysicsSandboxSessionOptions {
-  activeTable: TableRecord;
+  activeTable: BuiltInTable;
   canvas: HTMLCanvasElement;
   renderer: CanvasRenderer;
   modeTitle: HTMLElement;

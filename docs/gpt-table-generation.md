@@ -42,7 +42,7 @@ or saucers that float without nearby guides, lane feeds, or shot entrances.
 ## Validation Expectations
 
 Generated tables should compile with `compileBuiltInBoardLayout(...)` and pass
-both layout validation and editor-side analysis. At minimum, check for:
+both layout validation and geometry analysis. At minimum, check for:
 
 - no blocked shooter lane
 - full plunges leave the shooter lane horizontally and enter live play
@@ -50,6 +50,6 @@ both layout validation and editor-side analysis. At minimum, check for:
 - no flipper keepout errors
 - no obstructed spinner envelopes
 - no saucer eject obstruction
-- no editor analysis warnings
+- no geometry analysis warnings
 
 `Classic Table` and `Starlight EM` are the reference examples for this workflow.

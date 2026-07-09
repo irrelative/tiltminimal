@@ -91,16 +91,15 @@ composes:
 - the lower flipper pair
 
 The helper returns a layout fragment containing `guides`, `posts`,
-`slingshots`, and `flippers`. Tables still spread those arrays into the normal
-flat `BoardLayoutDefinition` fields, so the compiler, runtime board model, and
-editor continue to work with explicit board elements.
+`slingshots`, and `flippers`. Tables spread those arrays into the normal flat
+`BoardLayoutDefinition` fields, so the compiler and runtime board model retain
+explicit board elements.
 
 For the common lower-third layout, prefer `createStandardLowerPlayfieldPair(...)`.
 It includes both inlane and outlane mouths, raised return rails, lane-entry
 posts, short sling-approach rubber, active slingshots, and the lower flipper
-pair. The editor's "Add lower playfield" tool uses this standard package. Its
-right outlane is kept inside the shooter lane corridor, matching the right-side
-launcher layout used by the built-in tables.
+pair. Its right outlane is kept inside the shooter lane corridor, matching the
+right-side launcher layout used by the built-in tables.
 
 ## Authoring Guidance
 

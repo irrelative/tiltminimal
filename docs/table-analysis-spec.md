@@ -1,17 +1,17 @@
 # Table Analysis Specification
 
-This document defines the current editor-side table analysis workflow.
+This document defines the current table analysis workflow.
 
 ## Goal
 
 Table analysis is intended to catch potentially problematic geometry before a
 table is play-tested or shipped as a built-in board.
 
-The current implementation focuses on pragmatic editor-time warnings for
+The current implementation focuses on pragmatic authoring-time warnings for
 geometry and rule coverage issues that commonly make a table frustrating or
 obviously broken.
 
-## Editor Workflow
+## CLI Workflow
 
 The analysis runs from the validation CLI against code-authored built-in boards.
 It is advisory by default and reports warnings alongside hard layout errors.
@@ -170,8 +170,8 @@ This analysis system is expected to grow further, for example into:
 - trapped-ball or livelock pocket detection
 - more exact rules-to-device consistency checks
 
-New checks should continue to reuse the same editor-facing warning model so the
-analysis panel remains a single place to review issues.
+New checks should continue to reuse the same warning model so CLI output remains
+a single place to review issues.
 
 ## Playability Simulation
 
