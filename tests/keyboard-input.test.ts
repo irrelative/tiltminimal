@@ -143,6 +143,19 @@ describe('PlayInput', () => {
     });
   });
 
+  it('clears held touches when the window loses focus', () => {
+    dispatchPointer(canvas, 'pointerdown', {
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 140,
+      clientY: 1200,
+    });
+
+    expect(input.getState().leftPressed).toBe(true);
+    window.dispatchEvent(new Event('blur'));
+    expect(input.getState().leftPressed).toBe(false);
+  });
+
   it('maps touch swipes to nudge pulses', () => {
     dispatchPointer(canvas, 'pointerdown', {
       pointerId: 1,

@@ -54,6 +54,7 @@ interface RulesContext {
 }
 
 const compiledRulesCache = new Map<string, CompiledRulesModule>();
+const MAX_CACHED_RULES_MODULES = 32;
 
 export const initializeRulesState = (
   state: GameState,
@@ -98,8 +99,17 @@ export const applyRulesFrame = (
   return state;
 };
 
-export const validateRulesScript = (source: string): string | null =>
-  getCompiledRulesModule(source).error;
+export const validateRulesScript = (source: string): string | null => {
+  const script = source.trim() || defaultRulesScript;
+
+  try {
+    // Constructing a function checks syntax without running top-level user code.
+    new Function(script);
+    return null;
+  } catch (error) {
+    return error instanceof Error ? error.message : 'Invalid rules script.';
+  }
+};
 
 const getCompiledRulesModule = (source: string): CompiledRulesModule => {
   const cacheKey = source.trim() || defaultRulesScript;
@@ -110,6 +120,13 @@ const getCompiledRulesModule = (source: string): CompiledRulesModule => {
   }
 
   const compiled = compileRulesModule(source);
+  if (compiledRulesCache.size >= MAX_CACHED_RULES_MODULES) {
+    const oldestKey = compiledRulesCache.keys().next().value;
+
+    if (oldestKey) {
+      compiledRulesCache.delete(oldestKey);
+    }
+  }
   compiledRulesCache.set(cacheKey, compiled);
 
   return compiled;

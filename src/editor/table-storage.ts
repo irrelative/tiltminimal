@@ -49,10 +49,16 @@ export const loadTablesState = (
       continue;
     }
 
+    const board = tryNormalizeStoredBoardDefinition(entry.board);
+
+    if (!board) {
+      continue;
+    }
+
     storedMap.set(entry.id, {
       id: entry.id,
       builtIn: entry.builtIn,
-      board: normalizeBoardDefinition(entry.board as never),
+      board,
     });
   }
 
@@ -208,6 +214,51 @@ const isStoredTableRecord = (value: unknown): value is StoredTableRecord => {
     typeof candidate.builtIn === 'boolean' &&
     candidate.board !== undefined
   );
+};
+
+const tryNormalizeStoredBoardDefinition = (
+  value: unknown,
+): BoardDefinition | null => {
+  if (!value || typeof value !== 'object') {
+    return null;
+  }
+
+  const candidate = value as Record<string, unknown>;
+  const arrayFields = [
+    'posts',
+    'bumpers',
+    'standupTargets',
+    'dropTargets',
+    'saucers',
+    'spinners',
+    'slingshots',
+    'rollovers',
+    'guides',
+  ];
+
+  if (
+    arrayFields.some(
+      (field) => candidate[field] !== undefined && !Array.isArray(candidate[field]),
+    )
+  ) {
+    return null;
+  }
+
+  if (
+    !Array.isArray(candidate.flippers) &&
+    (!candidate.flippers ||
+      typeof candidate.flippers !== 'object' ||
+      !('left' in candidate.flippers) ||
+      !('right' in candidate.flippers))
+  ) {
+    return null;
+  }
+
+  try {
+    return normalizeBoardDefinition(value as never);
+  } catch {
+    return null;
+  }
 };
 
 const parseLegacyStorageState = (storage: Storage): StoredTablesState => {

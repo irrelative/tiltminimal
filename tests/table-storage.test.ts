@@ -23,6 +23,27 @@ describe('table storage', () => {
     expect(state.activeTableId).toBe(BUILT_IN_TABLES[0]?.id);
   });
 
+  it('skips malformed stored boards without preventing startup', () => {
+    window.localStorage.setItem(
+      'pball-web.tables.v2',
+      JSON.stringify({
+        activeTableId: 'broken-table',
+        tables: [
+          {
+            id: 'broken-table',
+            builtIn: false,
+            board: { name: 'Broken' },
+          },
+        ],
+      }),
+    );
+
+    const state = loadTablesState(window.localStorage);
+
+    expect(state.tables).toHaveLength(BUILT_IN_TABLES.length);
+    expect(state.tables.some((table) => table.id === 'broken-table')).toBe(false);
+  });
+
   it('persists edits to a built-in table by id', () => {
     const table = BUILT_IN_TABLES[0];
 

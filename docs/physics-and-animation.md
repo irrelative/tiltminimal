@@ -96,6 +96,9 @@ Handled by `stepPlayingState(...)`.
 The physics step is capped into slices of at most `1/120s` via
 `MAX_SIMULATION_STEP_SECONDS` in `src/game/physics-engine-types.ts`.
 
+Frame deltas are also capped at `0.1s`. Returning to a backgrounded tab drops
+the excess elapsed time instead of attempting thousands of catch-up substeps.
+
 This matters because pinball has:
 
 - fast moving balls
@@ -119,6 +122,9 @@ Inside each playing substep:
    the current playfield material.
 8. Velocity updates ball position.
 9. Collision and trigger passes run.
+
+The physics sandbox uses this same rolling-resistance pass, so a spawned ball
+has the same material slowdown as a ball in normal play.
 
 The order is important because moving devices need their transient motion solved
 before ball contacts are evaluated.

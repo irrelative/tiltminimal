@@ -1165,8 +1165,8 @@ function syncRulesPanel(): void {
   }
 
   rulesScriptStatus.textContent = validationError
-    ? `Rules have a compile error. Game falls back to the default rules until this is fixed: ${validationError}`
-    : 'Rules script compiled successfully.';
+    ? `Rules have a syntax error: ${validationError}`
+    : 'Rules syntax is valid. The script runs when a game starts.';
 }
 
 function syncAnalysisPanel(): void {

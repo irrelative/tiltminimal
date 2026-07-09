@@ -470,7 +470,8 @@ const isOutsideShooterLane = (
 
   return (
     point.x < lane.minX - LIVE_PLAY_EXIT_MARGIN ||
-    point.x > lane.maxX + LIVE_PLAY_EXIT_MARGIN
+    point.x > lane.maxX + LIVE_PLAY_EXIT_MARGIN ||
+    point.y < lane.topY - board.ball.radius
   );
 };
 

@@ -26,6 +26,7 @@ import {
   resolveStandupTargetCollisions,
 } from './physics-engine-devices';
 import { resolveFlipperCollisions } from './physics-engine-flippers';
+import { applyPlayfieldRollingResistance } from './physics-engine-state';
 import {
   MAX_SIMULATION_STEP_SECONDS,
   type PhysicsStepResult,
@@ -587,6 +588,7 @@ const stepSandboxBallState = (
     }
 
     next.ball.linearVelocity.y += board.gravity * stepSeconds;
+    applyPlayfieldRollingResistance(next, board, stepSeconds);
     next.ball.position.x += next.ball.linearVelocity.x * stepSeconds;
     next.ball.position.y += next.ball.linearVelocity.y * stepSeconds;
 

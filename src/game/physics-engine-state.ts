@@ -189,7 +189,7 @@ export const stepPlayingState = (
   };
 };
 
-const applyPlayfieldRollingResistance = (
+export const applyPlayfieldRollingResistance = (
   state: GameState,
   board: BoardDefinition,
   deltaSeconds: number,

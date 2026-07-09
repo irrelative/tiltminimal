@@ -51,6 +51,9 @@ Touch and keyboard controls are merged into one runtime input state.
 - touch flipper holds combine with keyboard flipper holds
 - touch plunge hold combines with keyboard plunger hold
 - touch nudge gestures queue one-frame nudge pulses
+- active touch pointers are captured by the canvas and reset on blur or when
+  the document becomes hidden, so a flipper or plunger cannot remain held after
+  the pointer leaves the playfield
 
 ## Non-Goals
 

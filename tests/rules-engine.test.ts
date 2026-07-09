@@ -86,4 +86,16 @@ describe('rules engine', () => {
   it('reports compile errors for invalid rule scripts', () => {
     expect(validateRulesScript('return { onEvent() {')).toBeTruthy();
   });
+
+  it('checks rules syntax without executing top-level code', () => {
+    const marker = '__pballRulesValidationMarker__';
+    delete (globalThis as Record<string, unknown>)[marker];
+
+    expect(
+      validateRulesScript(
+        `globalThis.${marker} = true; return { onEvent() {} };`,
+      ),
+    ).toBeNull();
+    expect((globalThis as Record<string, unknown>)[marker]).toBeUndefined();
+  });
 });

@@ -147,6 +147,8 @@ export class PlayInput implements InputSource {
     this.element.addEventListener('pointermove', this.onPointerMove);
     this.element.addEventListener('pointerup', this.onPointerUp);
     this.element.addEventListener('pointercancel', this.onPointerUp);
+    window.addEventListener('blur', this.resetTouchState);
+    document.addEventListener('visibilitychange', this.onVisibilityChange);
     this.connected = true;
   }
 
@@ -160,10 +162,9 @@ export class PlayInput implements InputSource {
     this.element.removeEventListener('pointermove', this.onPointerMove);
     this.element.removeEventListener('pointerup', this.onPointerUp);
     this.element.removeEventListener('pointercancel', this.onPointerUp);
-    this.touchPointers.clear();
-    this.touchLeftCount = 0;
-    this.touchRightCount = 0;
-    this.touchLaunchCount = 0;
+    window.removeEventListener('blur', this.resetTouchState);
+    document.removeEventListener('visibilitychange', this.onVisibilityChange);
+    this.resetTouchState();
     this.connected = false;
   }
 
@@ -203,6 +204,7 @@ export class PlayInput implements InputSource {
       startY: point.localY,
       kind,
     });
+    this.element.setPointerCapture?.(event.pointerId);
     this.updateTouchCounts(kind, 1);
     event.preventDefault();
   };
@@ -269,7 +271,28 @@ export class PlayInput implements InputSource {
 
     this.updateTouchCounts(pointer.kind, -1);
     this.touchPointers.delete(event.pointerId);
+    if (this.element.hasPointerCapture?.(event.pointerId)) {
+      this.element.releasePointerCapture?.(event.pointerId);
+    }
     event.preventDefault();
+  };
+
+  private readonly onVisibilityChange = (): void => {
+    if (document.visibilityState === 'hidden') {
+      this.resetTouchState();
+    }
+  };
+
+  private readonly resetTouchState = (): void => {
+    this.touchPointers.clear();
+    this.touchLeftCount = 0;
+    this.touchRightCount = 0;
+    this.touchLaunchCount = 0;
+    this.queuedNudges = {
+      nudgeLeftPressed: false,
+      nudgeRightPressed: false,
+      nudgeUpPressed: false,
+    };
   };
 
   private reassignPointer(pointerId: number, nextKind: TouchPointerKind): void {

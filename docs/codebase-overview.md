@@ -135,6 +135,7 @@ That module is responsible for:
 
 - loading tables from local storage
 - merging stored records with built-in tables
+- skipping malformed stored board records rather than preventing app startup
 - exporting/importing sparse board JSON
 - resetting built-in tables back to their shipped definitions
 - preserving the active table id
@@ -211,16 +212,17 @@ Important files:
 - `src/game/rules-types.ts`
 - `src/game/rules-defaults.ts`
 
-The rules engine compiles the script with `new Function(...)`, caches the
-result, and executes lifecycle hooks such as:
+The rules engine compiles the script with `new Function(...)`, caches a bounded
+set of runtime modules, and executes lifecycle hooks such as:
 
 - `onGameStart`
 - `onBallStart`
 - `onEvent`
 - `onTick`
 
-If a custom rules script fails validation, the engine falls back to the default
-rules module and exposes the validation error to the rules editor UI.
+The rules editor performs syntax validation without executing top-level script
+code. A script is evaluated only when a game starts. If runtime compilation
+fails, the engine falls back to the default rules module.
 
 ## Rendering Layout
 

@@ -4,6 +4,7 @@ import {
   createBoardDefinition,
   physicsDefaults,
 } from '../src/game/physics-defaults';
+import { clampFrameDeltaSeconds } from '../src/game/physics-engine-types';
 
 describe('createBoardDefinition', () => {
   it('fills in omitted physics values from the defaults', () => {
@@ -108,6 +109,13 @@ describe('createBoardDefinition', () => {
     expect(board.surfaceMaterials.flipperRubber.dynamicFriction).toBe(
       physicsDefaults.surfaceMaterials.flipperRubber.dynamicFriction,
     );
+  });
+});
+
+describe('frame timing', () => {
+  it('caps simulation time after a stalled animation frame', () => {
+    expect(clampFrameDeltaSeconds(3)).toBe(0.1);
+    expect(clampFrameDeltaSeconds(-1)).toBe(0);
   });
 });
 

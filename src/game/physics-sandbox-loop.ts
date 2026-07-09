@@ -15,6 +15,7 @@ import {
   type PhysicsSandboxSpawnMode,
   type PhysicsSandboxState,
 } from './physics-sandbox';
+import { clampFrameDeltaSeconds } from './physics-engine-types';
 
 export class PhysicsSandboxLoop {
   private animationFrameId = 0;
@@ -110,10 +111,11 @@ export class PhysicsSandboxLoop {
       return;
     }
 
-    const deltaSeconds =
+    const deltaSeconds = clampFrameDeltaSeconds(
       this.lastFrameTime === 0
         ? 1 / 60
-        : (frameTime - this.lastFrameTime) / 1000;
+        : (frameTime - this.lastFrameTime) / 1000,
+    );
     this.lastFrameTime = frameTime;
     this.state = stepPhysicsSandbox(
       this.state,

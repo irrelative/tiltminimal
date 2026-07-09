@@ -7,6 +7,7 @@ import type { GameState } from './game-state';
 import { resetBall } from './game-state';
 import { applyRulesFrame, initializeRulesState } from './rules-engine';
 import { getPlungerPullRatio, stepGameFrame } from './physics-engine';
+import { clampFrameDeltaSeconds } from './physics-engine-types';
 
 export class GameLoop {
   private animationFrameId = 0;
@@ -67,10 +68,11 @@ export class GameLoop {
       return;
     }
 
-    const deltaSeconds =
+    const deltaSeconds = clampFrameDeltaSeconds(
       this.lastFrameTime === 0
         ? 1 / 60
-        : (frameTime - this.lastFrameTime) / 1000;
+        : (frameTime - this.lastFrameTime) / 1000,
+    );
     this.lastFrameTime = frameTime;
     const input = this.input.getState();
     let previousState = this.state;

@@ -174,4 +174,15 @@ describe('physics sandbox', () => {
     expect(state.displayState.tableNudge.offset.x).toBeGreaterThan(0);
     expect(state.balls[0]?.state.ball.linearVelocity.x ?? 0).toBeGreaterThan(0);
   });
+
+  it('applies playfield rolling resistance to sandbox balls', () => {
+    const board = createBlankTable('Sandbox');
+    let state = createPhysicsSandboxState(board);
+
+    state = setPhysicsSandboxLinearVelocity(state, 'x', 600);
+    state = spawnPhysicsSandboxBall(state, board, { x: 200, y: 400 }).state;
+    state = stepPhysicsSandbox(state, board, idleInput, 1 / 60);
+
+    expect(state.balls[0]?.state.ball.linearVelocity.x ?? 0).toBeLessThan(600);
+  });
 });

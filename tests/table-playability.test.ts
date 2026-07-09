@@ -11,6 +11,7 @@ import {
 describe('table playability analysis', () => {
   it('reports a launcher that only moves the ball vertically', () => {
     const board = createBlankTable('No Shooter Exit');
+    board.plunger.guideLength = board.launchPosition.y + board.ball.radius;
     const issues = analyzePlayability(board, {
       plungePowers: [1],
       maxDropIssues: 0,

@@ -241,7 +241,7 @@ const starlightEmLayout: BoardLayoutDefinition = {
   physics: {
     plunger: {
       minReleaseSpeed: 1600,
-      maxReleaseSpeed: 4200,
+      maxReleaseSpeed: 5000,
       bodyMass: 0.9,
     },
   },
