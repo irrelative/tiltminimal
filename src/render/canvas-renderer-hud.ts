@@ -18,7 +18,7 @@ export const drawHud = (
   context.fillText(board.name, 48, 64);
   context.fillText(`Score ${state.score}`, 48, 104);
 
-  if (state.status === 'waiting-launch') {
+  if (state.status === 'waiting-launch' && input.launchPressed) {
     drawLaunchMeter(context, board, state);
   }
 
