@@ -302,6 +302,7 @@ export const getPhysicsSandboxSpawnBlockedReason = (
   if (
     board.guides.some(
       (guide) =>
+        (guide.plane ?? 'playfield') !== 'raised' &&
         projectPointToGuide(point, guide).distance <=
         guide.thickness / 2 + ball.radius,
     )

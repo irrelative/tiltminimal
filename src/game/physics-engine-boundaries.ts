@@ -111,6 +111,10 @@ export const resolveGuideCollisions = (
   const tableOffset = state.tableNudge.offset;
 
   for (const guide of board.guides) {
+    if ((guide.plane ?? 'playfield') === 'raised') {
+      continue;
+    }
+
     resolveGuideCollision(
       state,
       board,

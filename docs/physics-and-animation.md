@@ -162,6 +162,10 @@ The renderer applies that offset to the board artwork and playfield geometry,
 but not to the freely moving ball. This makes the table visibly move underneath
 the ball, which matches how a cabinet shove reads on a top-down 2D playfield.
 
+Raised guides model overhead return hardware. They render above the playfield
+but do not participate in ball collision or sandbox spawn blocking; treating
+them as floor walls creates artificial rail-end cups and local minima.
+
 Physics uses the same offset and derived table velocity when resolving walls,
 guides, posts, targets, bumpers, flippers, and saucers. That means table motion
 is not just cosmetic: moving geometry can push on the ball when contact occurs.
