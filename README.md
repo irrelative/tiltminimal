@@ -24,6 +24,7 @@ Use the `Makefile` entrypoints:
 * `make build`
 * `make lint`
 * `make test`
+* `make cloc`
 * `make validate-table TABLE=classic-table`
 * `make fmt`
 

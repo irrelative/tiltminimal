@@ -20,6 +20,7 @@ Use the `Makefile` as the main entrypoint:
 - `make build` to type-check and build production assets
 - `make lint` to run ESLint
 - `make test` to run Vitest
+- `make cloc` to count repository lines of code
 - `make fmt` to format the repository with Prettier
 
 The underlying npm scripts remain in `package.json`, but contributor docs and automation should prefer `make` targets.
