@@ -130,6 +130,10 @@ export const resolvePlungerGuideCollisions = (
   board: BoardDefinition,
   solver: SolverPhysicsDefinition,
 ): void => {
+  if (state.launcherExited) {
+    return;
+  }
+
   const tableOffset = state.tableNudge.offset;
 
   for (const guide of getPlungerGuideSegments(board)) {
