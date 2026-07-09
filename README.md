@@ -11,7 +11,7 @@ The repository now includes a TypeScript + Vite browser game with:
 
 * a 2D canvas-based playfield
 * 2D ball physics with planar position/velocity and 2-axis rolling spin
-* multiple built-in data-driven tables plus editable custom tables
+* multiple built-in, code-authored tables
 * separated game loop, physics, input, and rendering modules
 * Vitest and GitHub Actions wiring for basic verification
 
@@ -32,7 +32,7 @@ Use the `Makefile` entrypoints:
 * `src/boards/` shared board authoring, codec, and library modules
 * `src/boards/tables/` built-in table implementations and rules scripts
 * `src/cli/` terminal entrypoints for validation and other repo tooling
-* `src/editor/` board editor state, hit testing, mutation, and storage helpers
+* `src/editor/` internal geometry analysis and layout-test helpers
 * `src/game/` runtime state and physics
 * `src/render/` canvas rendering
 * `src/input/` player controls
@@ -83,10 +83,7 @@ Use the `Makefile` entrypoints:
 * GitHub Pages: https://irrelative.github.io/tiltminimal/
 * Deployed routes:
   * Game: `https://irrelative.github.io/tiltminimal/`
-  * Editor: `https://irrelative.github.io/tiltminimal/editor`
-  * Physics Sandbox: `https://irrelative.github.io/tiltminimal/physics`
-  * Rules: `https://irrelative.github.io/tiltminimal/rules`
-* On narrower screens, route navigation collapses into a hamburger menu in the app toolbar.
+* Physics Sandbox: `https://irrelative.github.io/tiltminimal/physics`
 * Deployment is handled by `.github/workflows/deploy-pages.yml`, which builds with the Pages-provided base path and publishes the `dist/` output.
 
 ## Play Controls

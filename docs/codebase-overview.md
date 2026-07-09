@@ -32,20 +32,17 @@ The main source tree is under `src/`.
 The application has four routes:
 
 - `/`: play mode
-- `/editor`: board editor
 - `/physics`: physics-only sandbox
-- `/rules`: rules script editor
 
 Route parsing and route-path generation live in `src/app/routes.ts`.
 
-`src/main.ts` is still the top-level composition point for all three routes.
+`src/main.ts` is the top-level composition point for the two runtime routes.
 It is responsible for:
 
 - reading the active route
 - querying DOM elements
-- loading persisted tables
 - creating shared renderer/audio instances
-- booting either play, editor, physics, or rules mode
+- booting either play or physics mode
 
 Supporting app modules currently include:
 
@@ -53,8 +50,6 @@ Supporting app modules currently include:
   synchronization
 - `src/app/physics-sandbox-session.ts`: physics-route setup, status wiring, and
   sandbox panel synchronization
-- `src/app/editor-selection-panel.ts`: editor-side form rendering for the
-  current selection
 
 `src/main.ts` is still one of the central files in the repo. That is expected
 for now. The supporting modules reduce some surface area, but the app bootstrap
@@ -113,40 +108,12 @@ The first CLI command validates built-in tables by id and runs both:
 - compile-time layout validation from `src/boards/layout-validation.ts`
 - editor-style advisory analysis from `src/editor/table-analysis.ts`
 
-## Editor And Persistence
+## Analysis Tooling
 
-The editor is split into focused modules behind the barrel
-`src/editor/table-editor.ts`.
-
-Current editor module roles:
-
-- `table-editor-selection.ts`: hit testing and selection logic
-- `table-editor-add.ts`: add-tool element creation
-- `table-editor-mutate.ts`: movement, property updates, and deletion
-- `table-editor-handles.ts`: drag handles and rotation/guide endpoint behavior
-- `table-editor-shared.ts`: shared editor constants/helpers
-- `table-analysis.ts`: editor-side analysis passes and warning generation
-- `editor-types.ts`: editor-specific state types
-- `grid.ts`: grid size, snap behavior, and snap helpers
-
-Persistence lives in `src/editor/table-storage.ts`.
-
-That module is responsible for:
-
-- loading tables from local storage
-- merging stored records with built-in tables
-- skipping malformed stored board records rather than preventing app startup
-- exporting/importing sparse board JSON
-- resetting built-in tables back to their shipped definitions
-- preserving the active table id
-
-Built-in tables can be overridden in storage and later reset. Custom tables are
-stored alongside them.
-
-The editor also includes an analysis panel that can run advisory checks against
-the active board. Current checks cover overlaps, out-of-bounds geometry,
-shooter lane obstruction, flipper keepout, spinner clearance, saucer eject
-clearance, and basic rules-event coverage.
+The visual table and rules editors have been retired. Built-in tables are
+authored in TypeScript, and the browser only offers play and physics-sandbox
+routes. `src/editor/table-analysis.ts` and `table-playability.ts` remain
+internal analysis helpers used by the validation CLI.
 
 ## Runtime Game Flow
 
