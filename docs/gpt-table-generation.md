@@ -18,7 +18,6 @@ Use semantic primitives for the table's repeated anatomy:
 - `createTopArchLanes(...)` for top rollover lanes and separators
 - `createPopBumperCluster(...)` for a three-pop bumper group
 - `createMirroredTargetBank(...)` for balanced target banks
-- `createOrbitLanePair(...)` for left/right orbit guide structures
 
 Use raw guide lines only for table-specific shot shaping that is not covered by
 a primitive. Do not hand-place the lower third, shooter lane, top arch, or

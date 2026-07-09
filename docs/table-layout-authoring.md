@@ -69,12 +69,9 @@ Current helpers include:
 - `createFlipperPair(...)`
 - `createPopTriangle(...)`
 - `createPopBumperCluster(...)`
-- `createMirroredRollovers(...)`
-- `createMirroredStandupTargets(...)`
 - `createMirroredTargetBank(...)`
 - `createShooterLaneRight(...)`
 - `createTopArchLanes(...)`
-- `createOrbitLanePair(...)`
 - `createInlaneOutlanePair(...)`
 - `createSlingshotPair(...)`
 - `createLowerPlayfieldPair(...)`
@@ -84,9 +81,8 @@ These return high-level layout objects, not runtime board data.
 
 Layout fragments are reusable authoring-time buckets that contain the same
 arrays the layout compiler already accepts, such as `guides`, `posts`,
-`slingshots`, `rollovers`, and `flippers`. Use `mergeLayoutFragments(...)` when
-a table needs to combine several composed pieces while preserving bucket order.
-Fragments are flattened by spreading their arrays into the ordinary
+`slingshots`, `rollovers`, and `flippers`. Tables combine fragments by
+spreading their arrays into the ordinary
 `BoardLayoutDefinition` fields; they are not a separate runtime component
 system.
 
@@ -111,10 +107,10 @@ section that crosses the flipper area.
 
 For agent-generated tables, use the semantic pinball primitives before
 authoring raw geometry. `createPopBumperCluster(...)`,
-`createMirroredTargetBank(...)`, and `createOrbitLanePair(...)` describe common
-pinball anatomy in terms of clusters, banks, and shot lanes. Raw guide lines
-should be reserved for table-specific shot shaping after the canonical lower
-third, shooter lane, top arch, target banks, and pop cluster have been placed.
+`createMirroredTargetBank(...)` describe common pinball anatomy in terms of
+clusters and banks. Raw guide lines should be reserved for table-specific shot
+shaping after the canonical lower third, shooter lane, top arch, target banks,
+and pop cluster have been placed.
 
 Guides can also now declare a `plane`:
 

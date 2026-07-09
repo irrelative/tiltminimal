@@ -3,19 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { validateCompiledBoardLayout } from '../src/boards/layout-validation';
 import { classicTable } from '../src/boards/tables/classic-table';
 import { analyzeBoard } from '../src/validation/table-analysis';
-import { createInitialGameState } from '../src/game/game-state';
 import { getPlungerLaneHalfWidth } from '../src/game/plunger-geometry';
 import { stepGame } from '../src/game/physics-engine';
-import type { InputState } from '../src/input/keyboard-input';
-
-const idleInput: InputState = {
-  leftPressed: false,
-  rightPressed: false,
-  launchPressed: false,
-  nudgeLeftPressed: false,
-  nudgeRightPressed: false,
-  nudgeUpPressed: false,
-};
+import { idleInput, launchBall } from './helpers/game-fixture';
 
 describe('classicTable', () => {
   it('exposes a valid board definition', () => {
@@ -61,15 +51,7 @@ describe('classicTable', () => {
   });
 
   it('can full-plunge the ball out of the shooter lane into the playfield', () => {
-    let state = createInitialGameState(classicTable);
-    state = stepGame(
-      state,
-      classicTable,
-      { ...idleInput, launchPressed: true },
-      classicTable.physics.plunger.maxPullSeconds,
-    );
-
-    let launched = releaseUntilLaunched(state);
+    let launched = launchBall(classicTable);
     let minX = launched.ball.position.x;
     let minY = launched.ball.position.y;
 
@@ -94,19 +76,3 @@ describe('classicTable', () => {
     expect(raisedGuides.length).toBeGreaterThanOrEqual(4);
   });
 });
-
-const releaseUntilLaunched = (
-  state: ReturnType<typeof createInitialGameState>,
-): ReturnType<typeof createInitialGameState> => {
-  let current = state;
-
-  for (let index = 0; index < 120; index += 1) {
-    current = stepGame(current, classicTable, idleInput, 1 / 120);
-
-    if (current.status === 'playing') {
-      return current;
-    }
-  }
-
-  throw new Error('Expected Classic Table to launch within 1 second.');
-};

@@ -3,18 +3,8 @@ import { describe, expect, it } from 'vitest';
 import { BUILT_IN_TABLES } from '../src/boards/table-library';
 import { validateCompiledBoardLayout } from '../src/boards/layout-validation';
 import { doubleCrossedTable } from '../src/boards/tables/double-crossed';
-import { createInitialGameState } from '../src/game/game-state';
 import { stepGame } from '../src/game/physics-engine';
-import type { InputState } from '../src/input/keyboard-input';
-
-const idleInput: InputState = {
-  leftPressed: false,
-  rightPressed: false,
-  launchPressed: false,
-  nudgeLeftPressed: false,
-  nudgeRightPressed: false,
-  nudgeUpPressed: false,
-};
+import { idleInput, launchBall } from './helpers/game-fixture';
 
 describe('doubleCrossedTable', () => {
   it('exposes a validated three-ball original table', () => {
@@ -46,15 +36,10 @@ describe('doubleCrossedTable', () => {
   });
 
   it('can full-plunge into the upper playfield', () => {
-    let state = createInitialGameState(doubleCrossedTable);
-    state = stepGame(
-      state,
-      doubleCrossedTable,
-      { ...idleInput, launchPressed: true },
-      doubleCrossedTable.physics.plunger.maxPullSeconds,
-    );
-
-    let launched = releaseUntilLaunched(state);
+    let launched = launchBall(doubleCrossedTable, {
+      maxSteps: 60,
+      stepSeconds: 1 / 60,
+    });
     let minY = launched.ball.position.y;
 
     for (let step = 0; step < 120; step += 1) {
@@ -65,19 +50,3 @@ describe('doubleCrossedTable', () => {
     expect(minY).toBeLessThan(320);
   });
 });
-
-const releaseUntilLaunched = (
-  state: ReturnType<typeof createInitialGameState>,
-): ReturnType<typeof createInitialGameState> => {
-  let current = state;
-
-  for (let step = 0; step < 60; step += 1) {
-    current = stepGame(current, doubleCrossedTable, idleInput, 1 / 60);
-
-    if (current.status === 'playing') {
-      return current;
-    }
-  }
-
-  throw new Error('Expected Double Crossed to launch within 1 second.');
-};

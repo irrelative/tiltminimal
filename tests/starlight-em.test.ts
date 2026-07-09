@@ -4,18 +4,8 @@ import { BUILT_IN_TABLES } from '../src/boards/table-library';
 import { validateCompiledBoardLayout } from '../src/boards/layout-validation';
 import { starlightEmTable } from '../src/boards/tables/starlight-em-table';
 import { analyzeBoard } from '../src/validation/table-analysis';
-import { createInitialGameState } from '../src/game/game-state';
 import { stepGame } from '../src/game/physics-engine';
-import type { InputState } from '../src/input/keyboard-input';
-
-const idleInput: InputState = {
-  leftPressed: false,
-  rightPressed: false,
-  launchPressed: false,
-  nudgeLeftPressed: false,
-  nudgeRightPressed: false,
-  nudgeUpPressed: false,
-};
+import { idleInput, launchBall } from './helpers/game-fixture';
 
 describe('starlightEmTable', () => {
   it('exposes a valid EM-style built-in table', () => {
@@ -51,15 +41,7 @@ describe('starlightEmTable', () => {
   });
 
   it('can full-plunge the ball into the upper playfield', () => {
-    let state = createInitialGameState(starlightEmTable);
-    state = stepGame(
-      state,
-      starlightEmTable,
-      { ...idleInput, launchPressed: true },
-      1.2,
-    );
-
-    let launched = releaseUntilLaunched(state);
+    let launched = launchBall(starlightEmTable, { chargeSeconds: 1.2 });
     const initialLaunch = {
       velocity: { ...launched.ball.linearVelocity },
       position: { ...launched.ball.position },
@@ -113,22 +95,6 @@ describe('starlightEmTable', () => {
     expect(analyzeBoard(starlightEmTable)).toHaveLength(0);
   });
 });
-
-const releaseUntilLaunched = (
-  state: ReturnType<typeof createInitialGameState>,
-): ReturnType<typeof createInitialGameState> => {
-  let current = state;
-
-  for (let index = 0; index < 120; index += 1) {
-    current = stepGame(current, starlightEmTable, idleInput, 1 / 120);
-
-    if (current.status === 'playing') {
-      return current;
-    }
-  }
-
-  throw new Error('Expected Starlight EM to launch within 1 second.');
-};
 
 const distanceToSegment = (
   point: { x: number; y: number },

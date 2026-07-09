@@ -8,10 +8,8 @@ import {
   createInlaneOutlanePair,
   createLowerPlayfieldPair,
   createMirroredTargetBank,
-  createOrbitLanePair,
   createPopBumperCluster,
   createStandardLowerPlayfieldPair,
-  mergeLayoutFragments,
   createPopTriangle,
   createShooterLaneRight,
   createSlingshotPair,
@@ -237,54 +235,6 @@ describe('compileBoardLayout', () => {
     expect(result.board.dropTargets[1]).toMatchObject({ x: 520, y: 460 });
   });
 
-  it('expands orbit lane pairs with optional entry posts', () => {
-    const orbits = createOrbitLanePair({
-      leftEntry: absolutePoint(130, 900),
-      rightEntry: absolutePoint(770, 900),
-      leftShoulder: absolutePoint(200, 260),
-      rightShoulder: absolutePoint(700, 260),
-      leftReturn: absolutePoint(320, 150),
-      rightReturn: absolutePoint(580, 150),
-      entryPosts: { radius: 14 },
-    });
-    const layout: BoardLayoutDefinition = {
-      name: 'Orbit Pair Test',
-      width: 900,
-      height: 1400,
-      drainY: 1425,
-      launchPosition: absolutePoint(770, 1180),
-      materials: {
-        playfield: 'playfieldWood',
-        walls: 'metalGuide',
-      },
-      posts: orbits.posts,
-      guides: orbits.guides,
-      flippers: createFlipperPair({
-        leftX: 270,
-        rightX: 630,
-        y: 1220,
-        length: 150,
-        thickness: 20,
-        restingAngleOffset: 0.28,
-        activeAngleOffset: -0.42,
-      }),
-    };
-
-    const result = compileBoardLayout(layout, { snapToGrid: false });
-
-    expect(result.board.guides).toHaveLength(4);
-    expect(result.board.posts).toHaveLength(2);
-    expect(result.board.guides[0]).toMatchObject({
-      start: { x: 130, y: 900 },
-      end: { x: 200, y: 260 },
-      material: 'metalGuide',
-    });
-    expect(result.board.guides[3]).toMatchObject({
-      start: { x: 700, y: 260 },
-      end: { x: 580, y: 150 },
-    });
-  });
-
   it('expands shooter-lane and top-arch primitives into board geometry', () => {
     const shooterLane = createShooterLaneRight({
       boardWidth: 900,
@@ -440,15 +390,6 @@ describe('compileBoardLayout', () => {
         activeAngleOffset: -0.42,
       },
     });
-    const fragment = mergeLayoutFragments(lowerPlayfield, {
-      posts: [
-        {
-          position: absolutePoint(450, 1100),
-          radius: 18,
-          material: 'rubberPost',
-        },
-      ],
-    });
     const layout: BoardLayoutDefinition = {
       name: 'Lower Playfield Fragment Test',
       width: 900,
@@ -459,10 +400,17 @@ describe('compileBoardLayout', () => {
         playfield: 'playfieldWood',
         walls: 'metalGuide',
       },
-      posts: fragment.posts,
-      guides: fragment.guides,
-      slingshots: fragment.slingshots,
-      flippers: fragment.flippers ?? [],
+      posts: [
+        ...lowerPlayfield.posts,
+        {
+          position: absolutePoint(450, 1100),
+          radius: 18,
+          material: 'rubberPost',
+        },
+      ],
+      guides: lowerPlayfield.guides,
+      slingshots: lowerPlayfield.slingshots,
+      flippers: lowerPlayfield.flippers,
     };
 
     const result = compileBoardLayout(layout, { snapToGrid: false });

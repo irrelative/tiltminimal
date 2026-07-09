@@ -89,13 +89,12 @@ Behavior requirements:
 
 ## Canonical Midfield Primitives
 
-`createPopBumperCluster(...)`, `createMirroredTargetBank(...)`, and
-`createOrbitLanePair(...)` are the first semantic midfield helpers for
-agent-authored layouts.
+`createPopBumperCluster(...)` and `createMirroredTargetBank(...)` are semantic
+midfield helpers for agent-authored layouts.
 
 They are responsible for:
 
-- placing common pop, target, and orbit structures as table anatomy
+- placing common pop and target structures as table anatomy
 - keeping mirrored shot families balanced by default
 - reducing raw guide authoring to table-specific shaping
 

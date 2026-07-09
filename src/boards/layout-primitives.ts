@@ -223,51 +223,6 @@ export const createFlipperPair = (options: {
   createFlipperLayout('right', options.rightX, options.y, options),
 ];
 
-export const createMirroredRollovers = (options: {
-  center: LayoutPoint;
-  offsetsX: number[];
-  radius: number;
-  score: number;
-}): RolloverLayoutDefinition[] =>
-  options.offsetsX.map((offsetX) => ({
-    position: offsetLayoutPoint(options.center, offsetX, 0),
-    radius: options.radius,
-    score: options.score,
-  }));
-
-export const createMirroredStandupTargets = (options: {
-  center: LayoutPoint;
-  offsetX: number;
-  yOffset?: number;
-  width: number;
-  height: number;
-  angleOffset: number;
-  score: number;
-  material?: SurfaceMaterialName;
-}): StandupTargetLayoutDefinition[] => {
-  const material = options.material ?? 'rubberPost';
-  const yOffset = options.yOffset ?? 0;
-
-  return [
-    {
-      position: offsetLayoutPoint(options.center, -options.offsetX, yOffset),
-      width: options.width,
-      height: options.height,
-      angle: -options.angleOffset,
-      score: options.score,
-      material,
-    },
-    {
-      position: offsetLayoutPoint(options.center, options.offsetX, yOffset),
-      width: options.width,
-      height: options.height,
-      angle: Math.PI + options.angleOffset,
-      score: options.score,
-      material,
-    },
-  ];
-};
-
 export interface MirroredTargetBankLayout extends BoardLayoutFragment {
   standupTargets: StandupTargetLayoutDefinition[];
   dropTargets: DropTargetLayoutDefinition[];
@@ -341,23 +296,6 @@ export const createMirroredTargetBank = (options: {
   };
 };
 
-export const mergeLayoutFragments = (
-  ...fragments: BoardLayoutFragment[]
-): BoardLayoutFragment => ({
-  posts: fragments.flatMap((fragment) => fragment.posts ?? []),
-  bumpers: fragments.flatMap((fragment) => fragment.bumpers ?? []),
-  standupTargets: fragments.flatMap(
-    (fragment) => fragment.standupTargets ?? [],
-  ),
-  dropTargets: fragments.flatMap((fragment) => fragment.dropTargets ?? []),
-  saucers: fragments.flatMap((fragment) => fragment.saucers ?? []),
-  spinners: fragments.flatMap((fragment) => fragment.spinners ?? []),
-  slingshots: fragments.flatMap((fragment) => fragment.slingshots ?? []),
-  rollovers: fragments.flatMap((fragment) => fragment.rollovers ?? []),
-  guides: fragments.flatMap((fragment) => fragment.guides ?? []),
-  flippers: fragments.flatMap((fragment) => fragment.flippers ?? []),
-});
-
 export interface ShooterLaneRightLayout {
   launchPosition: LayoutPoint;
   plunger: Partial<PlungerDefinition>;
@@ -420,79 +358,6 @@ export const createShooterLaneRight = (options: {
         material,
       },
     ],
-  };
-};
-
-export interface OrbitLanePairLayout extends BoardLayoutFragment {
-  guides: GuideLayoutDefinition[];
-  posts: PostLayoutDefinition[];
-}
-
-export const createOrbitLanePair = (options: {
-  leftEntry: LayoutPoint;
-  rightEntry: LayoutPoint;
-  leftShoulder: LayoutPoint;
-  rightShoulder: LayoutPoint;
-  leftReturn?: LayoutPoint;
-  rightReturn?: LayoutPoint;
-  guideThickness?: number;
-  material?: SurfaceMaterialName;
-  entryPosts?: {
-    radius?: number;
-    material?: SurfaceMaterialName;
-  };
-}): OrbitLanePairLayout => {
-  const material = options.material ?? 'metalGuide';
-  const guideThickness = options.guideThickness ?? 14;
-  const guides: GuideLayoutDefinition[] = [
-    {
-      start: options.leftEntry,
-      end: options.leftShoulder,
-      thickness: guideThickness,
-      material,
-    },
-    {
-      start: options.rightEntry,
-      end: options.rightShoulder,
-      thickness: guideThickness,
-      material,
-    },
-  ];
-
-  if (options.leftReturn) {
-    guides.push({
-      start: options.leftShoulder,
-      end: options.leftReturn,
-      thickness: guideThickness,
-      material,
-    });
-  }
-
-  if (options.rightReturn) {
-    guides.push({
-      start: options.rightShoulder,
-      end: options.rightReturn,
-      thickness: guideThickness,
-      material,
-    });
-  }
-
-  return {
-    guides,
-    posts: options.entryPosts
-      ? [
-          {
-            position: options.leftEntry,
-            radius: options.entryPosts.radius ?? 14,
-            material: options.entryPosts.material ?? material,
-          },
-          {
-            position: options.rightEntry,
-            radius: options.entryPosts.radius ?? 14,
-            material: options.entryPosts.material ?? material,
-          },
-        ]
-      : [],
   };
 };
 
