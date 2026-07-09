@@ -181,8 +181,8 @@ This validation pass is distinct from the editor-side analysis panel:
 
 - `layout-validation.ts` runs as part of DSL compilation and is focused on
   rejecting bad authored layouts early
-- `src/editor/table-analysis.ts` runs in the editor UI against any active board
-  and produces advisory warnings, including overlap, out-of-bounds geometry,
+- `src/validation/table-analysis.ts` runs from the validation CLI and produces
+  advisory warnings, including overlap, out-of-bounds geometry,
   shooter-lane obstruction, flipper keepout, spinner clearance, saucer eject
   obstruction, and basic rules-event coverage
 

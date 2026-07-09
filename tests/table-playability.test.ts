@@ -6,7 +6,7 @@ import {
   analyzePlayability,
   simulateDroppedBall,
   simulatePlunge,
-} from '../src/editor/table-playability';
+} from '../src/validation/table-playability';
 
 describe('table playability analysis', () => {
   it('reports a launcher that only moves the ball vertically', () => {

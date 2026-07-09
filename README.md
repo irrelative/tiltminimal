@@ -32,7 +32,7 @@ Use the `Makefile` entrypoints:
 * `src/boards/` shared board authoring, codec, and library modules
 * `src/boards/tables/` built-in table implementations and rules scripts
 * `src/cli/` terminal entrypoints for validation and other repo tooling
-* `src/editor/` internal geometry analysis and layout-test helpers
+* `src/validation/` simulation-based table analysis and playability checks
 * `src/game/` runtime state and physics
 * `src/render/` canvas rendering
 * `src/input/` player controls

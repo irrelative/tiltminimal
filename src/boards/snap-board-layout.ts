@@ -2,7 +2,7 @@ import {
   EDITOR_GRID_SIZE,
   snapPointToGrid,
   snapValueToGrid,
-} from '../editor/grid';
+} from './grid';
 import type { BoardDefinition } from '../types/board-definition';
 
 export const snapBoardLayoutToGrid = (

@@ -4,7 +4,7 @@ import {
   EDITOR_GRID_SIZE,
   snapPointToGrid,
   snapValueToGrid,
-} from '../src/editor/grid';
+} from '../src/boards/grid';
 
 describe('editor grid', () => {
   it('snaps points to the nearest grid intersection', () => {

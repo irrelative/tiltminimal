@@ -17,8 +17,8 @@ The main source tree is under `src/`.
 - `src/boards/tables/`: built-in table layouts, compiled built-in boards, and
   table-specific rules scripts
 - `src/cli/`: terminal-facing validation and utility entrypoints
-- `src/editor/`: retained analysis and legacy authoring helpers used by tests
-  and validation tooling, not by the browser runtime
+- `src/validation/`: simulation-based analysis and playability checks used by
+  the validation CLI
 - `src/game/`: runtime state, physics stepping, rules execution, materials, and
   geometry helpers
 - `src/input/`: keyboard and touch control input handling
@@ -106,13 +106,13 @@ Current modules:
 The first CLI command validates built-in tables by id and runs both:
 
 - compile-time layout validation from `src/boards/layout-validation.ts`
-- editor-style advisory analysis from `src/editor/table-analysis.ts`
+- advisory analysis from `src/validation/table-analysis.ts`
 
 ## Analysis Tooling
 
 The visual table and rules editors have been retired. Built-in tables are
 authored in TypeScript, and the browser only offers play and physics-sandbox
-routes. `src/editor/table-analysis.ts` and `table-playability.ts` remain
+routes. `src/validation/table-analysis.ts` and `table-playability.ts` remain
 internal analysis helpers used by the validation CLI.
 
 ## Runtime Game Flow
@@ -200,8 +200,6 @@ Current renderer modules:
 - `src/render/canvas-renderer.ts`: façade and render coordination
 - `src/render/canvas-renderer-board.ts`: playfield and device drawing
 - `src/render/canvas-renderer-hud.ts`: play HUD drawing
-- `src/render/canvas-renderer-editor.ts`: editor overlays, grid, handles, and
-  draft previews
 - `src/render/canvas-renderer-shared.ts`: shared drawing constants and geometry
 - `src/render/board-themes.ts`: theme palette definitions
 
@@ -262,7 +260,6 @@ For common tasks, these are the fastest entry points:
   `src/game/rules-engine.ts` and the table rules scripts in
   `src/boards/tables/`
 - changing editor interactions:
-  `src/editor/table-editor.ts` and its leaf modules
 - changing play or editor rendering:
   `src/render/canvas-renderer.ts` and the specialized renderer files
 - changing route behavior or screen wiring:

@@ -39,7 +39,6 @@ split across:
 
 - `src/render/canvas-renderer-board.ts`
 - `src/render/canvas-renderer-hud.ts`
-- `src/render/canvas-renderer-editor.ts`
 - `src/render/canvas-renderer-shared.ts`
 
 That means rendering is always driven by the same state object that physics just
@@ -274,7 +273,6 @@ This work happens in two places:
   `src/game/physics-engine-flippers.ts`
 - drawing in `src/render/canvas-renderer-board.ts`,
   `src/render/canvas-renderer-hud.ts`, and
-  `src/render/canvas-renderer-editor.ts`
 
 There is no duplicate animation model in the renderer.
 

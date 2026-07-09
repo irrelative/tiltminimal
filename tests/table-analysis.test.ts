@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { createBlankTable } from '../src/boards/table-library';
 import { doubleCrossedTable } from '../src/boards/tables/double-crossed';
-import { analyzeBoard } from '../src/editor/table-analysis';
+import { analyzeBoard } from '../src/validation/table-analysis';
 import { getFlipperBySide } from '../src/boards/table-library';
 
 describe('analyzeBoard', () => {

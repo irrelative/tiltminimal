@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { validateCompiledBoardLayout } from '../src/boards/layout-validation';
 import { classicTable } from '../src/boards/tables/classic-table';
-import { analyzeBoard } from '../src/editor/table-analysis';
+import { analyzeBoard } from '../src/validation/table-analysis';
 import { createInitialGameState } from '../src/game/game-state';
 import { getPlungerLaneHalfWidth } from '../src/game/plunger-geometry';
 import { stepGame } from '../src/game/physics-engine';

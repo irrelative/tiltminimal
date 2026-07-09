@@ -9,7 +9,7 @@ guide hacks.
 - model lower slings as active kick devices, not just diagonal rubber rails
 - keep lower-lane geometry tied to flipper-relative anchors
 - make common lower-third layouts reusable for future DSL-authored tables
-- keep the runtime/editor board model explicit enough that tables can still be
+- keep the runtime board model explicit enough that tables can still be
   fine-tuned by hand after compilation
 
 ## Slingshot Component
@@ -30,7 +30,7 @@ The current physics model treats the slingshot as:
 2. normal collision resolution using the surface material
 3. a one-shot kick impulse when the ball arrives with enough inward speed
 4. a short re-arm cooldown
-5. a compression animation for rendering/editor feedback
+5. a compression animation for rendering feedback
 
 For lower-playfield tables, the rendered slingshot body is oriented toward the
 nearest flipper tip so mirrored left/right slings visually point into the

@@ -176,7 +176,7 @@ analysis panel remains a single place to review issues.
 ## Playability Simulation
 
 The CLI also runs `analyzePlayability(...)` from
-`src/editor/table-playability.ts`. This pass is separate from the editor panel
+`src/validation/table-playability.ts`.
 and focuses on dynamic scenarios that static geometry cannot prove:
 
 - multiple plunger strengths must enter live play instead of staying in the

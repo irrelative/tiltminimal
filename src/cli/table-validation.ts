@@ -3,12 +3,12 @@ import { validateCompiledBoardLayout } from '../boards/layout-validation';
 import {
   analyzeBoard,
   type TableAnalysisWarning,
-} from '../editor/table-analysis';
+} from '../validation/table-analysis';
 import {
   analyzePlayability,
   type PlayabilityIssue,
   type PlayabilityMode,
-} from '../editor/table-playability';
+} from '../validation/table-playability';
 
 export interface ValidateTableCliOptions {
   help: boolean;

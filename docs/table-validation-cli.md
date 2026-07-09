@@ -52,8 +52,8 @@ Supported ids include:
 For each selected table, the CLI runs:
 
 1. `validateCompiledBoardLayout(...)` from `src/boards/layout-validation.ts`
-2. `analyzeBoard(...)` from `src/editor/table-analysis.ts`
-3. `analyzePlayability(...)` from `src/editor/table-playability.ts`
+2. `analyzeBoard(...)` from `src/validation/table-analysis.ts`
+3. `analyzePlayability(...)` from `src/validation/table-playability.ts`
 
 That means the CLI reports both:
 
