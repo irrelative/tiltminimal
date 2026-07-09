@@ -7,8 +7,10 @@ left/right shots and matching target-bank objectives.
 
 - two lower flippers, active slingshots, visible inlanes, outlanes, and raised
   return rails form a conventional lower third
-- raised return rails leave both flipper cradle regions free of flat guide
-  blockers for player-controlled catches
+- wide raised side rails make the inlane/outlane mouths visually distinct from
+  the other built-in tables while preserving the right shooter-lane corridor
+- held flippers retain a low-speed ball against the inboard blade, providing a
+  controllable cradle on either side
 - mirrored standup banks and spinner shots frame a centered pop-bumper cluster
   and center saucer
 - a symmetric three-lane top arch feeds the upper playfield
@@ -28,4 +30,5 @@ left/right shots and matching target-bank objectives.
 `Mirror Match` must compile through the layout DSL, clear layout and geometry
 analysis, and pass normal playability validation. Its tests verify device
 symmetry, the right-lane launcher exception, full-plunge behavior, and raised
-return rails that keep the two flipper cradle regions clear.
+return rails that keep the two flipper cradle regions clear. The shared physics
+tests also verify held-flipper cradle retention.

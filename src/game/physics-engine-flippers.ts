@@ -25,7 +25,14 @@ export const resolveFlipperCollisions = (
       return;
     }
 
-    resolveFlipperCollision(state, board, flipper, motion, deltaSeconds, solver);
+    resolveFlipperCollision(
+      state,
+      board,
+      flipper,
+      motion,
+      deltaSeconds,
+      solver,
+    );
   });
 };
 
@@ -140,6 +147,23 @@ const applyFlipperCollisionAtAngle = (
   const isPassiveContact =
     !motion.engaged &&
     Math.abs(motion.angularVelocity) <= motion.passiveAngularVelocityThreshold;
+
+  if (
+    motion.engaged &&
+    Math.abs(motion.angularVelocity) <=
+      motion.passiveAngularVelocityThreshold &&
+    collision.t <= 0.58 &&
+    Math.hypot(state.ball.linearVelocity.x, state.ball.linearVelocity.y) <= 420
+  ) {
+    state.ball.position.x += normal.x * overlap;
+    state.ball.position.y += normal.y * overlap;
+    state.ball.linearVelocity.x = motion.tableVelocity.x;
+    state.ball.linearVelocity.y = motion.tableVelocity.y;
+    state.ball.angularVelocity.x = 0;
+    state.ball.angularVelocity.y = 0;
+    return true;
+  }
+
   const contact: ContactData = {
     point: contactPoint,
     normal,
@@ -161,7 +185,11 @@ const applyFlipperCollisionAtAngle = (
     spinDampingScale: isPassiveContact ? motion.passiveSpinDampingScale : 1,
   };
 
-  if (isPassiveContact && incomingNormalSpeed >= 0 && overlap > solver.epsilon) {
+  if (
+    isPassiveContact &&
+    incomingNormalSpeed >= 0 &&
+    overlap > solver.epsilon
+  ) {
     state.ball.position.x += normal.x * overlap;
     state.ball.position.y += normal.y * overlap;
     return true;

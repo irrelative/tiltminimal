@@ -25,7 +25,7 @@ describe('mirrorMatchTable', () => {
     expect(mirrorMatchTable.flippers).toHaveLength(2);
     expect(
       mirrorMatchTable.guides.filter((guide) => guide.plane === 'raised'),
-    ).toHaveLength(4);
+    ).toHaveLength(8);
 
     expect(BUILT_IN_TABLES.some((table) => table.id === 'mirror-match')).toBe(
       true,
@@ -86,7 +86,7 @@ describe('mirrorMatchTable', () => {
     ]);
     expect(
       mirrorMatchTable.guides.filter((guide) => guide.plane === 'raised'),
-    ).toHaveLength(4);
+    ).toHaveLength(8);
     expect(
       validateCompiledBoardLayout(mirrorMatchTable).some(
         (diagnostic) => diagnostic.code === 'flipper-keepout',

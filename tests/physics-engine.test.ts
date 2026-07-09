@@ -5,6 +5,7 @@ import { classicTable } from '../src/boards/tables/classic-table';
 import { getFlipperBySide } from '../src/boards/table-library';
 import type { InputState } from '../src/input/keyboard-input';
 import {
+  getDistanceToFlipperSurface,
   getFlipperFaceNormal,
   getFlipperRadiusAt,
   getFlipperTipRadius,
@@ -183,6 +184,37 @@ describe('stepGame', () => {
     expect(getFlipperState(settled, classicTable, 'left').angularVelocity).toBe(
       0,
     );
+  });
+
+  it('holds a low-speed ball in the active flipper cradle zone', () => {
+    const state = createInitialGameState(classicTable);
+    state.status = 'playing';
+    state.flippers[0] = {
+      engaged: true,
+      angle: leftFlipper.activeAngle,
+      angularVelocity: 0,
+    };
+    placeBallOnFlipperSurface(
+      state,
+      leftFlipper,
+      0.35,
+      leftFlipper.activeAngle,
+    );
+
+    const settled = advanceFrames(state, classicTable, 120, {
+      ...idleInput,
+      leftPressed: true,
+    });
+
+    expect(settled.status).toBe('playing');
+    expect(
+      getDistanceToFlipperSurface(
+        settled.ball.position,
+        leftFlipper,
+        leftFlipper.activeAngle,
+      ),
+    ).toBeLessThanOrEqual(settled.ball.radius + 1);
+    expect(getBallSpeed(settled)).toBeLessThan(1);
   });
 
   it('keeps flipper animation at real-time speed on long frames', () => {
@@ -883,8 +915,8 @@ const placeBallOnFlipperSurface = (
   state: ReturnType<typeof createInitialGameState>,
   flipper: FlipperDefinition,
   along: number,
+  angle = flipper.restingAngle,
 ): void => {
-  const angle = flipper.restingAngle;
   const segmentX = Math.cos(angle) * flipper.length;
   const segmentY = Math.sin(angle) * flipper.length;
   const surfaceX = flipper.x + segmentX * along;
@@ -960,11 +992,12 @@ const advanceFrames = <TBoard extends BoardDefinition>(
   state: ReturnType<typeof createInitialGameState>,
   board: TBoard,
   frameCount: number,
+  input: InputState = idleInput,
 ): ReturnType<typeof createInitialGameState> => {
   let current = state;
 
   for (let index = 0; index < frameCount; index += 1) {
-    current = stepGame(current, board, idleInput, 1 / 60);
+    current = stepGame(current, board, input, 1 / 60);
   }
 
   return current;

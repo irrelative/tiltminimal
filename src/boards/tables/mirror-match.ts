@@ -112,7 +112,11 @@ return {
 const lowerPlayfield = createStandardLowerPlayfieldPair({
   leftFlipperPivot: absolutePoint(270, 1220),
   rightFlipperPivot: absolutePoint(630, 1220),
-  slingshots: { angle: 0.5, score: 10, strength: 560 },
+  slingshots: {
+    angle: 0.5,
+    score: 10,
+    strength: 560,
+  },
   flippers: {
     leftX: 270,
     rightX: 630,
@@ -150,6 +154,37 @@ const topArch = createTopArchLanes({
   sideEntryInset: 112,
   roofInset: 66,
 });
+
+const lowerLaneRailAccents = [
+  {
+    start: absolutePoint(88, 780),
+    end: absolutePoint(88, 980),
+    thickness: 10,
+    material: 'metalGuide' as const,
+    plane: 'raised' as const,
+  },
+  {
+    start: absolutePoint(88, 780),
+    end: absolutePoint(142, 734),
+    thickness: 10,
+    material: 'metalGuide' as const,
+    plane: 'raised' as const,
+  },
+  {
+    start: absolutePoint(852, 780),
+    end: absolutePoint(852, 980),
+    thickness: 10,
+    material: 'metalGuide' as const,
+    plane: 'raised' as const,
+  },
+  {
+    start: absolutePoint(852, 780),
+    end: absolutePoint(820, 734),
+    thickness: 10,
+    material: 'metalGuide' as const,
+    plane: 'raised' as const,
+  },
+];
 
 const popCluster = createPopBumperCluster({
   top: absolutePoint(450, 300),
@@ -228,6 +263,7 @@ const mirrorMatchLayout: BoardLayoutDefinition = {
   guides: [
     ...lowerPlayfield.guides,
     ...popCluster.guides,
+    ...lowerLaneRailAccents,
     ...topArch.guides,
     {
       start: absolutePoint(820, 438),
