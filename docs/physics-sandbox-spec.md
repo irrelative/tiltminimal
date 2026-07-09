@@ -25,7 +25,7 @@ The sandbox still uses the same:
 - nudge motion
 - materials
 - collision response
-- plunger and shooter-lane geometry
+- playfield collision geometry; spawned balls begin outside the plunger pipe
 
 ## Board Selection
 
@@ -34,7 +34,6 @@ The route uses the same table-selection model as the play route.
 Available boards include:
 
 - built-in tables
-- locally edited or custom tables loaded from storage
 
 Changing the selected board resets the sandbox session for that board.
 
@@ -172,4 +171,4 @@ Coverage for this feature should include:
 - blocked spawn rejection
 - drain removal without resetting the sandbox route
 - continued flipper/nudge interaction
-- unchanged behavior on `/`, `/editor`, and `/rules`
+- unchanged behavior on `/` and `/physics`

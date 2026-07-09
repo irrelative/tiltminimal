@@ -41,9 +41,7 @@ export const syncPhysicsRoutePanel = ({
       const option = document.createElement('option');
       option.value = table.id;
       option.selected = table.id === activeTableId;
-      option.textContent = table.builtIn
-        ? `${table.board.name} (built-in)`
-        : `${table.board.name} (edited)`;
+      option.textContent = table.board.name;
 
       return option;
     }),
@@ -57,7 +55,7 @@ export const syncPhysicsRoutePanel = ({
     return;
   }
 
-  tableMeta.textContent = `${active.builtIn ? 'Built-in table' : 'Custom or edited table'} · ${getFeatureCount(active.board)} features`;
+  tableMeta.textContent = `${getFeatureCount(active.board)} features`;
 };
 
 export const startPhysicsSandboxSession = ({
@@ -81,7 +79,8 @@ export const startPhysicsSandboxSession = ({
     const selected = getPhysicsSandboxDebugBall(state);
 
     pauseButton.textContent = state.paused ? 'Resume' : 'Pause';
-    statusMessage.textContent = state.statusMessage ?? 'Click the playfield to spawn.';
+    statusMessage.textContent =
+      state.statusMessage ?? 'Click the playfield to spawn.';
     debugStatus.textContent = `${state.balls.length} active ball${state.balls.length === 1 ? '' : 's'}`;
 
     if (!selected) {

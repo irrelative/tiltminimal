@@ -27,7 +27,6 @@ import {
   pointsNearlyEqual,
 } from './physics-helpers';
 
-const SAUCER_EJECT_ANGLE_JITTER = 0.12;
 const SLINGSHOT_COMPRESSION_RECOVERY = 8;
 
 export interface FlipperMotionFrame {
@@ -201,7 +200,8 @@ export const advanceElementStates = (
     );
     slingshotState.compression = Math.max(
       0,
-      slingshotState.compression - deltaSeconds * SLINGSHOT_COMPRESSION_RECOVERY,
+      slingshotState.compression -
+        deltaSeconds * SLINGSHOT_COMPRESSION_RECOVERY,
     );
   });
 };
@@ -238,8 +238,7 @@ export const resolveOccupiedSaucer = (
 
   if (saucerState.holdSecondsRemaining === 0) {
     saucerState.occupied = false;
-    const ejectAngle =
-      saucer.ejectAngle + (Math.random() * 2 - 1) * SAUCER_EJECT_ANGLE_JITTER;
+    const ejectAngle = saucer.ejectAngle;
     state.ball.position.x =
       center.x + Math.cos(ejectAngle) * (saucer.radius + state.ball.radius + 4);
     state.ball.position.y =
@@ -355,7 +354,11 @@ const advanceFlipper = (
   };
 };
 
-const moveToward = (current: number, target: number, maxStep: number): number => {
+const moveToward = (
+  current: number,
+  target: number,
+  maxStep: number,
+): number => {
   if (maxStep <= 0) {
     return current;
   }

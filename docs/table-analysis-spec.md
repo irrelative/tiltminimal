@@ -13,18 +13,8 @@ obviously broken.
 
 ## Editor Workflow
 
-The analysis UI lives on the `/editor` route in its own `Analysis` panel.
-
-Current behavior:
-
-- the user clicks `Analyze table`
-- the editor runs the analysis pass against the active board
-- the editor shows a list of warnings
-- after analysis has been run once, subsequent board edits automatically update
-  the warning list because the panel re-analyzes the current board on render
-
-The analysis panel is advisory only. It does not block saving, exporting, or
-play testing.
+The analysis runs from the validation CLI against code-authored built-in boards.
+It is advisory by default and reports warnings alongside hard layout errors.
 
 ## Warning Shape
 

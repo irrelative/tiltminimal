@@ -39,9 +39,7 @@ export const syncPlayRoutePanel = ({
       const option = document.createElement('option');
       option.value = table.id;
       option.selected = table.id === activeTableId;
-      option.textContent = table.builtIn
-        ? `${table.board.name} (built-in)`
-        : `${table.board.name} (edited)`;
+      option.textContent = table.board.name;
 
       return option;
     }),
@@ -55,7 +53,7 @@ export const syncPlayRoutePanel = ({
     return;
   }
 
-  playTableMeta.textContent = `${active.builtIn ? 'Built-in table' : 'Custom or edited table'} · ${getFeatureCount(active.board)} features`;
+  playTableMeta.textContent = `${getFeatureCount(active.board)} features`;
 };
 
 export const startStandalonePlaySession = ({

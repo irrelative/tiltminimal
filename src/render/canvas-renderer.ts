@@ -1,4 +1,3 @@
-import type { EditorSelection } from '../editor/editor-types';
 import type { BallState, GameState } from '../game/game-state';
 import type { InputState } from '../input/keyboard-input';
 import type { BoardDefinition } from '../types/board-definition';
@@ -11,30 +10,20 @@ import {
   drawStaticBoardBase,
   drawStaticBoardOverlay,
 } from './canvas-renderer-board';
-import {
-  drawDraft,
-  drawEditorGrid,
-  drawEditorHud,
-  drawEditorSelection,
-  drawLaunchPosition,
-  type EditorRenderOptions,
-} from './canvas-renderer-editor';
 import { drawHud } from './canvas-renderer-hud';
 
 export class CanvasRenderer {
   private context: CanvasRenderingContext2D | null = null;
   private lastDisplayWidth = 0;
   private lastDisplayHeight = 0;
-  private staticGameLayers:
-    | {
-        board: BoardDefinition;
-        width: number;
-        height: number;
-        themeId: BoardDefinition['themeId'];
-        baseCanvas: HTMLCanvasElement;
-        overlayCanvas: HTMLCanvasElement;
-      }
-    | null = null;
+  private staticGameLayers: {
+    board: BoardDefinition;
+    width: number;
+    height: number;
+    themeId: BoardDefinition['themeId'];
+    baseCanvas: HTMLCanvasElement;
+    overlayCanvas: HTMLCanvasElement;
+  } | null = null;
 
   constructor(private readonly canvas: HTMLCanvasElement) {}
 
@@ -62,27 +51,6 @@ export class CanvasRenderer {
     context.restore();
     drawBall(context, board, state);
     drawHud(context, board, state, input);
-  }
-
-  renderEditor(
-    board: BoardDefinition,
-    selection: EditorSelection,
-    draftPosition: { x: number; y: number } | null,
-    options: EditorRenderOptions = {},
-  ): void {
-    const context = this.getContext();
-    this.invalidateStaticGameLayers();
-    this.syncCanvasSize(board);
-    context.clearRect(0, 0, board.width, board.height);
-
-    drawBoard(context, board);
-    if (options.showGrid) {
-      drawEditorGrid(context, board);
-    }
-    drawLaunchPosition(context, board, selection);
-    drawEditorSelection(context, board, selection);
-    drawDraft(context, draftPosition);
-    drawEditorHud(context, board, options);
   }
 
   renderPhysicsSandbox(
@@ -177,9 +145,7 @@ export class CanvasRenderer {
     return context;
   }
 
-  private ensureStaticGameLayers(
-    board: BoardDefinition,
-  ): {
+  private ensureStaticGameLayers(board: BoardDefinition): {
     baseCanvas: HTMLCanvasElement;
     overlayCanvas: HTMLCanvasElement;
   } | null {
@@ -218,9 +184,7 @@ export class CanvasRenderer {
     return this.staticGameLayers;
   }
 
-  private createLayerCanvas(
-    board: BoardDefinition,
-  ): {
+  private createLayerCanvas(board: BoardDefinition): {
     canvas: HTMLCanvasElement;
     context: CanvasRenderingContext2D;
   } | null {
@@ -237,9 +201,5 @@ export class CanvasRenderer {
       canvas: layerCanvas,
       context: layerContext,
     };
-  }
-
-  private invalidateStaticGameLayers(): void {
-    this.staticGameLayers = null;
   }
 }

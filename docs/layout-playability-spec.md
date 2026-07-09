@@ -64,11 +64,11 @@ Guides can now be authored on two visual/playability planes:
 
 - `playfield`: normal guide geometry that participates in flipper keepout
   validation
-- `raised`: guide geometry intended to represent elevated rails or returns;
-  these render above flippers and are exempt from flipper keepout validation
+- `raised`: non-colliding overhead return hardware; these render above flippers
+  and are exempt from flipper keepout validation
 
-This is still a 2D physics model. `raised` changes validation and rendering, not
-full 3D collision behavior.
+This is still a 2D physics model. Raised guides are visual overhead hardware,
+not floor-level collision walls.
 
 ## Top Arch Primitive
 
@@ -123,9 +123,8 @@ Behavior requirements:
 These checks are geometric heuristics. They do not replace shot simulation, but
 they are intended to fail fast on layouts that are visibly unplayable.
 
-Separate from this compile-time validation, the `/editor` route also exposes an
-analysis panel that can run advisory checks against built-in or custom boards.
-That editor analysis currently covers:
+The validation CLI also runs advisory analysis against built-in boards. It
+currently covers:
 
 - overlapping elements
 - out-of-bounds geometry

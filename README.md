@@ -74,9 +74,6 @@ Use the `Makefile` entrypoints:
   and layout goals for the built-in 1970s EM-style table
 * [docs/double-crossed-spec.md](docs/double-crossed-spec.md) defines the
   behavior and validation goals for the built-in `Double Crossed` table
-* [docs/module-boundary-refactor-spec.md](docs/module-boundary-refactor-spec.md)
-  defines the current structural refactor targets and the new shared module
-  boundaries for board codecs, physics helpers, and app UI composition
 
 ## Static Deployment
 

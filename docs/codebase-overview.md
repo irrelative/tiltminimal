@@ -17,8 +17,8 @@ The main source tree is under `src/`.
 - `src/boards/tables/`: built-in table layouts, compiled built-in boards, and
   table-specific rules scripts
 - `src/cli/`: terminal-facing validation and utility entrypoints
-- `src/editor/`: table builder state, hit testing, drag handles, mutation, and
-  local-storage persistence helpers
+- `src/editor/`: retained analysis and legacy authoring helpers used by tests
+  and validation tooling, not by the browser runtime
 - `src/game/`: runtime state, physics stepping, rules execution, materials, and
   geometry helpers
 - `src/input/`: keyboard and touch control input handling
