@@ -7,8 +7,9 @@ import {
 } from '../src/render/board-themes';
 
 describe('board themes', () => {
-  it('includes four selectable built-in themes', () => {
+  it('includes five selectable built-in themes', () => {
     expect(Object.keys(BOARD_THEMES)).toEqual([
+      'mirror-match',
       'classic',
       'midnight',
       'sunburst',

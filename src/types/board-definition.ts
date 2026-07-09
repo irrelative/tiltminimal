@@ -5,7 +5,12 @@ export interface Point {
 
 export type GuidePlane = 'playfield' | 'raised';
 
-export type BoardThemeId = 'classic' | 'midnight' | 'sunburst' | 'grayscale';
+export type BoardThemeId =
+  | 'classic'
+  | 'midnight'
+  | 'sunburst'
+  | 'grayscale'
+  | 'mirror-match';
 
 export type FlipperSide = 'left' | 'right';
 

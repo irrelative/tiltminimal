@@ -1,6 +1,7 @@
 import { classicTable } from './tables/classic-table';
 import { doubleCrossedTable } from './tables/double-crossed';
 import { harlemGlobetrottersTable } from './tables/harlem-globetrotters';
+import { mirrorMatchTable } from './tables/mirror-match';
 import { starlightEmTable } from './tables/starlight-em-table';
 import type {
   BoardDefinition,
@@ -25,6 +26,10 @@ export const BUILT_IN_TABLES: BuiltInTable[] = [
   {
     id: 'harlem-globetrotters',
     board: harlemGlobetrottersTable,
+  },
+  {
+    id: 'mirror-match',
+    board: mirrorMatchTable,
   },
   {
     id: 'starlight-em',

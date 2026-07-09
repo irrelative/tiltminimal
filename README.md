@@ -73,6 +73,8 @@ Use the `Makefile` entrypoints:
   playable lower thirds
 * [docs/starlight-em-spec.md](docs/starlight-em-spec.md) defines the behavior
   and layout goals for the built-in 1970s EM-style table
+* [docs/mirror-match-spec.md](docs/mirror-match-spec.md) defines the symmetric
+  solid-state layout and rules goals for `Mirror Match`
 * [docs/double-crossed-spec.md](docs/double-crossed-spec.md) defines the
   behavior and validation goals for the built-in `Double Crossed` table
 
