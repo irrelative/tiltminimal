@@ -1,3 +1,4 @@
+import { clonePlungerDefinition } from '../game/plunger-geometry';
 import { BOARD_GRID_SIZE, snapPointToGrid, snapValueToGrid } from './grid';
 import type { BoardDefinition } from '../types/board-definition';
 
@@ -9,7 +10,7 @@ export const snapBoardLayoutToGrid = (
     ...board,
     ball: { ...board.ball },
     launchPosition: { ...board.launchPosition },
-    plunger: { ...board.plunger },
+    plunger: clonePlungerDefinition(board.plunger),
     materials: { ...board.materials },
     surfaceMaterials: {
       playfieldWood: { ...board.surfaceMaterials.playfieldWood },

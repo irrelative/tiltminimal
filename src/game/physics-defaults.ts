@@ -224,6 +224,14 @@ const resolvePlungerDefinition = (
     guideLength:
       input.plunger?.guideLength ?? physicsDefaults.plunger.guideLength,
     material: input.plunger?.material ?? physicsDefaults.plunger.material,
+    ...(input.plunger?.returnGate
+      ? {
+          returnGate: {
+            start: { ...input.plunger.returnGate.start },
+            end: { ...input.plunger.returnGate.end },
+          },
+        }
+      : {}),
   };
 };
 

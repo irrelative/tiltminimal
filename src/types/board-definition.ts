@@ -30,6 +30,8 @@ export interface PlungerDefinition extends Point {
   travel: number;
   // Vertical shooter-lane guide span above the launch position.
   guideLength: number;
+  // Keep shooter walls solid and close the exit behind a launched ball.
+  returnGate?: { start: Point; end: Point };
   material: SurfaceMaterialName;
 }
 

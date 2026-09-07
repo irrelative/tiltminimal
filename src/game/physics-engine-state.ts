@@ -3,7 +3,10 @@ import type { BoardDefinition } from '../types/board-definition';
 import type { GameState } from './game-state';
 import { resetBall } from './game-state';
 import { getSurfaceMaterial } from './materials';
-import { getPlungerLaneBounds } from './plunger-geometry';
+import {
+  getPlungerLaneBounds,
+  hasPassedPlungerReturnGate,
+} from './plunger-geometry';
 import {
   constrainBallToLauncherLane,
   resolveGuideCollisions,
@@ -23,7 +26,7 @@ import {
 } from './physics-engine-devices';
 import { resolveFlipperCollisions } from './physics-engine-flippers';
 import {
-  MAX_SIMULATION_STEP_SECONDS,
+  getBallStepSeconds,
   type PhysicsStepResult,
 } from './physics-engine-types';
 import {
@@ -117,13 +120,14 @@ export const stepPlayingState = (
 ): PhysicsStepResult => {
   const events: GameEvent[] = [];
   const next = clonePlayingGameState(state, board);
-  const stepCount = Math.max(
-    1,
-    Math.ceil(deltaSeconds / MAX_SIMULATION_STEP_SECONDS),
-  );
-  const stepSeconds = stepCount > 0 ? deltaSeconds / stepCount : 0;
-
-  for (let stepIndex = 0; stepIndex < stepCount; stepIndex += 1) {
+  let remainingSeconds = deltaSeconds;
+  do {
+    const stepSeconds = getBallStepSeconds(
+      next.ball,
+      board.gravity,
+      remainingSeconds,
+    );
+    remainingSeconds -= stepSeconds;
     next.tableNudge = advanceTableNudgeState(
       next.tableNudge,
       board,
@@ -173,6 +177,32 @@ export const stepPlayingState = (
     resolveSpinnerInteractions(next, board, board.physics.solver, events);
     resolveRolloverTriggers(next, board, events);
 
+    // A weak plunge that never crossed the gate is still the same ball.
+    // Re-seat it for the next pull instead of leaving it in live-play state.
+    if (
+      board.plunger.returnGate &&
+      !next.launcherExited &&
+      !input.launchPressed &&
+      next.plunger.pullback === 0 &&
+      Math.abs(
+        next.ball.position.x -
+          board.launchPosition.x -
+          next.tableNudge.offset.x,
+      ) <= next.ball.radius &&
+      Math.abs(
+        next.ball.position.y -
+          board.launchPosition.y -
+          next.tableNudge.offset.y,
+      ) <=
+        next.ball.radius * 2 &&
+      Math.hypot(next.ball.linearVelocity.x, next.ball.linearVelocity.y) < 40
+    ) {
+      next.status = 'waiting-launch';
+      next.ball.position = { ...board.launchPosition };
+      next.ball.linearVelocity = { x: 0, y: 0 };
+      next.ball.angularVelocity = { x: 0, y: 0 };
+    }
+
     if (
       next.ball.position.y - next.ball.radius >
       board.drainY + next.tableNudge.offset.y
@@ -187,7 +217,7 @@ export const stepPlayingState = (
         events,
       };
     }
-  }
+  } while (remainingSeconds > 1e-9);
 
   return {
     state: next,
@@ -199,6 +229,12 @@ const hasExitedShooterLane = (
   state: GameState,
   board: BoardDefinition,
 ): boolean => {
+  if (board.plunger.returnGate) {
+    return hasPassedPlungerReturnGate(board, {
+      x: state.ball.position.x - state.tableNudge.offset.x,
+      y: state.ball.position.y - state.tableNudge.offset.y,
+    });
+  }
   const guideTopY = board.launchPosition.y - board.plunger.guideLength;
   const lane = getPlungerLaneBounds(board);
 

@@ -29,6 +29,7 @@ import { resolveFlipperCollisions } from './physics-engine-flippers';
 import { applyPlayfieldRollingResistance } from './physics-engine-state';
 import {
   MAX_SIMULATION_STEP_SECONDS,
+  getBallStepSeconds,
   type PhysicsStepResult,
 } from './physics-engine-types';
 import {
@@ -246,7 +247,7 @@ export const stepPhysicsSandbox = (
     balls.some((ball) => ball.id === state.selectedBallId)
       ? state.selectedBallId
       : balls.length > 0
-        ? balls[balls.length - 1]?.id ?? null
+        ? (balls[balls.length - 1]?.id ?? null)
         : null;
 
   return {
@@ -304,7 +305,7 @@ export const getPhysicsSandboxSpawnBlockedReason = (
       (guide) =>
         (guide.plane ?? 'playfield') !== 'raised' &&
         projectPointToGuide(point, guide).distance <=
-        guide.thickness / 2 + ball.radius,
+          guide.thickness / 2 + ball.radius,
     )
   ) {
     return 'Spawn blocked: point overlaps a guide.';
@@ -323,7 +324,8 @@ export const getPhysicsSandboxSpawnBlockedReason = (
   if (
     board.posts.some(
       (post) =>
-        Math.hypot(point.x - post.x, point.y - post.y) <= post.radius + ball.radius,
+        Math.hypot(point.x - post.x, point.y - post.y) <=
+        post.radius + ball.radius,
     )
   ) {
     return 'Spawn blocked: point overlaps a post.';
@@ -565,13 +567,14 @@ const stepSandboxBallState = (
 } => {
   const events: GameEvent[] = [];
   const next = clonePlayingGameState(state, board);
-  const stepCount = Math.max(
-    1,
-    Math.ceil(deltaSeconds / MAX_SIMULATION_STEP_SECONDS),
-  );
-  const stepSeconds = stepCount > 0 ? deltaSeconds / stepCount : 0;
-
-  for (let stepIndex = 0; stepIndex < stepCount; stepIndex += 1) {
+  let remainingSeconds = deltaSeconds;
+  do {
+    const stepSeconds = getBallStepSeconds(
+      next.ball,
+      board.gravity,
+      remainingSeconds,
+    );
+    remainingSeconds -= stepSeconds;
     next.tableNudge = advanceTableNudgeState(
       next.tableNudge,
       board,
@@ -625,7 +628,7 @@ const stepSandboxBallState = (
         drained: true,
       };
     }
-  }
+  } while (remainingSeconds > 1e-9);
 
   return {
     state: next,

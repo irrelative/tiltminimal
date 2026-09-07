@@ -2,6 +2,7 @@ import { getSurfaceMaterial } from '../game/materials';
 import {
   getPlungerGuideBottomY,
   getPlungerGuideSegments,
+  getPlungerReturnGate,
   getPlungerGuideTopY,
   getPlungerLaneHalfWidth,
 } from '../game/plunger-geometry';
@@ -58,6 +59,25 @@ export const drawDynamicBoard = (
   state?: GameState,
 ): void => {
   drawPlungerBody(context, board, state);
+  const gate = getPlungerReturnGate(board);
+  if (gate) {
+    context.save();
+    context.strokeStyle = getBoardTheme(board.themeId).plungerGuidePrimary;
+    context.lineWidth = gate.thickness;
+    context.beginPath();
+    context.moveTo(gate.start.x, gate.start.y);
+    // Open leaf points up the lane; the closed leaf spans the exit.
+    context.lineTo(
+      state?.launcherExited
+        ? gate.end.x
+        : gate.start.x + gate.end.y - gate.start.y,
+      state?.launcherExited
+        ? gate.end.y
+        : gate.start.y - (gate.end.x - gate.start.x),
+    );
+    context.stroke();
+    context.restore();
+  }
   drawStandupTargets(context, board, state);
   drawDropTargets(context, board, state);
   drawSlingshots(context, board, state);
@@ -138,8 +158,18 @@ const drawBallMotionStreak = (
     x: ball.position.x - direction.x * headInset,
     y: ball.position.y - direction.y * headInset,
   };
-  const haloGradient = context.createLinearGradient(start.x, start.y, end.x, end.y);
-  const coreGradient = context.createLinearGradient(start.x, start.y, end.x, end.y);
+  const haloGradient = context.createLinearGradient(
+    start.x,
+    start.y,
+    end.x,
+    end.y,
+  );
+  const coreGradient = context.createLinearGradient(
+    start.x,
+    start.y,
+    end.x,
+    end.y,
+  );
 
   haloGradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
   haloGradient.addColorStop(
@@ -287,10 +317,7 @@ const drawGuides = (
       continue;
     }
 
-    const material = getSurfaceMaterial(
-      guide.material,
-      board.surfaceMaterials,
-    );
+    const material = getSurfaceMaterial(guide.material, board.surfaceMaterials);
 
     context.save();
     if (plane === 'raised') {
@@ -420,12 +447,7 @@ const drawPlungerLane = (
   context.strokeStyle = theme.plungerLaneStroke;
   context.lineWidth = 3;
   context.beginPath();
-  context.rect(
-    board.plunger.x - laneWidth / 2,
-    laneTop,
-    laneWidth,
-    laneHeight,
-  );
+  context.rect(board.plunger.x - laneWidth / 2, laneTop, laneWidth, laneHeight);
   context.fill();
   context.stroke();
 
@@ -645,13 +667,7 @@ const drawSpinners = (
     context.save();
     context.fillStyle = theme.spinnerCap;
     context.beginPath();
-    context.arc(
-      spinner.x,
-      spinner.y,
-      spinner.thickness * 0.8,
-      0,
-      Math.PI * 2,
-    );
+    context.arc(spinner.x, spinner.y, spinner.thickness * 0.8, 0, Math.PI * 2);
     context.fill();
     context.restore();
   });
@@ -671,9 +687,7 @@ const drawRollovers = (
     context.beginPath();
     context.arc(rollover.x, rollover.y, rollover.radius, 0, Math.PI * 2);
     context.fill();
-    context.strokeStyle = lit
-      ? theme.rolloverStrokeLit
-      : theme.rolloverStroke;
+    context.strokeStyle = lit ? theme.rolloverStrokeLit : theme.rolloverStroke;
     context.lineWidth = 4;
     context.stroke();
     context.restore();

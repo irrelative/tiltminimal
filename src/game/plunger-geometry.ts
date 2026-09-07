@@ -8,13 +8,11 @@ import { getGuideDistance } from './guide-geometry';
 
 const PLUNGER_GUIDE_CLEARANCE = 12;
 
-export const getPlungerGuideThickness = (
-  plunger: PlungerDefinition,
-): number => Math.max(8, Math.round(plunger.thickness * 0.35));
+export const getPlungerGuideThickness = (plunger: PlungerDefinition): number =>
+  Math.max(8, Math.round(plunger.thickness * 0.35));
 
-export const getPlungerLaneHalfWidth = (
-  plunger: PlungerDefinition,
-): number => plunger.thickness / 2 + PLUNGER_GUIDE_CLEARANCE;
+export const getPlungerLaneHalfWidth = (plunger: PlungerDefinition): number =>
+  plunger.thickness / 2 + PLUNGER_GUIDE_CLEARANCE;
 
 export const getPlungerGuideTopY = (board: BoardDefinition): number =>
   board.launchPosition.y - board.plunger.guideLength;
@@ -94,7 +92,9 @@ export const getLauncherGuideDistance = (
   point: Point,
 ): number =>
   Math.min(
-    ...getPlungerGuideSegments(board).map((guide) => getGuideDistance(point, guide)),
+    ...getPlungerGuideSegments(board).map((guide) =>
+      getGuideDistance(point, guide),
+    ),
   );
 
 export const getLauncherMinX = (board: BoardDefinition): number => {
@@ -110,3 +110,48 @@ export const getLauncherMaxX = (board: BoardDefinition): number => {
 
   return board.width - halfWidth - guideHalfThickness;
 };
+
+// Endpoint order defines the exit side: (dy, -dx) points into live play.
+export const getPlungerReturnGate = (
+  board: BoardDefinition,
+): LineGuideDefinition | null => {
+  const gate = board.plunger.returnGate;
+  return gate
+    ? {
+        kind: 'line',
+        start: { ...gate.start },
+        end: { ...gate.end },
+        thickness: getPlungerGuideThickness(board.plunger),
+        material: board.plunger.material,
+      }
+    : null;
+};
+
+export const hasPassedPlungerReturnGate = (
+  board: BoardDefinition,
+  point: Point,
+): boolean => {
+  const gate = getPlungerReturnGate(board);
+  if (!gate) return false;
+  const dx = gate.end.x - gate.start.x;
+  const dy = gate.end.y - gate.start.y;
+  const length = Math.hypot(dx, dy);
+  if (length === 0) return false;
+  const exitDistance =
+    ((point.x - gate.start.x) * dy - (point.y - gate.start.y) * dx) / length;
+  return exitDistance > board.ball.radius + gate.thickness / 2;
+};
+
+export const clonePlungerDefinition = (
+  plunger: PlungerDefinition,
+): PlungerDefinition => ({
+  ...plunger,
+  ...(plunger.returnGate
+    ? {
+        returnGate: {
+          start: { ...plunger.returnGate.start },
+          end: { ...plunger.returnGate.end },
+        },
+      }
+    : {}),
+});

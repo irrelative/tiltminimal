@@ -16,6 +16,7 @@ import {
 import type { PlungerMotionFrame } from './physics-motion';
 import {
   getPlungerGuideSegments,
+  getPlungerReturnGate,
   getPlungerLaneCenterBounds,
 } from './plunger-geometry';
 import { getContactTangent, resolveBallContact } from './spin-solver';
@@ -130,13 +131,25 @@ export const resolvePlungerGuideCollisions = (
   board: BoardDefinition,
   solver: SolverPhysicsDefinition,
 ): void => {
-  if (state.launcherExited) {
+  if (state.launcherExited && !board.plunger.returnGate) {
     return;
   }
 
   const tableOffset = state.tableNudge.offset;
 
-  for (const guide of getPlungerGuideSegments(board)) {
+  const guides = getPlungerGuideSegments(board);
+  const gate = getPlungerReturnGate(board);
+  if (gate && state.launcherExited) {
+    resolveGuideCollision(
+      state,
+      board,
+      offsetGuide(gate, tableOffset),
+      solver,
+      state.tableNudge.velocity,
+    );
+  }
+
+  for (const guide of guides) {
     resolveGuideCollision(
       state,
       board,
@@ -280,10 +293,7 @@ export const constrainBallToLauncherLane = (
 
   if (state.ball.position.x <= minX && state.ball.linearVelocity.x < 0) {
     state.ball.linearVelocity.x = 0;
-  } else if (
-    state.ball.position.x >= maxX &&
-    state.ball.linearVelocity.x > 0
-  ) {
+  } else if (state.ball.position.x >= maxX && state.ball.linearVelocity.x > 0) {
     state.ball.linearVelocity.x = 0;
   }
 };

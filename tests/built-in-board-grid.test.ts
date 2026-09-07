@@ -1,16 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { classicTable } from '../src/boards/tables/classic-table';
 import { doubleCrossedTable } from '../src/boards/tables/double-crossed';
 import { harlemGlobetrottersTable } from '../src/boards/tables/harlem-globetrotters';
 import { BOARD_GRID_SIZE } from '../src/boards/grid';
 import type { BoardDefinition, Point } from '../src/types/board-definition';
 
 describe('built-in board layouts', () => {
-  it('snaps the classic table layout to the board grid', () => {
-    expectBoardLayoutOnGrid(classicTable);
-  });
-
   it('snaps the Double Crossed layout to the board grid', () => {
     expectBoardLayoutOnGrid(doubleCrossedTable);
   });

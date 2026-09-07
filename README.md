@@ -41,6 +41,8 @@ Use the `Makefile` entrypoints:
 
 ## Additional docs
 
+* [docs/classic-table-spec.md](docs/classic-table-spec.md) defines Classic’s
+  connected lanes, scoring shots, shooter gate, and route verification
 * [docs/codebase-overview.md](docs/codebase-overview.md) explains the current
   folder layout, runtime flow, route responsibilities, and important module
   boundaries

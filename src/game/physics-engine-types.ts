@@ -1,4 +1,4 @@
-import type { GameState } from './game-state';
+import type { GameState, BallState } from './game-state';
 import type { GameEvent } from './rules-types';
 
 export interface PhysicsStepResult {
@@ -13,3 +13,21 @@ export const MIN_SLINGSHOT_TRIGGER_SPEED = 40;
 
 export const clampFrameDeltaSeconds = (deltaSeconds: number): number =>
   Math.min(Math.max(deltaSeconds, 0), MAX_FRAME_DELTA_SECONDS);
+
+// Limit travel to one ball radius so a fast ball cannot cross a rail's
+// centerline between collision samples and be resolved onto the wrong side.
+export const getBallStepSeconds = (
+  ball: BallState,
+  gravity: number,
+  remainingSeconds: number,
+): number =>
+  Math.min(
+    remainingSeconds,
+    MAX_SIMULATION_STEP_SECONDS,
+    ball.radius /
+      Math.max(
+        1,
+        Math.hypot(ball.linearVelocity.x, ball.linearVelocity.y) +
+          Math.abs(gravity) * MAX_SIMULATION_STEP_SECONDS,
+      ),
+  );

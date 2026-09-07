@@ -328,3 +328,12 @@ Known simplifications:
 
 These choices keep the code understandable and easy to tune while still
 producing believable pinball-like behavior.
+
+## Fast-ball rail collision sampling
+
+Game and sandbox ball integration use at most 1/120 second per substep and
+reduce that interval at high speed so linear travel does not exceed one ball
+radius (including a gravity allowance). Collision sampling therefore sees a
+fast plunge before it crosses a thin rail's centerline. Slow-ball stepping
+keeps the existing maximum interval. Classic's route tests and shooter-wall
+regression cover this behavior; it applies to all built-in tables.

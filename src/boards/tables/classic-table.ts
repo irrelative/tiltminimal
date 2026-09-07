@@ -1,11 +1,8 @@
 import {
   absolutePoint,
-  anchorPoint,
-  createMirroredTargetBank,
+  createFlipperPair,
   createPopBumperCluster,
-  createShooterLaneRight,
-  createStandardLowerPlayfieldPair,
-  createTopArchLanes,
+  createSlingshotPair,
 } from '../layout-primitives';
 import type {
   BoardLayoutDefinition,
@@ -112,147 +109,171 @@ return {
 };
 `;
 
-const classicLowerPlayfield = createStandardLowerPlayfieldPair({
-  leftFlipperPivot: absolutePoint(270, 1220),
-  rightFlipperPivot: absolutePoint(630, 1220),
-  slingshots: {
-    angle: 0.5,
-    score: 10,
-    strength: 560,
-  },
-  flippers: {
-    leftX: 270,
-    rightX: 630,
-    y: 1220,
-    length: 150,
-    thickness: 20,
-    restingAngleOffset: 0.28,
-    activeAngleOffset: -0.42,
-    material: 'flipperRubber',
-  },
+// These coordinates describe connected ball paths; do not snap their joints.
+const rail = (
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number,
+): GuideLayoutDefinition => ({
+  start: absolutePoint(x1, y1),
+  end: absolutePoint(x2, y2),
+  thickness: 12,
+  material: 'metalGuide',
+  plane: 'playfield',
+});
+const arc = (
+  x: number,
+  y: number,
+  radius: number,
+  startAngle: number,
+  endAngle: number,
+): GuideLayoutDefinition => ({
+  kind: 'arc',
+  center: absolutePoint(x, y),
+  radius,
+  startAngle,
+  endAngle,
+  thickness: 12,
+  material: 'metalGuide',
+  plane: 'playfield',
 });
 
-const classicShooterLane = createShooterLaneRight({
-  boardWidth: 900,
-  launchX: 760,
-  launchY: 1180,
-  guideLength: 620,
-  feedTopY: 280,
-  innerMergeX: 692,
-  innerMergeY: 332,
-  outerExitX: 800,
-  outerBendX: 808,
-  outerBendY: 396,
-});
-
-const classicTopArch = createTopArchLanes({
-  center: anchorPoint('top-arch-center'),
-  laneCount: 3,
-  spacingX: 150,
-  radius: 24,
-  score: 25,
-  roofOffsetY: -58,
-  separatorBottomOffsetY: 28,
-  shoulderStartOffsetY: 86,
-  sideEntryInset: 112,
-  roofInset: 66,
-});
-
-const classicPopCluster = createPopBumperCluster({
-  top: anchorPoint('pop-cluster-top'),
-  spacingX: 240,
-  spacingY: 180,
-  radius: 44,
-  scores: [100, 100, 250],
-  material: 'rubberPost',
-});
-
-const classicStandupBank = createMirroredTargetBank({
-  kind: 'standup',
-  center: anchorPoint('target-bank-center'),
-  targetsPerBank: 3,
-  sideOffsetX: 220,
-  spacingY: 80,
-  width: 60,
-  height: 16,
-  angleOffset: 0.2,
-  score: 50,
-  material: 'rubberPost',
-});
-
-const classicShooterExitGuides: GuideLayoutDefinition[] = [
-  {
-    start: absolutePoint(820, 438),
-    end: absolutePoint(704, 246),
-    thickness: 14,
-    material: 'metalGuide',
-  },
+// Inlanes bend inward above the flipper heels. Outside each divider is a
+// separate outlane which continues to the drain.
+const lowerGuides: GuideLayoutDefinition[] = [
+  rail(12, 460, 12, 1380),
+  rail(80, 900, 80, 1040),
+  arc(220, 1040, 140, Math.PI / 2, Math.PI),
+  rail(160, 900, 160, 1040),
+  arc(220, 1040, 60, Math.PI / 2, Math.PI),
+  rail(728, 900, 728, 1040),
+  arc(588, 1040, 140, 0, Math.PI / 2),
+  rail(648, 900, 648, 1040),
+  arc(588, 1040, 60, 0, Math.PI / 2),
 ];
 
 const classicTableLayout: BoardLayoutDefinition = {
   name: 'Classic Table',
-  template: 'solid-state-two-flipper',
   width: 900,
   height: 1400,
   rulesScript: classicRulesScript,
   drainY: 1425,
-  launchPosition: classicShooterLane.launchPosition,
-  plunger: classicShooterLane.plunger,
-  materials: {
-    playfield: 'playfieldWood',
-    walls: 'metalGuide',
-  },
-  physics: {
-    plunger: {
-      minReleaseSpeed: 5200,
-      maxReleaseSpeed: 6000,
-      bodyMass: 0.9,
+  launchPosition: absolutePoint(824, 1160),
+  plunger: {
+    x: 824,
+    thickness: 32,
+    guideLength: 520,
+    returnGate: {
+      start: { x: 432 + 364 * Math.cos(-0.8), y: 460 + 364 * Math.sin(-0.8) },
+      end: { x: 432 + 420 * Math.cos(-0.8), y: 460 + 420 * Math.sin(-0.8) },
     },
   },
-  posts: [...classicLowerPlayfield.posts, ...classicPopCluster.posts],
-  bumpers: classicPopCluster.bumpers,
-  standupTargets: classicStandupBank.standupTargets,
+  materials: { playfield: 'playfieldWood', walls: 'metalGuide' },
+  physics: {
+    plunger: { minReleaseSpeed: 5200, maxReleaseSpeed: 6000, bodyMass: 0.9 },
+  },
+  posts: [80, 160, 648, 728].map((x) => ({
+    position: absolutePoint(x, 900),
+    radius: 12,
+    material: 'rubberPost',
+  })),
+  bumpers: createPopBumperCluster({
+    top: absolutePoint(420, 330),
+    spacingX: 140,
+    spacingY: 140,
+    radius: 38,
+    scores: [100, 100, 250],
+    material: 'rubberPost',
+  }).bumpers,
+  standupTargets: [0, 1, 2].map((index) => ({
+    position: absolutePoint(245 + index * 40, 550 + index * 60),
+    width: 56,
+    height: 16,
+    angle: Math.atan2(60, 40),
+    score: 50,
+    material: 'rubberPost',
+  })),
   dropTargets: [
     {
-      position: absolutePoint(450, 470),
-      width: 54,
+      position: absolutePoint(365, 730),
+      width: 56,
       height: 16,
-      angle: -Math.PI / 2,
+      angle: Math.atan2(60, 40),
       score: 100,
       material: 'rubberPost',
     },
   ],
   saucers: [
     {
-      position: absolutePoint(610, 270),
-      radius: 30,
+      position: absolutePoint(670, 480),
+      radius: 28,
       score: 500,
       holdSeconds: 0.5,
-      ejectSpeed: 980,
-      ejectAngle: Math.PI * 0.45,
+      ejectSpeed: 640,
+      ejectAngle: Math.PI / 2 + 0.15,
       material: 'metalGuide',
     },
   ],
   spinners: [
     {
-      position: absolutePoint(520, 800),
-      length: 96,
+      position: absolutePoint(92, 570),
+      length: 70,
       thickness: 10,
       angle: 0,
       score: 10,
       material: 'metalGuide',
     },
   ],
-  slingshots: classicLowerPlayfield.slingshots,
-  rollovers: classicTopArch.rollovers,
+  slingshots: createSlingshotPair({
+    leftCenter: absolutePoint(260, 1030),
+    rightCenter: absolutePoint(548, 1030),
+    width: 144,
+    height: 50,
+    leftAngle: 0.65,
+    rightAngle: Math.PI - 0.65,
+    score: 10,
+    strength: 560,
+  }).slingshots,
+  rollovers: [300, 410, 520].map((x) => ({
+    position: absolutePoint(x, 200),
+    radius: 22,
+    score: 25,
+  })),
   guides: [
-    ...classicLowerPlayfield.guides,
-    ...classicPopCluster.guides,
-    ...classicTopArch.guides,
-    ...classicShooterExitGuides,
-    ...classicShooterLane.guides,
+    ...lowerGuides,
+    // Persistent shooter extension and a tangent outer arch above the lanes.
+    rail(852, 640, 852, 460),
+    rail(796, 640, 796, 460),
+    arc(432, 460, 420, Math.PI, Math.PI * 2),
+    arc(432, 460, 364, -0.8, 0),
+    // Open lane entrances: no roof across the rollover mouths.
+    rail(245, 90, 245, 150),
+    ...[245, 355, 465, 575].map((x) => rail(x, 150, x, 245)),
+    // Left spinner orbit. The outside edge joins the top arch.
+    rail(160, 340, 160, 540),
+    rail(160, 540, 260, 820),
+    // Target-bank backing, parallel to its four broad scoring faces.
+    rail(290, 510, 430, 720),
+    // Saucer pocket, with a flared approach and an open kickout path.
+    arc(670, 480, 54, Math.PI, Math.PI * 2),
+    rail(616, 480, 616, 550),
+    rail(616, 550, 590, 620),
+    rail(724, 480, 724, 550),
+    rail(724, 550, 750, 620),
   ],
-  flippers: classicLowerPlayfield.flippers,
+  flippers: createFlipperPair({
+    leftX: 244,
+    rightX: 564,
+    y: 1220,
+    length: 136,
+    thickness: 22,
+    restingAngleOffset: 0.28,
+    activeAngleOffset: -0.5,
+    material: 'flipperRubber',
+  }),
 };
 
-export const classicTable = compileBuiltInBoardLayout(classicTableLayout);
+export const classicTable = compileBuiltInBoardLayout(classicTableLayout, {
+  snapToGrid: false,
+});
