@@ -171,7 +171,7 @@ const classicTableLayout: BoardLayoutDefinition = {
   },
   materials: { playfield: 'playfieldWood', walls: 'metalGuide' },
   physics: {
-    plunger: { minReleaseSpeed: 5200, maxReleaseSpeed: 6000, bodyMass: 0.9 },
+    plunger: { minReleaseSpeed: 0, maxReleaseSpeed: 2800, bodyMass: 0.9 },
   },
   posts: [80, 160, 648, 728].map((x) => ({
     position: absolutePoint(x, 900),

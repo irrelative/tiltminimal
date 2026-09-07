@@ -129,7 +129,13 @@ export const advancePlungerFrame = (
       deltaSeconds > 0
         ? {
             x: 0,
-            y: (nextPullback - current.pullback) / deltaSeconds,
+            // Contact occurs while the spring is moving, even when it reaches
+            // its stop partway through this frame. Averaging that final
+            // travel over the whole frame made launch power depend on timing.
+            y:
+              !input.launchPressed && current.pullback > nextPullback
+                ? -releaseSpeed
+                : (nextPullback - current.pullback) / deltaSeconds,
           }
         : { x: 0, y: 0 },
   };

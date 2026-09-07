@@ -337,3 +337,13 @@ radius (including a gravity allowance). Collision sampling therefore sees a
 fast plunge before it crosses a thin rail's centerline. Slow-ball stepping
 keeps the existing maximum interval. Classic's route tests and shooter-wall
 regression cover this behavior; it applies to all built-in tables.
+
+## Plunger release calibration
+
+Spring contact uses the release velocity at impact, including a frame in which
+the spring reaches its stop. Dividing the final partial travel by the entire
+frame duration underestimates that velocity and makes launch strength depend
+on the frame boundary. Charge sweeps at 30, 60, 120, and 240 Hz now verify
+monotonically increasing, matching launch speeds. Classic uses release speeds
+from 0 to 2800; short pulls can return for another attempt, and pulls at 55%
+and above feed the arch in its route tests.

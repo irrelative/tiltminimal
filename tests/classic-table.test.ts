@@ -129,7 +129,7 @@ describe('classic ball routes', () => {
     expect(reachedTop).toBe(true);
   });
 
-  it.each([0.1, 0.35, 0.55, 0.8, 1])(
+  it.each([0.55, 0.7, 0.85, 1])(
     'feeds a top rollover from a %s plunge',
     (power) => {
       let state = launchBall(classicTable, {
