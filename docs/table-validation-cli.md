@@ -95,3 +95,11 @@ Optional behavior:
 - the CLI only targets built-in table implementations at the moment
 - it does not load browser-local custom tables
 - it does not yet validate arbitrary module paths
+
+
+## Assembly routes
+
+Normal and deep validation both execute any `board.routes` contracts. Failures
+appear as `playability:route-failed`, identifying the route, sample, and unmet
+goal. They count as errors, so a broken feed or return fails the command even
+without `--fail-on-warnings`. See [board-assemblies.md](board-assemblies.md).

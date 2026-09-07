@@ -1,3 +1,4 @@
+import type { BallRouteDefinition } from '../types/ball-route';
 import type {
   BumperDefinition,
   BallDefinition,
@@ -117,6 +118,7 @@ export interface BoardLayoutFragment {
 }
 
 export interface BoardLayoutDefinition {
+  routes?: BallRouteDefinition[];
   name: string;
   themeId?: BoardThemeId;
   template?: LayoutTemplateId;

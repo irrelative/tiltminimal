@@ -1,3 +1,4 @@
+import type { BallRouteDefinition } from './ball-route';
 export interface Point {
   x: number;
   y: number;
@@ -214,6 +215,7 @@ export interface ArcGuideDefinition {
 export type GuideDefinition = LineGuideDefinition | ArcGuideDefinition;
 
 export interface BoardDefinition {
+  routes?: BallRouteDefinition[];
   name: string;
   themeId: BoardThemeId;
   // Playfield width in board units/pixels.
@@ -246,6 +248,7 @@ export interface BoardDefinition {
 }
 
 export interface BoardDefinitionInput {
+  routes?: BallRouteDefinition[];
   name: string;
   themeId?: BoardThemeId;
   width: number;

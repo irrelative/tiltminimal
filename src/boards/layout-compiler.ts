@@ -34,6 +34,7 @@ export const compileBoardLayout = (
   const context = resolveLayoutContext(layout);
   const input: BoardDefinitionInput = {
     name: layout.name,
+    routes: layout.routes,
     themeId: layout.themeId,
     width: layout.width,
     height: layout.height,
@@ -120,10 +121,11 @@ export const compileBoardLayout = (
   };
 
   const compiledBoard = createBoardDefinition(input);
-  const board =
-    options.snapToGrid === false
-      ? compiledBoard
-      : snapBoardLayoutToGrid(compiledBoard);
+  // Route-bearing assemblies rely on precise joints and feature references.
+  const snapToGrid = options.snapToGrid ?? !layout.routes?.length;
+  const board = snapToGrid
+    ? snapBoardLayoutToGrid(compiledBoard)
+    : compiledBoard;
   const diagnostics = validateCompiledBoardLayout(board);
 
   return {

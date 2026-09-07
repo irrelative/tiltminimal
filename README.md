@@ -41,6 +41,9 @@ Use the `Makefile` entrypoints:
 
 ## Additional docs
 
+* [docs/board-assemblies.md](docs/board-assemblies.md) describes reusable
+  mechanisms, their configuration, and automatic ball-route validation
+
 * [docs/classic-table-spec.md](docs/classic-table-spec.md) defines Classic’s
   connected lanes, scoring shots, shooter gate, and route verification
 * [docs/codebase-overview.md](docs/codebase-overview.md) explains the current

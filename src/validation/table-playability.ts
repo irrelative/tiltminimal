@@ -1,3 +1,4 @@
+import { validateBallRoutes } from './ball-routes';
 import { getDistanceToFlipperSurface } from '../game/flipper-geometry';
 import { createInitialGameState, type GameState } from '../game/game-state';
 import { getGuideDistance } from '../game/guide-geometry';
@@ -7,6 +8,7 @@ import type { InputState } from '../input/keyboard-input';
 import type { BoardDefinition, Point } from '../types/board-definition';
 
 export type PlayabilityIssueCode =
+  | 'route-failed'
   | 'plunge-does-not-enter-play'
   | 'plunge-returns-to-shooter-lane'
   | 'passive-ball-trap'
@@ -108,6 +110,7 @@ export const analyzePlayability = (
   }
 
   issues.push(...analyzeDroppedBallSeeds(board, options));
+  issues.push(...validateBallRoutes(board));
 
   return issues;
 };
@@ -271,8 +274,7 @@ const analyzeDroppedBallSeeds = (
       });
 
       return (
-        perturbed.outcome === 'trapped' ||
-        perturbed.outcome === 'livelock-risk'
+        perturbed.outcome === 'trapped' || perturbed.outcome === 'livelock-risk'
       );
     });
 

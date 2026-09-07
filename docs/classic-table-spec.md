@@ -1,7 +1,8 @@
 # Classic Table
 
 Classic is a two-flipper table organized around physical ball routes. Its
-layout lives in `src/boards/tables/classic-table.ts`; other built-in tables
+layout lives in `src/boards/tables/classic-table.ts` and composes the reusable
+assemblies documented in [board-assemblies.md](board-assemblies.md); other built-in tables
 continue to use their existing layouts.
 
 ## Lower playfield
@@ -54,7 +55,8 @@ three targets in one bank; the drop target remains the multiplier objective.
 
 ## Precision and physics
 
-Classic compiles with `snapToGrid: false`. A 40-unit grid is larger than the
+Classic compiles with `snapToGrid: false`; route-bearing assembly layouts
+also preserve precision by default. A 40-unit grid is larger than the
 32-unit ball diameter, so rounding individual joints can break lane widths,
 arc tangency, or flipper clearances. Coordinates and gate endpoints retain
 their authored precision.
@@ -75,3 +77,16 @@ direct flipper shots at the target bank and saucer, spinner continuation,
 saucer kickout clearance, and the gate's outbound, return, and re-plunge paths.
 Review the actual table in the browser as well: validation alone does not
 establish shot quality or difficulty balance.
+
+## Assembly contracts and launch calibration
+
+Classic's five assemblies contribute 11 named routes (36 simulation samples)
+to normal and deep CLI validation. They cover inlane feeds, outlane drains,
+plunge continuation, spinner continuation, target approaches/returns, and
+saucer capture/return. Geometry edits that break those routes fail validation.
+The arch stop now meets the circular roof exactly, using its computed join.
+
+The plunger uses a 0–2800 release-speed range with a monotonic charge response.
+Very short pulls return to the shooter; the tested 55%, 70%, 85%, and 100%
+pulls feed the top lanes. The old 5200–6000 range compensated for the former
+frame-dependent plunger contact calculation and is no longer used.

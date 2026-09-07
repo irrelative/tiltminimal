@@ -6,6 +6,7 @@ export const cloneBoardDefinition = (
   board: BoardDefinition,
 ): BoardDefinition => ({
   ...board,
+  routes: structuredClone(board.routes ?? []),
   rulesScript: board.rulesScript,
   ball: { ...board.ball },
   launchPosition: { ...board.launchPosition },

@@ -109,6 +109,7 @@ export const createBoardDefinition = (
   input: BoardDefinitionInput,
 ): BoardDefinition => ({
   name: input.name,
+  routes: structuredClone(input.routes ?? []),
   themeId: input.themeId ?? 'classic',
   width: input.width,
   height: input.height,

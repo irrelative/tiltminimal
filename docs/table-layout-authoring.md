@@ -188,3 +188,13 @@ The next logical steps are:
   families
 - grow validation from geometric heuristics into shot simulation acceptance checks
 - compile more built-in tables through the layout layer
+
+
+## Connected assemblies
+
+Prefer the factories exported by `src/boards/assemblies/index.ts` for new
+lower playfields, shooter arches, spinner lanes, target banks, and saucer
+pockets. They produce route contracts alongside geometry; see
+[board-assemblies.md](board-assemblies.md) for composition and validation.
+Layouts with routes preserve precision by default, while legacy layouts keep
+grid snapping unless the caller overrides `snapToGrid`.

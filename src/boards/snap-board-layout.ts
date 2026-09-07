@@ -8,6 +8,7 @@ export const snapBoardLayoutToGrid = (
 ): BoardDefinition => {
   const snapped: BoardDefinition = {
     ...board,
+    routes: structuredClone(board.routes ?? []),
     ball: { ...board.ball },
     launchPosition: { ...board.launchPosition },
     plunger: clonePlungerDefinition(board.plunger),
