@@ -1,4 +1,4 @@
-.PHONY: help install dev build lint test cloc fmt clean validate-table
+.PHONY: help install dev build lint test cloc fmt clean validate-table playtest-classic
 
 help:
 	@printf "Available targets:\n"
@@ -9,6 +9,7 @@ help:
 	@printf "  make test     Run Vitest\n"
 	@printf "  make cloc     Count repository lines of code\n"
 	@printf "  make validate-table TABLE=<id>  Run validation against a built-in table implementation\n"
+	@printf "  make playtest-classic  Run Classic timing sweeps and seeded games\n"
 	@printf "  make fmt      Format the repository with Prettier\n"
 	@printf "  make clean    Remove generated build output\n"
 
@@ -38,3 +39,6 @@ fmt:
 
 clean:
 	rm -rf dist coverage
+
+playtest-classic:
+	npm run playtest:classic -- $(ARGS)

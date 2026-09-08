@@ -112,3 +112,7 @@ bumper, and rollover collision rules and regression coverage.
 Enable **Physics overlay** in Game or Physics for collision outlines, contact
 normals, ball speed, recent triggers, and pause/step/slow-motion controls.
 See [the debugging guide](docs/physics-debug-overlay.md).
+
+Run `make playtest-classic` for a focused Classic timing sweep and seeded game
+batch. It saves a Markdown report and replayable JSON under `playtest-results/`.
+See [Classic playtest scenarios and baseline findings](docs/classic-playtest.md).
