@@ -4,6 +4,11 @@ Enable **Physics overlay** in the sidebar on either Game or Physics. It starts
 off and does not persist across page reloads. Selecting another table clears the
 trace and resumes the simulation, retaining the overlay and speed selection.
 
+Normal play hides the sidebar diagnostic readouts. Enabling the overlay reveals
+ball position, velocity, roll spin, and diagnostic status alongside the debugging
+controls on both Game and Physics. Disabling it hides those readouts again; the
+game score and ball count remain on the playfield HUD.
+
 ## Inspection
 
 - Cyan outlines show solid collision geometry, including the moving flippers,
