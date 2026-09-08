@@ -108,3 +108,7 @@ Use the `Makefile` entrypoints:
 
 See [physical contact behavior](docs/physics-contact-spec.md) for flipper, sling,
 bumper, and rollover collision rules and regression coverage.
+
+Enable **Physics overlay** in Game or Physics for collision outlines, contact
+normals, ball speed, recent triggers, and pause/step/slow-motion controls.
+See [the debugging guide](docs/physics-debug-overlay.md).

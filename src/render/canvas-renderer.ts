@@ -1,3 +1,5 @@
+import { drawPhysicsDebug } from './physics-debug-overlay';
+import type { PhysicsDebug } from '../game/physics-debug';
 import type { BallState, GameState } from '../game/game-state';
 import type { InputState } from '../input/keyboard-input';
 import type { BoardDefinition } from '../types/board-definition';
@@ -31,6 +33,7 @@ export class CanvasRenderer {
     board: BoardDefinition,
     state: GameState,
     input: InputState,
+    debug?: PhysicsDebug,
   ): void {
     const context = this.getContext();
     this.syncCanvasSize(board);
@@ -51,12 +54,14 @@ export class CanvasRenderer {
     context.restore();
     drawBall(context, board, state);
     drawHud(context, board, state, input);
+    drawPhysicsDebug(context, board, state, [state.ball], debug);
   }
 
   renderPhysicsSandbox(
     board: BoardDefinition,
     displayState: GameState,
     balls: BallState[],
+    debug?: PhysicsDebug,
   ): void {
     const context = this.getContext();
     this.syncCanvasSize(board);
@@ -82,6 +87,7 @@ export class CanvasRenderer {
     balls.forEach((ball) => {
       drawBallState(context, board, ball);
     });
+    drawPhysicsDebug(context, board, displayState, balls, debug);
   }
 
   private syncCanvasSize(board: BoardDefinition): void {

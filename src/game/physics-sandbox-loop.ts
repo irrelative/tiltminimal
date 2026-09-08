@@ -1,3 +1,4 @@
+import { PhysicsDebug } from './physics-debug';
 import type { InputSource } from '../input/keyboard-input';
 import type { CanvasRenderer } from '../render/canvas-renderer';
 import type { BoardDefinition, Point } from '../types/board-definition';
@@ -18,6 +19,7 @@ import {
 import { clampFrameDeltaSeconds } from './physics-engine-types';
 
 export class PhysicsSandboxLoop {
+  readonly debug = new PhysicsDebug();
   private animationFrameId = 0;
   private lastFrameTime = 0;
   private running = false;
@@ -28,7 +30,9 @@ export class PhysicsSandboxLoop {
     private readonly board: BoardDefinition,
     private readonly input: InputSource,
     private readonly renderer: CanvasRenderer,
-  ) {}
+  ) {
+    this.debug.paused = state.paused;
+  }
 
   start(): void {
     if (this.running) {
@@ -62,7 +66,8 @@ export class PhysicsSandboxLoop {
   }
 
   togglePaused(): void {
-    this.state = setPhysicsSandboxPaused(this.state, !this.state.paused);
+    this.debug.paused = !this.debug.paused;
+    this.state = setPhysicsSandboxPaused(this.state, this.debug.paused);
     this.render();
     this.emitStateChange();
   }
@@ -74,6 +79,8 @@ export class PhysicsSandboxLoop {
   }
 
   reset(): void {
+    this.debug.clear();
+    this.debug.paused = false;
     this.state = resetPhysicsSandboxState(this.board);
     this.render();
     this.emitStateChange();
@@ -111,18 +118,24 @@ export class PhysicsSandboxLoop {
       return;
     }
 
-    const deltaSeconds = clampFrameDeltaSeconds(
-      this.lastFrameTime === 0
-        ? 1 / 60
-        : (frameTime - this.lastFrameTime) / 1000,
+    const deltaSeconds = this.debug.delta(
+      clampFrameDeltaSeconds(
+        this.lastFrameTime === 0
+          ? 1 / 60
+          : (frameTime - this.lastFrameTime) / 1000,
+      ),
     );
     this.lastFrameTime = frameTime;
-    this.state = stepPhysicsSandbox(
-      this.state,
-      this.board,
-      this.input.getState(),
-      deltaSeconds,
-    );
+    if (deltaSeconds > 0)
+      this.state = this.debug.capture(deltaSeconds, () =>
+        stepPhysicsSandbox(
+          { ...this.state, paused: false },
+          this.board,
+          this.input.getState(),
+          deltaSeconds,
+        ),
+      );
+    this.state = { ...this.state, paused: this.debug.paused };
     this.render();
     this.emitStateChange();
     this.animationFrameId = window.requestAnimationFrame(this.onFrame);
@@ -133,6 +146,7 @@ export class PhysicsSandboxLoop {
       this.board,
       this.state.displayState,
       this.state.balls.map((ball) => ball.state.ball),
+      this.debug,
     );
   }
 
@@ -153,6 +167,5 @@ export const createPhysicsSandboxLoop = (
     renderer,
   );
 
-export const getPhysicsSandboxDebugBall = (
-  state: PhysicsSandboxState,
-) => getSelectedPhysicsSandboxBall(state);
+export const getPhysicsSandboxDebugBall = (state: PhysicsSandboxState) =>
+  getSelectedPhysicsSandboxBall(state);

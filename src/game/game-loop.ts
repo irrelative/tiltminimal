@@ -1,3 +1,4 @@
+import { PhysicsDebug, recordDebugEvents } from './physics-debug';
 import type { InputSource, InputState } from '../input/keyboard-input';
 import type { BoardDefinition } from '../types/board-definition';
 import type { CanvasRenderer } from '../render/canvas-renderer';
@@ -10,6 +11,7 @@ import { getPlungerPullRatio, stepGameFrame } from './physics-engine';
 import { clampFrameDeltaSeconds } from './physics-engine-types';
 
 export class GameLoop {
+  readonly debug = new PhysicsDebug();
   private animationFrameId = 0;
   private lastFrameTime = 0;
   private running = false;
@@ -54,6 +56,7 @@ export class GameLoop {
   }
 
   resetBall(): void {
+    this.debug.clear();
     this.state = resetBall(this.state, this.board);
     this.renderer.renderGame(this.board, this.state, this.input.getState());
     this.emitStateChange();
@@ -68,13 +71,21 @@ export class GameLoop {
       return;
     }
 
-    const deltaSeconds = clampFrameDeltaSeconds(
-      this.lastFrameTime === 0
-        ? 1 / 60
-        : (frameTime - this.lastFrameTime) / 1000,
+    const deltaSeconds = this.debug.delta(
+      clampFrameDeltaSeconds(
+        this.lastFrameTime === 0
+          ? 1 / 60
+          : (frameTime - this.lastFrameTime) / 1000,
+      ),
     );
     this.lastFrameTime = frameTime;
     const input = this.input.getState();
+    if (deltaSeconds === 0) {
+      this.renderer.renderGame(this.board, this.state, input, this.debug);
+      this.emitStateChange();
+      this.animationFrameId = window.requestAnimationFrame(this.onFrame);
+      return;
+    }
     let previousState = this.state;
 
     if (
@@ -88,12 +99,16 @@ export class GameLoop {
       );
       previousState = this.state;
     } else {
-      const frame = stepGameFrame(
-        previousState,
-        this.board,
-        input,
-        deltaSeconds,
-      );
+      const frame = this.debug.capture(deltaSeconds, () => {
+        const result = stepGameFrame(
+          previousState,
+          this.board,
+          input,
+          deltaSeconds,
+        );
+        recordDebugEvents(result.events);
+        return result;
+      });
       this.state = applyRulesFrame(
         frame.state,
         this.board,
@@ -113,7 +128,7 @@ export class GameLoop {
       ),
     );
     this.lastInputState = input;
-    this.renderer.renderGame(this.board, this.state, input);
+    this.renderer.renderGame(this.board, this.state, input, this.debug);
     this.emitStateChange();
     this.animationFrameId = window.requestAnimationFrame(this.onFrame);
   };

@@ -573,3 +573,29 @@ body[data-route='physics'] #game {
     grid-template-columns: 1fr;
   }
 }
+
+.debug-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+}
+.debug-toggle input {
+  width: auto;
+  margin: 0;
+}
+#debug-controls .button-row {
+  margin: 0.75rem 0;
+}
+#debug-events {
+  padding-left: 1.4rem;
+  overflow-wrap: anywhere;
+}
+#debug-events:empty::after {
+  content: 'No triggers recorded yet.';
+}
+
+body[data-session-route='play'] .physics-route-panel,
+body[data-session-route='physics'] .play-route-panel {
+  display: none;
+}

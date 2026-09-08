@@ -1,3 +1,4 @@
+import { recordDebugContact } from './physics-debug';
 import type { BallState } from './game-state';
 import type {
   ContactData,
@@ -12,6 +13,7 @@ export const resolveBallContact = (
   contact: ContactData,
   solver: SolverPhysicsDefinition = physicsDefaults.tuning.solver,
 ): ContactImpulseResult => {
+  recordDebugContact(contact);
   const compliance = clamp(contact.material.compliance, 0, 0.95);
   const correctionScale = 1 - compliance;
 

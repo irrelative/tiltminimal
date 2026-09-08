@@ -1,3 +1,4 @@
+import { recordDebugEvents } from './physics-debug';
 import { getSlingshotCollision } from './slingshot-geometry';
 import type { InputState } from '../input/keyboard-input';
 import type { BoardDefinition, Point } from '../types/board-definition';
@@ -619,6 +620,8 @@ const stepSandboxBallState = (
     resolveSaucerCaptures(next, board, events);
     resolveSpinnerInteractions(next, board, board.physics.solver, events);
     resolveRolloverTriggers(next, board, events);
+    recordDebugEvents(events);
+    events.length = 0;
 
     if (
       next.ball.position.y - next.ball.radius >

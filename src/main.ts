@@ -29,6 +29,7 @@ const renderer = new CanvasRenderer(canvas);
 const audio = new GameAudio();
 const basePath = import.meta.env.BASE_URL;
 const route = getAppRouteFromPathname(window.location.pathname, basePath);
+document.body.dataset.sessionRoute = route;
 const state: {
   tableId: string;
   loop: GameLoop | null;
@@ -81,6 +82,9 @@ const restart = (): void => {
     state.loop = session.loop;
     state.sandbox = null;
   }
+  const debug = (state.loop ?? state.sandbox)!.debug;
+  debug.enabled = required<HTMLInputElement>('#debug-overlay').checked;
+  debug.speed = Number(required<HTMLSelectElement>('#debug-speed').value);
 };
 if (route === 'physics') {
   syncPhysicsRoutePanel({
@@ -165,3 +169,47 @@ required<HTMLAnchorElement>('#physics-link').href = buildAppRoutePath(
   basePath,
 );
 restart();
+
+const currentDebug = () => (state.loop ?? state.sandbox)!.debug;
+required<HTMLInputElement>('#debug-overlay').addEventListener(
+  'change',
+  (event) => {
+    const enabled = (event.target as HTMLInputElement).checked;
+    currentDebug().enabled = enabled;
+    required<HTMLElement>('#debug-controls').hidden = !enabled;
+    if (!enabled) {
+      currentDebug().paused = false;
+      currentDebug().speed = 1;
+      required<HTMLSelectElement>('#debug-speed').value = '1';
+    }
+  },
+);
+required('#debug-pause').addEventListener('click', () => {
+  currentDebug().paused = !currentDebug().paused;
+});
+required('#debug-step').addEventListener('click', () => currentDebug().step());
+required<HTMLSelectElement>('#debug-speed').addEventListener(
+  'change',
+  (event) => {
+    currentDebug().speed = Number((event.target as HTMLSelectElement).value);
+  },
+);
+let lastDebugEvents = '';
+window.setInterval(() => {
+  const debug = currentDebug();
+  required('#debug-pause').textContent = debug.paused ? 'Resume' : 'Pause';
+  required('#debug-pause').setAttribute('aria-pressed', String(debug.paused));
+  required('#debug-time').textContent =
+    `${debug.paused ? 'Paused' : 'Running'} · ${debug.time.toFixed(2)} s · ${debug.speed}×`;
+  const events = debug.events.join('\n');
+  if (events !== lastDebugEvents) {
+    lastDebugEvents = events;
+    required('#debug-events').replaceChildren(
+      ...debug.events.map((text) => {
+        const li = document.createElement('li');
+        li.textContent = text;
+        return li;
+      }),
+    );
+  }
+}, 100);
