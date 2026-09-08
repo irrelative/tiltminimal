@@ -41,6 +41,9 @@ Use the `Makefile` entrypoints:
 
 ## Additional docs
 
+* [docs/viewport-layout-spec.md](docs/viewport-layout-spec.md) defines full-height
+  desktop board sizing, sidebar scrolling, and narrow-window behavior
+
 * [docs/board-assemblies.md](docs/board-assemblies.md) describes reusable
   mechanisms, their configuration, and automatic ball-route validation
 

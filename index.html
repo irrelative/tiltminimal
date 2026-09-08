@@ -10,6 +10,7 @@
     <main class="app-shell">
       <section class="workspace">
         <aside class="control-panel">
+          <nav class="debug-menu" aria-label="Game modes"><a id="play-link" class="debug-link" href="./">Game</a><a id="physics-link" class="debug-link" href="./physics">Physics</a></nav>
           <header class="panel-header"><p class="eyebrow">Pinball Browser</p><h1 id="mode-title">Play</h1><p id="mode-copy" class="lede">Choose a built-in board and play.</p></header>
           <section class="panel-section"><p class="eyebrow">Table</p><label class="field"><span>Choose board</span><select id="play-table-select" aria-label="Playable pinball tables"></select></label><p id="play-table-meta" class="meta-text"></p></section>
           <section class="play-route-panel"><button id="play-reset-ball" type="button" class="accent-button">Reset ball</button><dl class="play-debug-stats"><div><dt>Status</dt><dd id="play-debug-status">Waiting</dd></div><div><dt>Position</dt><dd id="play-debug-position">0, 0</dd></div><div><dt>Velocity</dt><dd id="play-debug-velocity">0, 0</dd></div><div><dt>Roll Spin</dt><dd id="play-debug-spin">0, 0</dd></div></dl></section>
@@ -24,7 +25,7 @@
             </div>
           </section>
         </aside>
-        <section class="stage-shell"><header class="stage-toolbar"><nav class="debug-menu"><a id="play-link" class="debug-link" href="./">Game</a><a id="physics-link" class="debug-link" href="./physics">Physics</a></nav></header><section class="playfield-frame"><canvas id="game" width="900" height="1400" aria-label="Pinball table"></canvas></section></section>
+        <section class="stage-shell"><section class="playfield-frame"><canvas id="game" width="900" height="1400" aria-label="Pinball table"></canvas></section></section>
       </section>
     </main>
     <script type="module" src="/src/main.ts"></script>
