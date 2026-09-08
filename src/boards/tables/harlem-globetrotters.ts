@@ -39,11 +39,11 @@ const lowerOptions = {
   center: { x: 490, y: 1800 },
   pivotSpacing: 320,
   flipperLength: 136,
-  laneWidth: 80,
-  returnRadius: 140,
+  laneWidth: 72,
+  returnRadius: 148,
+  bendRise: 174,
   entryRise: 320,
-  bendRise: 180,
-  heelOffset: 24,
+  heelOffset: 32,
   slingOffset: { x: 144, y: 190 },
   slingWidth: 144,
   slingHeight: 50,
@@ -77,8 +77,8 @@ const lower: BoardAssembly = {
   routes: [...left.routes.slice(0, 2), ...right.routes.slice(2)],
 };
 
-// The original staggered left return releases a cross-playfield feed rather
-// than guaranteeing a catch on a paired lower flipper.
+// Passive staggered feeds may cross the playfield; the held-feed check below
+// independently requires a cradle on the upper-left flipper.
 lower.routes[0]!.goals = [
   { type: 'region', min: { x: 270, y: 1560 }, max: { x: 840, y: 1810 } },
 ];
@@ -97,6 +97,7 @@ for (const [id, x, y, pivot] of [
       ],
     },
     goals: [{ type: 'flipper', pivot }],
+    cradle: { pivot },
     timeoutSeconds: 2,
   });
 

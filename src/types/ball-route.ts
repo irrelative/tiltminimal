@@ -20,6 +20,8 @@ export interface BallRouteDefinition {
     | { type: 'plunge'; powers: number[] }
     | { type: 'feed'; position: Point; velocities: Point[] };
   goals: RouteGoal[];
+  // Also rerun the feed with the destination flipper held; require a stable catch.
+  cradle?: { pivot: Point };
   avoidFlippers?: boolean;
   timeoutSeconds: number;
 }

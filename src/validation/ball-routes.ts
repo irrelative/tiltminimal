@@ -1,9 +1,17 @@
+import {
+  MIN_CRADLE_POSITION,
+  MAX_CRADLE_POSITION,
+} from '../game/physics-engine-types';
 import type { BoardDefinition, Point } from '../types/board-definition';
 import type { BallRouteDefinition, RouteGoal } from '../types/ball-route';
 import type { GameEvent } from '../game/rules-types';
 import { createInitialGameState, type GameState } from '../game/game-state';
 import { stepGameFrame } from '../game/physics-engine';
-import { getDistanceToFlipperSurface } from '../game/flipper-geometry';
+import {
+  getDistanceToFlipperSurface,
+  sampleFlipperProfile,
+  getFlipperFaceNormal,
+} from '../game/flipper-geometry';
 import type { InputState } from '../input/keyboard-input';
 
 const idle: InputState = {
@@ -96,7 +104,9 @@ export const validateBallRoutes = (board: BoardDefinition): BallRouteIssue[] =>
       ];
     }
     return Array.from({ length: count }, (_, index) => {
-      const failure = simulateRoute(board, route, index);
+      const failure =
+        simulateRoute(board, route, index) ??
+        (route.cradle ? simulateCradleFeed(board, route, index) : null);
       return failure
         ? {
             severity: 'error' as const,
@@ -155,4 +165,68 @@ const simulateRoute = (
       return `drained before goal ${goalIndex + 1} (${route.goals[goalIndex].type}).`;
   }
   return `did not reach goal ${goalIndex + 1} (${route.goals[goalIndex].type}) within ${route.timeoutSeconds}s.`;
+};
+
+// Keep feed/catch validation separate from passive shot routing: touching a
+// flipper once does not establish that its return lane supports a cradle.
+export const simulateCradleFeed = (
+  board: BoardDefinition,
+  route: BallRouteDefinition,
+  sample: number,
+): string | null => {
+  if (!route.cradle || route.start.type !== 'feed')
+    return 'cradle requires a feed start';
+  const index = board.flippers.findIndex((f) => near(f, route.cradle!.pivot));
+  const flipper = board.flippers[index];
+  if (!flipper) return 'cradle destination flipper is missing';
+  let state = createInitialGameState(board);
+  state.status = 'playing';
+  state.launcherExited = true;
+  state.ball.position = { ...route.start.position };
+  state.ball.linearVelocity = { ...route.start.velocities[sample] };
+  state.flippers.forEach((f, i) => {
+    if (board.flippers[i].side === flipper.side) {
+      f.angle = board.flippers[i].activeAngle;
+      f.engaged = true;
+    }
+  });
+  const input = {
+    ...idle,
+    leftPressed: flipper.side === 'left',
+    rightPressed: flipper.side === 'right',
+  };
+  let settledFrames = 0;
+  for (let frame = 0; frame < Math.ceil(route.timeoutSeconds * 120); frame++) {
+    state = stepGameFrame(state, board, input, 1 / 120).state;
+    if (state.status !== 'playing')
+      return 'inlane drained before settling in cradle';
+    const profile = sampleFlipperProfile(
+      state.ball.position,
+      flipper,
+      state.flippers[index].angle,
+    );
+    const normal = getFlipperFaceNormal(flipper, state.flippers[index].angle);
+    const caught =
+      profile.t >= MIN_CRADLE_POSITION &&
+      profile.t <= MAX_CRADLE_POSITION &&
+      profile.distance <= profile.radius + state.ball.radius + 1 &&
+      profile.normal.x * normal.x + profile.normal.y * normal.y > 0 &&
+      Math.hypot(state.ball.linearVelocity.x, state.ball.linearVelocity.y) < 5;
+    settledFrames = caught ? settledFrames + 1 : 0;
+    if (settledFrames >= 60) {
+      const caught = { ...state.ball.position };
+      for (let releaseFrame = 0; releaseFrame < 120; releaseFrame++) {
+        state = stepGameFrame(state, board, idle, 1 / 120).state;
+        if (
+          Math.hypot(
+            state.ball.position.x - caught.x,
+            state.ball.position.y - caught.y,
+          ) > state.ball.radius
+        )
+          return null;
+      }
+      return 'caught feed stays wedged after lowering the flipper';
+    }
+  }
+  return 'feed did not settle on the held flipper for 0.5 seconds';
 };

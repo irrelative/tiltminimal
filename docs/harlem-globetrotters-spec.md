@@ -62,3 +62,8 @@ scanning GLOBE lamps, advancing spinner values, super bonus, specials/extra-ball
 logic, and powered right-outlane detour gate are not implemented. The shooter's
 one-way gate and return curves are adaptations for reliable 2D play. Dimensions,
 plastics, portrait art, and switch positions remain approximations.
+
+The return lanes now use the heel-relative dimensions in
+[the flipper feed specification](flipper-feed-spec.md). Both side returns and
+the direct feeds to both left flippers include held catch/release contracts;
+the staggered flipper positions remain unchanged.

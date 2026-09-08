@@ -1,3 +1,8 @@
+import {
+  MIN_CRADLE_POSITION,
+  MAX_CRADLE_POSITION,
+  MAX_CRADLE_CAPTURE_SPEED,
+} from './physics-engine-types';
 import type {
   BoardDefinition,
   FlipperDefinition,
@@ -151,9 +156,26 @@ const applyFlipperCollisionAtAngle = (
     motion.engaged &&
     Math.abs(motion.angularVelocity) <=
       motion.passiveAngularVelocityThreshold &&
-    collision.t <= 0.58 &&
-    Math.hypot(state.ball.linearVelocity.x, state.ball.linearVelocity.y) <= 420
+    collision.t >= MIN_CRADLE_POSITION &&
+    collision.t <= MAX_CRADLE_POSITION &&
+    Math.hypot(state.ball.linearVelocity.x, state.ball.linearVelocity.y) <=
+      MAX_CRADLE_CAPTURE_SPEED
   ) {
+    // Static friction must cancel tangential displacement as well as velocity,
+    // otherwise gravity integration slowly walks a held ball onto the fixed heel.
+    const relativeSpeed = Math.hypot(
+      state.ball.linearVelocity.x - motion.tableVelocity.x,
+      state.ball.linearVelocity.y - motion.tableVelocity.y,
+    );
+    if (relativeSpeed <= board.gravity * deltaSeconds + 1) {
+      const axis = { x: Math.cos(collisionAngle), y: Math.sin(collisionAngle) };
+      const travel =
+        ((state.ball.linearVelocity.x - motion.tableVelocity.x) * axis.x +
+          (state.ball.linearVelocity.y - motion.tableVelocity.y) * axis.y) *
+        deltaSeconds;
+      state.ball.position.x -= axis.x * travel;
+      state.ball.position.y -= axis.y * travel;
+    }
     state.ball.position.x += normal.x * overlap;
     state.ball.position.y += normal.y * overlap;
     state.ball.linearVelocity.x = motion.tableVelocity.x;

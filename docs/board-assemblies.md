@@ -114,3 +114,9 @@ to feature indices.
 All built-in tables are regression-tested against geometry analysis and deep
 playability, including their route contracts. The checks sample representative
 feeds and drops; they do not guarantee every possible player trajectory.
+
+Lower inlane contracts also declare `cradle: { pivot }`. After validating the
+passive route, the validator reruns each velocity with that input side held,
+requires a stable catch on the destination flipper, then lowers it and checks
+release. See [flipper feed geometry and capture behavior](flipper-feed-spec.md)
+for dimensions and acceptance criteria.

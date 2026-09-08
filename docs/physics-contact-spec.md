@@ -44,3 +44,8 @@ cooldowns and visible indicators are shared.
 `tests/physics-regressions.test.ts` checks idle and held flipper underside
 contacts, sling geometry and active-face behavior, bumper impulse and rearming,
 rollover reentry, and two Classic lane completions in one ball.
+
+Held flippers capture normal return feeds on the movable upper face (8–58% of
+length, up to 1100 units/s). Static friction cancels gravity's tangential
+position drift during a hold; the fixed heel cannot latch a ball. See
+[the flipper feed specification](flipper-feed-spec.md) for catch/release checks.

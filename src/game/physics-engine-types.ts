@@ -33,3 +33,7 @@ export const getBallStepSeconds = (
           Math.abs(gravity) * MAX_SIMULATION_STEP_SECONDS,
       ),
   );
+
+export const MIN_CRADLE_POSITION = 0.08;
+export const MAX_CRADLE_POSITION = 0.58;
+export const MAX_CRADLE_CAPTURE_SPEED = 1100;

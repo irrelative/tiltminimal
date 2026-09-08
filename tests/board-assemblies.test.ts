@@ -18,11 +18,10 @@ const lowerOptions = {
   center: { x: 504, y: 1320 },
   pivotSpacing: 320,
   flipperLength: 136,
-  laneWidth: 80,
-  returnRadius: 140,
+  laneWidth: 64,
+  returnRadius: 160,
   entryRise: 320,
-  bendRise: 180,
-  heelOffset: 24,
+  heelOffset: 32,
   slingOffset: { x: 144, y: 190 },
   slingWidth: 144,
   slingHeight: 50,
@@ -45,10 +44,12 @@ describe('reusable board assemblies', () => {
     expect(layout.board.flippers[0].x).toBe(344);
   });
 
-  it('supports a narrower inlane while keeping its flipper feed working', () => {
+  it('supports alternate return dimensions while keeping its flipper feed working', () => {
     const assembly = createLowerPlayfieldAssembly({
       ...lowerOptions,
       laneWidth: 72,
+      returnRadius: 148,
+      bendRise: 174,
     });
     const layout = compileBoardLayout({
       ...composeAssemblies(assembly),

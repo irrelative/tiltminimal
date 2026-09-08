@@ -116,3 +116,6 @@ See [the debugging guide](docs/physics-debug-overlay.md).
 Run `make playtest-classic` for a focused Classic timing sweep and seeded game
 batch. It saves a Markdown report and replayable JSON under `playtest-results/`.
 See [Classic playtest scenarios and baseline findings](docs/classic-playtest.md).
+
+All tables validate their inlane feeds for both passive contact and held-flipper
+catch/release. See [the flipper feed specification](docs/flipper-feed-spec.md).

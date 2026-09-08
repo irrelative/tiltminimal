@@ -154,7 +154,17 @@ describe('classic ball routes', () => {
     (side) => {
       for (const vx of [-40, 0, 40])
         for (const vy of [0, 250, 500]) {
-          let state = seedBall(side === 0 ? 120 : 688, 930, vx, vy);
+          const route = classicTable.routes!.find(
+            (route) => route.id === `classic-lower/inlane-${side}`,
+          )!;
+          if (route.start.type !== 'feed')
+            throw new Error('Expected an inlane feed');
+          let state = seedBall(
+            route.start.position.x,
+            route.start.position.y,
+            vx,
+            vy,
+          );
           let touched = false;
           for (let frame = 0; frame < 480; frame += 1) {
             state = stepGame(state, classicTable, idleInput, 1 / 120);

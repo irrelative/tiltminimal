@@ -11,7 +11,7 @@ export interface LowerPlayfieldOptions {
   laneWidth: number;
   returnRadius: number;
   entryRise: number;
-  bendRise: number;
+  bendRise?: number;
   heelOffset: number;
   slingOffset: Point;
   slingWidth: number;
@@ -27,7 +27,9 @@ export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
   const ballRadius = o.ballRadius ?? 16;
   requireClearance(o.laneWidth, ballRadius * 2 + 24, 'Inlane width');
   requireClearance(o.returnRadius, o.laneWidth, 'Return radius');
-  requireClearance(o.entryRise, o.bendRise, 'Lane entry rise');
+  // Leave room above the heel for the ball to meet the held flipper's top face.
+  const bendRise = o.bendRise ?? o.returnRadius + 20;
+  requireClearance(o.entryRise, bendRise, 'Lane entry rise');
   const flippers = createFlipperPair({
     leftX: o.center.x - o.pivotSpacing / 2,
     rightX: o.center.x + o.pivotSpacing / 2,
@@ -45,7 +47,7 @@ export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
     };
     const center = {
       x: pivot.x + sign * o.heelOffset,
-      y: pivot.y - o.bendRise,
+      y: pivot.y - bendRise,
     };
     const mouthY = pivot.y - o.entryRise;
     const radii = [o.returnRadius, o.returnRadius - o.laneWidth];
@@ -56,8 +58,10 @@ export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
         arc(
           center,
           radius,
-          sign < 0 ? Math.PI / 2 : 0,
-          sign < 0 ? Math.PI : Math.PI / 2,
+          sign < 0 ? Math.PI / 2 + (radius === radii[1] ? 0.15 : 0.005) : 0,
+          sign < 0
+            ? Math.PI
+            : Math.PI / 2 - (radius === radii[1] ? 0.15 : 0.005),
         ),
       );
       part.posts!.push({
@@ -77,6 +81,7 @@ export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
         ),
       },
       goals: [{ type: 'flipper', pivot }],
+      cradle: { pivot },
       timeoutSeconds: 4,
     });
     part.routes.push({
