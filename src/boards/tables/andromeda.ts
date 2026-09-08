@@ -11,6 +11,13 @@ import { andromedaRulesScript } from './andromeda-rules';
 // Relative arrangement estimated from Game Plan's flyer and playfield photos.
 const foundation = createFoundation('andromeda', 3, 1800);
 const { lower, shooter } = foundation;
+// A hard plunge can pass the right of the top lanes and hit the two standups.
+// Require upper-arch arrival and live-field continuation, not an incidental
+// rollover elsewhere on the table several rebounds later.
+shooter.routes[0].goals = [
+  { type: 'region', min: { x: 285, y: 80 }, max: { x: 760, y: 250 } },
+  { type: 'region', min: { x: 240, y: 300 }, max: { x: 760, y: 650 } },
+];
 lower.flippers.forEach((flipper) => {
   flipper.length = 120;
 });
@@ -30,7 +37,7 @@ const field: BoardAssembly = {
   guides: [
     rail({ x: 12, y: 506 }, { x: 12, y: 1340 }),
     arc({ x: 258, y: 1340 }, 246, Math.PI / 2 + 0.005, Math.PI),
-    rail({ x: 780, y: 890 }, { x: 780, y: 1210 }),
+    rail({ x: 780, y: 1080 }, { x: 780, y: 1210 }),
   ],
   bumpers: [
     {
@@ -52,7 +59,7 @@ const field: BoardAssembly = {
       material: 'rubberPost',
     },
     {
-      position: { x: 170, y: 1320 },
+      position: { x: 230, y: 1430 },
       radius: 44,
       score: 100,
       material: 'rubberPost',
@@ -60,7 +67,7 @@ const field: BoardAssembly = {
   ],
   slingshots: [
     {
-      position: { x: 145, y: 1150 },
+      position: { x: 100, y: 1290 },
       width: 120,
       height: 44,
       angle: 0.5,
@@ -81,7 +88,7 @@ const field: BoardAssembly = {
   ],
   standupTargets: [
     {
-      position: { x: 245, y: 710 },
+      position: { x: 230, y: 510 },
       width: 56,
       height: 16,
       angle: 0.5,
@@ -89,15 +96,23 @@ const field: BoardAssembly = {
       material: 'rubberPost',
     },
     {
-      position: { x: 460, y: 1020 },
+      position: { x: 160, y: 1160 },
       width: 56,
       height: 16,
-      angle: 0.18,
+      angle: -0.65,
       score: 1000,
       material: 'rubberPost',
     },
     {
-      position: { x: 700, y: 1080 },
+      position: { x: 800, y: 370 },
+      width: 56,
+      height: 16,
+      angle: -0.5,
+      score: 1000,
+      material: 'rubberPost',
+    },
+    {
+      position: { x: 810, y: 470 },
       width: 56,
       height: 16,
       angle: -0.5,
@@ -140,6 +155,21 @@ const field: BoardAssembly = {
     },
   ],
 };
+// The photographed bank's runoff feeds the two right-side advance lanes.
+field.routes.push({
+  id: 'andromeda-bank-right-runoff',
+  start: {
+    type: 'feed',
+    position: { x: 500, y: 680 },
+    velocities: [{ x: 0, y: 150 }],
+  },
+  goals: [
+    { type: 'event', event: 'rollover-hit', position: { x: 832, y: 960 } },
+    { type: 'event', event: 'rollover-hit', position: { x: 832, y: 1150 } },
+    { type: 'region', min: { x: 790, y: 1270 }, max: { x: 875, y: 1460 } },
+  ],
+  timeoutSeconds: 4,
+});
 for (const x of [430, 450, 470])
   field.routes.push({
     id: `andromeda-center-drain-${x}`,
@@ -155,27 +185,25 @@ for (const x of [430, 450, 470])
     avoidFlippers: true,
     timeoutSeconds: 3,
   });
-const bank = (id: string, x: number, y: number) =>
-  createTargetBankAssembly({
-    id,
-    first: { x, y },
-    step: { x: 70, y: 40 },
-    standupCount: 0,
-    dropCount: 3,
-    targetWidth: 56,
-    targetHeight: 16,
-    backingOffset: { x: 20, y: -45 },
-    backingExtension: 18,
-    standupScore: 1000,
-    dropScore: 3000,
-    returnRegion: {
-      type: 'region',
-      min: { x: 150, y: y + 140 },
-      max: { x: 865, y: 1610 },
-    },
-  });
-const leftBank = bank('andromeda-left-bank', 250, 840);
-const rightBank = bank('andromeda-right-bank', 570, 680);
+// One diagonal row with two scoring halves, rather than two staggered banks.
+const dropBank = createTargetBankAssembly({
+  id: 'andromeda-drop-bank',
+  first: { x: 330, y: 780 },
+  step: { x: 76, y: 44 },
+  standupCount: 0,
+  dropCount: 6,
+  targetWidth: 64,
+  targetHeight: 16,
+  backingOffset: { x: 24, y: -46 },
+  backingExtension: 18,
+  standupScore: 1000,
+  dropScore: 3000,
+  returnRegion: {
+    type: 'region',
+    min: { x: 180, y: 1150 },
+    max: { x: 865, y: 1610 },
+  },
+});
 const lock = createPocket('andromeda-lock', { x: 110, y: 330 }, 30000);
 lock.guides = [
   arc({ x: 110, y: 330 }, 54, Math.PI, Math.PI * 2),
@@ -199,7 +227,7 @@ lock.routes = [];
 export const andromedaTable = compileBuiltInBoardLayout(
   {
     ...foundation,
-    ...composeAssemblies(lower, shooter, field, leftBank, rightBank, lock),
+    ...composeAssemblies(lower, shooter, field, dropBank, lock),
     name: 'Andromeda',
     themeId: 'andromeda',
     rulesScript: andromedaRulesScript,

@@ -17,6 +17,14 @@ describe('Andromeda', () => {
     expect(board.bumpers).toHaveLength(4);
     expect(board.dropTargets).toHaveLength(7);
     expect(board.spinners).toHaveLength(1);
+    expect(board.standupTargets).toHaveLength(4);
+    expect(board.standupTargets[1].x).toBeLessThan(200);
+    expect(board.standupTargets[1].y).toBeLessThan(board.bumpers[3].y);
+    const bank = board.dropTargets.slice(0, 6);
+    for (let i = 1; i < bank.length; i++) {
+      expect(bank[i].x - bank[i - 1].x).toBe(76);
+      expect(bank[i].y - bank[i - 1].y).toBe(44);
+    }
     expect(board.saucers).toHaveLength(1);
     expect(board.bumpers[3].y).toBeGreaterThan(1200);
     expect(board.routes!.some((r) => r.id.includes('outlane-0'))).toBe(false);
@@ -48,7 +56,7 @@ describe('Andromeda', () => {
     // A player-controlled shot from below the yellow standup releases the lock.
     state.status = 'playing';
     state.launcherExited = true;
-    state.ball.position = { x: 460, y: 1100 };
+    state.ball.position = { x: 195, y: 1210 };
     state.ball.linearVelocity = { x: 0, y: -800 };
     for (let f = 0; f < 120 && !state.additionalBalls.length; f++) {
       const frame = stepGameFrame(state, board, idle, 1 / 120);
@@ -84,7 +92,7 @@ describe('Andromeda', () => {
       state = applyRulesFrame(state, board, events, 0);
       expect(state.dropTargets.slice(0, 6).every((t) => !t.isDown)).toBe(true);
     }
-    expect(state.rules.ballValues.spinner).toBe(2000);
+    expect(state.rules.ballValues.spinner).toBe(4000);
     expect(state.rules.ballValues.extraLit).toBe(true);
     state = applyRulesFrame(
       state,
@@ -94,6 +102,51 @@ describe('Andromeda', () => {
     );
     expect(state.rules.ballsRemaining).toBe(4);
     expect(state.rules.ballValues.extraLit).toBe(false);
+  });
+  it('uses the documented spinner progression, 5X-to-10X jump, and 80K bonus cap', () => {
+    let state = start();
+    expect(state.rules.ballValues.spinner).toBe(1000);
+    for (let round = 0; round < 2; round++) {
+      state = applyRulesFrame(
+        state,
+        board,
+        Array.from({ length: 6 }, (_, index) => ({
+          type: 'drop-target-hit' as const,
+          index,
+          score: 3000,
+          tick: 1,
+        })),
+        0,
+      );
+      expect(state.rules.ballValues.spinner).toBe((round + 3) * 1000);
+    }
+    for (const multiplier of [2, 3, 4, 5, 10, 10]) {
+      state = applyRulesFrame(
+        state,
+        board,
+        [0, 1, 2].map((index) => ({
+          type: 'rollover-hit' as const,
+          index,
+          score: 3000,
+          tick: 2,
+        })),
+        0,
+      );
+      expect(state.rules.bonusMultiplier).toBe(multiplier);
+    }
+    state.rules.bonus = 79000;
+    state = applyRulesFrame(
+      state,
+      board,
+      [0, 1, 2].map((index) => ({
+        type: 'rollover-hit' as const,
+        index,
+        score: 3000,
+        tick: 3,
+      })),
+      0,
+    );
+    expect(state.rules.bonus).toBe(80000);
   });
   it('clears multiball rules when manually restarting the current ball', () => {
     const state = start();

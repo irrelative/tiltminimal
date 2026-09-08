@@ -3,10 +3,10 @@ export const andromedaRulesScript = `
 function status(ctx) {
   const prefix = ctx.getBall('multiball') ? 'MULTIBALL · 2× playfield' :
     ctx.getLockedBallCount() ? 'LOCKED · Shoot yellow target for multiball' : 'Shoot the left drop, then lock';
-  ctx.setMachine('table-status', prefix + ' · Spinner ' + (ctx.getBall('spinner') || 100));
+  ctx.setMachine('table-status', prefix + ' · Spinner ' + (ctx.getBall('spinner') || 1000));
 }
 function score(ctx, points) { ctx.addScore(points * (ctx.getBall('multiball') ? 2 : 1)); }
-function bonus(ctx, steps) { ctx.setBonus(Math.min(99000, ctx.getBonus() + steps * 1000)); }
+function bonus(ctx, steps) { ctx.setBonus(Math.min(80000, ctx.getBonus() + steps * 1000)); }
 function lanes(ctx, mask) {
   ctx.setBall('lanes', mask);
   for (let i = 0; i < 3; i++) ctx.setRolloverLit(i, Boolean(mask & (1 << i)));
@@ -15,7 +15,7 @@ return {
   onGameStart(ctx) { ctx.setBallsPerGame(3); ctx.setBallsRemaining(3); ctx.setCurrentBall(1); },
   onBallStart(ctx) {
     ctx.setBonus(0); ctx.setBonusMultiplier(1);
-    ctx.setBall('multiball', false); ctx.setBall('spinner', 100);
+    ctx.setBall('multiball', false); ctx.setBall('spinner', 1000);
     ctx.setBall('banks', 0); ctx.setBall('drops', 0); ctx.setBall('powered', false);
     ctx.setBall('upperLane', false); ctx.setBall('lowerLane', false);
     ctx.setBall('extraLit', false); ctx.setBall('specialLit', false);
@@ -36,7 +36,7 @@ return {
     } else if (event.type === 'bumper-hit') {
       score(ctx, ctx.getBall('powered') ? 1000 : 100);
     } else if (event.type === 'spinner-spin') {
-      score(ctx, ctx.getBall('spinner') || 100);
+      score(ctx, ctx.getBall('spinner') || 1000);
     } else if (event.type === 'drop-target-hit') {
       bonus(ctx, 1); score(ctx, event.index === 6 ? 5000 : 3000);
       if (event.index < 6) {
@@ -47,7 +47,7 @@ return {
         if (mask === 63) {
           score(ctx, 50000);
           const rounds = ctx.incrementBall('banks');
-          ctx.setBall('spinner', Math.min(10000, rounds * 1000));
+          ctx.setBall('spinner', Math.min(10000, (rounds + 2) * 1000));
           if (rounds === 2) ctx.setBall('extraLit', true);
           if (rounds === 3) ctx.setBall('specialLit', true);
           if (rounds >= 4) score(ctx, 100000);
@@ -58,7 +58,7 @@ return {
       if (event.index < 3) {
         score(ctx, 3000); bonus(ctx, 1);
         const mask = (ctx.getBall('lanes') || 0) | (1 << event.index);
-        if (mask === 7) { ctx.increaseBonusMultiplier(1, 10); lanes(ctx, 0); }
+        if (mask === 7) { ctx.increaseBonusMultiplier(ctx.getBonusMultiplier() === 5 ? 5 : 1, 10); lanes(ctx, 0); }
         else lanes(ctx, mask);
       } else if (event.index === 3 || event.index === 4) {
         const key = event.index === 3 ? 'upperLane' : 'lowerLane';

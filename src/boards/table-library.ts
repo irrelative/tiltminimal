@@ -25,7 +25,7 @@ export const BUILT_IN_TABLES: BuiltInTable[] = [
     id: 'andromeda',
     board: andromedaTable,
     description:
-      'Clear the left guard, then shoot the saucer to lock a ball. Plunge again and hit the yellow RELEASE target for two-ball multiball and 2× scoring. Right flipper shifts the top lanes; complete both drop banks to raise spinner value.',
+      'Clear the left guard, then shoot the saucer to lock a ball. Plunge again and hit the yellow RELEASE target for two-ball multiball and 2× scoring. Right flipper shifts the top lanes; complete all six drops to raise spinner value.',
   },
   {
     id: 'double-crossed',
