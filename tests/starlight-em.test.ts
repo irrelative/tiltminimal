@@ -57,12 +57,12 @@ describe('starlightEmTable', () => {
     expect(minY).toBeLessThan(280);
   });
 
-  it('uses raised lower return guides instead of playfield-level flipper blockers', () => {
+  it('uses solid curved returns with clear flipper feeds', () => {
     const raisedGuides = starlightEmTable.guides.filter(
       (guide) => guide.plane === 'raised',
     );
 
-    expect(raisedGuides.length).toBeGreaterThanOrEqual(4);
+    expect(raisedGuides).toHaveLength(0);
   });
 
   it('leaves the center spinner rotation envelope clear of guides', () => {

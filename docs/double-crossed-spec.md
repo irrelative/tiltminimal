@@ -1,77 +1,38 @@
 # Double Crossed Specification
 
-`Double Crossed` is an original built-in table authored as a single self-contained
-layout-and-rules module.
-
-## Design Goals
-
-- keep the playfield symmetric and readable
-- support a clean three-ball rule set
-- emphasize two mirrored spinner shots and crossed target banks
-- use the layout DSL and built-in validator so the shipped table remains
-  authorable and machine-checkable
+Double Crossed is an original three-ball table emphasizing paired spinner
+orbits and two inward-leaning target banks.
 
 ## Layout
 
-The table is defined in `src/boards/tables/double-crossed.ts`.
+The 1000 × 1400 cabinet uses the shared assembly foundation in
+[board-assemblies.md](board-assemblies.md): gated shooter arch, four open top
+lanes, two lower flippers, active slings, and curved inlane returns.
 
-Major features:
+Three pop bumpers occupy the upper center. Left and right spinner corridors
+continue into the upper field. Each bank contains two standups followed by a
+drop target. The angled backings stop well apart, preserving a ball-width
+center return. A center rubber post above the slings adds a rebound risk.
 
-- 2 lower flippers
-- 3 upper pop bumpers in a triangle
-- 2 mirrored spinner shots
-- 4 top rollover lanes
-- 4 standup targets arranged as two inward-leaning cross banks
-- 2 center drop targets
-- 2 lower slingshots
-- right shooter lane with a full plunge into the upper field
-- standard inlane / outlane returns built from the DSL lane helpers
-
-The lower returns are authored symmetrically with guide-defined mouths and a
-single lower rubber post per side. The extra upper entry post was intentionally
-omitted so the right shooter-lane exit stays fully clear while the visible
-lower playfield remains mirrored.
-
-The right outer return guide is kept fully outside the shooter-lane body rather
-than mirroring the left side exactly at its upper end. That break from exact
-mirroring is intentional and is limited to the shooter-lane side only.
-
-The table intentionally stays lighter than the more toy-heavy built-ins. It is
-meant to play like a straightforward original solid-state game where repeated
-lane completion and spinner feeding matter more than deep staged modes.
+The shooter has persistent walls and a one-way return gate. Lower inlanes feed
+their respective flippers; separate outlanes run outside those returns to the
+drain. Geometry stays at authored precision rather than snapping joints to a
+coarse grid. All visible guide rails are physical playfield rails.
 
 ## Rules
 
-The rules stay intentionally simple:
+The existing rule script and target indices are preserved:
 
-- 3 balls per game
-- bumpers score and add a small amount of bonus
-- slingshots score and add a small amount of bonus
-- top rollovers score, build bonus, and completing all 4 lanes lights the
-  spinners while stepping the bonus multiplier
-- each 2-target standup bank scores and lights the spinners when completed
-- the 2-drop center bank awards a larger score, more bonus, and a bonus
-  multiplier step when completed
-- lit spinners score double
-- end of ball awards `bonus * bonusMultiplier`
+- Three balls per game; end-of-ball award is bonus × multiplier.
+- Bumpers and slings score and add bonus.
+- Completing all four top lanes lights the spinners and increases multiplier.
+- Completing either two-standup bank lights the spinners.
+- Completing both drop targets awards score, bonus, and a multiplier increase.
+- Lit spinners score double.
 
-## Validation Expectations
+## Validation
 
-`Double Crossed` should remain valid under the current automated table checks.
-
-The required bar is:
-
-- layout validation from `src/boards/layout-validation.ts`
-- rules coverage for the devices it ships with
-
-The geometry analysis warnings from the validation CLI are still heuristic.
-They should stay reviewable and should not indicate blocked launch geometry,
-unreachable top lanes, or missing rules coverage.
-
-In practice, the shipped built-in should keep:
-
-- an open shooter lane
-- reachable top lanes
-- clear spinner rotation envelopes
-- no obvious major element overlaps
-- rules coverage for every interactive device currently on the table
+The table must compile cleanly and pass geometry analysis, declared scoring
+and return routes, and the deep dropped-ball sweep without diagnostics.
+Scoring tests cover the retained lane and spinner rules. Route tests exercise
+multiple plunge powers, target approach speeds, and inlane feed velocities.

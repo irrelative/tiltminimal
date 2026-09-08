@@ -2,7 +2,8 @@
 
 Use `src/boards/assemblies/index.ts` to author connected pinball mechanisms.
 Assemblies generate both collision geometry and behavioral route definitions.
-Classic Table is the complete working example.
+All five built-in tables use these assemblies. Classic Table is the smallest
+complete working example.
 
 ## Available assemblies
 
@@ -11,7 +12,7 @@ Classic Table is the complete working example.
 | `createLowerPlayfieldAssembly` | Two flippers, slings, entry posts, paired inlanes/outlanes, and concentric curved returns. Configure center/pivot spacing, flipper length, lane width, return radius, entry/bend heights, and sling dimensions.            | Both inlanes feed their own flipper over nine entry velocities each. Outlane samples drain without crossing a flipper. |
 | `createShooterArchAssembly`    | Shooter position and plunger, tangent extensions, concentric arch, gate, open rollover lanes, and an arch-connected lane stop. Configure arch center/radius, shooter width, gate angle, launch height, lane count/spacing. | Selected charge levels cross a rollover and enter the upper playfield.                                                 |
 | `createShotLaneAssembly`       | Continuous inner/outer polylines and a spinner. Configure entrance and approach velocities plus the intended exit region.                                                                                                  | Spinner contact precedes arrival in the exit region.                                                                   |
-| `createTargetBankAssembly`     | Spaced, angled standups, optional end drop target, and a parallel backing rail. Configure first target, spacing vector, dimensions, backing offset, and return region.                                                     | Each target is approachable from its scoring face and the ball returns downstream.                                     |
+| `createTargetBankAssembly`     | Spaced, angled standups and/or drop targets with a parallel backing rail. Configure first target, spacing vector, dimensions, backing offset, and return region.                                                           | Each target is approachable from its scoring face and the ball returns downstream.                                     |
 | `createSaucerPocketAssembly`   | Cup, rounded pocket, throat, and flared mouth. Configure wall radius, throat/mouth dimensions, capture timing, ejection, and return region.                                                                                | Three approach velocities capture the ball and reach the return region after release.                                  |
 
 Constructors reject basic impossible dimensions such as inlanes too narrow
@@ -93,3 +94,22 @@ contracts detect the resulting failures. Separate flipper-input tests cover
 long approaches to Classic's bank and saucer. The assembly bank checks are
 local approach/rebound tests, not a guarantee that every flipper can shoot
 every target. Browser review and difficulty tuning are still necessary.
+
+## Shared built-in foundation
+
+`src/boards/tables/table-foundation.ts` composes the common 1000-unit cabinet
+for Double Crossed, Mirror Match, Starlight EM, and Harlem Globetrotters. It
+provides lower returns, shooter geometry, and reusable orbit/bank/pocket
+configuration. Each table owns its scoring arrangement and existing rules.
+Harlem uses a taller cabinet and adds an explicit upper-flipper feed contract.
+The right orbit reuses the foundation's shooter wall without duplicating it.
+
+Target banks accept `dropCount` for multiple trailing drops or drop-only banks
+(`standupCount: 0`). The older `endDropTarget: true` remains shorthand for one
+drop when `dropCount` is omitted. Counts must be nonnegative integers with at
+least one target overall. Preserve composition order where rule scripts refer
+to feature indices.
+
+All built-in tables are regression-tested against geometry analysis and deep
+playability, including their route contracts. The checks sample representative
+feeds and drops; they do not guarantee every possible player trajectory.

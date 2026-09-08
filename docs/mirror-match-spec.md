@@ -1,34 +1,34 @@
 # Mirror Match Specification
 
-`Mirror Match` is a three-ball solid-state built-in table centered on paired
-left/right shots and matching target-bank objectives.
+Mirror Match is a three-ball solid-state table centered on paired left/right
+shots and matching target-bank objectives.
 
 ## Layout
 
-- two lower flippers, active slingshots, visible inlanes, outlanes, and raised
-  return rails form a conventional lower third
-- wide raised side rails make the inlane/outlane mouths visually distinct from
-  the other built-in tables while preserving the right shooter-lane corridor
-- held flippers retain a low-speed ball against the inboard blade, providing a
-  controllable cradle on either side
-- mirrored standup banks and spinner shots frame a centered pop-bumper cluster
-  and center saucer
-- a symmetric three-lane top arch feeds the upper playfield
-- the right shooter lane and its launch transition are the intentional exception
-  to left/right mirror geometry
+The 1000 × 1400 cabinet shares the assembly foundation described in
+[board-assemblies.md](board-assemblies.md). Main shot devices mirror around
+x=450; the separate right shooter lane is intentionally asymmetric.
+
+- Two lower flippers receive balls from solid concentric return rails. Four
+  entry posts distinguish inlanes from outlanes; slings leave the feeds clear.
+- Two side-orbit spinners lead upward around the pop-bumper triangle.
+- Two banks of three standups sit below the centered saucer mouth. Their
+  backings leave an open center return instead of forming a closed V.
+- The saucer captures through an open lower mouth and ejects downward into
+  live play. The pocket ends above the target-bank constriction.
+- A gated shooter arch feeds three open rollover lanes. Weak launches can
+  reseat; useful charges enter play and cannot fall back into the shooter lane.
 
 ## Rules
 
-- completing all three targets in both mirrored banks lights the center saucer
-- the lit saucer awards an extra score award and advances the bonus multiplier
-- top lanes, pop bumpers, spinners, and slingshots add score and bonus
-- balls drain through the standard three-ball lifecycle with end-of-ball bonus
-  counting
+Completing both three-target banks lights the center saucer. A lit capture
+adds 7000 to its 3000 base award and advances the multiplier. Top lanes,
+bumpers, spinners, and slings add score and bonus. Three-ball lifecycle,
+bank indices, and end-of-ball bonus counting remain unchanged.
 
 ## Validation
 
-`Mirror Match` must compile through the layout DSL, clear layout and geometry
-analysis, and pass normal playability validation. Its tests verify device
-symmetry, the right-lane launcher exception, full-plunge behavior, and raised
-return rails that keep the two flipper cradle regions clear. The shared physics
-tests also verify held-flipper cradle retention.
+Tests verify device symmetry, scoring, launches, every assembly route, and
+zero layout/geometry/deep-playability diagnostics. Rails use precise
+coordinates without grid snapping; no decorative raised rail substitutes for
+a collision surface. Shared physics tests cover held-flipper cradle retention.

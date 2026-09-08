@@ -1,316 +1,128 @@
-import { createBoardDefinition } from '../../game/physics-defaults';
-import { snapBoardLayoutToGrid } from '../snap-board-layout';
+import { absolutePoint, createPopBumperCluster } from '../layout-primitives';
+import { compileBuiltInBoardLayout } from '../layout-compiler';
+import {
+  createShotLaneAssembly,
+  createTargetBankAssembly,
+} from '../assemblies';
+import {
+  createFoundation,
+  createOrbit,
+  createBank,
+  createPocket,
+  composeAssemblies,
+} from './table-foundation';
 
-export const harlemGlobetrottersTable = snapBoardLayoutToGrid(createBoardDefinition({
-  name: 'Harlem Globetrotters',
-  width: 900,
-  height: 1400,
-  drainY: 1425,
-  launchPosition: {
-    x: 840,
-    y: 1188,
+const { lower, shooter, ...foundation } = createFoundation('harlem', 3, 1600);
+const upperPocket = createPocket(
+  'harlem-upper-saucer',
+  { x: 600, y: 350 },
+  5000,
+);
+// The upper kickout feeds the third flipper before returning to center court.
+upperPocket.routes[0]!.goals.push({
+  type: 'flipper',
+  pivot: { x: 680, y: 600 },
+});
+const lowerPocket = createPocket(
+  'harlem-bonus-saucer',
+  { x: 680, y: 820 },
+  25000,
+);
+const leftBank = createBank(
+  'harlem-left',
+  { x: 245, y: 720 },
+  { x: 0, y: 75 },
+  5,
+  false,
+  300,
+);
+const rightBank = createBank(
+  'harlem-right',
+  { x: 620, y: 1040 },
+  { x: 0, y: 65 },
+  1,
+  false,
+  300,
+);
+const drops = createTargetBankAssembly({
+  id: 'harlem-drop-bank',
+  first: { x: 300, y: 660 },
+  step: { x: 65, y: 30 },
+  standupCount: 0,
+  dropCount: 4,
+  targetWidth: 52,
+  targetHeight: 16,
+  backingOffset: { x: 25, y: -55 },
+  backingExtension: 20,
+  standupScore: 300,
+  dropScore: 500,
+  returnRegion: {
+    type: 'region',
+    min: { x: 170, y: 810 },
+    max: { x: 580, y: 1400 },
   },
-  materials: {
-    playfield: 'playfieldWood',
-    walls: 'metalGuide',
+});
+const centerLane = createShotLaneAssembly({
+  id: 'harlem-center-spinner',
+  outerPath: [
+    { x: 380, y: 800 },
+    { x: 380, y: 950 },
+  ],
+  innerPath: [
+    { x: 520, y: 800 },
+    { x: 520, y: 950 },
+  ],
+  spinner: { position: { x: 450, y: 880 }, length: 90, angle: 0, score: 100 },
+  entry: { x: 450, y: 990 },
+  entryVelocities: [{ x: 0, y: -1400 }],
+  exit: { type: 'region', min: { x: 380, y: 770 }, max: { x: 520, y: 795 } },
+});
+const parts = composeAssemblies(
+  lower,
+  shooter,
+  createOrbit('harlem-left-orbit', false, 1600),
+  createOrbit('harlem-right-orbit', true, 1600),
+  centerLane,
+  leftBank,
+  rightBank,
+  drops,
+  upperPocket,
+  lowerPocket,
+);
+parts.flippers.push({
+  position: { x: 680, y: 600 },
+  side: 'right',
+  length: 118,
+  thickness: 22,
+  restingAngle: Math.PI - 0.28,
+  activeAngle: Math.PI + 0.5,
+  material: 'flipperRubber',
+});
+parts.rollovers!.push(
+  ...[330, 410, 490, 570].map((x, index) => ({
+    position: { x, y: 1090 + (index === 1 || index === 2 ? 50 : 0) },
+    radius: 19,
+    score: 300,
+  })),
+);
+// Three top lanes plus four court inserts retain seven rollover switches.
+parts.rollovers!.forEach((lane) => {
+  lane.score = 300;
+});
+
+export const harlemGlobetrottersTable = compileBuiltInBoardLayout(
+  {
+    ...foundation,
+    ...parts,
+    name: 'Harlem Globetrotters',
+    bumpers: createPopBumperCluster({
+      top: absolutePoint(380, 330),
+      spacingX: 160,
+      spacingY: 140,
+      radius: 38,
+      scores: [100, 100, 100],
+      material: 'rubberPost',
+    }).bumpers,
   },
-  physics: {
-    plunger: {
-      minReleaseSpeed: 1150,
-      maxReleaseSpeed: 2400,
-    },
-  },
-  posts: [
-    { x: 150, y: 900, radius: 16, material: 'metalGuide' },
-    { x: 210, y: 1000, radius: 18, material: 'rubberPost' },
-    { x: 750, y: 900, radius: 16, material: 'metalGuide' },
-    { x: 690, y: 1000, radius: 18, material: 'rubberPost' },
-  ],
-  bumpers: [
-    { x: 315, y: 338, radius: 48, score: 100, material: 'rubberPost' },
-    { x: 450, y: 430, radius: 44, score: 100, material: 'rubberPost' },
-    { x: 586, y: 338, radius: 48, score: 100, material: 'rubberPost' },
-  ],
-  standupTargets: [
-    {
-      x: 60,
-      y: 760,
-      width: 60,
-      height: 18,
-      angle: Math.PI / 2,
-      score: 300,
-      material: 'rubberPost',
-    },
-    {
-      x: 60,
-      y: 840,
-      width: 60,
-      height: 18,
-      angle: Math.PI / 2,
-      score: 300,
-      material: 'rubberPost',
-    },
-    {
-      x: 60,
-      y: 920,
-      width: 60,
-      height: 18,
-      angle: Math.PI / 2,
-      score: 300,
-      material: 'rubberPost',
-    },
-    {
-      x: 60,
-      y: 1000,
-      width: 60,
-      height: 18,
-      angle: Math.PI / 2,
-      score: 300,
-      material: 'rubberPost',
-    },
-    {
-      x: 60,
-      y: 1080,
-      width: 60,
-      height: 18,
-      angle: Math.PI / 2,
-      score: 300,
-      material: 'rubberPost',
-    },
-    {
-      x: 600,
-      y: 880,
-      width: 82,
-      height: 18,
-      angle: -1.15,
-      score: 300,
-      material: 'rubberPost',
-    },
-  ],
-  dropTargets: [
-    {
-      x: 260,
-      y: 540,
-      width: 52,
-      height: 16,
-      angle: 0,
-      score: 500,
-      material: 'rubberPost',
-    },
-    {
-      x: 390,
-      y: 540,
-      width: 52,
-      height: 16,
-      angle: 0,
-      score: 500,
-      material: 'rubberPost',
-    },
-    {
-      x: 510,
-      y: 540,
-      width: 52,
-      height: 16,
-      angle: 0,
-      score: 500,
-      material: 'rubberPost',
-    },
-    {
-      x: 640,
-      y: 540,
-      width: 52,
-      height: 16,
-      angle: 0,
-      score: 500,
-      material: 'rubberPost',
-    },
-  ],
-  saucers: [
-    {
-      x: 470,
-      y: 222,
-      radius: 34,
-      score: 5000,
-      holdSeconds: 0.6,
-      ejectSpeed: 980,
-      ejectAngle: Math.PI,
-      material: 'metalGuide',
-    },
-    {
-      x: 678,
-      y: 754,
-      radius: 31,
-      score: 25000,
-      holdSeconds: 0.55,
-      ejectSpeed: 960,
-      ejectAngle: Math.PI * 0.92,
-      material: 'metalGuide',
-    },
-  ],
-  spinners: [
-    {
-      x: 240,
-      y: 440,
-      length: 88,
-      thickness: 10,
-      angle: -0.35,
-      score: 100,
-      material: 'metalGuide',
-    },
-    {
-      x: 450,
-      y: 700,
-      length: 118,
-      thickness: 10,
-      angle: 0.03,
-      score: 100,
-      material: 'metalGuide',
-    },
-    {
-      x: 800,
-      y: 280,
-      length: 88,
-      thickness: 10,
-      angle: -0.72,
-      score: 100,
-      material: 'metalGuide',
-    },
-  ],
-  slingshots: [
-    { x: 330, y: 1060, width: 132, height: 36, angle: 0.5, score: 10, strength: 560, material: 'rubberPost' },
-    { x: 540, y: 1060, width: 132, height: 36, angle: Math.PI - 0.5, score: 10, strength: 560, material: 'rubberPost' },
-  ],
-  rollovers: [
-    { x: 348, y: 722, radius: 19, score: 300 },
-    { x: 554, y: 722, radius: 19, score: 300 },
-    { x: 305, y: 790, radius: 21, score: 300 },
-    { x: 382, y: 834, radius: 19, score: 300 },
-    { x: 450, y: 866, radius: 19, score: 300 },
-    { x: 518, y: 834, radius: 19, score: 300 },
-    { x: 595, y: 790, radius: 21, score: 300 },
-  ],
-  guides: [
-    {
-      start: { x: 84, y: 1180 },
-      end: { x: 150, y: 884 },
-      thickness: 14,
-      material: 'metalGuide',
-    },
-    {
-      start: { x: 210, y: 1006 },
-      end: { x: 182, y: 1266 },
-      thickness: 18,
-      material: 'metalGuide',
-    },
-    {
-      start: { x: 218, y: 1040 },
-      end: { x: 364, y: 1100 },
-      thickness: 20,
-      material: 'rubberPost',
-    },
-    {
-      start: { x: 812, y: 1178 },
-      end: { x: 742, y: 888 },
-      thickness: 14,
-      material: 'metalGuide',
-    },
-    {
-      start: { x: 690, y: 994 },
-      end: { x: 716, y: 1266 },
-      thickness: 18,
-      material: 'metalGuide',
-    },
-    {
-      start: { x: 700, y: 980 },
-      end: { x: 540, y: 1040 },
-      thickness: 20,
-      material: 'rubberPost',
-    },
-    {
-      start: { x: 132, y: 778 },
-      end: { x: 108, y: 598 },
-      thickness: 14,
-      material: 'metalGuide',
-    },
-    {
-      start: { x: 108, y: 598 },
-      end: { x: 220, y: 220 },
-      thickness: 14,
-      material: 'metalGuide',
-    },
-    {
-      start: { x: 220, y: 220 },
-      end: { x: 438, y: 120 },
-      thickness: 14,
-      material: 'metalGuide',
-    },
-    {
-      start: { x: 880, y: 1190 },
-      end: { x: 880, y: 210 },
-      thickness: 12,
-      material: 'metalGuide',
-    },
-    {
-      start: { x: 730, y: 872 },
-      end: { x: 748, y: 514 },
-      thickness: 14,
-      material: 'metalGuide',
-    },
-    {
-      start: { x: 748, y: 514 },
-      end: { x: 700, y: 218 },
-      thickness: 14,
-      material: 'metalGuide',
-    },
-    {
-      start: { x: 700, y: 218 },
-      end: { x: 482, y: 120 },
-      thickness: 14,
-      material: 'metalGuide',
-    },
-    {
-      start: { x: 278, y: 516 },
-      end: { x: 380, y: 652 },
-      thickness: 14,
-      material: 'metalGuide',
-    },
-    {
-      start: { x: 622, y: 516 },
-      end: { x: 520, y: 652 },
-      thickness: 14,
-      material: 'metalGuide',
-    },
-  ],
-  flippers: [
-    {
-      side: 'left',
-      x: 268,
-      y: 1218,
-      length: 150,
-      thickness: 20,
-      restingAngle: 0.28,
-      activeAngle: -0.42,
-      material: 'flipperRubber',
-    },
-    {
-      side: 'right',
-      x: 632,
-      y: 1218,
-      length: 150,
-      thickness: 20,
-      restingAngle: Math.PI - 0.28,
-      activeAngle: Math.PI + 0.42,
-      material: 'flipperRubber',
-    },
-    {
-      side: 'right',
-      x: 640,
-      y: 286,
-      length: 118,
-      thickness: 18,
-      restingAngle: Math.PI + 0.78,
-      activeAngle: Math.PI + 0.02,
-      material: 'flipperRubber',
-    },
-  ],
-}));
+  { snapToGrid: false },
+);

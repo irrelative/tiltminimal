@@ -5,6 +5,7 @@ import { compileBoardLayout } from '../src/boards/layout-compiler';
 import { createBlankTable } from './helpers/board-fixture';
 import { createBoardDefinition } from '../src/game/physics-defaults';
 import { validateBallRoutes } from '../src/validation/ball-routes';
+import { harlemGlobetrottersTable } from '../src/boards/tables/harlem-globetrotters';
 import { classicTable } from '../src/boards/tables/classic-table';
 import { cloneBoardDefinition } from '../src/boards/board-codec';
 import {
@@ -84,6 +85,28 @@ describe('reusable board assemblies', () => {
 });
 
 describe('assembly route validation', () => {
+  it('checks every switch in a drop-only bank', () => {
+    const board = cloneBoardDefinition(harlemGlobetrottersTable);
+    board.dropTargets.splice(2, 1);
+    expect(
+      validateBallRoutes(board).some(
+        (issue) =>
+          issue.message.includes('harlem-drop-bank/target-2') &&
+          issue.message.includes('goal 1'),
+      ),
+    ).toBe(true);
+  });
+  it('detects a missing upper flipper in the Harlem saucer feed', () => {
+    const board = cloneBoardDefinition(harlemGlobetrottersTable);
+    board.flippers.pop();
+    expect(
+      validateBallRoutes(board).some(
+        (issue) =>
+          issue.message.includes('harlem-upper-saucer') &&
+          issue.message.includes('goal 3'),
+      ),
+    ).toBe(true);
+  });
   it('checks all declared Classic assembly routes', () => {
     expect(classicTable.routes).toHaveLength(11);
     expect(validateBallRoutes(classicTable)).toEqual([]);

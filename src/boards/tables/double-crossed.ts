@@ -1,14 +1,11 @@
-import {
-  absolutePoint,
-  anchorPoint,
-  createLowerPlayfieldPair,
-  createPopTriangle,
-  createShooterLaneRight,
-  createTopArchLanes,
-  offsetLayoutPoint,
-} from '../layout-primitives';
-import type { BoardLayoutDefinition } from '../layout-schema';
+import { absolutePoint, createPopBumperCluster } from '../layout-primitives';
 import { compileBuiltInBoardLayout } from '../layout-compiler';
+import {
+  createFoundation,
+  createOrbit,
+  createBank,
+  composeAssemblies,
+} from './table-foundation';
 
 const doubleCrossedRulesScript = `
 const BALLS_PER_GAME = 3;
@@ -157,197 +154,54 @@ return {
 };
 `;
 
-const doubleCrossedShooterLane = createShooterLaneRight({
-  boardWidth: 900,
-  launchX: 760,
-  launchY: 1180,
-  guideLength: 640,
-  feedTopY: 240,
-  innerMergeX: 680,
-  innerMergeY: 360,
-  outerExitX: 800,
-  outerBendX: 800,
-  outerBendY: 440,
+const { lower, shooter, ...foundation } = createFoundation(
+  'doubleCrossedTable',
+  4,
+);
+const leftBank = createBank(
+  'cross-left',
+  { x: 240, y: 620 },
+  { x: 40, y: 80 },
+  2,
+  true,
+  100,
+);
+const rightBank = createBank(
+  'cross-right',
+  { x: 660, y: 620 },
+  { x: -40, y: 80 },
+  2,
+  true,
+  100,
+);
+const parts = composeAssemblies(
+  lower,
+  shooter,
+  createOrbit('cross-left-orbit'),
+  createOrbit('cross-right-orbit', true),
+  leftBank,
+  rightBank,
+);
+parts.posts!.push({
+  position: { x: 450, y: 1000 },
+  radius: 18,
+  material: 'rubberPost',
 });
-
-const doubleCrossedTopArch = createTopArchLanes({
-  center: absolutePoint(480, 200),
-  laneCount: 4,
-  spacingX: 120,
-  radius: 22,
-  score: 500,
-  roofOffsetY: -60,
-  separatorBottomOffsetY: 24,
-  shoulderStartOffsetY: 96,
-  sideEntryInset: 120,
-  roofInset: 60,
-});
-
-const doubleCrossedLowerPlayfield = createLowerPlayfieldPair({
-  leftFlipperPivot: anchorPoint('left-flipper-pivot'),
-  rightFlipperPivot: anchorPoint('right-flipper-pivot'),
-  leftLane: {
-    outerGuideStartOffset: { x: -176, y: -40 },
-    outerGuideEndOffset: { x: -120, y: -320 },
-    innerGuideStartOffset: { x: -56, y: -200 },
-    innerGuideEndOffset: { x: -80, y: 40 },
-    entryPostOffsets: [{ x: -72, y: -200, radius: 18, material: 'rubberPost' }],
+export const doubleCrossedTable = compileBuiltInBoardLayout(
+  {
+    ...foundation,
+    ...parts,
+    name: 'Double Crossed',
+    themeId: 'midnight',
+    rulesScript: doubleCrossedRulesScript,
+    bumpers: createPopBumperCluster({
+      top: absolutePoint(450, 320),
+      spacingX: 180,
+      spacingY: 140,
+      radius: 38,
+      scores: [100, 100, 100],
+      material: 'rubberPost',
+    }).bumpers,
   },
-  rightLane: {
-    outerGuideStartOffset: { x: 176, y: -40 },
-    outerGuideEndOffset: { x: 160, y: -320 },
-    innerGuideStartOffset: { x: 56, y: -200 },
-    innerGuideEndOffset: { x: 80, y: 40 },
-    entryPostOffsets: [{ x: 72, y: -200, radius: 18, material: 'rubberPost' }],
-  },
-  slingshots: {
-    leftCenterOffset: { x: 20, y: -140 },
-    rightCenterOffset: { x: -20, y: -140 },
-    width: 148,
-    height: 24,
-    leftAngle: 0.4,
-    rightAngle: Math.PI - 0.4,
-    score: 10,
-    strength: 540,
-  },
-  flippers: {
-    leftX: 280,
-    rightX: 640,
-    y: 1240,
-    length: 150,
-    thickness: 20,
-    restingAngleOffset: 0.28,
-    activeAngleOffset: -0.42,
-    material: 'flipperRubber',
-  },
-});
-
-const doubleCrossedLayout: BoardLayoutDefinition = {
-  name: 'Double Crossed',
-  themeId: 'midnight',
-  template: 'solid-state-two-flipper',
-  width: 900,
-  height: 1400,
-  rulesScript: doubleCrossedRulesScript,
-  drainY: 1425,
-  launchPosition: doubleCrossedShooterLane.launchPosition,
-  plunger: doubleCrossedShooterLane.plunger,
-  materials: {
-    playfield: 'playfieldWood',
-    walls: 'metalGuide',
-  },
-  physics: {
-    plunger: {
-      minReleaseSpeed: 1600,
-      maxReleaseSpeed: 4400,
-      bodyMass: 0.9,
-    },
-  },
-  anchors: [
-    { id: 'left-flipper-pivot', point: absolutePoint(280, 1240) },
-    { id: 'right-flipper-pivot', point: absolutePoint(640, 1240) },
-    { id: 'pop-top', point: absolutePoint(480, 360) },
-    { id: 'cross-center', point: absolutePoint(480, 760) },
-  ],
-  posts: [
-    ...doubleCrossedLowerPlayfield.posts,
-    { position: absolutePoint(180, 660), radius: 14, material: 'metalGuide' },
-    { position: absolutePoint(380, 660), radius: 14, material: 'metalGuide' },
-    { position: absolutePoint(580, 660), radius: 14, material: 'metalGuide' },
-    { position: absolutePoint(780, 660), radius: 14, material: 'metalGuide' },
-    {
-      position: offsetLayoutPoint(anchorPoint('cross-center'), 0, 200),
-      radius: 18,
-      material: 'rubberPost',
-    },
-  ],
-  bumpers: createPopTriangle({
-    top: anchorPoint('pop-top'),
-    spacingX: 160,
-    spacingY: 120,
-    radius: 44,
-    scores: [100, 100, 100],
-    material: 'rubberPost',
-  }),
-  standupTargets: [
-    {
-      position: absolutePoint(280, 680),
-      width: 60,
-      height: 16,
-      angle: 0.78,
-      score: 100,
-      material: 'rubberPost',
-    },
-    {
-      position: absolutePoint(360, 800),
-      width: 60,
-      height: 16,
-      angle: 0.78,
-      score: 100,
-      material: 'rubberPost',
-    },
-    {
-      position: absolutePoint(680, 680),
-      width: 60,
-      height: 16,
-      angle: Math.PI - 0.78,
-      score: 100,
-      material: 'rubberPost',
-    },
-    {
-      position: absolutePoint(600, 800),
-      width: 60,
-      height: 16,
-      angle: Math.PI - 0.78,
-      score: 100,
-      material: 'rubberPost',
-    },
-  ],
-  dropTargets: [
-    {
-      position: absolutePoint(440, 880),
-      width: 54,
-      height: 16,
-      angle: -Math.PI / 2,
-      score: 500,
-      material: 'rubberPost',
-    },
-    {
-      position: absolutePoint(520, 880),
-      width: 54,
-      height: 16,
-      angle: -Math.PI / 2,
-      score: 500,
-      material: 'rubberPost',
-    },
-  ],
-  spinners: [
-    {
-      position: absolutePoint(280, 560),
-      length: 96,
-      thickness: 10,
-      angle: 0.96,
-      score: 100,
-      material: 'metalGuide',
-    },
-    {
-      position: absolutePoint(640, 560),
-      length: 96,
-      thickness: 10,
-      angle: Math.PI - 0.96,
-      score: 100,
-      material: 'metalGuide',
-    },
-  ],
-  slingshots: doubleCrossedLowerPlayfield.slingshots,
-  rollovers: doubleCrossedTopArch.rollovers,
-  guides: [
-    ...doubleCrossedShooterLane.guides,
-    ...doubleCrossedTopArch.guides,
-    ...doubleCrossedLowerPlayfield.guides,
-  ],
-  flippers: doubleCrossedLowerPlayfield.flippers,
-};
-
-export const doubleCrossedTable =
-  compileBuiltInBoardLayout(doubleCrossedLayout);
+  { snapToGrid: false },
+);

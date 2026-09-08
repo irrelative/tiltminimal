@@ -53,6 +53,8 @@ export interface TargetBankOptions {
   step: Point;
   standupCount: number;
   endDropTarget?: boolean;
+  /** Number of drop targets after the standups, including drop-only banks. */
+  dropCount?: number;
   targetWidth: number;
   targetHeight: number;
   backingOffset: Point;
@@ -65,8 +67,17 @@ export interface TargetBankOptions {
 export const createTargetBankAssembly = (
   o: TargetBankOptions,
 ): BoardAssembly => {
-  if (!Number.isInteger(o.standupCount) || o.standupCount < 1)
-    throw new Error('A target bank needs at least one standup.');
+  const dropCount = o.dropCount ?? Number(Boolean(o.endDropTarget));
+  if (
+    !Number.isInteger(o.standupCount) ||
+    o.standupCount < 0 ||
+    !Number.isInteger(dropCount) ||
+    dropCount < 0 ||
+    o.standupCount + dropCount < 1
+  )
+    throw new Error(
+      'A target bank needs at least one target and nonnegative integer counts.',
+    );
   const spacing = Math.hypot(o.step.x, o.step.y);
   requireClearance(spacing, o.targetWidth, 'Target spacing');
   const normalOffset =
@@ -74,7 +85,7 @@ export const createTargetBankAssembly = (
     (o.step.x < 0 ? -1 : 1);
   if (normalOffset >= -(o.targetHeight / 2 + 6))
     throw new Error('Target backing must sit behind the scoring faces.');
-  const count = o.standupCount + Number(Boolean(o.endDropTarget));
+  const count = o.standupCount + dropCount;
   const angle = Math.atan2(o.step.y, o.step.x);
   const normal = { x: -Math.sin(angle), y: Math.cos(angle) };
   // Orient the accessible face toward the lower playfield.
@@ -103,9 +114,9 @@ export const createTargetBankAssembly = (
     standupTargets: Array.from({ length: o.standupCount }, (_, index) =>
       target(index, o.standupScore),
     ),
-    dropTargets: o.endDropTarget
-      ? [target(count - 1, o.dropScore ?? o.standupScore)]
-      : [],
+    dropTargets: Array.from({ length: dropCount }, (_, index) =>
+      target(o.standupCount + index, o.dropScore ?? o.standupScore),
+    ),
     guides: [
       rail(
         {

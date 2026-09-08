@@ -1,85 +1,39 @@
 # Starlight EM Specification
 
-`Starlight EM` is an original built-in table intended to evoke late-1960s to
-1970s electromechanical pinball rather than a solid-state or modern rules-heavy
-machine.
-
-## Design Goals
-
-- keep the playfield readable and symmetric
-- favor simple repeatable scoring over mode stacking
-- emphasize lanes, spinners, standup banks, pops, and a single saucer
-- use a five-ball rule set with straightforward end-of-ball bonus counting
+Starlight EM is an original five-ball table with simple repeatable scoring,
+standup banks, pop bumpers, and a single upper-right saucer.
 
 ## Layout
 
-The table is authored through the layout DSL, not raw resolved board geometry.
+The 1000 × 1400 cabinet uses the shared assembly foundation in
+[board-assemblies.md](board-assemblies.md). Four open top lanes receive gated
+plunges. A triangle of three pops occupies the upper center.
 
-Major features:
+The left spinner sits in an orbit that continues to the upper field. The
+second spinner occupies a separate center corridor with clear rotation space
+and an open upper exit. Its rails end above the two three-standup banks so the
+bank backings cannot pinch a descending ball against a spinner wall.
 
-- 2 lower flippers
-- 3 pop bumpers in an upper-center triangle
-- 2 spinners
-- 1 upper-right saucer
-- 2 lower slingshots
-- 6 standup targets in mirrored left/right banks of 3
-- 4 top rollover lanes
-- 1 center post and additional lane posts
-- classic inlane / outlane lower guides
-- a right shooter lane that full-plunges into the upper field
-- a 4-lane top arch with open entries rather than sealed rollover circles
-- lower inlane/outlane packages built relative to the flipper pivots
-- segmented lower lane mouths that separate the visible inlane / outlane entry
-  guides from the raised lower return rails
-- post-defined lane mouths so the inlane / outlane channels remain legible
-  without relying on artwork inserts
-- active lower slings generated separately from the lane rails so the lower
-  third behaves like a real EM/solid-state slingshot area instead of a passive
-  rubber guide
-- short rubber sling-approach guides tying each lane package into the active
-  sling body
-- triangular sling bodies with explicit front-face cues and end-post visuals
-  rather than generic diagonal wedges
-- raised lower return rails so the return hardware can visually cross the
-  flipper region without being modeled as a flat playfield blocker
-- upper left and upper right lane loops feeding back to the pops and saucer
-- spinner lanes that leave visible clearance around the spinner rotation
-  envelope rather than running a continuous guide through the spinner sweep
+The upper-right saucer has a rounded pocket and open downward capture/ejection
+mouth. Two active slings, four lane-entry posts, and solid curved returns feed
+the lower flippers. Outlanes remain separate. There is no center drain post.
+All guides collide on the playfield; joints retain precise coordinates without
+grid snapping.
 
 ## Rules
 
-The rules are intentionally EM-simple:
+The existing rule script and bank indices remain unchanged:
 
-- 5 balls per game
-- pop bumpers score and add a small amount of bonus
-- spinners score per spin and add small bonus
-- standup targets score and build bonus
-- completing either 3-target bank awards a larger score, bonus, and bonus multiplier step
-- completing all 4 top lanes awards a larger score and bonus multiplier step
-- the saucer awards a larger value and bonus multiplier step
-- drain awards `bonus * bonusMultiplier`
-- no timed modes, multiball, locks, or persistent modern feature ladders
+- Five balls per game.
+- Pops and spinners score and add bonus.
+- Standups score and build bonus; completing either bank adds an award and
+  advances the multiplier.
+- Completing four top lanes or capturing the saucer advances the multiplier.
+- Drains award bonus × multiplier.
+- No timed modes, multiball, locks, or persistent feature ladders.
 
-## Table Feel
+## Validation
 
-This table should feel closer to a reel-score electromechanical game:
-
-- more about repeating dependable shots
-- less about stacked features or toy interactions
-- a ruleset that can be understood from basic inserts and lane completion
-
-## Implementation Notes
-
-- Self-contained built-in table module: `src/boards/tables/starlight-em-table.ts`
-- Registered in: `src/boards/table-library.ts`
-- The layout now uses `createShooterLaneRight(...)`,
-  `createTopArchLanes(...)`, and `createLowerPlayfieldPair(...)` so the
-  launcher feed, top rollover bank, lower lanes, lower slings, and lower
-  flippers are generated from semantic fragments rather than hand-placed guide
-  fragments.
-- The lower third intentionally snaps to the board grid, so the lane package is
-  authored in coarse canonical geometry rather than fine-grained freehand
-  offsets. That keeps the built-in table editable without losing the EM lane
-  structure.
-- `Starlight EM` is expected to clear geometry analysis without
-  overlap, trap-risk, or launch-path warnings.
+The shipped layout must clear geometry checks, every declared ball route,
+and deep playability analysis. Tests also verify the five-ball rules, spinner
+clearance, and full-plunge access to the upper playfield.
