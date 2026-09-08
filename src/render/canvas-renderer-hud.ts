@@ -18,17 +18,23 @@ export const drawHud = (
   context.fillText(board.name, 48, 64);
   context.fillText(`Score ${state.score}`, 48, 104);
 
+  if (typeof state.rules.machineValues['table-status'] === 'string') {
+    context.font = `500 20px ${UI_FONT_FAMILY}`;
+    context.fillText(state.rules.machineValues['table-status'], 48, 138);
+    context.fillText(
+      `Bonus ${state.rules.bonus} × ${state.rules.bonusMultiplier}`,
+      48,
+      166,
+    );
+  }
+
   if (state.status === 'waiting-launch' && input.launchPressed) {
     drawLaunchMeter(context, board, state);
   }
 
   context.font = `400 20px ${UI_FONT_FAMILY}`;
   context.fillStyle = theme.hudMuted;
-  context.fillText(
-    getStatusLabel(state, input, board),
-    48,
-    board.height - 44,
-  );
+  context.fillText(getStatusLabel(state, input, board), 48, board.height - 44);
 };
 
 const drawLaunchMeter = (

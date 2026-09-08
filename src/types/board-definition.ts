@@ -12,7 +12,8 @@ export type BoardThemeId =
   | 'sunburst'
   | 'grayscale'
   | 'mirror-match'
-  | 'harlem';
+  | 'harlem'
+  | 'andromeda';
 
 export type FlipperSide = 'left' | 'right';
 

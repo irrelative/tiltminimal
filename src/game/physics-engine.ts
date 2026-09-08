@@ -31,16 +31,25 @@ export const stepGameFrame = (
     };
   }
 
-  if (state.status === 'waiting-launch') {
-    return stepWaitingLaunchState(
-      state,
-      board,
-      input,
-      Math.max(deltaSeconds, 0),
-    );
+  const result =
+    state.status === 'waiting-launch'
+      ? stepWaitingLaunchState(state, board, input, Math.max(deltaSeconds, 0))
+      : stepPlayingState(state, board, input, Math.max(deltaSeconds, 0));
+  for (const side of ['left', 'right'] as const) {
+    if (
+      input[side === 'left' ? 'leftPressed' : 'rightPressed'] &&
+      !state.flippers.some(
+        (flipper, index) =>
+          board.flippers[index].side === side && flipper.engaged,
+      )
+    )
+      result.events.unshift({
+        type: 'flipper-pressed',
+        side,
+        tick: result.state.tick,
+      });
   }
-
-  return stepPlayingState(state, board, input, Math.max(deltaSeconds, 0));
+  return result;
 };
 
 export const getLaunchChargeRatio = (

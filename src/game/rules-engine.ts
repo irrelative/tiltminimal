@@ -1,3 +1,4 @@
+import { lockCapturedBall, releaseLockedBalls } from './multiball';
 import type { BoardDefinition } from '../types/board-definition';
 import { defaultRulesScript } from './rules-defaults';
 import type { GameState } from './game-state';
@@ -23,6 +24,12 @@ interface CompiledRulesModule {
 }
 
 interface RulesContext {
+  lockBall(saucerIndex: number): boolean;
+  releaseLockedBalls(): number;
+  getActiveBallCount(): number;
+  getLockedBallCount(): number;
+  resetDropTargets(indices: number[]): void;
+  setRolloverLit(index: number, lit: boolean): void;
   addScore(points: number): void;
   addBonus(points: number): void;
   getBonus(): number;
@@ -73,6 +80,20 @@ export const initializeRulesState = (
   compiled.module.onGameStart?.(context);
   compiled.module.onBallStart?.(context);
 
+  return next;
+};
+
+export const restartCurrentBall = (
+  state: GameState,
+  board: BoardDefinition,
+): GameState => {
+  const next = resetBall(state, board);
+  next.rules.ballValues = {};
+  next.rules.modes = {};
+  const compiled = getCompiledRulesModule(board.rulesScript);
+  compiled.module.onBallStart?.(
+    createRulesContext(next, board, compiled.module),
+  );
   return next;
 };
 
@@ -191,6 +212,26 @@ const createRulesContext = (
   board: BoardDefinition,
   module: RulesModule,
 ): RulesContext => ({
+  lockBall(index) {
+    return lockCapturedBall(state, board, index);
+  },
+  releaseLockedBalls() {
+    return releaseLockedBalls(state, board);
+  },
+  getActiveBallCount() {
+    return state.status === 'playing' ? 1 + state.additionalBalls.length : 0;
+  },
+  getLockedBallCount() {
+    return state.lockedBalls.length;
+  },
+  resetDropTargets(indices) {
+    indices.forEach((index) => {
+      if (state.dropTargets[index]) state.dropTargets[index].isDown = false;
+    });
+  },
+  setRolloverLit(index, lit) {
+    if (state.rollovers[index]) state.rollovers[index].lit = lit;
+  },
   addScore(points) {
     state.score += normalizeWholeNumber(points);
   },
@@ -257,6 +298,11 @@ const createRulesContext = (
     const resetState = resetBall(state, board);
 
     state.ball = resetState.ball;
+    state.additionalBalls = [];
+    state.lockedBalls = [];
+    state.launcherExited = false;
+    state.tableNudge = resetState.tableNudge;
+    state.slingshots = resetState.slingshots;
     state.status = 'waiting-launch';
     state.plunger = resetState.plunger;
     state.flippers = resetState.flippers;
@@ -276,6 +322,12 @@ const createRulesContext = (
   },
   endGame() {
     state.status = 'game-over';
+    state.additionalBalls = [];
+    state.lockedBalls = [];
+    state.saucers.forEach((cup) => {
+      cup.occupied = false;
+      cup.holdSecondsRemaining = 0;
+    });
     state.rules.ballsRemaining = 0;
     state.plunger.pullback = 0;
     state.plunger.releaseSpeed = 0;

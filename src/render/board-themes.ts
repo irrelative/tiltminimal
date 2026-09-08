@@ -64,7 +64,10 @@ export interface BoardTheme {
 
 export const DEFAULT_BOARD_THEME_ID: BoardThemeId = 'classic';
 
-const BASE_THEMES: Record<Exclude<BoardThemeId, 'harlem'>, BoardTheme> = {
+const BASE_THEMES: Record<
+  Exclude<BoardThemeId, 'harlem' | 'andromeda'>,
+  BoardTheme
+> = {
   'mirror-match': {
     id: 'mirror-match',
     label: 'Mirror Match',
@@ -374,6 +377,26 @@ const BASE_THEMES: Record<Exclude<BoardThemeId, 'harlem'>, BoardTheme> = {
 
 export const BOARD_THEMES: Record<BoardThemeId, BoardTheme> = {
   ...BASE_THEMES,
+  andromeda: {
+    ...BASE_THEMES.midnight,
+    id: 'andromeda',
+    label: 'Andromeda',
+    backgroundTop: '#261b32',
+    backgroundMid: '#612c2e',
+    backgroundBottom: '#171523',
+    bumperColors: ['#ffe0a2', '#ffd271', '#eeb45f'],
+    bumperRing: '#fff0cb',
+    bumperCap: '#d95b38',
+    dropUpFill: '#dc5944',
+    dropStroke: '#ffe0a2',
+    standupFill: '#f5ce64',
+    standupLitFill: '#fff0a0',
+    flipperFill: '#fff1d1',
+    flipperStroke: '#f59c57',
+    flipperCore: '#672c35',
+    hudText: '#fff0cf',
+    hudMuted: '#ffe3b0',
+  },
   harlem: {
     ...BASE_THEMES.classic,
     id: 'harlem',

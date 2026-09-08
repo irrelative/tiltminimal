@@ -107,7 +107,7 @@ describe('classic ball routes', () => {
           1 / 120,
         );
         state = result.state;
-        firstEvent = result.events[0]?.type;
+        firstEvent = result.events.find((event) => 'score' in event)?.type;
         if (firstEvent) break;
       }
       expect(firstEvent).toBe(shot);

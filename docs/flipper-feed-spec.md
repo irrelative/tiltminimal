@@ -53,9 +53,12 @@ settle on the specified flipper's upper capture region below 5 units/second for
 0.5 continuous seconds. Lowering the flippers must then move it more than one
 ball radius within a second. Validation rejects fixed-heel or guide pinches.
 
-Ten inlanes across all five tables each exercise nine velocities: horizontal
+The original five tables’ ten inlanes each exercise nine velocities: horizontal
 -40, 0, or 40 and downward 0, 250, or 500 units/second. Four additional cases
-cover Harlem's direct feeds to its two left flippers. Outlane drain contracts,
+cover Harlem's direct feeds to its two left flippers. Andromeda adds nine right-inlane and nine direct open-left feed cases, with
+120-unit flippers and no left inlane/outlane pair. Its passive right feed may
+cross the court; held catches remain required. See [Andromeda](andromeda-spec.md).
+Outlane drain contracts,
 passive feeds, scoring routes, and deep trap detection remain enabled.
 
 Run:

@@ -11,6 +11,10 @@ export interface Vector2 {
 }
 
 export interface BallState {
+  capturedSaucer?: number;
+  launcherExited?: boolean;
+  bumperContacts?: boolean[];
+  rolloverContacts?: boolean[];
   position: Vector2;
   linearVelocity: Vector2;
   angularVelocity: Vector2;
@@ -82,6 +86,8 @@ export interface TableNudgeState {
 
 export interface GameState {
   ball: BallState;
+  additionalBalls: BallState[];
+  lockedBalls: { ball: BallState; saucerIndex: number }[];
   // Once a launch reaches live play, the shooter lane behaves as a one-way exit.
   launcherExited: boolean;
   score: number;
@@ -102,6 +108,8 @@ export interface GameState {
 
 export const createInitialGameState = (board: BoardDefinition): GameState => ({
   ball: createBallState(board),
+  additionalBalls: [],
+  lockedBalls: [],
   launcherExited: false,
   score: 0,
   tick: 0,
@@ -125,6 +133,8 @@ export const resetBall = (
 ): GameState => ({
   ...state,
   ball: createBallState(board),
+  additionalBalls: [],
+  lockedBalls: [],
   launcherExited: false,
   status: 'waiting-launch',
   plunger: createPlungerState(),
@@ -232,4 +242,14 @@ const createSlingshotState = (): SlingshotState => ({
 const createRolloverState = (): RolloverState => ({
   occupied: false,
   lit: false,
+});
+
+export const cloneBallState = (ball: BallState): BallState => ({
+  ...ball,
+  position: { ...ball.position },
+  linearVelocity: { ...ball.linearVelocity },
+  angularVelocity: { ...ball.angularVelocity },
+  angularPosition: { ...ball.angularPosition },
+  bumperContacts: ball.bumperContacts?.slice(),
+  rolloverContacts: ball.rolloverContacts?.slice(),
 });

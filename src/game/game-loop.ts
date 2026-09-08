@@ -6,7 +6,11 @@ import type { GameAudio } from '../audio/game-audio';
 import { getFrameAudioEvents } from '../audio/game-audio';
 import type { GameState } from './game-state';
 import { resetBall } from './game-state';
-import { applyRulesFrame, initializeRulesState } from './rules-engine';
+import {
+  applyRulesFrame,
+  initializeRulesState,
+  restartCurrentBall,
+} from './rules-engine';
 import { getPlungerPullRatio, stepGameFrame } from './physics-engine';
 import { clampFrameDeltaSeconds } from './physics-engine-types';
 
@@ -57,7 +61,7 @@ export class GameLoop {
 
   resetBall(): void {
     this.debug.clear();
-    this.state = resetBall(this.state, this.board);
+    this.state = restartCurrentBall(this.state, this.board);
     this.renderer.renderGame(this.board, this.state, this.input.getState());
     this.emitStateChange();
   }
@@ -148,6 +152,11 @@ export const getStatusLabel = (
   if (state.status === 'game-over') {
     return 'Game over. Hold Arrow Up to start a new game.';
   }
+
+  if (state.additionalBalls.length)
+    return `${1 + state.additionalBalls.length}-ball multiball — keep both balls in play.`;
+  if (state.lockedBalls.length && state.status === 'waiting-launch')
+    return 'Ball locked. Plunge the replacement ball, then shoot the lit release target.';
 
   if (state.status === 'waiting-launch') {
     const launchPercent = Math.round(getPlungerPullRatio(state, board) * 100);

@@ -1,3 +1,4 @@
+import { drawAndromedaPlayfield } from './andromeda-playfield-art';
 import { drawHarlemPlayfield } from './harlem-playfield-art';
 import { getSurfaceMaterial } from '../game/materials';
 import {
@@ -288,6 +289,10 @@ const drawBackground = (
   board: BoardDefinition,
 ): void => {
   const theme = getBoardTheme(board.themeId);
+  if (board.themeId === 'andromeda') {
+    drawAndromedaPlayfield(context, board.width, board.height);
+    return;
+  }
   if (board.themeId === 'harlem') {
     drawHarlemPlayfield(context, board.width, board.height);
     return;

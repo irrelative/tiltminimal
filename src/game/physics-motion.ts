@@ -1,3 +1,4 @@
+import { cloneBallState } from './game-state';
 import type { InputState } from '../input/keyboard-input';
 import type { ContactData } from './contact-types';
 import type {
@@ -46,21 +47,12 @@ export const clonePlayingGameState = (
 ): GameState => ({
   ...state,
   tick: state.tick + 1,
-  ball: {
-    ...state.ball,
-    position: {
-      ...state.ball.position,
-    },
-    linearVelocity: {
-      ...state.ball.linearVelocity,
-    },
-    angularVelocity: {
-      ...state.ball.angularVelocity,
-    },
-    angularPosition: {
-      ...state.ball.angularPosition,
-    },
-  },
+  ball: cloneBallState(state.ball),
+  additionalBalls: state.additionalBalls.map(cloneBallState),
+  lockedBalls: state.lockedBalls.map((lock) => ({
+    ...lock,
+    ball: cloneBallState(lock.ball),
+  })),
   plunger: clonePlungerState(state.plunger),
   tableNudge: cloneTableNudgeState(state.tableNudge),
   flippers: board.flippers.map((flipper, index) =>
@@ -221,7 +213,7 @@ export const resolveOccupiedSaucer = (
   board: BoardDefinition,
   deltaSeconds: number,
 ): boolean => {
-  const occupiedIndex = state.saucers.findIndex((saucer) => saucer.occupied);
+  const occupiedIndex = state.ball.capturedSaucer ?? -1;
 
   if (occupiedIndex === -1) {
     return false;
@@ -248,6 +240,7 @@ export const resolveOccupiedSaucer = (
 
   if (saucerState.holdSecondsRemaining === 0) {
     saucerState.occupied = false;
+    delete state.ball.capturedSaucer;
     const ejectAngle = saucer.ejectAngle;
     state.ball.position.x =
       center.x + Math.cos(ejectAngle) * (saucer.radius + state.ball.radius + 4);

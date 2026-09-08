@@ -1,0 +1,65 @@
+# Shared locks and multiball
+
+Normal gameplay supports multiple physical balls in one shared table simulation.
+Existing single-ball boards use the same path with no additional balls.
+
+## State and stepping
+
+`GameState.ball` remains the primary ball for existing HUD/input integrations.
+`additionalBalls` contains other active balls; `lockedBalls` stores captured balls
+with their saucer indices while a replacement is served. Each ball owns its
+saucer capture, shooter-exit flag, and bumper/rollover contact latches. Device
+cooldowns, drop positions, flipper motion, plunger, nudge, and scoring are shared.
+
+The physics loop picks a substep safe for the fastest active ball, advances
+shared motion/timers once, and resolves each ball against those shared devices.
+It then resolves ball-to-ball contact with inverse-mass separation and 0.9 normal
+restitution. Captured balls are excluded from ball-to-ball response. State clones
+copy each ball and its vectors/contact arrays, including locked balls.
+
+A saucer holds/ejects only its captured ball. Another ball cannot claim an
+occupied cup. Locked balls do not run the ordinary eject countdown. Their visible
+positions remain at the cup; no table-specific gravity or collision exception is
+needed for Andromeda.
+
+## Rules API
+
+- `ctx.lockBall(saucerIndex)` returns true only when the sole live ball is captured
+  by that cup and there is no existing lock. It parks that ball, serves a new ball,
+  and preserves the turn, score, bonus, and devices. This first implementation
+  deliberately supports one lock plus one replacement.
+- `ctx.releaseLockedBalls()` ejects the lock through the cup's configured exit,
+  returns the number released, and appends those balls to active play. It is a
+  no-op until the replacement is playing, and repeated calls cannot duplicate it.
+- `ctx.getActiveBallCount()` and `ctx.getLockedBallCount()` report the two groups.
+  A replacement waiting at the plunger is not counted as actively playing.
+- `ctx.resetDropTargets(indices)` resets selected physical targets, allowing
+  repeatable banks independently of end-of-turn resets.
+- `ctx.setRolloverLit(index, lit)` controls rollover lamps independently of each
+  ball's occupied/contact state.
+- `flipper-pressed` events carry `side` and fire on a press edge, including at the
+  plunger. Scoring-shot tests should distinguish input events from scoring events.
+
+A drain removes that ball and promotes a survivor if needed. `multiball-ended`
+fires when multiple live balls fall to one or zero. `ball-drained` is emitted
+only once no live balls remain, so existing rules award bonus and advance once.
+No target, flipper, bonus, or turn reset occurs on the first multiball drain.
+If a locked ball remains when the live replacement drains, this single-player
+implementation clears it as part of ending the turn rather than carrying a
+stealable lock across players.
+
+The renderer and physics overlay draw all active and locked balls. The sidebar
+shows live/locked counts during these states. `restartCurrentBall` clears locks,
+additional balls, modes, and per-ball rules, then runs `onBallStart` without
+consuming a turn or clearing score. Ordinary next-ball and game-over paths also
+clear lock state. The Physics sandbox retains its separate injection workflow;
+it does not execute table scoring scripts.
+
+## Regression coverage
+
+`tests/multiball.test.ts` checks independent ball motion/capture, one-time shared
+flipper/timer stepping, lock persistence and idempotent release, promotion after
+one drain, exactly one turn advance after simultaneous drains, and collision
+momentum/energy. `tests/andromeda.test.ts` checks integration with a real guarded
+shot, rules, release target, and doubled scoring. Full existing single-ball and
+all-table route tests remain required after infrastructure changes.

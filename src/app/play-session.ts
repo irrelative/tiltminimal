@@ -82,7 +82,7 @@ export const startStandalonePlaySession = ({
 
   modeTitle.textContent = board.name;
   loop.setOnStateChange((nextState) => {
-    playDebugStatus.textContent = `${nextState.status} · Ball ${nextState.rules.currentBall}/${nextState.rules.ballsPerGame} · Score ${nextState.score}`;
+    playDebugStatus.textContent = `${nextState.status} · Ball ${nextState.rules.currentBall}/${nextState.rules.ballsPerGame} · Score ${nextState.score}${nextState.additionalBalls.length || nextState.lockedBalls.length ? ` · ${nextState.status === 'playing' ? 1 + nextState.additionalBalls.length : 0} live / ${nextState.lockedBalls.length} locked` : ''}`;
     playDebugPosition.textContent = formatVector2(
       nextState.ball.position.x,
       nextState.ball.position.y,

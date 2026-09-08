@@ -259,3 +259,12 @@ For common tasks, these are the fastest entry points:
   `src/render/canvas-renderer.ts` and the specialized renderer files
 - changing route behavior or screen wiring:
   `src/main.ts`, `src/app/routes.ts`, and `src/app/`
+
+## Multiball and locks
+
+`GameState` retains a primary ball plus additional live balls and a locked-ball
+collection. The shared physics loop advances devices once per substep, resolves
+each live ball, and emits the turn-ending drain only after the last live ball
+is gone. See [multiball-spec.md](multiball-spec.md) for rules APIs, ownership, and
+reset behavior, and [andromeda-spec.md](andromeda-spec.md) for the first table
+using a guarded lock and two-ball play.

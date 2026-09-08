@@ -181,7 +181,7 @@ This validation pass is distinct from CLI geometry analysis:
 
 ## Current Scope
 
-All five built-in tables use connected assemblies with table-specific geometry.
+All six built-in tables use connected assemblies with table-specific geometry.
 Simulation route contracts supplement the compiler's geometric heuristics;
 held-feed validation and deep passive-drop checks are available today. They
 sample behavior rather than proving every possible trajectory. Center-drain

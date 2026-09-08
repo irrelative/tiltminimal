@@ -83,7 +83,17 @@ export interface ModeEndedEvent extends BaseGameEvent {
   name: string;
 }
 
+export interface FlipperPressedEvent extends BaseGameEvent {
+  type: 'flipper-pressed';
+  side: 'left' | 'right';
+}
+export interface MultiballEndedEvent extends BaseGameEvent {
+  type: 'multiball-ended';
+}
+
 export type GameEvent =
+  | FlipperPressedEvent
+  | MultiballEndedEvent
   | BallDrainedEvent
   | BallLaunchedEvent
   | BumperHitEvent

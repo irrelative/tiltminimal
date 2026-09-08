@@ -50,6 +50,7 @@ const features = (board: BoardDefinition): number =>
   board.guides.length +
   board.flippers.length;
 const restart = (): void => {
+  playMeta.textContent = `${features(table().board)} features${table().description ? ' · ' + table().description : ''}`;
   state.loop?.stop();
   state.sandbox?.stop();
   if (route === 'physics') {
