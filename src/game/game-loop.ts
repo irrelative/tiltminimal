@@ -38,7 +38,7 @@ export class GameLoop {
     this.lastFrameTime = 0;
     this.lastInputState = this.input.getState();
     this.input.connect();
-    this.audio?.connect();
+    this.audio?.connect(this.board);
     this.renderer.renderGame(this.board, this.state, this.input.getState());
     this.emitStateChange();
     this.animationFrameId = window.requestAnimationFrame(this.onFrame);
@@ -98,6 +98,7 @@ export class GameLoop {
         this.board,
       );
       previousState = this.state;
+      this.audio?.startGame();
     } else {
       const frame = this.debug.capture(deltaSeconds, () => {
         const result = stepGameFrame(
@@ -109,6 +110,7 @@ export class GameLoop {
         recordDebugEvents(result.events);
         return result;
       });
+      this.audio?.playGameEvents(frame.events);
       this.state = applyRulesFrame(
         frame.state,
         this.board,

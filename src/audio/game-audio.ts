@@ -1,3 +1,9 @@
+import type { GameEvent } from '../game/rules-types';
+import {
+  getTableAudioProfile,
+  type TableAudioProfile,
+} from './table-audio-profiles';
+import { TableTonePlayer } from './table-tone-player';
 import type { InputState } from '../input/keyboard-input';
 import type {
   BoardDefinition,
@@ -89,7 +95,17 @@ export class GameAudio {
   private noiseBuffer: AudioBuffer | null = null;
   private lastBounceTime = -Infinity;
 
-  connect(): void {
+  private profile: TableAudioProfile | null = null;
+  private readonly tableTone = new TableTonePlayer();
+  private pendingStart = false;
+  private session = 0;
+
+  connect(board?: BoardDefinition): void {
+    this.tableTone.stop();
+    this.profile = board ? getTableAudioProfile(board) : null;
+    this.pendingStart = this.profile !== null;
+    this.session += 1;
+    this.lastBounceTime = -Infinity;
     if (this.unlockBound || typeof window === 'undefined') {
       return;
     }
@@ -100,6 +116,10 @@ export class GameAudio {
   }
 
   disconnect(): void {
+    this.session += 1;
+    this.pendingStart = false;
+    this.tableTone.stop();
+    this.profile = null;
     if (!this.unlockBound || typeof window === 'undefined') {
       return;
     }
@@ -107,6 +127,31 @@ export class GameAudio {
     window.removeEventListener('pointerdown', this.unlockAudio);
     window.removeEventListener('keydown', this.unlockAudio);
     this.unlockBound = false;
+  }
+
+  startGame(): void {
+    this.tableTone.stop();
+    this.pendingStart = this.profile !== null;
+    this.playPendingStart();
+  }
+
+  playGameEvents(events: readonly GameEvent[]): void {
+    const context = this.getContext();
+    if (!context || context.state !== 'running' || !this.profile) return;
+    this.playPendingStart();
+    const cue = this.profile.cueForEvents(events);
+    if (cue) this.tableTone.play(context, cue);
+  }
+
+  private playPendingStart(): void {
+    if (
+      !this.pendingStart ||
+      !this.profile ||
+      this.context?.state !== 'running'
+    )
+      return;
+    this.pendingStart = false;
+    this.tableTone.play(this.context, this.profile.start);
   }
 
   playEvents(events: GameAudioEvent[]): void {
@@ -140,11 +185,18 @@ export class GameAudio {
   private readonly unlockAudio = (): void => {
     const context = this.getContext();
 
-    if (!context || context.state !== 'suspended') {
-      return;
-    }
-
-    void context.resume();
+    if (!context) return;
+    const session = this.session;
+    if (context.state === 'suspended') {
+      void context
+        .resume()
+        .then(() => {
+          if (session === this.session) this.playPendingStart();
+        })
+        .catch(() => {
+          /* A later user gesture can retry audio unlock. */
+        });
+    } else this.playPendingStart();
   };
 
   private getContext(): AudioContext | null {
@@ -179,9 +231,13 @@ export class GameAudio {
     event: Extract<GameAudioEvent, { type: 'flipper-trigger' }>,
   ): void {
     const oscillator = context.createOscillator();
-    oscillator.type = 'square';
-    oscillator.frequency.setValueAtTime(220, startTime);
-    oscillator.frequency.exponentialRampToValueAtTime(110, startTime + 0.045);
+    // Harlem's solenoid is a low mechanical knock beneath the electronic voice.
+    oscillator.type = this.profile ? 'triangle' : 'square';
+    oscillator.frequency.setValueAtTime(this.profile ? 120 : 220, startTime);
+    oscillator.frequency.exponentialRampToValueAtTime(
+      this.profile ? 55 : 110,
+      startTime + 0.045,
+    );
 
     const gain = context.createGain();
     gain.gain.setValueAtTime(0.0001, startTime);
@@ -322,7 +378,12 @@ const getNearbyImpactMaterial = (
     };
 
     if (
-      distanceToOrientedSegment(position, shifted, shifted.width, shifted.angle) <=
+      distanceToOrientedSegment(
+        position,
+        shifted,
+        shifted.width,
+        shifted.angle,
+      ) <=
       radius + shifted.height / 2 + 10
     ) {
       return shifted.material;
@@ -350,26 +411,25 @@ const getNearbyImpactMaterial = (
   }
 
   for (const guide of board.guides) {
-    const shiftedGuide =
-      isArcGuide(guide)
-        ? {
-            ...guide,
-            center: {
-              x: guide.center.x + offset.x,
-              y: guide.center.y + offset.y,
-            },
-          }
-        : {
-            ...guide,
-            start: {
-              x: guide.start.x + offset.x,
-              y: guide.start.y + offset.y,
-            },
-            end: {
-              x: guide.end.x + offset.x,
-              y: guide.end.y + offset.y,
-            },
-          };
+    const shiftedGuide = isArcGuide(guide)
+      ? {
+          ...guide,
+          center: {
+            x: guide.center.x + offset.x,
+            y: guide.center.y + offset.y,
+          },
+        }
+      : {
+          ...guide,
+          start: {
+            x: guide.start.x + offset.x,
+            y: guide.start.y + offset.y,
+          },
+          end: {
+            x: guide.end.x + offset.x,
+            y: guide.end.y + offset.y,
+          },
+        };
     if (
       getGuideDistance(position, shiftedGuide) <=
       radius + shiftedGuide.thickness / 2 + 10

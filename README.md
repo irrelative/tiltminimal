@@ -123,3 +123,7 @@ See [Classic playtest scenarios and baseline findings](docs/classic-playtest.md)
 
 All tables validate their intended passive inlane paths and held-flipper
 catch/release. See [the flipper feed specification](docs/flipper-feed-spec.md).
+
+Harlem has table-specific early Bally-style electronic scoring sounds and a
+synthesized Sweet Georgia Brown startup phrase. Click or press a key in Game
+to unlock audio. See [table audio and fidelity limits](docs/table-audio-spec.md).

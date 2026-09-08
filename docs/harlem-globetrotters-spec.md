@@ -151,3 +151,11 @@ all nine held catch/release samples on each side, both outlanes, all center
 routes, all-table deep validation without warnings, and the full 226-test suite.
 Browser overlay review checks the full table and matching-height lane drops as
 well as the center drain. Build and lint pass.
+
+## Audio
+
+The Game route layers a table-specific early Bally-style electronic voice over
+shared mechanical sounds, including a synthesized Sweet Georgia Brown startup
+phrase and event-driven spinner, target, sling, bumper, and saucer cues.
+See [table audio](table-audio-spec.md) for event mappings, browser lifecycle,
+references, and the distinction between this synthesis and ROM-exact sound.
