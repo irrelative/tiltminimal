@@ -41,7 +41,7 @@ shooter.routes[0]!.goals = [
 
 const lowerOptions = {
   id: 'harlem-right-return',
-  center: { x: 490, y: 1800 },
+  center: { x: 470, y: 1800 },
   pivotSpacing: 320,
   flipperLength: 110,
   restingAngle: 0.55,
@@ -50,7 +50,7 @@ const lowerOptions = {
   bendRise: 174,
   entryRise: 320,
   heelOffset: 32,
-  slingOffset: { x: 144, y: 190 },
+  slingOffset: { x: 174, y: 310 },
   slingWidth: 144,
   slingHeight: 50,
   slingAngle: 0.65,
@@ -59,8 +59,9 @@ const right = createLowerPlayfieldAssembly(lowerOptions);
 const left = createLowerPlayfieldAssembly({
   ...lowerOptions,
   id: 'harlem-left-return',
+  slingOffset: { x: 74, y: 190 },
   restingAngle: 0.55,
-  center: { x: 450, y: 1680 },
+  center: { x: 430, y: 1680 },
 });
 // Use each assembly's outer half: Harlem's left and right returns are staggered.
 const lower: BoardAssembly = {
@@ -70,7 +71,7 @@ const lower: BoardAssembly = {
     left.flippers[0],
     right.flippers[1],
     {
-      position: { x: 390, y: 1800 },
+      position: { x: 370, y: 1800 },
       side: 'left',
       length: 110,
       thickness: 22,
@@ -94,8 +95,8 @@ lower.routes[2]!.goals = [
   { type: 'region', min: { x: 430, y: 1720 }, max: { x: 700, y: 1920 } },
 ];
 for (const [id, x, y, pivot] of [
-  ['upper-left', 340, 1630, { x: 290, y: 1680 }],
-  ['lower-left', 440, 1740, { x: 390, y: 1800 }],
+  ['upper-left', 320, 1630, { x: 270, y: 1680 }],
+  ['lower-left', 420, 1740, { x: 370, y: 1800 }],
 ] as const)
   lower.routes.push({
     id: `harlem-${id}-feed`,
@@ -113,7 +114,7 @@ for (const [id, x, y, pivot] of [
   });
 
 // Keep a ball-width corridor through the center, including the rubber tips.
-for (const x of [510, 520, 530])
+for (const x of [490, 500, 510])
   lower.routes.push({
     id: `harlem-center-drain-${x}`,
     start: {

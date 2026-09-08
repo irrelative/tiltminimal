@@ -35,7 +35,7 @@ The 1000 × 2000 coordinate space approximates the original's long playfield.
   that exit clear rather than forcing the ball back through the target row.
 - Five standups run down the left edge. The sixth is recessed in the right-side
   Dunk Shot pocket. The center remains open for cross-court shots.
-- Staggered lower returns, slingshots, outlanes, and four representative
+- Staggered lower returns and outlanes, level mirrored slingshots, and four representative
   rollover switches complete the layout. Painted GLOBE letters and bonus
   inserts are decoration, not invented rollover collision switches.
 
@@ -67,13 +67,13 @@ plastics, portrait art, and switch positions remain approximations.
 The return lanes now use the heel-relative dimensions in
 [the flipper feed specification](flipper-feed-spec.md). Both side returns and
 the direct feeds to both left flippers include held catch/release contracts;
-the upper-left pivot is (290, 1680) and the lower-left is (390, 1800).
+the upper-left pivot is (270, 1680) and the lower-left is (370, 1800).
 All three flippers are 110 units long. Both left resting angles are 0.55
-radians, mirrored by the right flipper at (650, 1800). The upper-left tip lies
-at approximately (384, 1737), just above the lower-left heel rather than far
+radians, mirrored by the right flipper at (630, 1800). The upper-left tip lies
+at approximately (364, 1737), just above the lower-left heel rather than far
 to its right. Their rubber surfaces leave about 44 units of clearance for the
 32-unit ball. The lower pair leaves about 57 units of horizontal tip clearance.
-Center-drain routes at x=510, 520, and 530 exercise that opening at two speeds.
+Center-drain routes at x=490, 500, and 510 exercise that opening at two speeds.
 
 The [original flyer detail](https://www.csprojects.eu/_images/flippers/1125f2.jpg)
 and [full playfield photo](https://users.cis.fiu.edu/~jweiss/globetrotters/playfield.JPG)
@@ -89,7 +89,6 @@ The passive right-return contract now checks entry into the lower playfield:
 an unheld feed may drain through the center instead of rebounding off the
 lower-left flipper. Its nine held catch/release cases remain required.
 
-
 ## Plunge return into live play
 
 The open outer arch previously guided medium and full launches down the left
@@ -97,8 +96,7 @@ cabinet wall, outside the target bank and directly into the left outlane.
 The old route checked only arrival at the top of the arch, so it accepted this
 path without any interaction in the playfield.
 
-A short angled metal guide now joins the upper arch at x=220 (y approximately
-118) and ends at (270, 200), turning its runoff inward toward the bumper and
+A short angled metal guide now joins the upper arch at x=220 (y approximately 118) and ends at (270, 200), turning its runoff inward toward the bumper and
 Free Throw area. This is a documented 2D feed adaptation, not a claim that the
 original machine has this exact rail. The open arch, device counts, outlane
 openings, center drain, and held-flipper returns remain intact.
@@ -111,3 +109,21 @@ and the shooter lane. A regression removes the deflector and requires all 51
 samples to fail on the previously untested continuation. Normal play can still
 drain after rebounds; these checks prevent the direct arch-to-outlane launch
 path and do not guarantee every plunge survives subsequent play.
+
+## Centered drain and level slingshots
+
+The lower arrangement is translated 20 units left so the lower flipper tips'
+rubber edges center on x=500, half the table width. Return guides, lane entries,
+and held-feed destinations move with their flippers. The diagonal left pair
+and approximately 57-unit drain clearance are preserved.
+
+Both slingshots now share y=1490, at x=356 and x=644, with mirrored angles and
+equal dimensions. Their horizontal spacing clears the right inlane entry post;
+the return lanes retain their different heights to serve the diagonal left pair.
+This is an intentional playability/alignment adaptation of the estimated layout.
+
+Regression checks require the drain midpoint and sling midpoint to equal half
+the table width, and both slings to have equal heights. All 225 tests and all-table
+deep validation pass with no warnings. Browser review in `/physics` with the
+overlay checked the full table, lower alignment, center drop, and both inlane
+entries; automated route checks cover held catches and releases.

@@ -67,6 +67,13 @@ describe('harlemGlobetrottersTable', () => {
     expect(gap).toBeLessThan(b.ball.radius * 3);
   });
 
+  it('aligns the slingshots symmetrically around the table center', () => {
+    const b = harlemGlobetrottersTable;
+    const [left, right] = b.slingshots;
+    expect(left.y).toBe(right.y);
+    expect((left.x + right.x) / 2).toBe(b.width / 2);
+  });
+
   it('leaves a ball-width center drain between the lower flipper tips', () => {
     const b = harlemGlobetrottersTable;
     const left = b.flippers
@@ -79,6 +86,7 @@ describe('harlemGlobetrottersTable', () => {
     const rightEdge =
       getFlipperTipPosition(right, right.restingAngle).x -
       getFlipperTipRadius(right);
+    expect((leftEdge + rightEdge) / 2).toBeCloseTo(b.width / 2);
     expect(rightEdge - leftEdge).toBeGreaterThan(b.ball.radius * 2 + 20);
     const routes = b.routes!.filter((r) =>
       r.id.startsWith('harlem-center-drain-'),
