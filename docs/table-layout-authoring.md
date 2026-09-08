@@ -3,6 +3,13 @@
 This project now supports a higher-level layout authoring layer for built-in
 tables and future agent-generated tables.
 
+## Start here
+
+Follow [the shared layout requirements](conventional-layout-guidelines.md) for
+clearances, center drains, return alignment, and acceptance checks. Prefer
+[connected assemblies](board-assemblies.md) for new mechanisms. The DSL and
+legacy primitives below describe composition tools, not playability guarantees.
+
 ## Why This Exists
 
 Raw `BoardDefinition` JSON is still the runtime format, but it is awkward for
@@ -99,24 +106,19 @@ Lower-playfield authoring is intentionally split:
   outlane mouths, raised return rails, lane-entry posts, sling-approach rubber,
   active slingshots, and flippers
 
-For tables that need a canonical lower third, prefer using
-`outerGuideBreakOffset` and `innerGuideBreakOffset` in
-`createInlaneOutlanePair(...)`. That produces an upper `playfield` guide for
-the visible lane mouth and a lower return guide for the raised wireform-like
-section that crosses the flipper area.
+For new lower thirds, prefer `createLowerPlayfieldAssembly(...)`, whose curved
+returns include passive and held catch/release routes. The helpers above remain
+useful for legacy composition and custom shapes, but require their own physical
+feed and drain verification.
 
-For agent-generated tables, use the semantic pinball primitives before
-authoring raw geometry. `createPopBumperCluster(...)`,
-`createMirroredTargetBank(...)` describe common pinball anatomy in terms of
-clusters and banks. Raw guide lines should be reserved for table-specific shot
-shaping after the canonical lower third, shooter lane, top arch, target banks,
-and pop cluster have been placed.
+Guides can declare a `plane`:
 
-Guides can also now declare a `plane`:
+- `playfield`: physical guide geometry, validated against flipper keepouts
+- `raised`: geometry rendered above flippers and exempt from flipper keepout
+  validation; the ball collision solver skips these guides
 
-- `playfield`: standard guide geometry, validated against flipper keepouts
-- `raised`: return-rail style geometry rendered above flippers and exempt from
-  flipper keepout validation
+Use physical playfield guides for return rails that must carry the ball.
+Marking a guide raised does not implement a ball-carrying ramp or overpass.
 
 ## Compiler Flow
 
@@ -179,16 +181,11 @@ This validation pass is distinct from CLI geometry analysis:
 
 ## Current Scope
 
-The classic table and `Starlight EM` compile through this layout system and
-serve as reference layouts for code-authored tables.
-
-The next logical steps are:
-
-- add more canonical primitives for ramps, captive balls, and asymmetric shot
-  families
-- grow validation from geometric heuristics into shot simulation acceptance checks
-- compile more built-in tables through the layout layer
-
+All five built-in tables use connected assemblies with table-specific geometry.
+Simulation route contracts supplement the compiler's geometric heuristics;
+held-feed validation and deep passive-drop checks are available today. They
+sample behavior rather than proving every possible trajectory. Center-drain
+routes still need to be authored explicitly.
 
 ## Connected assemblies
 

@@ -1,54 +1,30 @@
 # GPT Table Generation
 
-This document defines the required workflow for agent-generated built-in tables.
-The goal is to make generated layouts look like recognizable pinball tables
-rather than collections of independent toys on a rectangle.
+Agent-authored tables follow the same [layout requirements](conventional-layout-guidelines.md)
+as manually authored tables. Read those requirements and the table-specific
+spec before changing geometry.
 
-## Required Workflow
+## Required workflow
 
-Start with a `BoardLayoutDefinition` that uses the
-`solid-state-two-flipper` template. That template provides canonical anatomy
-anchors for the lower playfield, shooter lane, top arch, target banks, pop
-cluster, and main shot zones.
+1. Establish the cabinet, ball size, and intended shot families. For a recreation,
+   inspect reference layouts and document the distinctive geometry and 2D adaptations.
+2. Build connected mechanisms using `src/boards/assemblies/index.ts`, optionally
+   reusing `table-foundation.ts`. Start with the lower playfield and its center
+   drain, then connect the shooter arch and scoring shots. The
+   `solid-state-two-flipper` template supplies anchors when useful; it is not
+   a substitute for connected geometry or a requirement to flatten asymmetric tables.
+3. Compose the assembly geometry and routes into a `BoardLayoutDefinition` and
+   compile with `compileBuiltInBoardLayout`. Use legacy primitives or custom
+   geometry only where a complete assembly does not fit the mechanism.
+4. Define passive feed, held catch/release, outlane, center-drain, and scoring
+   contracts. Reuse flipper-relative references. Every flipper needs a declared
+   cradle feed; extra flippers must not obstruct the main drain.
+5. Follow the acceptance commands and browser review in the shared requirements.
+   Fix failing geometry before weakening a contract. Record justified passive
+   route exceptions and reference adaptations in the table's spec.
 
-Use semantic primitives for the table's repeated anatomy:
-
-- `createShooterLaneRight(...)` for the right shooter lane and upper feed
-- `createStandardLowerPlayfieldPair(...)` for the canonical lower third
-- `createTopArchLanes(...)` for top rollover lanes and separators
-- `createPopBumperCluster(...)` for a three-pop bumper group
-- `createMirroredTargetBank(...)` for balanced target banks
-
-Use raw guide lines only for table-specific shot shaping that is not covered by
-a primitive. Do not hand-place the lower third, shooter lane, top arch, or
-target banks from raw coordinates unless a table intentionally breaks the
-canonical pattern.
-
-## Anatomy Rules
-
-Every normal two-flipper table should have:
-
-- two lower flippers with a drain gap between them
-- active slingshots above the flippers
-- inlane and outlane mouths feeding the lower third
-- a right-side shooter lane that feeds the upper playfield
-- a top arch or rollover area in the upper third
-- mid-playfield shots such as target banks, spinners, saucers, or pop bumpers
-
-Keep toys connected to plausible ball paths. Avoid isolated bumpers, targets,
-or saucers that float without nearby guides, lane feeds, or shot entrances.
-
-## Validation Expectations
-
-Generated tables should compile with `compileBuiltInBoardLayout(...)` and pass
-both layout validation and geometry analysis. At minimum, check for:
-
-- no blocked shooter lane
-- full plunges leave the shooter lane horizontally and enter live play
-- no unreachable top rollovers
-- no flipper keepout errors
-- no obstructed spinner envelopes
-- no saucer eject obstruction
-- no geometry analysis warnings
-
-`Classic Table` and `Starlight EM` are the reference examples for this workflow.
+See [board assemblies](board-assemblies.md) for factory configuration,
+[flipper feeds](flipper-feed-spec.md) for tested return dimensions, and
+[table layout authoring](table-layout-authoring.md) for compiler details.
+Classic demonstrates a complete connected table. Harlem demonstrates staggered
+flippers with explicit drain and catch/release checks.

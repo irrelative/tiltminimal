@@ -65,7 +65,8 @@ Use the `Makefile` entrypoints:
   higher-level layout DSL, compiler, and validation flow for built-in and
   agent-generated tables
 * [docs/conventional-layout-guidelines.md](docs/conventional-layout-guidelines.md)
-  defines the minimum shot anatomy expected from built-in playfields
+  defines the shared layout standard: connected mechanisms, center-drain
+  clearance, flipper-relative feeds, cradling, and acceptance checks
 * [docs/gpt-table-generation.md](docs/gpt-table-generation.md) defines the
   required anatomy-first workflow for GPT-authored table layouts
 * [docs/layout-playability-spec.md](docs/layout-playability-spec.md) defines
@@ -117,5 +118,5 @@ Run `make playtest-classic` for a focused Classic timing sweep and seeded game
 batch. It saves a Markdown report and replayable JSON under `playtest-results/`.
 See [Classic playtest scenarios and baseline findings](docs/classic-playtest.md).
 
-All tables validate their inlane feeds for both passive contact and held-flipper
+All tables validate their intended passive inlane paths and held-flipper
 catch/release. See [the flipper feed specification](docs/flipper-feed-spec.md).

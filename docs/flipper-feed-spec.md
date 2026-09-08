@@ -4,6 +4,9 @@ Return lanes must deliver the ball onto the movable upper part of a held
 flipper. A ball balanced on the stationary heel or wedged between a guide and
 the flipper is not a successful cradle. Lowering the flipper must release it.
 
+For center-drain clearance, connected shot structure, and the complete authoring
+workflow, follow [the shared layout requirements](conventional-layout-guidelines.md).
+
 ## Geometry
 
 All built-in lower returns use flipper-relative anchors. Each return curve's
@@ -21,8 +24,10 @@ and shooter walls. The shared assembly defaults `bendRise` to `returnRadius +
 20`; authors can override it, but must validate the complete table afterward.
 Slings and flipper lengths retain their positions and dimensions. Harlem's
 lower-left flipper is offset to (350, 1860) to maintain its center drain; its
-direct feed follows that pivot. Harlem's left return still permits a
-cross-playfield passive release, while a held upper-left flipper must catch it.
+direct feed follows that pivot. Harlem's left return permits a cross-playfield
+passive release, and its right return permits lower-playfield entry followed by
+a center drain. Both returns still require a catch on their specified held
+flipper and a successful release.
 
 ## Held contact behavior
 

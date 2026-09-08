@@ -35,6 +35,14 @@ Prefer:
 
 Keep modules small and focused. Avoid coupling board layout data directly to rendering or gameplay rules.
 
+## Table Layout Changes
+
+Before creating or modifying a table, read `docs/conventional-layout-guidelines.md`
+and its table-specific spec. Use connected assemblies, preserve a ball-sized
+center drain, and align return lanes to their flippers with held catch/release
+contracts. Follow that guide's regression, all-table validation, and browser
+review workflow; document intentional variations in the table spec.
+
 ## Testing Guidelines
 Vitest is configured for unit tests. Add tests under `tests/` with names such as `physics-engine.test.ts` and keep coverage focused on board loading, state transitions, and collision behavior.
 

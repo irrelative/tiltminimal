@@ -17,23 +17,18 @@ This is intended for:
 
 ## Entry Points
 
-Use either:
-
-- `npm run validate-table -- <built-in-table-id>`
-- `npm run validate-table -- --all`
-- `npm run validate-table -- <built-in-table-id> --deep-playability`
-- `make validate-table TABLE=<built-in-table-id>`
-
-Examples:
+Use the Makefile entrypoint:
 
 ```sh
-npm run validate-table -- classic-table
-npm run validate-table -- double-crossed
-npm run validate-table -- starlight-em --fail-on-warnings
-npm run validate-table -- classic-table --deep-playability
-npm run validate-table -- --all
+make validate-table TABLE=classic-table
 make validate-table TABLE=harlem-globetrotters
+make validate-table TABLE='classic-table --deep-playability --fail-on-warnings'
+make validate-table TABLE='--all --deep-playability --fail-on-warnings'
 ```
+
+The underlying npm entrypoint remains `npm run validate-table -- <arguments>`.
+For layout acceptance, use the all-table command and follow the
+[shared layout requirements](conventional-layout-guidelines.md).
 
 ## Scope
 
@@ -45,6 +40,7 @@ Supported ids include:
 - `classic-table`
 - `double-crossed`
 - `harlem-globetrotters`
+- `mirror-match`
 - `starlight-em`
 
 ## Checks Run
@@ -89,6 +85,13 @@ Optional behavior:
 
 - `--fail-on-warnings` makes any warning or error produce a non-zero exit code
 - `--deep-playability` uses denser dropped-ball sampling for manual review
+
+## Coverage limits
+
+Route checks execute only the contracts present on a board. A passing report
+cannot prove an undeclared center drain or feed works. Authors must supply
+center-drain routes and held feeds for every flipper, then inspect them in the
+browser. Deep mode adds passive-drop sampling, not exhaustive player inputs.
 
 ## Constraints
 

@@ -5,11 +5,15 @@ Assemblies generate both collision geometry and behavioral route definitions.
 All five built-in tables use these assemblies alongside table-specific geometry. Classic Table is the smallest
 complete working example.
 
+Follow [the shared layout requirements](conventional-layout-guidelines.md) when
+composing mechanisms. In particular, add center-drain routes explicitly: the
+lower assembly generates inlane and outlane contracts, but no center-drain test.
+
 ## Available assemblies
 
 | Factory                        | Geometry and configuration                                                                                                                                                                                                 | Behavioral checks                                                                                                      |
 | ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `createLowerPlayfieldAssembly` | Two flippers, slings, entry posts, paired inlanes/outlanes, and concentric curved returns. Configure center/pivot spacing, flipper length, lane width, return radius, entry/bend heights, and sling dimensions.            | Both inlanes feed their own flipper over nine entry velocities each. Outlane samples drain without crossing a flipper. |
+| `createLowerPlayfieldAssembly` | Two flippers, slings, entry posts, paired inlanes/outlanes, and concentric curved returns. Configure center/pivot spacing, flipper length, lane width, return radius, entry/bend heights, and sling dimensions.            | Both inlanes have nine passive feed and held catch/release samples each. Outlane samples drain without crossing a flipper. |
 | `createShooterArchAssembly`    | Shooter position and plunger, tangent extensions, concentric arch, gate, open rollover lanes, and an arch-connected lane stop. Configure arch center/radius, shooter width, gate angle, launch height, lane count/spacing. | Selected charge levels cross a rollover and enter the upper playfield.                                                 |
 | `createShotLaneAssembly`       | Continuous inner/outer polylines and a spinner. Configure entrance and approach velocities plus the intended exit region.                                                                                                  | Spinner contact precedes arrival in the exit region.                                                                   |
 | `createTargetBankAssembly`     | Spaced, angled standups and/or drop targets with a parallel backing rail. Configure first target, spacing vector, dimensions, backing offset, and return region.                                                           | Each target is approachable from its scoring face and the ball returns downstream.                                     |
@@ -76,6 +80,7 @@ A route defines:
 - Ordered goals: a scoring event (optionally tied to a feature position),
   a rectangular region, contact with a particular flipper, or a drain event.
 - Optional `avoidFlippers` for intentional drain paths.
+- Optional `cradle: { pivot }` for a held catch/release run of each feed sample.
 
 A feed starts as a live ball with the shooter gate closed. A plunge uses the
 real pull/release lifecycle. Goals advance in order, and one event cannot
