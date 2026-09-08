@@ -8,6 +8,8 @@ export interface PhysicsStepResult {
 
 export const MAX_SIMULATION_STEP_SECONDS = 1 / 120;
 export const MAX_FRAME_DELTA_SECONDS = 0.1;
+export const BUMPER_KICK_SPEED = 560;
+export const BUMPER_REARM_SECONDS = 0.14;
 export const SLINGSHOT_REARM_SECONDS = 0.14;
 export const MIN_SLINGSHOT_TRIGGER_SPEED = 40;
 

@@ -568,8 +568,7 @@ describe('stepGame', () => {
     const state = createInitialGameState(board);
     state.status = 'playing';
     state.ball.position.x = 240;
-    state.ball.position.y =
-      260 - (state.ball.radius + board.slingshots[0]!.height / 2 - 1);
+    state.ball.position.y = 260 - (state.ball.radius - 1);
     state.ball.linearVelocity.y = 220;
 
     const next = stepGameFrame(state, board, idleInput, 1 / 60);

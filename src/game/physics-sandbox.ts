@@ -1,3 +1,4 @@
+import { getSlingshotCollision } from './slingshot-geometry';
 import type { InputState } from '../input/keyboard-input';
 import type { BoardDefinition, Point } from '../types/board-definition';
 import {
@@ -394,16 +395,7 @@ export const getPhysicsSandboxSpawnBlockedReason = (
 
   if (
     board.slingshots.some((slingshot) =>
-      Boolean(
-        getOrientedElementCollision(
-          collisionState,
-          slingshot,
-          slingshot.width,
-          slingshot.height,
-          slingshot.angle,
-          board.physics.solver,
-        ),
-      ),
+      Boolean(getSlingshotCollision(point, ball.radius, board, slingshot)),
     )
   ) {
     return 'Spawn blocked: point overlaps a slingshot.';
@@ -467,6 +459,14 @@ const seedSandboxBallState = (
 
   return {
     ...seeded,
+    bumpers: seeded.bumpers.map((bumper, index) => ({
+      ...bumper,
+      touching: ballState.bumpers[index].touching,
+    })),
+    rollovers: seeded.rollovers.map((rollover, index) => ({
+      ...rollover,
+      occupied: ballState.rollovers[index].occupied,
+    })),
     status: 'playing',
     ball: {
       ...ballState.ball,
@@ -497,6 +497,7 @@ const copySandboxDynamics = (
   flippers: board.flippers.map((_, index) => ({
     ...source.flippers[index],
   })),
+  bumpers: board.bumpers.map((_, index) => ({ ...source.bumpers[index] })),
   standupTargets: board.standupTargets.map((_, index) => ({
     ...source.standupTargets[index],
   })),

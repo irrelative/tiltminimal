@@ -264,6 +264,7 @@ const createRulesContext = (
     state.dropTargets = resetState.dropTargets;
     state.saucers = resetState.saucers;
     state.spinners = resetState.spinners;
+    state.bumpers = resetState.bumpers;
     state.rollovers = resetState.rollovers;
     state.rules.ballValues = {};
     state.rules.ballsRemaining = nextRemaining;

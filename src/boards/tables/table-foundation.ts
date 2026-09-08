@@ -20,7 +20,7 @@ export function createFoundation(id: string, laneCount: number, height = 1400) {
     entryRise: 320,
     bendRise: 180,
     heelOffset: 24,
-    slingOffset: { x: 144, y: 190 },
+    slingOffset: { x: 144, y: 230 },
     slingWidth: 144,
     slingHeight: 50,
     slingAngle: 0.65,

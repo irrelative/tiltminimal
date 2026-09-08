@@ -106,10 +106,10 @@ from the center.
 
 `SlingshotDefinition`
 
-- `x`, `y`: slingshot center
+- `x`, `y`: midpoint of the front rubber face
 - `width`: base span across the sling face
 - `height`: depth from the base toward the pointed tip
-- `angle`: rotation around the center
+- `angle`: rotation around the front face midpoint
 
 The active slingshot device is not a rectangle in play; it is rendered and
 treated as a triangle-like wedge, but `width` and `height` still define that

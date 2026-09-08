@@ -120,10 +120,8 @@ const applyFlipperCollisionAtAngle = (
   const fallbackNormal = getFlipperFaceNormal(flipper, collisionAngle);
   const normal = { ...collision.normal };
 
-  if (normal.x * fallbackNormal.x + normal.y * fallbackNormal.y < 0) {
-    normal.x *= -1;
-    normal.y *= -1;
-  }
+  const isTopFace =
+    normal.x * fallbackNormal.x + normal.y * fallbackNormal.y > 0;
 
   const contactPoint = {
     x: collision.center.x + normal.x * collision.radius,
@@ -149,6 +147,7 @@ const applyFlipperCollisionAtAngle = (
     Math.abs(motion.angularVelocity) <= motion.passiveAngularVelocityThreshold;
 
   if (
+    isTopFace &&
     motion.engaged &&
     Math.abs(motion.angularVelocity) <=
       motion.passiveAngularVelocityThreshold &&
@@ -199,7 +198,7 @@ const applyFlipperCollisionAtAngle = (
     resolveBallContact(state.ball, contact, solver);
   }
 
-  if (isPassiveContact && deltaSeconds > 0) {
+  if (isPassiveContact && isTopFace && deltaSeconds > 0) {
     applyPassiveFlipperSlopeCarry(
       state,
       collisionAngle,

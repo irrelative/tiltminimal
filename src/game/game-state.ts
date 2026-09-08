@@ -55,7 +55,13 @@ export interface SlingshotState {
   compression: number;
 }
 
+export interface BumperState {
+  touching: boolean;
+  cooldownSeconds: number;
+}
+
 export interface RolloverState {
+  occupied: boolean;
   lit: boolean;
 }
 
@@ -84,6 +90,7 @@ export interface GameState {
   plunger: PlungerState;
   tableNudge: TableNudgeState;
   flippers: FlipperState[];
+  bumpers: BumperState[];
   standupTargets: StandupTargetState[];
   dropTargets: DropTargetState[];
   saucers: SaucerState[];
@@ -102,6 +109,7 @@ export const createInitialGameState = (board: BoardDefinition): GameState => ({
   plunger: createPlungerState(),
   tableNudge: createTableNudgeState(),
   flippers: board.flippers.map(createFlipperState),
+  bumpers: board.bumpers.map(() => ({ touching: false, cooldownSeconds: 0 })),
   standupTargets: board.standupTargets.map(createStandupTargetState),
   dropTargets: board.dropTargets.map(createDropTargetState),
   saucers: board.saucers.map(createSaucerState),
@@ -122,6 +130,7 @@ export const resetBall = (
   plunger: createPlungerState(),
   tableNudge: createTableNudgeState(),
   flippers: board.flippers.map(createFlipperState),
+  bumpers: board.bumpers.map(() => ({ touching: false, cooldownSeconds: 0 })),
   standupTargets: board.standupTargets.map(createStandupTargetState),
   dropTargets: board.dropTargets.map(createDropTargetState),
   saucers: board.saucers.map(createSaucerState),
@@ -221,5 +230,6 @@ const createSlingshotState = (): SlingshotState => ({
 });
 
 const createRolloverState = (): RolloverState => ({
+  occupied: false,
   lit: false,
 });

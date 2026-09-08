@@ -1,3 +1,4 @@
+import { getSlingshotCollision } from '../game/slingshot-geometry';
 import { validateBallRoutes } from './ball-routes';
 import { getDistanceToFlipperSurface } from '../game/flipper-geometry';
 import { createInitialGameState, type GameState } from '../game/game-state';
@@ -398,11 +399,8 @@ const isPlayableDropSeed = (board: BoardDefinition, point: Point): boolean => {
       ),
     ) ||
     board.slingshots.some((slingshot) =>
-      isInsideApproximateElement(
-        point,
-        slingshot,
-        slingshot.width,
-        slingshot.height,
+      Boolean(
+        getSlingshotCollision(point, board.ball.radius + 8, board, slingshot),
       ),
     )
   ) {

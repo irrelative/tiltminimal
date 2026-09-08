@@ -1,3 +1,4 @@
+import { getSlingshotVertices } from '../game/slingshot-geometry';
 import {
   getFlipperBaseRadius,
   getFlipperTipRadius,
@@ -5,7 +6,6 @@ import {
 import { isArcGuide } from '../game/guide-geometry';
 import type { GameState } from '../game/game-state';
 import type {
-  BoardDefinition,
   FlipperDefinition,
   GuideDefinition,
 } from '../types/board-definition';
@@ -19,30 +19,7 @@ export const getRenderedFlipperAngle = (
   index: number,
 ): number => state.flippers[index]?.angle ?? flipper.restingAngle;
 
-export const getRenderedSlingshotAngle = (
-  board: BoardDefinition,
-  slingshot: BoardDefinition['slingshots'][number],
-): number => {
-  const targetTip = getNearestFlipperTip(board, slingshot);
-  const currentTipDirection = {
-    x: -Math.sin(slingshot.angle),
-    y: Math.cos(slingshot.angle),
-  };
-  const desiredDirection = {
-    x: targetTip.x - slingshot.x,
-    y: targetTip.y - slingshot.y,
-  };
-
-  if (
-    currentTipDirection.x * desiredDirection.x +
-      currentTipDirection.y * desiredDirection.y <
-    0
-  ) {
-    return slingshot.angle + Math.PI;
-  }
-
-  return slingshot.angle;
-};
+export { getSlingshotAngle as getRenderedSlingshotAngle } from '../game/slingshot-geometry';
 
 export const traceFlipperPath = (
   context: CanvasRenderingContext2D,
@@ -65,16 +42,11 @@ export const traceSlingshotPath = (
   width: number,
   depth: number,
 ): void => {
-  const halfWidth = width / 2;
-  const shoulderInset = width * 0.16;
-  const shoulderDepth = depth * 0.58;
-
   context.beginPath();
-  context.moveTo(-halfWidth, 0);
-  context.lineTo(halfWidth, 0);
-  context.lineTo(halfWidth - shoulderInset, shoulderDepth);
-  context.lineTo(0, depth);
-  context.lineTo(-halfWidth + shoulderInset, shoulderDepth);
+  getSlingshotVertices(width, depth).forEach((point, index) => {
+    if (index === 0) context.moveTo(point.x, point.y);
+    else context.lineTo(point.x, point.y);
+  });
   context.closePath();
 };
 
@@ -113,32 +85,6 @@ export const drawOrientedPlate = (
   context.fill();
   context.stroke();
   context.restore();
-};
-
-const getNearestFlipperTip = (
-  board: BoardDefinition,
-  point: { x: number; y: number },
-): { x: number; y: number } => {
-  let nearestTip = {
-    x: board.flippers[0]?.x ?? point.x,
-    y: board.flippers[0]?.y ?? point.y,
-  };
-  let nearestDistance = Number.POSITIVE_INFINITY;
-
-  for (const flipper of board.flippers) {
-    const tip = {
-      x: flipper.x + Math.cos(flipper.restingAngle) * flipper.length,
-      y: flipper.y + Math.sin(flipper.restingAngle) * flipper.length,
-    };
-    const distance = Math.hypot(point.x - tip.x, point.y - tip.y);
-
-    if (distance < nearestDistance) {
-      nearestDistance = distance;
-      nearestTip = tip;
-    }
-  }
-
-  return nearestTip;
 };
 
 export const drawGuidePath = (

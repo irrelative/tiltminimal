@@ -1,4 +1,9 @@
 import {
+  getSlingshotAngle,
+  getSlingshotVertices,
+  getSlingshotCollision,
+} from '../game/slingshot-geometry';
+import {
   getDistanceToFlipperSurface,
   getFlipperRadiusAt,
   getFlipperTipPosition,
@@ -389,9 +394,7 @@ const analyzeBallTrapRisks = (
       title: 'Ball trap risk',
       message: `A ball settling near (${Math.round(
         trap.position.x,
-      )}, ${Math.round(
-        trap.position.y,
-      )}) appears to stop without draining.`,
+      )}, ${Math.round(trap.position.y)}) appears to stop without draining.`,
     });
 
     if (reportedPositions.length >= TRAP_MAX_WARNINGS) {
@@ -557,13 +560,20 @@ const collectAnalyzableElements = (
   });
 
   board.slingshots.forEach((slingshot, index) => {
+    const angle = getSlingshotAngle(board, slingshot),
+      cos = Math.cos(angle),
+      sin = Math.sin(angle);
+    const vertices = getSlingshotVertices(
+      slingshot.width,
+      slingshot.height,
+    ).map((p) => ({
+      x: slingshot.x + p.x * cos - p.y * sin,
+      y: slingshot.y + p.x * sin + p.y * cos,
+    }));
     elements.push({
       ref: createRef('slingshot', index, 'Slingshot'),
-      samples: createOrientedCapsuleSamples(
-        slingshot,
-        slingshot.width,
-        slingshot.height,
-        slingshot.angle,
+      samples: vertices.flatMap((point, i) =>
+        sampleSegment(point, vertices[(i + 1) % vertices.length], 2),
       ),
     });
   });
@@ -601,7 +611,10 @@ const collectTrapSamplePoints = (
   const minX = board.ball.radius + 18;
   const maxX = board.width - board.ball.radius - 18;
   const minY = Math.max(board.height * 0.52, board.ball.radius + 24);
-  const maxY = Math.min(board.drainY - board.ball.radius * 4, board.height - 80);
+  const maxY = Math.min(
+    board.drainY - board.ball.radius * 4,
+    board.height - 80,
+  );
 
   for (let y = minY; y <= maxY; y += TRAP_SAMPLE_SPACING_Y) {
     for (let x = minX; x <= maxX; x += TRAP_SAMPLE_SPACING_X) {
@@ -623,6 +636,17 @@ const isPointPlayableTrapSeed = (
   board: BoardDefinition,
   elements: AnalyzableElement[],
 ): boolean => {
+  if (
+    board.slingshots.some((sling) =>
+      getSlingshotCollision(
+        point,
+        board.ball.radius + TRAP_CLEARANCE_MARGIN,
+        board,
+        sling,
+      ),
+    )
+  )
+    return false;
   if (isPointInsidePlungerLane(point, board)) {
     return false;
   }
@@ -787,8 +811,7 @@ const hasBarrierInDirection = (
         x: sample.x - point.x,
         y: sample.y - point.y,
       };
-      const along =
-        delta.x * direction.x + delta.y * direction.y;
+      const along = delta.x * direction.x + delta.y * direction.y;
       const lateral = Math.abs(
         delta.x * perpendicular.x + delta.y * perpendicular.y,
       );
@@ -892,13 +915,14 @@ const isGuidePostJoin = (
   }
 
   const projection = getPointProjectionOnSegment(post, guide.start, guide.end);
-  const attachmentExtension = (post.radius + guide.thickness / 2 + 6) /
+  const attachmentExtension =
+    (post.radius + guide.thickness / 2 + 6) /
     Math.max(getPointDistance(guide.start, guide.end), 1);
 
   return (
-    (projection >= -attachmentExtension &&
-      projection <= 1 + attachmentExtension &&
-      getPointToSegmentDistance(post, guide.start, guide.end) <= threshold)
+    projection >= -attachmentExtension &&
+    projection <= 1 + attachmentExtension &&
+    getPointToSegmentDistance(post, guide.start, guide.end) <= threshold
   );
 };
 

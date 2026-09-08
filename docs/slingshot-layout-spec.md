@@ -16,7 +16,7 @@ guide hacks.
 
 Runtime slingshots are first-class board elements with:
 
-- `x`, `y`: center position
+- `x`, `y`: midpoint of the front rubber face
 - `width`: rubber face length
 - `height`: body depth
 - `angle`: rubber face orientation
@@ -26,13 +26,13 @@ Runtime slingshots are first-class board elements with:
 
 The current physics model treats the slingshot as:
 
-1. an oriented rubber contact face
+1. a solid wedge polygon shared with rendering and spawn validation
 2. normal collision resolution using the surface material
-3. a one-shot kick impulse when the ball arrives with enough inward speed
+3. a one-shot kick impulse on the front face when the ball arrives with enough inward speed; sides and back remain passive
 4. a short re-arm cooldown
 5. a compression animation for rendering feedback
 
-For lower-playfield tables, the rendered slingshot body is oriented toward the
+For lower-playfield tables, the rendered and collidable slingshot body is oriented toward the
 nearest flipper tip so mirrored left/right slings visually point into the
 flipper area instead of drawing the same wedge handedness on both sides.
 

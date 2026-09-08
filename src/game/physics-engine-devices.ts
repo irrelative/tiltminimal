@@ -1,3 +1,4 @@
+import { getSlingshotCollision } from './slingshot-geometry';
 import type {
   BoardDefinition,
   SolverPhysicsDefinition,
@@ -6,6 +7,8 @@ import type { GameState } from './game-state';
 import { getSurfaceMaterial } from './materials';
 import {
   MIN_SLINGSHOT_TRIGGER_SPEED,
+  BUMPER_KICK_SPEED,
+  BUMPER_REARM_SECONDS,
   SLINGSHOT_REARM_SECONDS,
 } from './physics-engine-types';
 import {
@@ -160,13 +163,14 @@ export const resolveSlingshotCollisions = (
       return;
     }
 
-    const collision = getOrientedElementCollision(
-      state,
-      offsetPoint(slingshot, state.tableNudge.offset),
-      slingshot.width,
-      slingshot.height,
-      slingshot.angle,
-      solver,
+    const collision = getSlingshotCollision(
+      {
+        x: state.ball.position.x - state.tableNudge.offset.x,
+        y: state.ball.position.y - state.tableNudge.offset.y,
+      },
+      state.ball.radius,
+      board,
+      slingshot,
     );
 
     if (!collision) {
@@ -187,7 +191,7 @@ export const resolveSlingshotCollisions = (
         state.ball,
         createStaticContact(
           material,
-          collision.point,
+          offsetPoint(collision.point, state.tableNudge.offset),
           collision.normal,
           collision.overlap,
           surfaceVelocity,
@@ -197,6 +201,7 @@ export const resolveSlingshotCollisions = (
     }
 
     if (
+      !collision.activeFace ||
       slingshotState.cooldownSeconds > 0 ||
       incomingNormalSpeed >= -MIN_SLINGSHOT_TRIGGER_SPEED
     ) {
@@ -265,6 +270,8 @@ export const resolveBumperCollisions = (
   events: GameEvent[],
 ): void => {
   for (const [index, bumper] of board.bumpers.entries()) {
+    const bumperState = state.bumpers[index];
+    if (!bumperState) continue;
     const bumperMaterial = getSurfaceMaterial(
       bumper.material,
       board.surfaceMaterials,
@@ -275,6 +282,7 @@ export const resolveBumperCollisions = (
     const distance = Math.hypot(dx, dy) || solver.epsilon;
     const overlap = state.ball.radius + bumper.radius - distance;
 
+    if (overlap < -2) bumperState.touching = false;
     if (overlap <= 0) {
       continue;
     }
@@ -300,7 +308,14 @@ export const resolveBumperCollisions = (
     if (isIncomingHit || overlap > solver.epsilon) {
       resolveBallContact(state.ball, contact, solver);
 
-      if (isIncomingHit) {
+      if (
+        isIncomingHit &&
+        !bumperState.touching &&
+        bumperState.cooldownSeconds <= 0
+      ) {
+        state.ball.linearVelocity.x += nx * BUMPER_KICK_SPEED;
+        state.ball.linearVelocity.y += ny * BUMPER_KICK_SPEED;
+        bumperState.cooldownSeconds = BUMPER_REARM_SECONDS;
         events.push({
           type: 'bumper-hit',
           index,
@@ -309,6 +324,7 @@ export const resolveBumperCollisions = (
         });
       }
     }
+    bumperState.touching = true;
   }
 };
 
@@ -407,7 +423,7 @@ export const resolveRolloverTriggers = (
   board.rollovers.forEach((rollover, index) => {
     const rolloverState = state.rollovers[index];
 
-    if (!rolloverState || rolloverState.lit) {
+    if (!rolloverState) {
       return;
     }
 
@@ -417,10 +433,10 @@ export const resolveRolloverTriggers = (
       state.ball.position.y - center.y,
     );
 
-    if (distance > rollover.radius + state.ball.radius * 0.3) {
-      return;
-    }
-
+    const triggerRadius = rollover.radius + state.ball.radius * 0.3;
+    if (distance > triggerRadius + 2) rolloverState.occupied = false;
+    if (distance > triggerRadius || rolloverState.occupied) return;
+    rolloverState.occupied = true;
     rolloverState.lit = true;
     events.push({
       type: 'rollover-hit',

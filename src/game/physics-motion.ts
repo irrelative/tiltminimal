@@ -66,6 +66,7 @@ export const clonePlayingGameState = (
   flippers: board.flippers.map((flipper, index) =>
     cloneFlipperState(getFlipperState(state, flipper, index)),
   ),
+  bumpers: state.bumpers.map((bumper) => ({ ...bumper })),
   standupTargets: state.standupTargets.map(cloneStandupTargetState),
   dropTargets: state.dropTargets.map(cloneDropTargetState),
   saucers: state.saucers.map(cloneSaucerState),
@@ -169,6 +170,9 @@ export const advanceElementStates = (
     state.ball.angularPosition.y + state.ball.angularVelocity.y * deltaSeconds,
   );
 
+  state.bumpers.forEach((bumper) => {
+    bumper.cooldownSeconds = Math.max(0, bumper.cooldownSeconds - deltaSeconds);
+  });
   state.standupTargets.forEach((targetState) => {
     targetState.cooldownSeconds = Math.max(
       0,

@@ -105,3 +105,6 @@ Use the `Makefile` entrypoints:
 * Touch lower-right playfield: hold right flipper
 * Touch swipe left/right/up on the playfield: nudge
 * Touch swipe down on the right side: plunger pull/release
+
+See [physical contact behavior](docs/physics-contact-spec.md) for flipper, sling,
+bumper, and rollover collision rules and regression coverage.
