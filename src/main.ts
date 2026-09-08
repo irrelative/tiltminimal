@@ -34,7 +34,17 @@ const state: {
   tableId: string;
   loop: GameLoop | null;
   sandbox: PhysicsSandboxLoop | null;
-} = { tableId: BUILT_IN_TABLES[0]?.id ?? '', loop: null, sandbox: null };
+} = {
+  tableId:
+    BUILT_IN_TABLES.find(
+      (table) =>
+        table.id === new URLSearchParams(window.location.search).get('table'),
+    )?.id ??
+    BUILT_IN_TABLES[0]?.id ??
+    '',
+  loop: null,
+  sandbox: null,
+};
 const table = (): BuiltInTable =>
   BUILT_IN_TABLES.find((item) => item.id === state.tableId) ??
   BUILT_IN_TABLES[0]!;
@@ -157,18 +167,22 @@ if (route === 'physics') {
     () => state.loop?.resetBall(),
   );
 }
+const syncTableUrl = (): void => {
+  const url = new URL(window.location.href);
+  url.searchParams.set('table', state.tableId);
+  window.history.replaceState(window.history.state, '', url);
+  for (const mode of ['play', 'physics'] as const) {
+    const link = new URL(buildAppRoutePath(mode, basePath), url);
+    link.searchParams.set('table', state.tableId);
+    required<HTMLAnchorElement>(`#${mode}-link`).href = link.href;
+  }
+};
 tableSelect.addEventListener('change', () => {
   state.tableId = tableSelect.value;
+  syncTableUrl();
   restart();
 });
-required<HTMLAnchorElement>('#play-link').href = buildAppRoutePath(
-  'play',
-  basePath,
-);
-required<HTMLAnchorElement>('#physics-link').href = buildAppRoutePath(
-  'physics',
-  basePath,
-);
+syncTableUrl();
 restart();
 
 const currentDebug = () => (state.loop ?? state.sandbox)!.debug;
