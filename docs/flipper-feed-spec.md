@@ -39,10 +39,17 @@ ball speed at or below 1100 board units/second. The previous 420-unit limit was
 below ordinary inlane arrival speeds after gravity accelerated these feeds.
 Faster impacts and moving-flipper strokes continue through the contact solver.
 
-Once caught, static friction cancels the small tangential displacement introduced
-by each gravity integration step, as well as velocity. This prevents a held
-ball from slowly creeping onto the fixed heel. Regression tests verify a
-10-second hold stays within one unit and that a 1600-unit/s impact is not caught.
+Once caught, the ball retains tangential motion and rolls downhill toward the
+base. Normal impact is absorbed; catches arriving faster than 40 units/second
+into the face retain 10% of their tangential speed. Sustained contact uses 5/7
+of the gravity projection along the bat, with matching visible rolling spin.
+It must not freeze at the initial catch position.
+
+The heel pocket settles the center one ball radius plus one base radius along
+the bat from its pivot (at least 8% of length). This bounded 2D approximation
+keeps it clear of the stationary cap so lowering the flipper releases it.
+Regression tests cover gradual rolling and settling on every built-in flipper,
+long holds, all declared catch/release feeds, and rejection of fast impacts.
 
 ## Validation
 

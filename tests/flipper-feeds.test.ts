@@ -108,8 +108,10 @@ describe('held-flipper capture limits', () => {
         1 / 120,
       ).state;
       expect(
-        Math.hypot(state.ball.linearVelocity.x, state.ball.linearVelocity.y) <
-          1,
+        Math.abs(
+          state.ball.linearVelocity.x * Math.sin(angle) -
+            state.ball.linearVelocity.y * Math.cos(angle),
+        ) < 1,
       ).toBe(speed === 900);
       if (speed === 900) {
         const caught = { ...state.ball.position };
@@ -125,8 +127,61 @@ describe('held-flipper capture limits', () => {
             state.ball.position.x - caught.x,
             state.ball.position.y - caught.y,
           ),
+        ).toBeGreaterThan(5);
+        expect(
+          sampleFlipperProfile(state.ball.position, f, angle).t,
+        ).toBeCloseTo((state.ball.radius + f.thickness / 2) / f.length, 2);
+        expect(
+          Math.hypot(state.ball.linearVelocity.x, state.ball.linearVelocity.y),
         ).toBeLessThan(1);
       }
     },
   );
 });
+
+it.each(BUILT_IN_TABLES)(
+  '$id rolls a caught ball toward each heel before settling',
+  ({ board }) => {
+    for (const [index, f] of board.flippers.entries()) {
+      const angle = f.activeAngle;
+      const axis = { x: Math.cos(angle), y: Math.sin(angle) };
+      const normal =
+        f.side === 'left'
+          ? { x: axis.y, y: -axis.x }
+          : { x: -axis.y, y: axis.x };
+      let state = createInitialGameState(board);
+      state.status = 'playing';
+      state.launcherExited = true;
+      state.flippers[index] = { engaged: true, angle, angularVelocity: 0 };
+      const radius =
+        (f.thickness / 2) * (1 - 0.28 * 0.5) + state.ball.radius - 0.01;
+      state.ball.position = {
+        x: f.x + axis.x * f.length * 0.5 + normal.x * radius,
+        y: f.y + axis.y * f.length * 0.5 + normal.y * radius,
+      };
+      const held = {
+        ...idle,
+        leftPressed: f.side === 'left',
+        rightPressed: f.side === 'right',
+      };
+      for (let frame = 0; frame < 12; frame++)
+        state = stepGameFrame(state, board, held, 1 / 120).state;
+      const rolling = sampleFlipperProfile(state.ball.position, f, angle).t;
+      expect(rolling).toBeLessThan(0.5);
+      expect(rolling).toBeGreaterThan(0.3);
+      expect(
+        Math.hypot(state.ball.angularVelocity.x, state.ball.angularVelocity.y),
+      ).toBeGreaterThan(0);
+      for (let frame = 0; frame < 600; frame++)
+        state = stepGameFrame(state, board, held, 1 / 120).state;
+      expect(state.status).toBe('playing');
+      expect(sampleFlipperProfile(state.ball.position, f, angle).t).toBeCloseTo(
+        (state.ball.radius + f.thickness / 2) / f.length,
+        2,
+      );
+      expect(
+        Math.hypot(state.ball.linearVelocity.x, state.ball.linearVelocity.y),
+      ).toBeLessThan(1);
+    }
+  },
+);

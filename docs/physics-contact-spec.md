@@ -7,7 +7,9 @@ active kick devices, and non-solid switches.
 
 Contact normals follow the actual side of the flipper struck by the ball.
 Balls approaching from below bounce below the flipper. Held-flipper cradling
-and passive top-surface carry apply only to the upper face.
+and passive top-surface carry apply only to the upper face. A caught ball rolls
+along a held bat toward a heel pocket instead of freezing at its impact point;
+see [held contact behavior](flipper-feed-spec.md#held-contact-behavior).
 
 ## Slingshots
 
