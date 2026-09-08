@@ -350,6 +350,8 @@ export const resolveSaucerCaptures = (
       return;
     }
 
+    if (state.ball.capturedSaucer !== undefined) return;
+    state.ball.capturedSaucer = index;
     saucerState.occupied = true;
     saucerState.holdSecondsRemaining = saucer.holdSeconds;
     events.push({

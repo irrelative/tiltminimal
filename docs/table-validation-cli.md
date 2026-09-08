@@ -38,6 +38,7 @@ The CLI currently validates built-in tables registered in
 Supported ids include:
 
 - `classic-table`
+- `andromeda`
 - `double-crossed`
 - `harlem-globetrotters`
 - `mirror-match`

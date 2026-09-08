@@ -41,6 +41,11 @@ Use the `Makefile` entrypoints:
 
 ## Additional docs
 
+* [docs/andromeda-spec.md](docs/andromeda-spec.md) describes Andromeda's reference
+  layout, guarded lock, two-ball multiball, rules, and fidelity limits
+* [docs/multiball-spec.md](docs/multiball-spec.md) defines shared ball ownership,
+  lock/serve/release behavior, rules APIs, and final-drain handling
+
 * [docs/viewport-layout-spec.md](docs/viewport-layout-spec.md) defines full-height
   desktop board sizing, sidebar scrolling, and narrow-window behavior
 

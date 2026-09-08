@@ -1,7 +1,8 @@
 import type { InputState } from '../input/keyboard-input';
 import type { BoardDefinition } from '../types/board-definition';
 import type { GameState } from './game-state';
-import { resetBall } from './game-state';
+import { resetBall, cloneBallState } from './game-state';
+import { resolveBallPairs, positionLockedBalls } from './multiball';
 import { getSurfaceMaterial } from './materials';
 import {
   getPlungerLaneBounds,
@@ -82,9 +83,16 @@ export const stepWaitingLaunchState = (
     plunger: plungerFrame.next,
     tableNudge,
     flippers: flipperFrame.map((motion) => motion.next),
+    additionalBalls: state.additionalBalls.map(cloneBallState),
+    lockedBalls: state.lockedBalls.map((lock) => ({
+      ...lock,
+      ball: cloneBallState(lock.ball),
+    })),
+    saucers: state.saucers.map((saucer) => ({ ...saucer })),
     rules: cloneRulesState(state.rules),
   };
 
+  positionLockedBalls(next, board);
   if (plungerFrame.surfaceVelocity.y >= 0) {
     return { state: next, events };
   }
@@ -120,12 +128,18 @@ export const stepPlayingState = (
 ): PhysicsStepResult => {
   const events: GameEvent[] = [];
   const next = clonePlayingGameState(state, board);
+  next.ball.launcherExited = next.launcherExited;
+  next.ball.bumperContacts ??= next.bumpers.map((bumper) => bumper.touching);
+  next.ball.rolloverContacts ??= next.rollovers.map(
+    (rollover) => rollover.occupied,
+  );
+  let balls = [next.ball, ...next.additionalBalls];
   let remainingSeconds = deltaSeconds;
   do {
-    const stepSeconds = getBallStepSeconds(
-      next.ball,
-      board.gravity,
-      remainingSeconds,
+    const stepSeconds = Math.min(
+      ...balls.map((ball) =>
+        getBallStepSeconds(ball, board.gravity, remainingSeconds),
+      ),
     );
     remainingSeconds -= stepSeconds;
     next.tableNudge = advanceTableNudgeState(
@@ -134,6 +148,7 @@ export const stepPlayingState = (
       input,
       stepSeconds,
     );
+    positionLockedBalls(next, board);
     const plungerFrame = advancePlungerFrame(next, board, input, stepSeconds);
     const flipperFrame = advanceFlipperFrame(next, board, input, stepSeconds);
 
@@ -142,81 +157,103 @@ export const stepPlayingState = (
 
     advanceElementStates(next, board, stepSeconds);
 
-    if (resolveOccupiedSaucer(next, board, stepSeconds)) {
-      continue;
-    }
-
-    next.ball.linearVelocity.y += board.gravity * stepSeconds;
-    applyPlayfieldRollingResistance(next, board, stepSeconds);
-    next.ball.position.x += next.ball.linearVelocity.x * stepSeconds;
-    next.ball.position.y += next.ball.linearVelocity.y * stepSeconds;
-
-    if (hasExitedShooterLane(next, board)) {
-      next.launcherExited = true;
-    }
-
-    resolveWallCollisions(next, board, board.physics.solver);
-    resolvePlungerGuideCollisions(next, board, board.physics.solver);
-    resolveGuideCollisions(next, board, board.physics.solver);
-    resolvePostCollisions(next, board, board.physics.solver);
-    resolvePlungerCollision(next, board, plungerFrame, board.physics.solver);
-    resolvePlungerGuideCollisions(next, board, board.physics.solver);
-    constrainBallToLauncherLane(next, board);
-    resolveStandupTargetCollisions(next, board, board.physics.solver, events);
-    resolveDropTargetCollisions(next, board, board.physics.solver, events);
-    resolveSlingshotCollisions(next, board, board.physics.solver, events);
-    resolveBumperCollisions(next, board, board.physics.solver, events);
-    resolveFlipperCollisions(
-      next,
-      board,
-      flipperFrame,
-      stepSeconds,
-      board.physics.solver,
-    );
-    resolveSaucerCaptures(next, board, events);
-    resolveSpinnerInteractions(next, board, board.physics.solver, events);
-    resolveRolloverTriggers(next, board, events);
-
-    // A weak plunge that never crossed the gate is still the same ball.
-    // Re-seat it for the next pull instead of leaving it in live-play state.
-    if (
-      board.plunger.returnGate &&
-      !next.launcherExited &&
-      !input.launchPressed &&
-      next.plunger.pullback === 0 &&
-      Math.abs(
-        next.ball.position.x -
-          board.launchPosition.x -
-          next.tableNudge.offset.x,
-      ) <= next.ball.radius &&
-      Math.abs(
-        next.ball.position.y -
-          board.launchPosition.y -
-          next.tableNudge.offset.y,
-      ) <=
-        next.ball.radius * 2 &&
-      Math.hypot(next.ball.linearVelocity.x, next.ball.linearVelocity.y) < 40
-    ) {
-      next.status = 'waiting-launch';
-      next.ball.position = { ...board.launchPosition };
-      next.ball.linearVelocity = { x: 0, y: 0 };
-      next.ball.angularVelocity = { x: 0, y: 0 };
-    }
-
-    if (
-      next.ball.position.y - next.ball.radius >
-      board.drainY + next.tableNudge.offset.y
-    ) {
-      events.push({
-        type: 'ball-drained',
-        tick: next.tick,
+    const survivors = [];
+    for (const ball of balls) {
+      next.ball = ball;
+      next.launcherExited = ball.launcherExited ?? true;
+      next.bumpers.forEach((bumper, i) => {
+        bumper.touching = ball.bumperContacts?.[i] ?? false;
       });
+      next.rollovers.forEach((rollover, i) => {
+        rollover.occupied = ball.rolloverContacts?.[i] ?? false;
+      });
+      if (resolveOccupiedSaucer(next, board, stepSeconds)) {
+        survivors.push(ball);
+        continue;
+      }
 
-      return {
-        state: resetBall(next, board),
-        events,
-      };
+      next.ball.linearVelocity.y += board.gravity * stepSeconds;
+      applyPlayfieldRollingResistance(next, board, stepSeconds);
+      next.ball.position.x += next.ball.linearVelocity.x * stepSeconds;
+      next.ball.position.y += next.ball.linearVelocity.y * stepSeconds;
+
+      if (hasExitedShooterLane(next, board)) {
+        next.launcherExited = true;
+      }
+
+      resolveWallCollisions(next, board, board.physics.solver);
+      resolvePlungerGuideCollisions(next, board, board.physics.solver);
+      resolveGuideCollisions(next, board, board.physics.solver);
+      resolvePostCollisions(next, board, board.physics.solver);
+      resolvePlungerCollision(next, board, plungerFrame, board.physics.solver);
+      resolvePlungerGuideCollisions(next, board, board.physics.solver);
+      constrainBallToLauncherLane(next, board);
+      resolveStandupTargetCollisions(next, board, board.physics.solver, events);
+      resolveDropTargetCollisions(next, board, board.physics.solver, events);
+      resolveSlingshotCollisions(next, board, board.physics.solver, events);
+      resolveBumperCollisions(next, board, board.physics.solver, events);
+      resolveFlipperCollisions(
+        next,
+        board,
+        flipperFrame,
+        stepSeconds,
+        board.physics.solver,
+      );
+      resolveSaucerCaptures(next, board, events);
+      resolveSpinnerInteractions(next, board, board.physics.solver, events);
+      resolveRolloverTriggers(next, board, events);
+
+      // A weak plunge that never crossed the gate is still the same ball.
+      // Re-seat it for the next pull instead of leaving it in live-play state.
+      if (
+        board.plunger.returnGate &&
+        !next.launcherExited &&
+        !input.launchPressed &&
+        next.plunger.pullback === 0 &&
+        Math.abs(
+          next.ball.position.x -
+            board.launchPosition.x -
+            next.tableNudge.offset.x,
+        ) <= next.ball.radius &&
+        Math.abs(
+          next.ball.position.y -
+            board.launchPosition.y -
+            next.tableNudge.offset.y,
+        ) <=
+          next.ball.radius * 2 &&
+        Math.hypot(next.ball.linearVelocity.x, next.ball.linearVelocity.y) < 40
+      ) {
+        next.status = 'waiting-launch';
+        next.ball.position = { ...board.launchPosition };
+        next.ball.linearVelocity = { x: 0, y: 0 };
+        next.ball.angularVelocity = { x: 0, y: 0 };
+      }
+
+      if (
+        next.ball.position.y - next.ball.radius >
+        board.drainY + next.tableNudge.offset.y
+      ) {
+        // Remove individual balls without ending the turn or resetting devices.
+        continue;
+      }
+      ball.launcherExited = next.launcherExited;
+      ball.bumperContacts = next.bumpers.map((bumper) => bumper.touching);
+      ball.rolloverContacts = next.rollovers.map(
+        (rollover) => rollover.occupied,
+      );
+      survivors.push(ball);
     }
+    if (balls.length > 1 && survivors.length <= 1)
+      events.push({ type: 'multiball-ended', tick: next.tick });
+    if (survivors.length === 0) {
+      events.push({ type: 'ball-drained', tick: next.tick });
+      return { state: resetBall(next, board), events };
+    }
+    balls = survivors;
+    resolveBallPairs(balls);
+    next.ball = balls[0];
+    next.additionalBalls = balls.slice(1);
+    next.launcherExited = next.ball.launcherExited ?? true;
   } while (remainingSeconds > 1e-9);
 
   return {

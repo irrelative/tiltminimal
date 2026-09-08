@@ -1,3 +1,4 @@
+import { drawAndromedaInserts } from './andromeda-playfield-art';
 import { drawPhysicsDebug } from './physics-debug-overlay';
 import type { PhysicsDebug } from '../game/physics-debug';
 import type { BallState, GameState } from '../game/game-state';
@@ -45,6 +46,7 @@ export class CanvasRenderer {
     if (staticLayers) {
       context.drawImage(staticLayers.baseCanvas, 0, 0);
       drawDynamicBoard(context, board, state);
+      if (board.themeId === 'andromeda') drawAndromedaInserts(context, state);
       context.drawImage(staticLayers.overlayCanvas, 0, 0);
     } else {
       context.fillStyle = getBoardTheme(board.themeId).backgroundMid;
@@ -53,8 +55,24 @@ export class CanvasRenderer {
     }
     context.restore();
     drawBall(context, board, state);
+    state.additionalBalls.forEach((ball) =>
+      drawBallState(context, board, ball),
+    );
+    state.lockedBalls.forEach(({ ball }) =>
+      drawBallState(context, board, ball),
+    );
     drawHud(context, board, state, input);
-    drawPhysicsDebug(context, board, state, [state.ball], debug);
+    drawPhysicsDebug(
+      context,
+      board,
+      state,
+      [
+        state.ball,
+        ...state.additionalBalls,
+        ...state.lockedBalls.map((lock) => lock.ball),
+      ],
+      debug,
+    );
   }
 
   renderPhysicsSandbox(
@@ -76,6 +94,8 @@ export class CanvasRenderer {
     if (staticLayers) {
       context.drawImage(staticLayers.baseCanvas, 0, 0);
       drawDynamicBoard(context, board, displayState);
+      if (board.themeId === 'andromeda')
+        drawAndromedaInserts(context, displayState);
       context.drawImage(staticLayers.overlayCanvas, 0, 0);
     } else {
       context.fillStyle = getBoardTheme(board.themeId).backgroundMid;
