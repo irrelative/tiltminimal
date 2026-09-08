@@ -47,6 +47,26 @@ describe('harlemGlobetrottersTable', () => {
     expect(b.themeId).toBe('harlem');
   });
 
+  it('aligns equal left flippers tip-to-heel above a level lower pair', () => {
+    const b = harlemGlobetrottersTable;
+    const [upper, lower] = b.flippers
+      .filter((f) => f.side === 'left')
+      .sort((a, b) => a.y - b.y);
+    const right = b.flippers.find((f) => f.side === 'right')!;
+    const tip = getFlipperTipPosition(upper, upper.restingAngle);
+    expect(upper.length).toBe(lower.length);
+    expect(lower.length).toBe(right.length);
+    expect(upper.restingAngle).toBe(lower.restingAngle);
+    expect(lower.y).toBe(right.y);
+    expect(Math.abs(lower.x - tip.x)).toBeLessThan(b.ball.radius);
+    const gap =
+      Math.hypot(lower.x - tip.x, lower.y - tip.y) -
+      getFlipperTipRadius(upper) -
+      lower.thickness / 2;
+    expect(gap).toBeGreaterThan(b.ball.radius * 2);
+    expect(gap).toBeLessThan(b.ball.radius * 3);
+  });
+
   it('leaves a ball-width center drain between the lower flipper tips', () => {
     const b = harlemGlobetrottersTable;
     const left = b.flippers

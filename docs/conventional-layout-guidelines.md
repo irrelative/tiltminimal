@@ -41,7 +41,7 @@ just its entrance. A guide, extra flipper, or post must not bridge that corridor
 
 For staggered flippers, the horizontal tip measurement is only a conservative
 screen: inspect every flipper along the descent and prove the path with ball
-simulation. Harlem's approximately 60-unit opening for a 32-unit ball is a
+simulation. Harlem's approximately 57-unit opening for a 32-unit ball is a
 working example, not a universal coordinate template.
 
 Add center-drain feed routes at several positions across the usable corridor

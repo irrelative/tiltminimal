@@ -21,8 +21,9 @@ Coordinates are estimated from perspective photographs, not measured CAD.
 
 The 1000 × 2000 coordinate space approximates the original's long playfield.
 
-- Two staggered, left-operated flippers occupy the lower left. A single
-  right-operated flipper faces them. The inter-flipper gap remains open.
+- Two equal-length, left-operated flippers form a diagonal tip-to-heel pair
+  on the lower left, as shown in the original flyer. The lower-left and right
+  pivots share a baseline. Both the left inter-flipper and center gaps stay open.
 - Three pop bumpers form a downward-pointing triangle below the top-center
   GLOBE basket. The shooter arch is open, with no invented top rollover bank.
 - A left spinner feeds the upper field. Two more spinners sit side by side
@@ -66,11 +67,23 @@ plastics, portrait art, and switch positions remain approximations.
 The return lanes now use the heel-relative dimensions in
 [the flipper feed specification](flipper-feed-spec.md). Both side returns and
 the direct feeds to both left flippers include held catch/release contracts;
-the staggered arrangement is retained. The lower-left pivot is at (350, 1860),
-leaving approximately 60 units of horizontal clearance between the lower
-flipper tip rubbers at rest. Three center-drain routes at x=475, 485, and 495
-verify that balls at two entry speeds drain without touching a flipper. Its
-direct catch/release feed moves with the pivot.
+the upper-left pivot is (290, 1680) and the lower-left is (390, 1800).
+All three flippers are 110 units long. Both left resting angles are 0.55
+radians, mirrored by the right flipper at (650, 1800). The upper-left tip lies
+at approximately (384, 1737), just above the lower-left heel rather than far
+to its right. Their rubber surfaces leave about 44 units of clearance for the
+32-unit ball. The lower pair leaves about 57 units of horizontal tip clearance.
+Center-drain routes at x=510, 520, and 530 exercise that opening at two speeds.
+
+The [original flyer detail](https://www.csprojects.eu/_images/flippers/1125f2.jpg)
+and [full playfield photo](https://users.cis.fiu.edu/~jweiss/globetrotters/playfield.JPG)
+show equal left bats with the lower heel beneath the upper tip, and a level
+bottom pair. These relative relationships replace the previous unequal
+136/110-unit bats and overly separated (350, 1860) lower pivot. Coordinates
+remain estimates adapted to our ball size, not measured original dimensions.
+The side returns and direct feed contracts move with their destination pivots.
+Regression coverage checks equal lengths, tip-to-heel alignment, both gaps,
+and catch/release behavior.
 
 The passive right-return contract now checks entry into the lower playfield:
 an unheld feed may drain through the center instead of rebounding off the
