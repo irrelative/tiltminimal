@@ -96,14 +96,14 @@ describe('assembly route validation', () => {
       ),
     ).toBe(true);
   });
-  it('detects a missing upper flipper in the Harlem saucer feed', () => {
+  it('detects a missing staggered upper-left flipper', () => {
     const board = cloneBoardDefinition(harlemGlobetrottersTable);
-    board.flippers.pop();
+    board.flippers.splice(0, 1);
     expect(
       validateBallRoutes(board).some(
         (issue) =>
-          issue.message.includes('harlem-upper-saucer') &&
-          issue.message.includes('goal 3'),
+          issue.message.includes('harlem-upper-left-feed') &&
+          issue.message.includes('goal 1'),
       ),
     ).toBe(true);
   });

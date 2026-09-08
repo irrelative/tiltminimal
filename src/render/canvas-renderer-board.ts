@@ -1,3 +1,4 @@
+import { drawHarlemPlayfield } from './harlem-playfield-art';
 import { getSurfaceMaterial } from '../game/materials';
 import {
   getPlungerGuideBottomY,
@@ -287,6 +288,10 @@ const drawBackground = (
   board: BoardDefinition,
 ): void => {
   const theme = getBoardTheme(board.themeId);
+  if (board.themeId === 'harlem') {
+    drawHarlemPlayfield(context, board.width, board.height);
+    return;
+  }
   const gradient = context.createLinearGradient(0, 0, 0, board.height);
   gradient.addColorStop(0, theme.backgroundTop);
   gradient.addColorStop(0.38, theme.backgroundMid);

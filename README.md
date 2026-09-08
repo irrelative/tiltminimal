@@ -81,7 +81,7 @@ Use the `Makefile` entrypoints:
 * [docs/mirror-match-spec.md](docs/mirror-match-spec.md) defines the symmetric
   solid-state layout and rules goals for `Mirror Match`
 * [docs/harlem-globetrotters-spec.md](docs/harlem-globetrotters-spec.md) describes
-  the three-flipper court layout and upper-saucer feed
+  the reference-based court layout, inline target lane, and staggered left flippers
 * [docs/double-crossed-spec.md](docs/double-crossed-spec.md) defines the
   behavior and validation goals for the built-in `Double Crossed` table
 

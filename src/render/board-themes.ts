@@ -64,7 +64,7 @@ export interface BoardTheme {
 
 export const DEFAULT_BOARD_THEME_ID: BoardThemeId = 'classic';
 
-export const BOARD_THEMES: Record<BoardThemeId, BoardTheme> = {
+const BASE_THEMES: Record<Exclude<BoardThemeId, 'harlem'>, BoardTheme> = {
   'mirror-match': {
     id: 'mirror-match',
     label: 'Mirror Match',
@@ -369,6 +369,48 @@ export const BOARD_THEMES: Record<BoardThemeId, BoardTheme> = {
     launchMarkerStroke: 'rgba(0, 0, 0, 0.75)',
     launchMarkerStrokeActive: 'rgba(0, 0, 0, 0.92)',
     launchMarkerFill: 'rgba(0, 0, 0, 0.1)',
+  },
+};
+
+export const BOARD_THEMES: Record<BoardThemeId, BoardTheme> = {
+  ...BASE_THEMES,
+  harlem: {
+    ...BASE_THEMES.classic,
+    id: 'harlem',
+    label: 'Harlem Globetrotters',
+    backgroundTop: '#e9cb72',
+    backgroundMid: '#e3bd58',
+    backgroundBottom: '#2c639e',
+    guideMetalPrimary: '#eee5d2',
+    guideMetalSecondary: '#787f83',
+    guideRubberPrimary: '#faf0d3',
+    guideRubberSecondary: '#b72f2e',
+    bumperColors: ['#f5df81', '#f5df81', '#f5df81'],
+    bumperRing: '#f8f1d6',
+    bumperCap: '#c73e31',
+    bumperText: '#16396b',
+    standupFill: '#b6292b',
+    standupLitFill: '#f7df69',
+    targetStroke: '#f7ead1',
+    dropUpFill: '#f0e6c9',
+    dropStroke: '#1f4d8c',
+    flipperFill: '#f2d167',
+    flipperStroke: '#fff6d9',
+    flipperCore: '#c83932',
+    spinnerFill: '#f3ead4',
+    spinnerStroke: '#a93629',
+    spinnerCap: '#dc7139',
+    postRubberFill: '#b8272c',
+    postRubberRing: '#f4eed7',
+    rolloverFill: '#e6c166',
+    rolloverStroke: '#7a392b',
+    saucerFill: '#393732',
+    saucerRing: '#b4aca0',
+    saucerCore: '#141b21',
+    plungerGuidePrimary: '#e8e4d9',
+    plungerGuideSecondary: '#8a8983',
+    hudText: '#17345d',
+    hudMuted: '#17345d',
   },
 };
 

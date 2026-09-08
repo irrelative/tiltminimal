@@ -2,7 +2,7 @@
 
 Use `src/boards/assemblies/index.ts` to author connected pinball mechanisms.
 Assemblies generate both collision geometry and behavioral route definitions.
-All five built-in tables use these assemblies. Classic Table is the smallest
+All five built-in tables use these assemblies alongside table-specific geometry. Classic Table is the smallest
 complete working example.
 
 ## Available assemblies
@@ -98,10 +98,11 @@ every target. Browser review and difficulty tuning are still necessary.
 ## Shared built-in foundation
 
 `src/boards/tables/table-foundation.ts` composes the common 1000-unit cabinet
-for Double Crossed, Mirror Match, Starlight EM, and Harlem Globetrotters. It
+for Double Crossed, Mirror Match, and Starlight EM. It
 provides lower returns, shooter geometry, and reusable orbit/bank/pocket
 configuration. Each table owns its scoring arrangement and existing rules.
-Harlem uses a taller cabinet and adds an explicit upper-flipper feed contract.
+Harlem composes staggered halves of the lower assembly with a custom open
+arch and an inline target lane to follow the photographed original.
 The right orbit reuses the foundation's shooter wall without duplicating it.
 
 Target banks accept `dropCount` for multiple trailing drops or drop-only banks

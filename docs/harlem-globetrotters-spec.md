@@ -1,36 +1,64 @@
-# Harlem Globetrotters layout
+# Harlem Globetrotters On Tour: reference-based layout
 
-This built-in interpretation retains three bumpers, six standups, four drops,
-two saucers, three spinners, seven rollovers, and three flippers. It uses the
-existing default rules. It is not a dimensionally exact historical replica.
+The table follows the photographed arrangement of Bally's 1979 machine.
+Coordinates are estimated from perspective photographs, not measured CAD.
 
-## Arrangement
+## References
 
-A taller 1000 × 1600 cabinet gives the upper flipper and scoring devices room
-without crowding the lower returns. The shared foundation provides three top
-lanes, a gated shooter arch, active lower slings, and solid curved inlanes.
+- [Full populated playfield photograph, Vintage Arcade](https://vintagearcade.net/wp-content/uploads/2023/10/1000087565-scaled.jpg)
+  establishes the relative placement of the devices, court, star, and striping.
+- [Restoration photographs and original flyer excerpt, Schmitronic](https://www.csprojects.eu/flippers/harlem_4_restauration.htm)
+  document the two left flippers, their drain gap, five left targets, dunk
+  target, and four targets arranged in line. The aftermarket post between the
+  left flippers shown in this restoration is deliberately omitted.
+- [Playfield photograph, J. Weiss](https://users.cis.fiu.edu/~jweiss/globetrotters/playfield.JPG)
+  provides another view of the lower flippers, paired center spinners, and art.
+- [Player's guide, Pinball for Mortals](https://www.pinballformortals.com/2019/06/12/harlem-globetrotters-on-tour-pinball-mini-guide/)
+  confirms that successive shots clear the inline targets and expose a
+  25,000-point saucer which ejects toward the top saucer area.
 
-- Two side-orbit spinners continue upward into the upper field.
-- The 5000-point upper saucer ejects through its lower mouth onto the third,
-  right-operated flipper at (680, 600). The pocket's outer side leaves enough
-  room for balls to pass between it and the right orbit wall.
-- A sloped four-drop bank spans center court below the upper flipper. Its
-  pitched backing allows balls landing behind the targets to roll off.
-- Five 300-point standups run down the left side; the sixth sits below the
-  lower saucer. Targets have distinct scoring faces and physical backings.
-- A third spinner occupies an open center corridor below the drop bank.
-- The 25000-point lower saucer captures and ejects through a downward mouth.
-- Four court rollover inserts join the three top switches to retain seven.
-- Two lower flippers receive their inlanes; outlanes drain separately.
+## Physical arrangement
 
-## Contracts and verification
+The 1000 × 2000 coordinate space approximates the original's long playfield.
 
-Every assembly declares executable route checks. The upper saucer contract
-requires capture, exit, and contact with its intended upper flipper in order.
-The drop-only bank checks each target separately at two approach speeds.
-Routes do not imply that every possible player shot succeeds; they establish
-working representative feeds with the production physics engine.
+- Two staggered, left-operated flippers occupy the lower left. A single
+  right-operated flipper faces them. The inter-flipper gap remains open.
+- Three pop bumpers form a downward-pointing triangle below the top-center
+  GLOBE basket. The shooter arch is open, with no invented top rollover bank.
+- A left spinner feeds the upper field. Two more spinners sit side by side
+  below the pop cluster, instead of occupying three separate side orbits.
+- Four horizontal drop-target faces lie one behind another in the upper-right
+  Free Throw lane. The front target must fall before a shot can reach the next.
+  Once all four are down, a shot can reach the saucer behind them.
+- The Free Throw saucer ejects left toward the GLOBE area. Pocket walls leave
+  that exit clear rather than forcing the ball back through the target row.
+- Five standups run down the left edge. The sixth is recessed in the right-side
+  Dunk Shot pocket. The center remains open for cross-court shots.
+- Staggered lower returns, slingshots, outlanes, and four representative
+  rollover switches complete the layout. Painted GLOBE letters and bonus
+  inserts are decoration, not invented rollover collision switches.
 
-The full table must pass layout, geometry, route, and deep dropped-ball checks
-without diagnostics. Dimensions remain unsnapped to preserve joined arcs and
-ball-width clearances. No core physics rewrite is required for this layout.
+## Rendering
+
+The `harlem` palette uses cream/yellow flippers, red targets, silver guides,
+and basketball-colored spinner caps. `harlem-playfield-art.ts` draws an original
+vector interpretation of the wood court, red-white-blue striping, central
+star, GLOBE letters, numbered bonus stars, and shot labels beneath the devices.
+No reference photograph is bundled or used as a collision map.
+
+## Verification and limits
+
+Tests establish target sequencing with five shots from the same lane entrance:
+one target falls per shot, then the fifth shot reaches the exposed saucer.
+Additional contracts check both saucer exits, spinner continuation, target
+approach faces, the right return, and feeds to both left flippers. The staggered
+left return's contract permits its cross-playfield release; it does not promise
+that every passive feed lands on the upper-left flipper. All tables must still
+pass deep dropped-ball and geometry analysis.
+
+This is a layout and visual recreation using the shared 2D physics, not a ROM
+emulation. It retains the application's basic three-ball scoring. The original
+scanning GLOBE lamps, advancing spinner values, super bonus, specials/extra-ball
+logic, and powered right-outlane detour gate are not implemented. The shooter's
+one-way gate and return curves are adaptations for reliable 2D play. Dimensions,
+plastics, portrait art, and switch positions remain approximations.

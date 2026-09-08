@@ -1,128 +1,331 @@
-import { absolutePoint, createPopBumperCluster } from '../layout-primitives';
 import { compileBuiltInBoardLayout } from '../layout-compiler';
 import {
-  createShotLaneAssembly,
-  createTargetBankAssembly,
-} from '../assemblies';
-import {
-  createFoundation,
-  createOrbit,
-  createBank,
-  createPocket,
+  createLowerPlayfieldAssembly,
+  createShooterArchAssembly,
   composeAssemblies,
-} from './table-foundation';
+} from '../assemblies';
+import { rail, arc } from '../assemblies/shared';
+import type { BoardAssembly } from '../assemblies';
 
-const { lower, shooter, ...foundation } = createFoundation('harlem', 3, 1600);
-const upperPocket = createPocket(
-  'harlem-upper-saucer',
-  { x: 600, y: 350 },
-  5000,
-);
-// The upper kickout feeds the third flipper before returning to center court.
-upperPocket.routes[0]!.goals.push({
-  type: 'flipper',
-  pivot: { x: 680, y: 600 },
-});
-const lowerPocket = createPocket(
-  'harlem-bonus-saucer',
-  { x: 680, y: 820 },
-  25000,
-);
-const leftBank = createBank(
-  'harlem-left',
-  { x: 245, y: 720 },
-  { x: 0, y: 75 },
-  5,
-  false,
-  300,
-);
-const rightBank = createBank(
-  'harlem-right',
-  { x: 620, y: 1040 },
-  { x: 0, y: 65 },
-  1,
-  false,
-  300,
-);
-const drops = createTargetBankAssembly({
-  id: 'harlem-drop-bank',
-  first: { x: 300, y: 660 },
-  step: { x: 65, y: 30 },
-  standupCount: 0,
-  dropCount: 4,
-  targetWidth: 52,
-  targetHeight: 16,
-  backingOffset: { x: 25, y: -55 },
-  backingExtension: 20,
-  standupScore: 300,
-  dropScore: 500,
-  returnRegion: {
-    type: 'region',
-    min: { x: 170, y: 810 },
-    max: { x: 580, y: 1400 },
+// Estimated from original populated playfield photos; see the reference spec.
+const shooter = createShooterArchAssembly({
+  id: 'harlem-shooter',
+  center: { x: 478, y: 506 },
+  radius: 466,
+  laneWidth: 56,
+  launchY: 1760,
+  guideTopY: 700,
+  gateAngle: -0.8,
+  lanes: {
+    firstX: 340,
+    y: 200,
+    spacing: 110,
+    count: 3,
+    radius: 22,
+    dividerTop: 150,
+    dividerBottom: 245,
+    score: 300,
   },
 });
-const centerLane = createShotLaneAssembly({
-  id: 'harlem-center-spinner',
-  outerPath: [
-    { x: 380, y: 800 },
-    { x: 380, y: 950 },
-  ],
-  innerPath: [
-    { x: 520, y: 800 },
-    { x: 520, y: 950 },
-  ],
-  spinner: { position: { x: 450, y: 880 }, length: 90, angle: 0, score: 100 },
-  entry: { x: 450, y: 990 },
-  entryVelocities: [{ x: 0, y: -1400 }],
-  exit: { type: 'region', min: { x: 380, y: 770 }, max: { x: 520, y: 795 } },
+// Harlem has an open top arch, not a bank of rollover lanes.
+shooter.guides = shooter.guides!.slice(0, 4);
+shooter.rollovers = [];
+shooter.routes[0]!.goals = [
+  { type: 'region', min: { x: 60, y: 100 }, max: { x: 680, y: 420 } },
+];
+
+const lowerOptions = {
+  id: 'harlem-right-return',
+  center: { x: 490, y: 1800 },
+  pivotSpacing: 320,
+  flipperLength: 136,
+  laneWidth: 80,
+  returnRadius: 140,
+  entryRise: 320,
+  bendRise: 180,
+  heelOffset: 24,
+  slingOffset: { x: 144, y: 190 },
+  slingWidth: 144,
+  slingHeight: 50,
+  slingAngle: 0.65,
+};
+const right = createLowerPlayfieldAssembly(lowerOptions);
+const left = createLowerPlayfieldAssembly({
+  ...lowerOptions,
+  id: 'harlem-left-return',
+  restingAngle: 0.55,
+  center: { x: 450, y: 1700 },
 });
-const parts = composeAssemblies(
-  lower,
-  shooter,
-  createOrbit('harlem-left-orbit', false, 1600),
-  createOrbit('harlem-right-orbit', true, 1600),
-  centerLane,
-  leftBank,
-  rightBank,
-  drops,
-  upperPocket,
-  lowerPocket,
-);
-parts.flippers.push({
-  position: { x: 680, y: 600 },
-  side: 'right',
-  length: 118,
-  thickness: 22,
-  restingAngle: Math.PI - 0.28,
-  activeAngle: Math.PI + 0.5,
-  material: 'flipperRubber',
-});
-parts.rollovers!.push(
-  ...[330, 410, 490, 570].map((x, index) => ({
-    position: { x, y: 1090 + (index === 1 || index === 2 ? 50 : 0) },
-    radius: 19,
+// Use each assembly's outer half: Harlem's left and right returns are staggered.
+const lower: BoardAssembly = {
+  guides: [...left.guides!.slice(0, 4), ...right.guides!.slice(4)],
+  posts: [...left.posts!.slice(0, 2), ...right.posts!.slice(2)],
+  flippers: [
+    left.flippers[0],
+    right.flippers[1],
+    {
+      position: { x: 390, y: 1800 },
+      side: 'left',
+      length: 110,
+      thickness: 22,
+      restingAngle: 0.55,
+      activeAngle: -0.5,
+      material: 'flipperRubber',
+    },
+  ],
+  slingshots: [left.slingshots![0], right.slingshots![1]],
+  routes: [...left.routes.slice(0, 2), ...right.routes.slice(2)],
+};
+
+// The original staggered left return releases a cross-playfield feed rather
+// than guaranteeing a catch on a paired lower flipper.
+lower.routes[0]!.goals = [
+  { type: 'region', min: { x: 270, y: 1560 }, max: { x: 840, y: 1810 } },
+];
+for (const [id, x, y, pivot] of [
+  ['upper-left', 350, 1650, { x: 290, y: 1700 }],
+  ['lower-left', 440, 1740, { x: 390, y: 1800 }],
+] as const)
+  lower.routes.push({
+    id: `harlem-${id}-feed`,
+    start: {
+      type: 'feed',
+      position: { x, y },
+      velocities: [
+        { x: 0, y: 150 },
+        { x: 0, y: 300 },
+      ],
+    },
+    goals: [{ type: 'flipper', pivot }],
+    timeoutSeconds: 2,
+  });
+
+const field: BoardAssembly = {
+  guides: [
+    rail({ x: 12, y: 506 }, { x: 12, y: 1980 }),
+    // Inline Free Throw channel; each horizontal face blocks the next target.
+    rail({ x: 684, y: 350 }, { x: 684, y: 750 }),
+    rail({ x: 814, y: 280 }, { x: 814, y: 750 }),
+    arc({ x: 750, y: 280 }, 64, Math.PI * 1.4, Math.PI * 2),
+    // Open GLOBE basket and sloped pop-area shoulders.
+    arc({ x: 450, y: 220 }, 56, Math.PI * 1.4, Math.PI * 2),
+    rail({ x: 506, y: 220 }, { x: 525, y: 275 }),
+    rail({ x: 200, y: 420 }, { x: 250, y: 520 }),
+    rail({ x: 630, y: 420 }, { x: 590, y: 520 }),
+    rail({ x: 80, y: 690 }, { x: 80, y: 1180 }),
+    // Recessed right-side dunk target, open toward the center court.
+    rail({ x: 795, y: 805 }, { x: 715, y: 820 }),
+    rail({ x: 805, y: 935 }, { x: 715, y: 950 }),
+  ],
+  bumpers: [
+    {
+      position: { x: 270, y: 350 },
+      radius: 44,
+      score: 100,
+      material: 'rubberPost',
+    },
+    {
+      position: { x: 600, y: 350 },
+      radius: 44,
+      score: 100,
+      material: 'rubberPost',
+    },
+    {
+      position: { x: 435, y: 465 },
+      radius: 44,
+      score: 100,
+      material: 'rubberPost',
+    },
+  ],
+  standupTargets: [0, 1, 2, 3, 4].map((i) => ({
+    position: { x: 110, y: 730 + i * 90 },
+    width: 60,
+    height: 16,
+    angle: Math.PI / 2,
     score: 300,
+    material: 'rubberPost',
   })),
-);
-// Three top lanes plus four court inserts retain seven rollover switches.
-parts.rollovers!.forEach((lane) => {
-  lane.score = 300;
+  dropTargets: [0, 1, 2, 3].map((i) => ({
+    position: { x: 749, y: 655 - i * 85 },
+    width: 76,
+    height: 16,
+    angle: 0,
+    score: 500,
+    material: 'rubberPost',
+  })),
+  saucers: [
+    {
+      position: { x: 450, y: 220 },
+      radius: 28,
+      score: 5000,
+      holdSeconds: 0.5,
+      ejectSpeed: 680,
+      ejectAngle: Math.PI * 0.8,
+      material: 'metalGuide',
+    },
+    {
+      position: { x: 750, y: 280 },
+      radius: 28,
+      score: 25000,
+      holdSeconds: 0.5,
+      ejectSpeed: 850,
+      ejectAngle: Math.PI + 0.1,
+      material: 'metalGuide',
+    },
+  ],
+  spinners: [
+    {
+      position: { x: 165, y: 540 },
+      length: 70,
+      thickness: 10,
+      angle: -0.4,
+      score: 100,
+      material: 'metalGuide',
+    },
+    {
+      position: { x: 345, y: 635 },
+      length: 76,
+      thickness: 10,
+      angle: 0,
+      score: 100,
+      material: 'metalGuide',
+    },
+    {
+      position: { x: 525, y: 635 },
+      length: 76,
+      thickness: 10,
+      angle: 0,
+      score: 100,
+      material: 'metalGuide',
+    },
+  ],
+  rollovers: [
+    { position: { x: 280, y: 830 }, radius: 18, score: 300 },
+    { position: { x: 600, y: 830 }, radius: 18, score: 300 },
+    { position: { x: 755, y: 1030 }, radius: 18, score: 300 },
+    { position: { x: 854, y: 1510 }, radius: 18, score: 300 },
+  ],
+  routes: [],
+};
+field.standupTargets!.push({
+  position: { x: 785, y: 875 },
+  width: 66,
+  height: 16,
+  angle: Math.PI / 2,
+  score: 300,
+  material: 'rubberPost',
+});
+for (let i = 0; i < 5; i++)
+  field.routes.push({
+    id: `harlem-left/target-${i}`,
+    start: {
+      type: 'feed',
+      position: { x: 154, y: 730 + i * 90 },
+      velocities: [{ x: -600, y: 0 }],
+    },
+    goals: [
+      {
+        type: 'event',
+        event: 'standup-target-hit',
+        position: { x: 110, y: 730 + i * 90 },
+      },
+      { type: 'region', min: { x: 135, y: 1150 }, max: { x: 870, y: 1750 } },
+    ],
+    timeoutSeconds: 5,
+  });
+for (let i = 0; i < 4; i++)
+  field.routes.push({
+    id: `harlem-drop-bank/target-${i}`,
+    start: {
+      type: 'feed',
+      position: { x: 749, y: 695 - i * 85 },
+      velocities: [{ x: 0, y: -600 }],
+    },
+    goals: [
+      {
+        type: 'event',
+        event: 'drop-target-hit',
+        position: { x: 749, y: 655 - i * 85 },
+      },
+    ],
+    timeoutSeconds: 2,
+  });
+field.routes.push({
+  id: 'harlem-dunk',
+  start: {
+    type: 'feed',
+    position: { x: 720, y: 875 },
+    velocities: [{ x: 700, y: 0 }],
+  },
+  goals: [
+    {
+      type: 'event',
+      event: 'standup-target-hit',
+      position: { x: 785, y: 875 },
+    },
+    { type: 'region', min: { x: 300, y: 960 }, max: { x: 875, y: 1400 } },
+  ],
+  timeoutSeconds: 5,
+});
+for (const [i, position] of [
+  { x: 165, y: 540 },
+  { x: 345, y: 635 },
+  { x: 525, y: 635 },
+].entries())
+  field.routes.push({
+    id: `harlem-spinner-${i}`,
+    start: {
+      type: 'feed',
+      position: { x: position.x, y: position.y + 85 },
+      velocities: [{ x: 0, y: -1300 }],
+    },
+    goals: [
+      { type: 'event', event: 'spinner-spin', position },
+      { type: 'region', min: { x: 40, y: 100 }, max: { x: 670, y: 560 } },
+    ],
+    timeoutSeconds: 5,
+  });
+field.routes.push({
+  id: 'harlem-globe-saucer',
+  start: {
+    type: 'feed',
+    position: { x: 450, y: 295 },
+    velocities: [{ x: 0, y: -900 }],
+  },
+  goals: [
+    { type: 'event', event: 'saucer-captured', position: { x: 450, y: 220 } },
+    { type: 'region', min: { x: 30, y: 310 }, max: { x: 680, y: 700 } },
+  ],
+  timeoutSeconds: 5,
+});
+field.routes.push({
+  id: 'harlem-free-throw-saucer',
+  start: {
+    type: 'feed',
+    position: { x: 750, y: 335 },
+    velocities: [{ x: 0, y: -600 }],
+  },
+  goals: [
+    { type: 'event', event: 'saucer-captured', position: { x: 750, y: 280 } },
+    { type: 'region', min: { x: 350, y: 100 }, max: { x: 630, y: 340 } },
+  ],
+  timeoutSeconds: 5,
 });
 
 export const harlemGlobetrottersTable = compileBuiltInBoardLayout(
   {
-    ...foundation,
-    ...parts,
+    ...composeAssemblies(lower, shooter, field),
     name: 'Harlem Globetrotters',
-    bumpers: createPopBumperCluster({
-      top: absolutePoint(380, 330),
-      spacingX: 160,
-      spacingY: 140,
-      radius: 38,
-      scores: [100, 100, 100],
-      material: 'rubberPost',
-    }).bumpers,
+    themeId: 'harlem',
+    width: 1000,
+    height: 2000,
+    drainY: 2025,
+    launchPosition: shooter.launchPosition,
+    plunger: shooter.plunger,
+    materials: { playfield: 'playfieldWood', walls: 'metalGuide' },
+    physics: {
+      plunger: { minReleaseSpeed: 0, maxReleaseSpeed: 3400, bodyMass: 0.9 },
+    },
   },
   { snapToGrid: false },
 );

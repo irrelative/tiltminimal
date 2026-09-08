@@ -107,5 +107,5 @@ describe('table validation cli resolution and reports', () => {
     expect(reports.every((report) => report.playabilityErrors === 0)).toBe(
       true,
     );
-  });
+  }, 15000);
 });

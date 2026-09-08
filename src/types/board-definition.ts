@@ -11,7 +11,8 @@ export type BoardThemeId =
   | 'midnight'
   | 'sunburst'
   | 'grayscale'
-  | 'mirror-match';
+  | 'mirror-match'
+  | 'harlem';
 
 export type FlipperSide = 'left' | 'right';
 
