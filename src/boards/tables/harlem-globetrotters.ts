@@ -39,18 +39,31 @@ shooter.routes[0]!.goals = [
   { type: 'region', min: { x: 240, y: 250 }, max: { x: 840, y: 700 } },
 ];
 
+// Shared visual baselines are independent of the staggered flipper heels.
+const lowerCenterX = 500;
+const laneEntryY = 1480;
+const slingY = 1490;
+const upperLeftPivot = { x: lowerCenterX - 230, y: 1680 };
+const lowerLeftPivot = { x: lowerCenterX - 130, y: 1800 };
+const rightPivot = { x: lowerCenterX + 130, y: 1800 };
+const slingSpacing = 288;
+const rightAssemblyCenterX = rightPivot.x - 160;
+const leftAssemblyCenterX = upperLeftPivot.x + 160;
 const lowerOptions = {
   id: 'harlem-right-return',
-  center: { x: 470, y: 1800 },
+  center: { x: rightAssemblyCenterX, y: rightPivot.y },
   pivotSpacing: 320,
   flipperLength: 110,
   restingAngle: 0.55,
   laneWidth: 72,
   returnRadius: 148,
   bendRise: 174,
-  entryRise: 320,
+  entryRise: rightPivot.y - laneEntryY,
   heelOffset: 32,
-  slingOffset: { x: 174, y: 310 },
+  slingOffset: {
+    x: lowerCenterX + slingSpacing / 2 - rightAssemblyCenterX,
+    y: rightPivot.y - slingY,
+  },
   slingWidth: 144,
   slingHeight: 50,
   slingAngle: 0.65,
@@ -59,9 +72,13 @@ const right = createLowerPlayfieldAssembly(lowerOptions);
 const left = createLowerPlayfieldAssembly({
   ...lowerOptions,
   id: 'harlem-left-return',
-  slingOffset: { x: 74, y: 190 },
+  entryRise: upperLeftPivot.y - laneEntryY,
+  slingOffset: {
+    x: leftAssemblyCenterX - (lowerCenterX - slingSpacing / 2),
+    y: upperLeftPivot.y - slingY,
+  },
   restingAngle: 0.55,
-  center: { x: 430, y: 1680 },
+  center: { x: leftAssemblyCenterX, y: upperLeftPivot.y },
 });
 // Use each assembly's outer half: Harlem's left and right returns are staggered.
 const lower: BoardAssembly = {
@@ -71,7 +88,7 @@ const lower: BoardAssembly = {
     left.flippers[0],
     right.flippers[1],
     {
-      position: { x: 370, y: 1800 },
+      position: lowerLeftPivot,
       side: 'left',
       length: 110,
       thickness: 22,
@@ -95,8 +112,8 @@ lower.routes[2]!.goals = [
   { type: 'region', min: { x: 430, y: 1720 }, max: { x: 700, y: 1920 } },
 ];
 for (const [id, x, y, pivot] of [
-  ['upper-left', 320, 1630, { x: 270, y: 1680 }],
-  ['lower-left', 420, 1740, { x: 370, y: 1800 }],
+  ['upper-left', upperLeftPivot.x + 50, upperLeftPivot.y - 50, upperLeftPivot],
+  ['lower-left', lowerLeftPivot.x + 50, lowerLeftPivot.y - 60, lowerLeftPivot],
 ] as const)
   lower.routes.push({
     id: `harlem-${id}-feed`,
@@ -114,7 +131,7 @@ for (const [id, x, y, pivot] of [
   });
 
 // Keep a ball-width corridor through the center, including the rubber tips.
-for (const x of [490, 500, 510])
+for (const x of [lowerCenterX - 10, lowerCenterX, lowerCenterX + 10])
   lower.routes.push({
     id: `harlem-center-drain-${x}`,
     start: {

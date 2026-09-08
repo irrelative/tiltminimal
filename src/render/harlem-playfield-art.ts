@@ -41,10 +41,10 @@ export const drawHarlemPlayfield = (
   polygon(
     [
       [25, 1280],
-      [450, 1160],
+      [500, 1160],
       [880, 1270],
-      [880, 1850],
-      [490, 1970],
+      [880, 1810],
+      [500, 1970],
       [25, 1810],
     ],
     '#32669b',
@@ -65,18 +65,18 @@ export const drawHarlemPlayfield = (
   stripe([
     [35, 110],
     [35, 1750],
-    [480, 1950],
-    [860, 1770],
+    [500, 1950],
+    [860, 1750],
     [860, 150],
   ]);
   stripe([
     [240, 520],
-    [450, 980],
+    [500, 980],
     [620, 520],
   ]);
   stripe([
     [175, 1160],
-    [450, 1270],
+    [500, 1270],
     [745, 1110],
   ]);
   const star = (x: number, y: number, r: number, fill: string) => {
@@ -88,13 +88,13 @@ export const drawHarlemPlayfield = (
     polygon(pts, fill, '#e7ca68', 7);
   };
   c.beginPath();
-  c.arc(450, 1110, 240, 0, Math.PI * 2);
+  c.arc(500, 1110, 240, 0, Math.PI * 2);
   c.fillStyle = '#b73032';
   c.fill();
   c.strokeStyle = '#eee1b8';
   c.lineWidth = 8;
   c.stroke();
-  star(450, 1100, 250, '#244f8d');
+  star(500, 1100, 250, '#244f8d');
   const label = (
     text: string,
     x: number,
@@ -107,24 +107,24 @@ export const drawHarlemPlayfield = (
     c.textAlign = 'center';
     c.fillText(text, x, y);
   };
-  label('HARLEM', 450, 1055, 45, '#f6e3ab');
-  label('GLOBETROTTERS', 450, 1138, 31, '#f6e3ab');
-  label('ON TOUR', 450, 1180, 23, '#f6e3ab');
-  label('THE MAGIC CIRCLE', 450, 918, 22, '#f6e3ab');
+  label('HARLEM', 500, 1055, 45, '#f6e3ab');
+  label('GLOBETROTTERS', 500, 1138, 31, '#f6e3ab');
+  label('ON TOUR', 500, 1180, 23, '#f6e3ab');
+  label('THE MAGIC CIRCLE', 500, 918, 22, '#f6e3ab');
   for (const [i, letter] of [...'GLOBE'].entries()) {
     c.beginPath();
-    c.ellipse(322 + i * 64, 1090, 24, 17, 0, 0, Math.PI * 2);
+    c.ellipse(372 + i * 64, 1090, 24, 17, 0, 0, Math.PI * 2);
     c.fillStyle = '#e3bd57';
     c.fill();
-    label(letter, 322 + i * 64, 1098, 24, '#a2292e');
+    label(letter, 372 + i * 64, 1098, 24, '#a2292e');
   }
   for (const [i, text] of ['2X', '3X', '5X'].entries())
-    label(text, 330 + i * 120, 1280, 28);
+    label(text, 380 + i * 120, 1280, 28);
   const rowStart = [7, 4, 2, 1];
   for (let row = 0; row < 4; row++)
     for (let j = 0; j < 4 - row; j++) {
-      const x = 450 + (j - (3 - row) / 2) * 72,
-        y = 1450 + row * 95;
+      const x = 500 + (j - (3 - row) / 2) * 72,
+        y = 1390 + row * 95;
       star(x, y, 42, '#b53332');
       c.beginPath();
       c.ellipse(x, y, 24, 17, 0, 0, Math.PI * 2);

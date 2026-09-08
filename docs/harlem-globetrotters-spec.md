@@ -123,7 +123,31 @@ the return lanes retain their different heights to serve the diagonal left pair.
 This is an intentional playability/alignment adaptation of the estimated layout.
 
 Regression checks require the drain midpoint and sling midpoint to equal half
-the table width, and both slings to have equal heights. All 225 tests and all-table
+the table width, and both slings to have equal heights. All 226 tests and all-table
 deep validation pass with no warnings. Browser review in `/physics` with the
 overlay checked the full table, lower alignment, center drop, and both inlane
 entries; automated route checks cover held catches and releases.
+
+## Whole-board alignment baselines
+
+Lane entry posts now share y=1480 on both sides, and all inlane/outlane feed
+contracts start at y=1510. The left lane's straight entrance is shortened to
+meet this baseline. The curved returns stay at their heel-relative heights:
+the left feeds the upper-left flipper and the right feeds the bottom-right.
+Their different lengths and horizontal positions are intentional consequences
+of the three-flipper arrangement, not disconnected or mismatched lane mouths.
+
+The board definition names the lower centerline, lane entry height, sling height,
+and three pivot anchors. Sling offsets, lane lengths, direct feeds, and center
+routes derive from these anchors so moving a component cannot silently leave
+its route destination behind. The central court badge, bonus ladder, and bottom
+stripe apex now share the x=500 drain/sling centerline; the bottom stripe corners
+share a height. Upper scoring mechanisms retain their distinct shot positions.
+The bonus ladder is raised 60 units to clear the repositioned slings.
+
+Extending the right lane to the former left entry height was rejected because
+three fast feed samples drained before cradling. The common y=1480 entry passes
+all nine held catch/release samples on each side, both outlanes, all center
+routes, all-table deep validation without warnings, and the full 226-test suite.
+Browser overlay review checks the full table and matching-height lane drops as
+well as the center drain. Build and lint pass.

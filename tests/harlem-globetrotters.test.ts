@@ -74,6 +74,31 @@ describe('harlemGlobetrottersTable', () => {
     expect((left.x + right.x) / 2).toBe(b.width / 2);
   });
 
+  it('aligns lane entry posts and feeds while keeping returns joined to their heels', () => {
+    const b = harlemGlobetrottersTable;
+    expect(b.posts).toHaveLength(4);
+    expect(new Set(b.posts.map((p) => p.y))).toEqual(new Set([1480]));
+    const routes = b.routes!.filter((r) =>
+      /harlem-(left|right)-return\/(inlane|outlane)/.test(r.id),
+    );
+    expect(routes).toHaveLength(4);
+    for (const route of routes) {
+      expect(route.start.type).toBe('feed');
+      if (route.start.type === 'feed')
+        expect(route.start.position.y).toBe(1510);
+    }
+    // All nine velocities must catch/release at each destination, including the
+    // longer right lane; equal mouth heights alone do not prove a working feed.
+    expect(validateBallRoutes({ ...b, routes })).toEqual([]);
+    for (const guide of b.guides.slice(0, 8)) {
+      if (guide.kind !== 'line') continue;
+      expect(guide.start.y).toBe(1480);
+      expect(
+        b.posts.some((p) => p.x === guide.start.x && p.y === guide.start.y),
+      ).toBe(true);
+    }
+  });
+
   it('leaves a ball-width center drain between the lower flipper tips', () => {
     const b = harlemGlobetrottersTable;
     const left = b.flippers

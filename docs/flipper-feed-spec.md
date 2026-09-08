@@ -22,9 +22,11 @@ small downward slopes prevent balls balancing on horizontal endpoint caps.
 The smaller Classic/Harlem returns preserve outlane clearance beside the cabinet
 and shooter walls. The shared assembly defaults `bendRise` to `returnRadius +
 20`; authors can override it, but must validate the complete table afterward.
-Harlem uses equal 110-unit bats, with the upper-left at (290, 1680),
-lower-left at (390, 1800), and right at (650, 1800). Its left return and sling
-follow the upper pivot, and direct feeds follow both left pivots. Harlem's left return permits a cross-playfield
+Harlem uses equal 110-unit bats, with the upper-left at (270, 1680),
+lower-left at (370, 1800), and right at (630, 1800). Its left return
+follows the upper pivot, and direct feeds follow both left pivots. Lane mouths
+share y=1480; the slings share y=1490 and mirror around x=500 independently
+of the staggered return exits. Harlem's left return permits a cross-playfield
 passive release, and its right return permits lower-playfield entry followed by
 a center drain. Both returns still require a catch on their specified held
 flipper and a successful release.
