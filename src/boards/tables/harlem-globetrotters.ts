@@ -64,7 +64,7 @@ const lower: BoardAssembly = {
     left.flippers[0],
     right.flippers[1],
     {
-      position: { x: 390, y: 1800 },
+      position: { x: 350, y: 1860 },
       side: 'left',
       length: 110,
       thickness: 22,
@@ -82,9 +82,14 @@ const lower: BoardAssembly = {
 lower.routes[0]!.goals = [
   { type: 'region', min: { x: 270, y: 1560 }, max: { x: 840, y: 1810 } },
 ];
+// With the center open, an unheld right return may drain instead of bouncing
+// off the lower-left flipper. Holding right must still catch every feed sample.
+lower.routes[2]!.goals = [
+  { type: 'region', min: { x: 430, y: 1720 }, max: { x: 700, y: 1920 } },
+];
 for (const [id, x, y, pivot] of [
   ['upper-left', 350, 1650, { x: 290, y: 1700 }],
-  ['lower-left', 440, 1740, { x: 390, y: 1800 }],
+  ['lower-left', 400, 1800, { x: 350, y: 1860 }],
 ] as const)
   lower.routes.push({
     id: `harlem-${id}-feed`,
@@ -99,6 +104,23 @@ for (const [id, x, y, pivot] of [
     goals: [{ type: 'flipper', pivot }],
     cradle: { pivot },
     timeoutSeconds: 2,
+  });
+
+// Keep a ball-width corridor through the center, including the rubber tips.
+for (const x of [475, 485, 495])
+  lower.routes.push({
+    id: `harlem-center-drain-${x}`,
+    start: {
+      type: 'feed',
+      position: { x, y: 1770 },
+      velocities: [
+        { x: 0, y: 150 },
+        { x: 0, y: 500 },
+      ],
+    },
+    goals: [{ type: 'drain' }],
+    avoidFlippers: true,
+    timeoutSeconds: 3,
   });
 
 const field: BoardAssembly = {

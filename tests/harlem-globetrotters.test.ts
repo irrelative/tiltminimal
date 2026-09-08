@@ -1,3 +1,8 @@
+import {
+  getFlipperTipPosition,
+  getFlipperTipRadius,
+} from '../src/game/flipper-geometry';
+import { validateBallRoutes } from '../src/validation/ball-routes';
 import { createInitialGameState } from '../src/game/game-state';
 import { stepGameFrame } from '../src/game/physics-engine';
 import { idleInput } from './helpers/game-fixture';
@@ -40,6 +45,26 @@ describe('harlemGlobetrottersTable', () => {
     expect(b.standupTargets[5].x).toBeGreaterThan(700);
     expect(b.spinners[1].y).toBe(b.spinners[2].y);
     expect(b.themeId).toBe('harlem');
+  });
+
+  it('leaves a ball-width center drain between the lower flipper tips', () => {
+    const b = harlemGlobetrottersTable;
+    const left = b.flippers
+      .filter((f) => f.side === 'left')
+      .sort((a, b) => b.y - a.y)[0];
+    const right = b.flippers.find((f) => f.side === 'right')!;
+    const leftEdge =
+      getFlipperTipPosition(left, left.restingAngle).x +
+      getFlipperTipRadius(left);
+    const rightEdge =
+      getFlipperTipPosition(right, right.restingAngle).x -
+      getFlipperTipRadius(right);
+    expect(rightEdge - leftEdge).toBeGreaterThan(b.ball.radius * 2 + 20);
+    const routes = b.routes!.filter((r) =>
+      r.id.startsWith('harlem-center-drain-'),
+    );
+    expect(routes).toHaveLength(3);
+    expect(validateBallRoutes({ ...b, routes })).toEqual([]);
   });
 
   it('requires successive shots through the inline bank before reaching its saucer', () => {

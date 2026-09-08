@@ -19,8 +19,9 @@ small downward slopes prevent balls balancing on horizontal endpoint caps.
 The smaller Classic/Harlem returns preserve outlane clearance beside the cabinet
 and shooter walls. The shared assembly defaults `bendRise` to `returnRadius +
 20`; authors can override it, but must validate the complete table afterward.
-Slings, flipper lengths, pivot positions, and Harlem's staggered three-flipper
-arrangement retain their positions. Harlem's left return still permits a
+Slings and flipper lengths retain their positions and dimensions. Harlem's
+lower-left flipper is offset to (350, 1860) to maintain its center drain; its
+direct feed follows that pivot. Harlem's left return still permits a
 cross-playfield passive release, while a held upper-left flipper must catch it.
 
 ## Held contact behavior

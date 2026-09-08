@@ -66,4 +66,12 @@ plastics, portrait art, and switch positions remain approximations.
 The return lanes now use the heel-relative dimensions in
 [the flipper feed specification](flipper-feed-spec.md). Both side returns and
 the direct feeds to both left flippers include held catch/release contracts;
-the staggered flipper positions remain unchanged.
+the staggered arrangement is retained. The lower-left pivot is at (350, 1860),
+leaving approximately 60 units of horizontal clearance between the lower
+flipper tip rubbers at rest. Three center-drain routes at x=475, 485, and 495
+verify that balls at two entry speeds drain without touching a flipper. Its
+direct catch/release feed moves with the pivot.
+
+The passive right-return contract now checks entry into the lower playfield:
+an unheld feed may drain through the center instead of rebounding off the
+lower-left flipper. Its nine held catch/release cases remain required.
