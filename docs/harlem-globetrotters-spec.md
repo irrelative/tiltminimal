@@ -75,3 +75,26 @@ direct catch/release feed moves with the pivot.
 The passive right-return contract now checks entry into the lower playfield:
 an unheld feed may drain through the center instead of rebounding off the
 lower-left flipper. Its nine held catch/release cases remain required.
+
+
+## Plunge return into live play
+
+The open outer arch previously guided medium and full launches down the left
+cabinet wall, outside the target bank and directly into the left outlane.
+The old route checked only arrival at the top of the arch, so it accepted this
+path without any interaction in the playfield.
+
+A short angled metal guide now joins the upper arch at x=220 (y approximately
+118) and ends at (270, 200), turning its runoff inward toward the bumper and
+Free Throw area. This is a documented 2D feed adaptation, not a claim that the
+original machine has this exact rail. The open arch, device counts, outlane
+openings, center drain, and held-flipper returns remain intact.
+
+The plunge contract samples 51 charges from 50% through 100% in 1% increments.
+Each must reach the upper arch region and then the live upper field
+(x=240–840, y=250–700) within six seconds. The latter includes both the bumper
+area and Free Throw approach while excluding the left wall/outlane corridor
+and the shooter lane. A regression removes the deflector and requires all 51
+samples to fail on the previously untested continuation. Normal play can still
+drain after rebounds; these checks prevent the direct arch-to-outlane launch
+path and do not guarantee every plunge survives subsequent play.

@@ -67,6 +67,29 @@ describe('harlemGlobetrottersTable', () => {
     expect(validateBallRoutes({ ...b, routes })).toEqual([]);
   });
 
+  it('feeds medium-to-full plunges into live play and detects a missing arch deflector', () => {
+    const b = harlemGlobetrottersTable;
+    const route = b.routes!.find((r) => r.id === 'harlem-shooter/plunge')!;
+    expect(route.start.type).toBe('plunge');
+    if (route.start.type !== 'plunge') throw new Error('Expected plunge');
+    expect(route.start.powers).toEqual(
+      Array.from({ length: 51 }, (_, i) => (50 + i) / 100),
+    );
+    expect(validateBallRoutes({ ...b, routes: [route] })).toEqual([]);
+
+    // The previous open arch passed the upper region but sent every launch
+    // along the left wall into the outlane. Keep that failure reproducible.
+    const guides = b.guides.filter(
+      (g) => !(g.kind === 'line' && g.start.x === 220 && g.end.x === 270),
+    );
+    expect(guides).toHaveLength(b.guides.length - 1);
+    const failures = validateBallRoutes({ ...b, guides, routes: [route] });
+    expect(failures).toHaveLength(route.start.powers.length);
+    expect(
+      failures.every((f) => f.message.includes('drained before goal 2')),
+    ).toBe(true);
+  });
+
   it('requires successive shots through the inline bank before reaching its saucer', () => {
     const b = harlemGlobetrottersTable;
     let state = createInitialGameState(b);

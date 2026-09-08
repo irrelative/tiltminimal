@@ -30,8 +30,13 @@ const shooter = createShooterArchAssembly({
 // Harlem has an open top arch, not a bank of rollover lanes.
 shooter.guides = shooter.guides!.slice(0, 4);
 shooter.rollovers = [];
+shooter.routes[0]!.start = {
+  type: 'plunge',
+  powers: Array.from({ length: 51 }, (_, i) => (50 + i) / 100),
+};
 shooter.routes[0]!.goals = [
   { type: 'region', min: { x: 60, y: 100 }, max: { x: 680, y: 420 } },
+  { type: 'region', min: { x: 240, y: 250 }, max: { x: 840, y: 700 } },
 ];
 
 const lowerOptions = {
@@ -126,6 +131,11 @@ for (const x of [475, 485, 495])
 const field: BoardAssembly = {
   guides: [
     rail({ x: 12, y: 506 }, { x: 12, y: 1980 }),
+    // Stop the outer-arch ride before it becomes a straight left-outlane feed.
+    rail(
+      { x: 220, y: 506 - Math.sqrt(466 ** 2 - 258 ** 2) },
+      { x: 270, y: 200 },
+    ),
     // Inline Free Throw channel; each horizontal face blocks the next target.
     rail({ x: 684, y: 350 }, { x: 684, y: 750 }),
     rail({ x: 814, y: 280 }, { x: 814, y: 750 }),
