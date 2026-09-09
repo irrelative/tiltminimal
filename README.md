@@ -141,3 +141,10 @@ query parameters and the URL fragment are preserved.
 
 Every table shows the current ball number beside the score on the playfield HUD
 (e.g. `Ball 2 of 3`), including when Physics overlay is off.
+
+Each table has a top-five high-score list beneath its name in the left sidebar.
+Positive final scores are recorded once when a game ends and saved in this
+browser's local storage. Refreshes preserve the list; changing tables shows that
+table's scores. Tied scores from separate games occupy separate places. Partial
+games and Physics sandbox play do not submit scores. If storage is unavailable,
+scores remain available for the current page session only.

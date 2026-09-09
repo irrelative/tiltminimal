@@ -1,3 +1,4 @@
+import { createGameScoreRecorder } from './high-scores';
 import type { BuiltInTable } from '../boards/table-library';
 import { cloneBoardDefinition } from '../boards/board-codec';
 import type { GameAudio } from '../audio/game-audio';
@@ -21,6 +22,7 @@ interface StartStandalonePlaySessionOptions {
   renderer: CanvasRenderer;
   gameAudio: GameAudio;
   modeTitle: HTMLElement;
+  onGameOver?: (score: number) => void;
   playDebugStatus: HTMLElement;
   playDebugPosition: HTMLElement;
   playDebugVelocity: HTMLElement;
@@ -62,6 +64,7 @@ export const startStandalonePlaySession = ({
   renderer,
   gameAudio,
   modeTitle,
+  onGameOver,
   playDebugStatus,
   playDebugPosition,
   playDebugVelocity,
@@ -81,7 +84,9 @@ export const startStandalonePlaySession = ({
   );
 
   modeTitle.textContent = board.name;
+  const recordScore = createGameScoreRecorder((score) => onGameOver?.(score));
   loop.setOnStateChange((nextState) => {
+    recordScore(nextState);
     playDebugStatus.textContent = `${nextState.status} · Ball ${nextState.rules.currentBall}/${nextState.rules.ballsPerGame} · Score ${nextState.score}${nextState.additionalBalls.length || nextState.lockedBalls.length ? ` · ${nextState.status === 'playing' ? 1 + nextState.additionalBalls.length : 0} live / ${nextState.lockedBalls.length} locked` : ''}`;
     playDebugPosition.textContent = formatVector2(
       nextState.ball.position.x,

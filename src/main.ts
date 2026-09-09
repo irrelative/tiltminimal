@@ -1,3 +1,4 @@
+import { HighScores, renderHighScores } from './app/high-scores';
 import { BUILT_IN_TABLES, type BuiltInTable } from './boards/table-library';
 import { buildAppRoutePath, getAppRouteFromPathname } from './app/routes';
 import {
@@ -25,6 +26,13 @@ const tableSelect = required<HTMLSelectElement>('#play-table-select');
 const modeTitle = required<HTMLElement>('#mode-title');
 const modeCopy = required<HTMLElement>('#mode-copy');
 const playMeta = required<HTMLElement>('#play-table-meta');
+const highScores = new HighScores();
+const showHighScores = (): void =>
+  renderHighScores(
+    required<HTMLOListElement>('#high-score-list'),
+    required<HTMLElement>('#high-score-empty'),
+    highScores.get(state.tableId),
+  );
 const renderer = new CanvasRenderer(canvas);
 const audio = new GameAudio();
 const basePath = import.meta.env.BASE_URL;
@@ -60,6 +68,7 @@ const features = (board: BoardDefinition): number =>
   board.guides.length +
   board.flippers.length;
 const restart = (): void => {
+  showHighScores();
   playMeta.textContent = `${features(table().board)} features${table().description ? ' · ' + table().description : ''}`;
   state.loop?.stop();
   state.sandbox?.stop();
@@ -84,6 +93,10 @@ const restart = (): void => {
       canvas,
       renderer,
       gameAudio: audio,
+      onGameOver: (score) => {
+        highScores.record(state.tableId, score);
+        showHighScores();
+      },
       modeTitle,
       playDebugStatus: required('#play-debug-status'),
       playDebugPosition: required('#play-debug-position'),
