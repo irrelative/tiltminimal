@@ -195,3 +195,63 @@ describe('audio session lifecycle', () => {
     expect(oscillators).toHaveLength(0);
   });
 });
+
+describe('audio preferences', () => {
+  it('does not initialize audio or queue startup music while muted', () => {
+    const { audioContext } = mockContext();
+    const ctor = vi.fn(function () {
+      return audioContext;
+    });
+    vi.stubGlobal('window', {
+      AudioContext: ctor,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    });
+    const audio = new GameAudio();
+    audio.setSettings(false, 0.4);
+    audio.connect(harlemGlobetrottersTable);
+    audio.startGame();
+    audio.playGameEvents([]);
+    audio.playEvents([
+      { type: 'flipper-trigger', side: 'left', pan: 0, intensity: 1 },
+    ]);
+    expect(ctor).not.toHaveBeenCalled();
+    audio.setSettings(true, 0.4);
+    audio.playGameEvents([]);
+    expect(ctor).toHaveBeenCalledOnce();
+    expect(audioContext.createOscillator).not.toHaveBeenCalled();
+    audio.disconnect();
+  });
+  it('routes music through master volume and immediately silences scheduled notes', () => {
+    const { context, audioContext, oscillators } = mockContext();
+    vi.stubGlobal('window', {
+      AudioContext: function () {
+        return audioContext;
+      },
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    });
+    const audio = new GameAudio();
+    audio.setSettings(true, 0.4);
+    audio.connect(harlemGlobetrottersTable);
+    audio.playGameEvents([]);
+    const master = context.createGain.mock.results[0]!.value;
+    expect(master.gain.value).toBe(0.4);
+    expect(
+      context.createGain.mock.results[1]!.value.connect,
+    ).toHaveBeenCalledWith(master);
+    audio.setSettings(false, 0.4);
+    expect(master.gain.value).toBe(0);
+    expect(oscillators.every((node) => node.stop.mock.calls.length === 2)).toBe(
+      true,
+    );
+    const count = oscillators.length;
+    audio.playGameEvents([
+      { type: 'bumper-hit', index: 0, score: 100, tick: 1 },
+    ]);
+    expect(oscillators).toHaveLength(count);
+    audio.setSettings(true, 0.7);
+    expect(master.gain.value).toBe(0.7);
+    audio.disconnect();
+  });
+});

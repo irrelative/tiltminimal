@@ -16,6 +16,16 @@
           <section class="play-route-panel"><button id="play-reset-ball" type="button" class="accent-button">Reset ball</button></section>
           <section class="physics-route-panel"><p class="eyebrow">Physics Sandbox</p><label class="field"><span>Spawn mode</span><select id="physics-spawn-mode"><option value="replace">Replace ball</option><option value="add">Add ball</option></select></label><div class="field-list compact-field-list"><label class="field"><span>vx</span><input id="physics-vx" type="number" value="0" step="10" /></label><label class="field"><span>vy</span><input id="physics-vy" type="number" value="0" step="10" /></label><label class="field"><span>wx</span><input id="physics-wx" type="number" value="0" step="0.1" /></label><label class="field"><span>wy</span><input id="physics-wy" type="number" value="0" step="0.1" /></label></div><div class="button-row"><button id="physics-pause-toggle" type="button">Pause</button><button id="physics-clear-balls" type="button">Clear balls</button><button id="physics-reset" type="button">Reset sandbox</button></div><p id="physics-status" class="meta-text"></p></section>
 
+          <details class="panel-section settings-panel">
+            <summary>Settings</summary>
+            <div class="settings-fields">
+              <label class="debug-toggle"><input id="setting-sound" type="checkbox" checked /> Sound</label>
+              <label class="field"><span>Volume <output id="setting-volume-value" for="setting-volume">100%</output></span><input id="setting-volume" type="range" min="0" max="100" step="1" value="100" /></label>
+              <label class="debug-toggle"><input id="setting-spin-marker" type="checkbox" checked /> Ball spin marker</label>
+              <label class="debug-toggle"><input id="setting-ball-trail" type="checkbox" checked /> Ball motion trail</label>
+              <p class="meta-text">Saved on this browser for all tables.</p>
+            </div>
+          </details>
           <section class="panel-section"><label class="debug-toggle"><input id="debug-overlay" type="checkbox" /> Physics overlay</label>
             <div id="debug-controls" hidden>
               <section class="play-route-panel"><dl class="play-debug-stats"><div><dt>Status</dt><dd id="play-debug-status">Waiting</dd></div><div><dt>Position</dt><dd id="play-debug-position">0, 0</dd></div><div><dt>Velocity</dt><dd id="play-debug-velocity">0, 0</dd></div><div><dt>Roll Spin</dt><dd id="play-debug-spin">0, 0</dd></div></dl></section>

@@ -6,6 +6,7 @@ import type { InputState } from '../input/keyboard-input';
 import type { BoardDefinition } from '../types/board-definition';
 import { getBoardTheme } from './board-themes';
 import {
+  type BallAppearance,
   drawBall,
   drawBallState,
   drawBoard,
@@ -16,6 +17,15 @@ import {
 import { drawHud } from './canvas-renderer-hud';
 
 export class CanvasRenderer {
+  private ballAppearance: BallAppearance = {
+    showSpinMarker: true,
+    showBallTrail: true,
+  };
+
+  setBallAppearance(appearance: BallAppearance): void {
+    this.ballAppearance = { ...appearance };
+  }
+
   private context: CanvasRenderingContext2D | null = null;
   private lastDisplayWidth = 0;
   private lastDisplayHeight = 0;
@@ -54,12 +64,12 @@ export class CanvasRenderer {
       drawBoard(context, board, state);
     }
     context.restore();
-    drawBall(context, board, state);
+    drawBall(context, board, state, this.ballAppearance);
     state.additionalBalls.forEach((ball) =>
-      drawBallState(context, board, ball),
+      drawBallState(context, board, ball, this.ballAppearance),
     );
     state.lockedBalls.forEach(({ ball }) =>
-      drawBallState(context, board, ball),
+      drawBallState(context, board, ball, this.ballAppearance),
     );
     drawHud(context, board, state, input);
     drawPhysicsDebug(
@@ -105,7 +115,7 @@ export class CanvasRenderer {
     context.restore();
 
     balls.forEach((ball) => {
-      drawBallState(context, board, ball);
+      drawBallState(context, board, ball, this.ballAppearance);
     });
     drawPhysicsDebug(context, board, displayState, balls, debug);
   }

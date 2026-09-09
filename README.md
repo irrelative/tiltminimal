@@ -148,3 +148,7 @@ browser's local storage. Refreshes preserve the list; changing tables shows that
 table's scores. Tied scores from separate games occupy separate places. Partial
 games and Physics sandbox play do not submit scores. If storage is unavailable,
 scores remain available for the current page session only.
+
+User preferences are available under **Settings** in the left sidebar: sound,
+volume, ball spin markers, and motion trails. They apply immediately across tables
+and are saved in this browser. See [User settings](docs/user-settings.md).

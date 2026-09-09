@@ -91,6 +91,20 @@ export const getFrameAudioEvents = (
 
 export class GameAudio {
   private context: AudioContext | null = null;
+  private masterGain: GainNode | null = null;
+  private enabled = true;
+  private volume = 1;
+
+  setSettings(enabled: boolean, volume: number): void {
+    this.enabled = enabled;
+    this.volume = Number.isFinite(volume) ? clamp(volume, 0, 1) : 1;
+    if (this.masterGain) this.masterGain.gain.value = enabled ? this.volume : 0;
+    if (!enabled) {
+      this.pendingStart = false;
+      this.tableTone.stop();
+    }
+  }
+
   private unlockBound = false;
   private noiseBuffer: AudioBuffer | null = null;
   private lastBounceTime = -Infinity;
@@ -103,7 +117,7 @@ export class GameAudio {
   connect(board?: BoardDefinition): void {
     this.tableTone.stop();
     this.profile = board ? getTableAudioProfile(board) : null;
-    this.pendingStart = this.profile !== null;
+    this.pendingStart = this.enabled && this.profile !== null;
     this.session += 1;
     this.lastBounceTime = -Infinity;
     if (this.unlockBound || typeof window === 'undefined') {
@@ -131,7 +145,7 @@ export class GameAudio {
 
   startGame(): void {
     this.tableTone.stop();
-    this.pendingStart = this.profile !== null;
+    this.pendingStart = this.enabled && this.profile !== null;
     this.playPendingStart();
   }
 
@@ -140,18 +154,19 @@ export class GameAudio {
     if (!context || context.state !== 'running' || !this.profile) return;
     this.playPendingStart();
     const cue = this.profile.cueForEvents(events);
-    if (cue) this.tableTone.play(context, cue);
+    if (cue) this.tableTone.play(context, cue, this.masterGain!);
   }
 
   private playPendingStart(): void {
     if (
+      !this.enabled ||
       !this.pendingStart ||
       !this.profile ||
       this.context?.state !== 'running'
     )
       return;
     this.pendingStart = false;
-    this.tableTone.play(this.context, this.profile.start);
+    this.tableTone.play(this.context, this.profile.start, this.masterGain!);
   }
 
   playEvents(events: GameAudioEvent[]): void {
@@ -200,6 +215,7 @@ export class GameAudio {
   };
 
   private getContext(): AudioContext | null {
+    if (!this.enabled) return null;
     if (this.context) {
       return this.context;
     }
@@ -222,6 +238,9 @@ export class GameAudio {
     }
 
     this.context = new AudioContextCtor();
+    this.masterGain = this.context.createGain();
+    this.masterGain.gain.value = this.volume;
+    this.masterGain.connect(this.context.destination);
     return this.context;
   }
 
@@ -250,7 +269,7 @@ export class GameAudio {
     const panner = createStereoPanner(context, event.pan);
     oscillator.connect(gain);
     gain.connect(panner);
-    panner.connect(context.destination);
+    panner.connect(this.masterGain!);
 
     oscillator.start(startTime);
     oscillator.stop(startTime + 0.08);
@@ -305,7 +324,7 @@ export class GameAudio {
     noiseSource.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
     noiseGain.connect(panner);
-    panner.connect(context.destination);
+    panner.connect(this.masterGain!);
 
     tone.start(startTime);
     tone.stop(startTime + 0.11);

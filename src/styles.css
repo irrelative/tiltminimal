@@ -621,3 +621,21 @@ body[data-session-route='physics'] .play-route-panel {
 .high-scores li::marker {
   color: var(--accent);
 }
+
+.settings-panel summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.settings-fields {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+.settings-fields output {
+  float: right;
+  font-variant-numeric: tabular-nums;
+}
+.settings-fields input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent);
+}

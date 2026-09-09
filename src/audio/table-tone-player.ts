@@ -8,7 +8,11 @@ export class TableTonePlayer {
   private priority = 0;
   private lastTrigger = -Infinity;
 
-  play(context: AudioContext, cue: TableAudioCue): void {
+  play(
+    context: AudioContext,
+    cue: TableAudioCue,
+    destination: AudioNode = context.destination,
+  ): void {
     const now = context.currentTime;
     if (now < this.busyUntil && cue.priority < this.priority) return;
     if (now - this.lastTrigger < 0.035 && cue.priority <= this.priority) return;
@@ -17,7 +21,7 @@ export class TableTonePlayer {
     this.priority = cue.priority;
     const output = context.createGain();
     output.gain.value = 0.1;
-    output.connect(context.destination);
+    output.connect(destination);
     this.output = output;
     // A filtered divider-like waveform, not a modern sweep or sampled chime.
     const real = new Float32Array(9);

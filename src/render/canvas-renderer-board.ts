@@ -106,27 +106,38 @@ export const drawStaticBoardOverlay = (
   drawGuides(context, board, 'raised');
 };
 
+export interface BallAppearance {
+  showSpinMarker: boolean;
+  showBallTrail: boolean;
+}
+const defaultBallAppearance: BallAppearance = {
+  showSpinMarker: true,
+  showBallTrail: true,
+};
+
 export const drawBall = (
   context: CanvasRenderingContext2D,
   board: BoardDefinition,
   state: GameState,
+  appearance: BallAppearance = defaultBallAppearance,
 ): void => {
-  drawBallState(context, board, state.ball);
+  drawBallState(context, board, state.ball, appearance);
 };
 
 export const drawBallState = (
   context: CanvasRenderingContext2D,
   board: BoardDefinition,
   ball: BallState,
+  appearance: BallAppearance = defaultBallAppearance,
 ): void => {
   const theme = getBoardTheme(board.themeId);
-  drawBallMotionStreak(context, theme, ball);
+  if (appearance.showBallTrail) drawBallMotionStreak(context, theme, ball);
 
   context.fillStyle = theme.ballFill;
   context.beginPath();
   context.arc(ball.position.x, ball.position.y, ball.radius, 0, Math.PI * 2);
   context.fill();
-  drawBallSpinPips(context, ball);
+  if (appearance.showSpinMarker) drawBallSpinPips(context, ball);
 
   context.strokeStyle = theme.ballStroke;
   context.lineWidth = 2;

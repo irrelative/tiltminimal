@@ -1,3 +1,4 @@
+import { UserSettingsStore } from './app/user-settings';
 import { HighScores, renderHighScores } from './app/high-scores';
 import { BUILT_IN_TABLES, type BuiltInTable } from './boards/table-library';
 import { buildAppRoutePath, getAppRouteFromPathname } from './app/routes';
@@ -35,6 +36,34 @@ const showHighScores = (): void =>
   );
 const renderer = new CanvasRenderer(canvas);
 const audio = new GameAudio();
+const settingsStore = new UserSettingsStore();
+const settings = settingsStore.load();
+const soundToggle = required<HTMLInputElement>('#setting-sound');
+const volumeSlider = required<HTMLInputElement>('#setting-volume');
+const spinToggle = required<HTMLInputElement>('#setting-spin-marker');
+const trailToggle = required<HTMLInputElement>('#setting-ball-trail');
+soundToggle.checked = settings.soundEnabled;
+volumeSlider.value = String(settings.soundVolume * 100);
+spinToggle.checked = settings.showSpinMarker;
+trailToggle.checked = settings.showBallTrail;
+const applySettings = (): void => {
+  audio.setSettings(settings.soundEnabled, settings.soundVolume);
+  renderer.setBallAppearance(settings);
+  volumeSlider.disabled = !settings.soundEnabled;
+  required<HTMLOutputElement>('#setting-volume-value').value =
+    `${Math.round(settings.soundVolume * 100)}%`;
+};
+applySettings();
+for (const control of [soundToggle, volumeSlider, spinToggle, trailToggle]) {
+  control.addEventListener('input', () => {
+    settings.soundEnabled = soundToggle.checked;
+    settings.soundVolume = Number(volumeSlider.value) / 100;
+    settings.showSpinMarker = spinToggle.checked;
+    settings.showBallTrail = trailToggle.checked;
+    applySettings();
+    settingsStore.save(settings);
+  });
+}
 const basePath = import.meta.env.BASE_URL;
 const route = getAppRouteFromPathname(window.location.pathname, basePath);
 document.body.dataset.sessionRoute = route;
