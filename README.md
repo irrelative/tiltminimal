@@ -138,3 +138,6 @@ its built-in table ID). Refreshing or switching between Game and Physics keeps
 that selection. Missing or invalid IDs fall back to the first table. Changing
 tables updates the current URL without adding browser history entries; other
 query parameters and the URL fragment are preserved.
+
+Every table shows the current ball number beside the score on the playfield HUD
+(e.g. `Ball 2 of 3`), including when Physics overlay is off.

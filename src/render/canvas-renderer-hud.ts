@@ -16,7 +16,11 @@ export const drawHud = (
   context.fillStyle = theme.hudText;
   context.font = `600 28px ${UI_FONT_FAMILY}`;
   context.fillText(board.name, 48, 64);
-  context.fillText(`Score ${state.score}`, 48, 104);
+  context.fillText(
+    `Score ${state.score} · Ball ${state.rules.currentBall} of ${state.rules.ballsPerGame}`,
+    48,
+    104,
+  );
 
   if (typeof state.rules.machineValues['table-status'] === 'string') {
     context.font = `500 20px ${UI_FONT_FAMILY}`;
