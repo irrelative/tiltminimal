@@ -159,7 +159,9 @@ export const getStatusLabel = (
   if (state.additionalBalls.length)
     return `${1 + state.additionalBalls.length}-ball multiball — keep both balls in play.`;
   if (state.lockedBalls.length && state.status === 'waiting-launch')
-    return 'Ball locked. Plunge the replacement ball, then shoot the lit release target.';
+    return state.rules.ballValues['cross-phase'] === 'locked'
+      ? 'Ball locked. Plunge for two-ball multiball.'
+      : 'Ball locked. Plunge the replacement ball, then shoot the lit release target.';
 
   if (state.status === 'waiting-launch') {
     const launchPercent = Math.round(getPlungerPullRatio(state, board) * 100);

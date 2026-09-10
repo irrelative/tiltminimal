@@ -206,6 +206,7 @@ export const stepPlayingState = (
       // A weak plunge that never crossed the gate is still the same ball.
       // Re-seat it for the next pull instead of leaving it in live-play state.
       if (
+        balls.length === 1 &&
         board.plunger.returnGate &&
         !next.launcherExited &&
         !input.launchPressed &&

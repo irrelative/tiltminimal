@@ -1,3 +1,4 @@
+import { drawDoubleCrossedInserts } from './double-crossed-inserts';
 import {
   drawStarlightPlayfield,
   drawStarlightInserts,
@@ -74,6 +75,8 @@ export const drawDynamicBoard = (
 ): void => {
   if (board.themeId === 'starlight')
     drawStarlightInserts(context, board, state);
+  if (board.themeId === 'double-crossed')
+    drawDoubleCrossedInserts(context, board, state);
   drawPlungerBody(context, board, state);
   const gate = getPlungerReturnGate(board);
   if (gate) {

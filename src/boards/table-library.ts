@@ -29,6 +29,8 @@ export const BUILT_IN_TABLES: BuiltInTable[] = [
   {
     id: 'double-crossed',
     board: doubleCrossedTable,
+    description:
+      'Complete both CROSS banks, lock a ball, then plunge for two-ball multiball. Both spinners light Cross Jackpot.',
   },
   {
     id: 'harlem-globetrotters',

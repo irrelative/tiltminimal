@@ -29,12 +29,13 @@ export const TABLE_RULE_CARDS: Record<string, TableRuleCard> = {
   },
   'double-crossed': {
     balls: 3,
-    objective: 'Complete the crosses to light double-value spinners.',
+    objective: 'Complete both CROSS banks to light two-ball multiball.',
     rules: [
-      'Complete either pair of cross standups for 1,500 points, 1,000 bonus and lit spinners.',
-      'Complete all four top lanes for 2,000 points, 1,000 bonus and lit spinners; advance bonus multiplication up to 2×.',
-      'Hit both drop targets for 3,000 points, 1,500 bonus and lit spinners; advance bonus multiplication up to 3×.',
-      'Lit spinners score double for the rest of the ball. Collect bonus × multiplier when the ball drains.',
+      'Complete each pair of CROSS standups to light the central lock. Shoot the lit saucer for 5,000 and lock one ball; unlit captures score 1,000.',
+      'Plunge the replacement ball to release the lock and start two-ball multiball. Your ball number and bonus stay the same.',
+      'During multiball, hit both different spinners to light the saucer jackpot: 10,000, then 15,000, then 20,000 maximum. Relight both spinners after each collection.',
+      'Losing one ball ends multiball. Complete both banks again to relight lock; the final drain collects bonus × multiplier.',
+      'Bank, top-lane and drop-pair completions light double-value spinners. Complete four top lanes to advance bonus multiplication up to 2×; both drops advance it up to 3×.',
     ],
   },
   'harlem-globetrotters': {

@@ -65,7 +65,10 @@ export interface BoardTheme {
 export const DEFAULT_BOARD_THEME_ID: BoardThemeId = 'classic';
 
 const BASE_THEMES: Record<
-  Exclude<BoardThemeId, 'harlem' | 'andromeda' | 'starlight'>,
+  Exclude<
+    BoardThemeId,
+    'harlem' | 'andromeda' | 'starlight' | 'double-crossed'
+  >,
   BoardTheme
 > = {
   classic: {
@@ -316,6 +319,11 @@ const BASE_THEMES: Record<
 
 export const BOARD_THEMES: Record<BoardThemeId, BoardTheme> = {
   ...BASE_THEMES,
+  'double-crossed': {
+    ...BASE_THEMES.midnight,
+    id: 'double-crossed',
+    label: 'Double Crossed',
+  },
   starlight: {
     ...BASE_THEMES.midnight,
     id: 'starlight',

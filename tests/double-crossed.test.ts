@@ -9,7 +9,7 @@ import { idleInput, launchBall } from './helpers/game-fixture';
 describe('doubleCrossedTable', () => {
   it('exposes a validated three-ball original table', () => {
     expect(doubleCrossedTable.name).toBe('Double Crossed');
-    expect(doubleCrossedTable.themeId).toBe('midnight');
+    expect(doubleCrossedTable.themeId).toBe('double-crossed');
     expect(doubleCrossedTable.rulesScript).toContain('BALLS_PER_GAME = 3');
     expect(doubleCrossedTable.bumpers).toHaveLength(3);
     expect(doubleCrossedTable.standupTargets).toHaveLength(4);

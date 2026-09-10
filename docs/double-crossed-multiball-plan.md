@@ -1,6 +1,9 @@
 # Double Crossed: Cross Lock proposal
 
-Status: proposed design; gameplay and geometry are not implemented yet.
+Status: implemented. The final pocket is at (450, 560), compacted to avoid
+passive traps found during validation. See [the current table spec](double-crossed-spec.md)
+for shipped dimensions, rules and regression coverage. The design rationale below
+records the original proposal.
 
 ## Player sequence
 
