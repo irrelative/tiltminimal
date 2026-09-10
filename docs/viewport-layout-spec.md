@@ -77,3 +77,7 @@ The workspace layout applies after a table is selected. URLs without a valid
 `table` parameter show the responsive [table gallery](table-selection.md) instead;
 its static previews do not run the game loop. The dropdown is replaced by a
 sidebar link back to selection.
+
+Reset ball is a compact icon-and-text action in the table header below the high
+scores. It sits outside the Rule card and Settings disclosures and is hidden on
+the Physics route, which retains its own sandbox reset.
