@@ -171,3 +171,7 @@ both Game and Physics without changing debug pause/speed settings. Switching or
 restarting a table closes its card. The cards describe the browser game's current
 rules; Harlem's card identifies its simplified scoring.
 See [rule-card behavior and authoring](docs/rule-cards.md).
+
+Bump passes are verified on every table: release a cradle, hold the opposite
+flipper, and tap Space to nudge the rolling ball across. See the
+[verified timings and coverage](docs/advanced-flipper-skills-spec.md#verified-bump-passes).
