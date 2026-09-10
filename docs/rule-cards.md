@@ -1,6 +1,6 @@
 # Table rule cards
 
-Every built-in table has a Rule card toggle directly beneath the table selector
+Every built-in table has a Rule card toggle in the game sidebar
 on Game and Physics. It replaces feature counts and table-description metadata.
 It uses the same native details/summary disclosure arrow, typography and focus
 style as Settings; its label remains “Rule card” when expanded.

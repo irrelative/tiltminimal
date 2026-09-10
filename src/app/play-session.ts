@@ -7,12 +7,6 @@ import { GameLoop } from '../game/game-loop';
 import { PlayInput, type InputSource } from '../input/keyboard-input';
 import type { CanvasRenderer } from '../render/canvas-renderer';
 
-interface SyncPlayRoutePanelOptions {
-  tables: BuiltInTable[];
-  activeTableId: string;
-  playTableSelect: HTMLSelectElement;
-}
-
 interface StartStandalonePlaySessionOptions {
   activeTable: BuiltInTable;
   canvas: HTMLCanvasElement;
@@ -25,23 +19,6 @@ interface StartStandalonePlaySessionOptions {
   playDebugVelocity: HTMLElement;
   playDebugSpin: HTMLElement;
 }
-
-export const syncPlayRoutePanel = ({
-  tables,
-  activeTableId,
-  playTableSelect,
-}: SyncPlayRoutePanelOptions): void => {
-  playTableSelect.replaceChildren(
-    ...tables.map((table) => {
-      const option = document.createElement('option');
-      option.value = table.id;
-      option.selected = table.id === activeTableId;
-      option.textContent = table.board.name;
-
-      return option;
-    }),
-  );
-};
 
 export const startStandalonePlaySession = ({
   activeTable,

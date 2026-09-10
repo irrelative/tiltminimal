@@ -19,12 +19,14 @@ export const BUILT_IN_TABLES: BuiltInTable[] = [
   {
     id: 'classic-table',
     board: classicTable,
+    description:
+      'A classic mix of bumpers, targets and a saucer. Build your bonus and keep the ball alive.',
   },
   {
     id: 'andromeda',
     board: andromedaTable,
     description:
-      'Clear the left guard, then shoot the saucer to lock a ball. Plunge again and hit the yellow RELEASE target for two-ball multiball and 2× scoring. Right flipper shifts the top lanes; complete all six drops to raise spinner value.',
+      'Clear the guard, lock a ball and launch into two-ball multiball. Drop banks and a rising spinner award reward accurate shooting.',
   },
   {
     id: 'double-crossed',
@@ -35,6 +37,8 @@ export const BUILT_IN_TABLES: BuiltInTable[] = [
   {
     id: 'harlem-globetrotters',
     board: harlemGlobetrottersTable,
+    description:
+      'Three flippers, sweeping lanes and big saucer shots on a basketball classic.',
   },
   {
     id: 'starlight-em',

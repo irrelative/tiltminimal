@@ -8,8 +8,24 @@
   </head>
   <body>
     <main class="app-shell">
-      <section class="workspace">
+      <section
+        id="table-selection"
+        class="table-selection"
+        hidden
+        aria-labelledby="selection-title"
+      >
+        <header class="selection-header">
+          <p class="eyebrow">Pinball Browser</p>
+          <h1 id="selection-title">Select a table</h1>
+          <p class="lede">Find your next high score.</p>
+        </header>
+        <div id="table-grid" class="table-grid"></div>
+      </section>
+      <section class="workspace" hidden>
         <aside class="control-panel">
+          <a id="choose-table" class="choose-table" href="./"
+            >← Select a table</a
+          >
           <header class="panel-header">
             <p class="eyebrow">Pinball Browser</p>
             <h1 id="mode-title">Play</h1>
@@ -20,17 +36,9 @@
                 No scores yet. Finish a game to set one.
               </p>
             </section>
-            <p id="mode-copy" class="lede">Choose a built-in board and play.</p>
+            <p id="mode-copy" class="lede"></p>
           </header>
           <section class="panel-section">
-            <p class="eyebrow">Table</p>
-            <label class="field"
-              ><span>Choose board</span
-              ><select
-                id="play-table-select"
-                aria-label="Playable pinball tables"
-              ></select
-            ></label>
             <div id="table-rules"></div>
           </section>
           <section class="play-route-panel">

@@ -7,12 +7,6 @@ import {
   getPhysicsSandboxDebugBall,
 } from '../game/physics-sandbox-loop';
 
-interface SyncPhysicsRoutePanelOptions {
-  tables: BuiltInTable[];
-  activeTableId: string;
-  tableSelect: HTMLSelectElement;
-}
-
 interface StartPhysicsSandboxSessionOptions {
   activeTable: BuiltInTable;
   canvas: HTMLCanvasElement;
@@ -25,23 +19,6 @@ interface StartPhysicsSandboxSessionOptions {
   debugVelocity: HTMLElement;
   debugSpin: HTMLElement;
 }
-
-export const syncPhysicsRoutePanel = ({
-  tables,
-  activeTableId,
-  tableSelect,
-}: SyncPhysicsRoutePanelOptions): void => {
-  tableSelect.replaceChildren(
-    ...tables.map((table) => {
-      const option = document.createElement('option');
-      option.value = table.id;
-      option.selected = table.id === activeTableId;
-      option.textContent = table.board.name;
-
-      return option;
-    }),
-  );
-};
 
 export const startPhysicsSandboxSession = ({
   activeTable,

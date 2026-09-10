@@ -165,7 +165,7 @@ Post passes use a quick release/re-flip from a cradle while holding the receiver
 Connected lower slings now provide passive rebound posts. See
 [supported transfers and geometry](docs/post-pass-spec.md).
 
-Click **Rule card** beneath the table selector to read its scoring rules in the
+Click **Rule card** in the game sidebar to read its scoring rules in the
 sidebar. Feature counts and table descriptions are replaced by this card.
 Click **Rule card** again (or press Escape while focused there) to resume. Cards pause
 both Game and Physics without changing debug pause/speed settings. Switching or
@@ -176,3 +176,7 @@ See [rule-card behavior and authoring](docs/rule-cards.md).
 Bump passes are verified on every table: release a cradle, hold the opposite
 flipper, and tap Space to nudge the rolling ball across. See the
 [verified timings and coverage](docs/advanced-flipper-skills-spec.md#verified-bump-passes).
+
+Open the home page to **Select a table** from the preview gallery. Use the
+sidebar’s **Select a table** link to choose another game. Direct `?table=` links
+keep the selected table on refresh. See [table selection](docs/table-selection.md).
