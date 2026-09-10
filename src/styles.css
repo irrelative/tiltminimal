@@ -613,7 +613,8 @@ body[data-session-route='physics'] .play-route-panel {
   color: var(--accent);
 }
 
-.settings-panel summary {
+.settings-panel summary,
+.rule-card-layer summary {
   cursor: pointer;
   font-weight: 600;
 }
@@ -635,24 +636,8 @@ body[data-session-route='physics'] .play-route-panel {
   position: relative;
 }
 
-.rule-card-layer {
-  display: grid;
-  gap: 12px;
-}
-
-.control-panel .rule-card-toggle {
-  justify-self: start;
-  min-height: 28px;
-  padding: 4px 0;
-  border: 0;
-  background: transparent;
-  color: var(--cool);
-  font-size: 0.85rem;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
 .rule-card {
+  margin-top: 16px;
   padding: 0;
   color: var(--text);
   font-size: 0.85rem;
@@ -770,13 +755,16 @@ body[data-session-route='physics'] .play-route-panel {
 .panel-header .lede {
   margin-top: 16px;
 }
-.settings-panel summary {
+.settings-panel summary,
+.rule-card-layer summary {
   font-size: 0.9rem;
 }
-.settings-panel summary::marker {
+.settings-panel summary::marker,
+.rule-card-layer summary::marker {
   color: var(--cool);
 }
-.settings-panel summary:focus-visible {
+.settings-panel summary:focus-visible,
+.rule-card-layer summary:focus-visible {
   outline: 2px solid var(--cool);
   outline-offset: 5px;
 }

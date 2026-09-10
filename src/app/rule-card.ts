@@ -2,8 +2,8 @@ import type { BuiltInTable } from '../boards/table-library';
 import { TABLE_RULE_CARDS } from '../boards/table-rule-cards';
 
 export class RuleCard {
-  private readonly layer = document.createElement('div');
-  private readonly toggle = document.createElement('button');
+  private readonly layer = document.createElement('details');
+  private readonly toggle = document.createElement('summary');
   private readonly card = document.createElement('section');
   private open = false;
 
@@ -12,7 +12,6 @@ export class RuleCard {
     private readonly onToggle: (open: boolean) => void,
   ) {
     this.layer.className = 'rule-card-layer';
-    this.toggle.type = 'button';
     this.toggle.className = 'rule-card-toggle';
     this.toggle.textContent = 'Rule card';
     this.toggle.setAttribute('aria-controls', 'table-rule-card');
@@ -24,7 +23,10 @@ export class RuleCard {
     this.card.hidden = true;
     this.layer.append(this.toggle, this.card);
     host.append(this.layer);
-    this.toggle.addEventListener('click', () => this.setOpen(!this.open));
+    this.toggle.addEventListener('click', (event) => {
+      event.preventDefault();
+      this.setOpen(!this.open);
+    });
     this.layer.addEventListener('keydown', (event) => {
       event.stopPropagation();
       if (event.key === 'Escape' && this.open) {
@@ -57,7 +59,7 @@ export class RuleCard {
   private setOpen(open: boolean): void {
     this.open = open;
     this.card.hidden = !open;
-    this.toggle.textContent = open ? 'Close rules' : 'Rule card';
+    this.layer.open = open;
     this.toggle.setAttribute('aria-expanded', String(open));
     this.onToggle(open);
   }

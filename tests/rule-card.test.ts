@@ -25,7 +25,7 @@ describe('table rule cards', () => {
     const pause = vi.fn();
     const ui = new RuleCard(document.querySelector('#rules')!, pause);
     ui.setTable(BUILT_IN_TABLES[0]);
-    const button = document.querySelector('button')!;
+    const button = document.querySelector('summary')!;
     const card = document.querySelector<HTMLElement>('#table-rule-card')!;
     expect(document.querySelector('aside')!.contains(card)).toBe(true);
     expect(document.querySelector('canvas')!.children).toHaveLength(0);
@@ -33,6 +33,8 @@ describe('table rule cards', () => {
     button.click();
     expect(card.hidden).toBe(false);
     expect(button.getAttribute('aria-expanded')).toBe('true');
+    expect(document.querySelector('details')!.open).toBe(true);
+    expect(button.textContent).toBe('Rule card');
     expect(pause).toHaveBeenLastCalledWith(true);
     button.dispatchEvent(
       new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }),

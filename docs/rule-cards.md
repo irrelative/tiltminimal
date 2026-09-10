@@ -2,6 +2,8 @@
 
 Every built-in table has a Rule card toggle directly beneath the table selector
 on Game and Physics. It replaces feature counts and table-description metadata.
+It uses the same native details/summary disclosure arrow, typography and focus
+style as Settings; its label remains “Rule card” when expanded.
 The card expands inline in the sidebar, which scrolls independently on desktop;
 there is no button or overlay on the canvas. Escape closes the card when focus
 is on its button or content. The button exposes its expanded state and controls
