@@ -10,34 +10,196 @@
     <main class="app-shell">
       <section class="workspace">
         <aside class="control-panel">
-          <nav class="debug-menu" aria-label="Game modes"><a id="play-link" class="debug-link" href="./">Game</a><a id="physics-link" class="debug-link" href="./physics">Physics</a></nav>
-          <header class="panel-header"><p class="eyebrow">Pinball Browser</p><h1 id="mode-title">Play</h1><section class="high-scores" aria-labelledby="high-score-title"><h2 id="high-score-title" class="eyebrow">High scores · Top 5</h2><ol id="high-score-list" hidden></ol><p id="high-score-empty" class="meta-text">No scores yet. Finish a game to set one.</p></section><p id="mode-copy" class="lede">Choose a built-in board and play.</p></header>
-          <section class="panel-section"><p class="eyebrow">Table</p><label class="field"><span>Choose board</span><select id="play-table-select" aria-label="Playable pinball tables"></select></label><p id="play-table-meta" class="meta-text"></p></section>
-          <section class="play-route-panel"><button id="play-reset-ball" type="button" class="accent-button">Reset ball</button></section>
-          <section class="physics-route-panel"><p class="eyebrow">Physics Sandbox</p><label class="field"><span>Spawn mode</span><select id="physics-spawn-mode"><option value="replace">Replace ball</option><option value="add">Add ball</option></select></label><div class="field-list compact-field-list"><label class="field"><span>vx</span><input id="physics-vx" type="number" value="0" step="10" /></label><label class="field"><span>vy</span><input id="physics-vy" type="number" value="0" step="10" /></label><label class="field"><span>wx</span><input id="physics-wx" type="number" value="0" step="0.1" /></label><label class="field"><span>wy</span><input id="physics-wy" type="number" value="0" step="0.1" /></label></div><div class="button-row"><button id="physics-pause-toggle" type="button">Pause</button><button id="physics-clear-balls" type="button">Clear balls</button><button id="physics-reset" type="button">Reset sandbox</button></div><p id="physics-status" class="meta-text"></p></section>
+          <nav class="debug-menu" aria-label="Game modes">
+            <a id="play-link" class="debug-link" href="./">Game</a
+            ><a id="physics-link" class="debug-link" href="./physics"
+              >Physics</a
+            >
+          </nav>
+          <header class="panel-header">
+            <p class="eyebrow">Pinball Browser</p>
+            <h1 id="mode-title">Play</h1>
+            <section class="high-scores" aria-labelledby="high-score-title">
+              <h2 id="high-score-title" class="eyebrow">High scores · Top 5</h2>
+              <ol id="high-score-list" hidden></ol>
+              <p id="high-score-empty" class="meta-text">
+                No scores yet. Finish a game to set one.
+              </p>
+            </section>
+            <p id="mode-copy" class="lede">Choose a built-in board and play.</p>
+          </header>
+          <section class="panel-section">
+            <p class="eyebrow">Table</p>
+            <label class="field"
+              ><span>Choose board</span
+              ><select
+                id="play-table-select"
+                aria-label="Playable pinball tables"
+              ></select
+            ></label>
+            <p id="play-table-meta" class="meta-text"></p>
+          </section>
+          <section class="play-route-panel">
+            <button id="play-reset-ball" type="button" class="accent-button">
+              Reset ball
+            </button>
+          </section>
+          <section class="physics-route-panel">
+            <p class="eyebrow">Physics Sandbox</p>
+            <label class="field"
+              ><span>Spawn mode</span
+              ><select id="physics-spawn-mode">
+                <option value="replace">Replace ball</option>
+                <option value="add">Add ball</option>
+              </select></label
+            >
+            <div class="field-list compact-field-list">
+              <label class="field"
+                ><span>vx</span
+                ><input
+                  id="physics-vx"
+                  type="number"
+                  value="0"
+                  step="10" /></label
+              ><label class="field"
+                ><span>vy</span
+                ><input
+                  id="physics-vy"
+                  type="number"
+                  value="0"
+                  step="10" /></label
+              ><label class="field"
+                ><span>wx</span
+                ><input
+                  id="physics-wx"
+                  type="number"
+                  value="0"
+                  step="0.1" /></label
+              ><label class="field"
+                ><span>wy</span
+                ><input id="physics-wy" type="number" value="0" step="0.1"
+              /></label>
+            </div>
+            <div class="button-row">
+              <button id="physics-pause-toggle" type="button">Pause</button
+              ><button id="physics-clear-balls" type="button">
+                Clear balls</button
+              ><button id="physics-reset" type="button">Reset sandbox</button>
+            </div>
+            <p id="physics-status" class="meta-text"></p>
+          </section>
 
           <details class="panel-section settings-panel">
             <summary>Settings</summary>
             <div class="settings-fields">
-              <label class="debug-toggle"><input id="setting-sound" type="checkbox" checked /> Sound</label>
-              <label class="field"><span>Volume <output id="setting-volume-value" for="setting-volume">100%</output></span><input id="setting-volume" type="range" min="0" max="100" step="1" value="100" /></label>
-              <label class="debug-toggle"><input id="setting-spin-marker" type="checkbox" checked /> Ball spin marker</label>
-              <label class="debug-toggle"><input id="setting-ball-trail" type="checkbox" checked /> Ball motion trail</label>
+              <label class="debug-toggle"
+                ><input id="setting-sound" type="checkbox" checked />
+                Sound</label
+              >
+              <label class="field"
+                ><span
+                  >Volume
+                  <output id="setting-volume-value" for="setting-volume"
+                    >100%</output
+                  ></span
+                ><input
+                  id="setting-volume"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value="100"
+              /></label>
+              <label class="debug-toggle"
+                ><input id="setting-spin-marker" type="checkbox" checked /> Ball
+                spin marker</label
+              >
+              <label class="debug-toggle"
+                ><input id="setting-ball-trail" type="checkbox" checked /> Ball
+                motion trail</label
+              >
               <p class="meta-text">Saved on this browser for all tables.</p>
             </div>
           </details>
-          <section class="panel-section"><label class="debug-toggle"><input id="debug-overlay" type="checkbox" /> Physics overlay</label>
+          <section class="panel-section">
+            <label class="debug-toggle"
+              ><input id="debug-overlay" type="checkbox" /> Physics
+              overlay</label
+            >
             <div id="debug-controls" hidden>
-              <section class="play-route-panel"><dl class="play-debug-stats"><div><dt>Status</dt><dd id="play-debug-status">Waiting</dd></div><div><dt>Position</dt><dd id="play-debug-position">0, 0</dd></div><div><dt>Velocity</dt><dd id="play-debug-velocity">0, 0</dd></div><div><dt>Roll Spin</dt><dd id="play-debug-spin">0, 0</dd></div></dl></section>
-              <section class="physics-route-panel"><dl class="play-debug-stats"><div><dt>Status</dt><dd id="physics-debug-status">0 active balls</dd></div><div><dt>Position</dt><dd id="physics-debug-position">-</dd></div><div><dt>Velocity</dt><dd id="physics-debug-velocity">-</dd></div><div><dt>Roll Spin</dt><dd id="physics-debug-spin">-</dd></div></dl></section>
-              <p class="meta-text">Cyan: solids · Yellow: triggers / sling face · Pink: contact normals · Green: velocity</p>
-              <div class="button-row"><button id="debug-pause" type="button">Pause</button><button id="debug-step" type="button">Step 1/120 s</button></div>
-              <label class="field"><span>Simulation speed</span><select id="debug-speed"><option value="1">1× normal</option><option value="0.5">½× slow</option><option value="0.25">¼× slow</option><option value="0.1">⅒× slow</option></select></label>
-              <p id="debug-time" class="meta-text"></p><p class="eyebrow">Recent triggers</p><ol id="debug-events" class="meta-text"></ol>
+              <section class="play-route-panel">
+                <dl class="play-debug-stats">
+                  <div>
+                    <dt>Status</dt>
+                    <dd id="play-debug-status">Waiting</dd>
+                  </div>
+                  <div>
+                    <dt>Position</dt>
+                    <dd id="play-debug-position">0, 0</dd>
+                  </div>
+                  <div>
+                    <dt>Velocity</dt>
+                    <dd id="play-debug-velocity">0, 0</dd>
+                  </div>
+                  <div>
+                    <dt>Roll Spin</dt>
+                    <dd id="play-debug-spin">0, 0</dd>
+                  </div>
+                </dl>
+              </section>
+              <section class="physics-route-panel">
+                <dl class="play-debug-stats">
+                  <div>
+                    <dt>Status</dt>
+                    <dd id="physics-debug-status">0 active balls</dd>
+                  </div>
+                  <div>
+                    <dt>Position</dt>
+                    <dd id="physics-debug-position">-</dd>
+                  </div>
+                  <div>
+                    <dt>Velocity</dt>
+                    <dd id="physics-debug-velocity">-</dd>
+                  </div>
+                  <div>
+                    <dt>Roll Spin</dt>
+                    <dd id="physics-debug-spin">-</dd>
+                  </div>
+                </dl>
+              </section>
+              <p class="meta-text">
+                Cyan: solids · Yellow: triggers / sling face · Pink: contact
+                normals · Green: velocity
+              </p>
+              <div class="button-row">
+                <button id="debug-pause" type="button">Pause</button
+                ><button id="debug-step" type="button">Step 1/120 s</button>
+              </div>
+              <label class="field"
+                ><span>Simulation speed</span
+                ><select id="debug-speed">
+                  <option value="1">1× normal</option>
+                  <option value="0.5">½× slow</option>
+                  <option value="0.25">¼× slow</option>
+                  <option value="0.1">⅒× slow</option>
+                </select></label
+              >
+              <p id="debug-time" class="meta-text"></p>
+              <p class="eyebrow">Recent triggers</p>
+              <ol id="debug-events" class="meta-text"></ol>
             </div>
           </section>
         </aside>
-        <section class="stage-shell"><section class="playfield-frame"><canvas id="game" width="900" height="1400" aria-label="Pinball table"></canvas></section></section>
+        <section class="stage-shell">
+          <section class="playfield-frame">
+            <canvas
+              id="game"
+              width="900"
+              height="1400"
+              aria-label="Pinball table"
+            ></canvas>
+          </section>
+        </section>
       </section>
     </main>
     <script type="module" src="/src/main.ts"></script>

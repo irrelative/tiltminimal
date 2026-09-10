@@ -5,14 +5,14 @@ is reserved for the complete table, with navigation and controls beside it.
 
 ## Desktop sizing
 
-Above 1080 CSS pixels wide, the workspace is a two-column grid bounded to
+Above 1080 CSS pixels wide, the workspace is a two-column grid with a 320-pixel sidebar and 12-pixel gap, bounded to
 `100dvh` minus an 8-pixel outer inset on each side. The sidebar scrolls
 independently; expanding debugging controls must not shrink the playfield or
 make the entire page taller. Game/Physics navigation belongs in the sidebar.
 Do not add a toolbar row above the canvas.
 
 The stage and playfield frame have no internal padding and occupy the full
-workspace height. Their borders leave approximately 10 pixels between each
+workspace height. Their borders leave approximately 9 pixels between each
 vertical window edge and a height-limited board. The frame centers the canvas.
 Empty horizontal space is expected for a portrait table on a wide display.
 
@@ -52,3 +52,20 @@ After changing the shell or canvas sizing:
 The September 2026 change moved navigation into the sidebar, removed nested
 stage padding, and verified full-height Classic and Harlem in the browser,
 including the Physics route. Table geometry and physics are unaffected.
+
+
+## HTML shell styling
+
+The table surround, sidebar, controls and rule-card containers use square corners.
+A flat dark surface and thin separators replace nested translucent cards,
+gradients and large shadows. The sidebar uses compact headings, restrained reset
+buttons and tabular score/debug numbers. Game/Physics navigation marks the current
+page with `aria-current`, a contrasting fill and a cyan underline. Focus outlines
+remain visible on controls, links and settings disclosure.
+
+Sidebar typography is independent of the canvas fonts. This styling revision
+changes no table artwork, geometry, scoring or physics. Canvas sizing remains
+proportional and the parent stays padding-free. Numeric sandbox fields remain in
+two columns on narrow screens. Review covered Game and Physics, Classic and
+Harlem, expanded settings/debug controls, a short desktop window and a 390-pixel
+mobile viewport including the rule card. Build and lint pass.

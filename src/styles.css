@@ -1,8 +1,10 @@
 :root {
-  --font-sans: Futura, 'Avenir Next', Avenir, 'Trebuchet MS', sans-serif;
+  --font-sans:
+    'Avenir Next', Avenir, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
   --bg-top: #09131f;
   --bg-bottom: #03070d;
-  --panel: rgba(10, 21, 31, 0.82);
+  --panel: #111b25;
   --panel-border: rgba(133, 198, 226, 0.18);
   --panel-soft: rgba(255, 255, 255, 0.08);
   --text: #f2efe2;
@@ -11,23 +13,13 @@
   --accent-strong: #ff8a3d;
   --cool: #89d2dc;
   --danger: #ff6f61;
-  --shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
-  --radius: 22px;
+  --shadow: none;
+  --radius: 0px;
   --stage-padding: 8px;
   color: var(--text);
   font-family: var(--font-sans);
-  background:
-    radial-gradient(
-      circle at top left,
-      rgba(255, 138, 61, 0.16),
-      transparent 28%
-    ),
-    radial-gradient(
-      circle at top right,
-      rgba(137, 210, 220, 0.12),
-      transparent 34%
-    ),
-    linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+  background: #080f17;
+  color-scheme: dark;
 }
 
 * {
@@ -50,7 +42,7 @@ summary {
 
 button {
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 12px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.08);
   color: var(--text);
   cursor: pointer;
@@ -81,7 +73,7 @@ select,
 textarea {
   width: 100%;
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 12px;
+  border-radius: 0;
   padding: 10px 12px;
   color: var(--text);
   background: rgba(255, 255, 255, 0.06);
@@ -96,8 +88,8 @@ textarea {
   min-height: 0;
   height: calc(100dvh - (var(--stage-padding) * 2));
   display: grid;
-  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
-  gap: clamp(14px, 2vw, 24px);
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 12px;
   align-items: stretch;
 }
 
@@ -112,20 +104,21 @@ body[data-route='physics'] .workspace {
 .stage-shell {
   min-height: 0;
   border: 1px solid var(--panel-border);
-  border-radius: var(--radius);
+  border-radius: 0;
   background: var(--panel);
   box-shadow: var(--shadow);
-  backdrop-filter: blur(18px);
 }
 
 .control-panel {
   height: 100%;
   display: grid;
-  gap: 14px;
+  gap: 0;
   grid-auto-rows: min-content;
   align-content: start;
-  padding: 18px;
+  padding: 0 20px;
   overflow: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #405361 transparent;
 }
 
 body[data-route='play'] .control-panel,
@@ -135,16 +128,11 @@ body[data-route='physics'] .control-panel {
 
 .panel-header,
 .panel-section {
-  padding: 16px;
-  border-radius: 18px;
-  background:
-    linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.06),
-      rgba(255, 255, 255, 0.03)
-    ),
-    rgba(5, 11, 17, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 20px 0;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--panel-border);
 }
 
 .eyebrow {
@@ -163,7 +151,9 @@ h2 {
 }
 
 h1 {
-  font-size: clamp(2rem, 3vw, 3rem);
+  font-size: 1.85rem;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
 }
 
 h2 {
@@ -176,7 +166,8 @@ h2 {
 .toolbar-copy {
   margin: 0;
   color: var(--muted);
-  line-height: 1.4;
+  line-height: 1.55;
+  font-size: 0.85rem;
 }
 
 .panel-section {
@@ -283,7 +274,7 @@ body[data-route='physics'] .stage-toolbar {
 body[data-route='play'] .toolbar-main,
 body[data-route='physics'] .toolbar-main {
   padding: 12px 14px;
-  border-radius: 16px;
+  border-radius: 0;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.04);
 }
@@ -296,7 +287,7 @@ body[data-route='physics'] .toolbar-main {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  border-radius: 14px;
+  border-radius: 0;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(255, 255, 255, 0.05);
 }
@@ -305,7 +296,7 @@ body[data-route='physics'] .toolbar-main {
   display: block;
   width: 18px;
   height: 2px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--text);
   transition:
     transform 160ms ease,
@@ -331,7 +322,7 @@ body[data-nav-open='true'] .nav-toggle-bar:nth-child(3) {
   display: grid;
   gap: 8px;
   padding: 12px 14px;
-  border-radius: 16px;
+  border-radius: 0;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.04);
 }
@@ -344,7 +335,7 @@ body[data-nav-open='true'] .nav-toggle-bar:nth-child(3) {
 
 .play-debug-stats div {
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: 0;
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -384,7 +375,7 @@ body[data-route='physics'] .play-route-panel {
   display: grid;
   gap: 8px;
   padding: 12px 14px;
-  border-radius: 16px;
+  border-radius: 0;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.04);
 }
@@ -402,7 +393,7 @@ body[data-route='physics'] .play-route-panel {
 .debug-link {
   display: block;
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: 0;
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--text);
   text-decoration: none;
@@ -429,7 +420,7 @@ body[data-route='physics'] .play-route-panel {
   min-width: 0;
   min-height: 0;
   height: 100%;
-  border-radius: calc(var(--radius) - 4px);
+  border-radius: 0;
   padding: 0;
   background:
     linear-gradient(
@@ -562,12 +553,12 @@ body[data-route='physics'] #game {
   }
 
   .control-panel {
-    padding: 12px;
+    padding: 0 18px;
   }
 
   .panel-header,
   .panel-section {
-    padding: 14px;
+    padding: 18px 0;
   }
 
   .button-row,
@@ -658,7 +649,7 @@ body[data-session-route='physics'] .play-route-panel {
   background: #f3e5c6;
   color: #29231c;
   border: 1px solid #a28b62;
-  border-radius: 4px;
+  border-radius: 0;
   font-size: 10px;
   line-height: 1.2;
   pointer-events: auto;
@@ -676,7 +667,7 @@ body[data-session-route='physics'] .play-route-panel {
   background: #f3e5c6;
   color: #29231c;
   border: 1px solid #a28b62;
-  border-radius: 4px;
+  border-radius: 0;
   box-shadow: 0 8px 28px #0009;
   font-size: 14px;
   line-height: 1.45;
@@ -712,4 +703,135 @@ body[data-session-route='physics'] .play-route-panel {
 .rule-card-toggle:hover {
   background: #fff1d2;
   border-color: #a28b62;
+}
+
+/* HTML shell: flat panels and compact controls; canvas rendering is independent. */
+.control-panel > .debug-menu {
+  padding: 16px 0;
+  border: 0;
+  border-bottom: 1px solid var(--panel-border);
+  background: transparent;
+  gap: 0;
+}
+.debug-link {
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #0b141e;
+  border-color: #344653;
+}
+.debug-link + .debug-link {
+  border-left: 0;
+}
+.debug-link[aria-current='page'] {
+  background: #263b47;
+  border-color: #728e9b;
+  box-shadow: inset 0 -2px var(--cool);
+}
+.control-panel > .play-route-panel,
+.control-panel > .physics-route-panel {
+  min-width: 0;
+  padding: 18px 0;
+  border: 0;
+  border-bottom: 1px solid var(--panel-border);
+  background: transparent;
+}
+.control-panel button {
+  min-height: 36px;
+  padding: 7px 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.control-panel .accent-button {
+  background: #20313c;
+  border-color: #4b6573;
+}
+.control-panel .accent-button:hover {
+  background: #2c4250;
+}
+.control-panel select,
+.control-panel input[type='number'] {
+  min-height: 40px;
+  background: #0b141e;
+  border-color: #3b4c59;
+  font-size: 0.9rem;
+}
+.control-panel input[type='checkbox'] {
+  accent-color: var(--cool);
+}
+.control-panel input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.field span {
+  font-size: 0.8rem;
+}
+.eyebrow {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+.high-scores {
+  margin: 18px 0 0;
+}
+.high-scores .meta-text {
+  font-size: 0.8rem;
+}
+.high-scores ol {
+  font-size: 0.9rem;
+}
+.high-scores li {
+  border-bottom: 1px solid #ffffff0c;
+  padding-block: 5px;
+}
+.panel-header .lede {
+  margin-top: 16px;
+}
+.settings-panel summary {
+  font-size: 0.9rem;
+}
+.settings-panel summary::marker {
+  color: var(--cool);
+}
+.settings-panel summary:focus-visible {
+  outline: 2px solid var(--cool);
+  outline-offset: 5px;
+}
+.debug-toggle {
+  font-size: 0.9rem;
+}
+#debug-controls > .play-route-panel,
+#debug-controls > .physics-route-panel {
+  padding: 14px 0;
+  background: transparent;
+  border: 0;
+  min-width: 0;
+}
+.play-debug-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+}
+.play-debug-stats div {
+  padding: 10px;
+  min-width: 0;
+}
+.play-debug-stats dd {
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.stage-shell {
+  background: #080f17;
+}
+.playfield-frame {
+  background: #080f17;
+  border: 0;
+}
+@media (max-width: 640px) {
+  .control-panel {
+    padding: 0 18px;
+  }
+  .field-list.compact-field-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }

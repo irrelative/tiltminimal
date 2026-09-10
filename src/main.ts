@@ -68,6 +68,7 @@ for (const control of [soundToggle, volumeSlider, spinToggle, trailToggle]) {
 const basePath = import.meta.env.BASE_URL;
 const route = getAppRouteFromPathname(window.location.pathname, basePath);
 document.body.dataset.sessionRoute = route;
+required(`#${route}-link`).setAttribute('aria-current', 'page');
 const state: {
   tableId: string;
   loop: GameLoop | null;
