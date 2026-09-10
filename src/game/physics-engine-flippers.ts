@@ -23,6 +23,32 @@ export const resolveFlipperCollisions = (
   deltaSeconds: number,
   solver: SolverPhysicsDefinition,
 ): void => {
+  const caughtIndex = state.ball.liveCatchFlipper;
+  if (caughtIndex !== undefined) {
+    const flipper = board.flippers[caughtIndex];
+    const motion = flipperFrame[caughtIndex];
+    if (!flipper || !motion?.next.engaged) {
+      delete state.ball.liveCatchFlipper;
+    } else {
+      const shifted = offsetFlipper(flipper, state.tableNudge.offset);
+      const profile = sampleFlipperProfile(
+        state.ball.position,
+        shifted,
+        motion.next.angle,
+      );
+      const normal = getFlipperFaceNormal(shifted, motion.next.angle);
+      if (
+        profile.t < MIN_CRADLE_POSITION ||
+        profile.t > 0.85 ||
+        profile.distance > profile.radius + state.ball.radius + 4 ||
+        profile.normal.x * normal.x + profile.normal.y * normal.y <= 0 ||
+        Math.hypot(state.ball.linearVelocity.x, state.ball.linearVelocity.y) >
+          MAX_CRADLE_CAPTURE_SPEED
+      ) {
+        delete state.ball.liveCatchFlipper;
+      }
+    }
+  }
   board.flippers.forEach((flipper, index) => {
     const motion = flipperFrame[index];
 
@@ -37,6 +63,7 @@ export const resolveFlipperCollisions = (
       motion,
       deltaSeconds,
       solver,
+      index,
     );
   });
 };
@@ -48,12 +75,16 @@ const resolveFlipperCollision = (
   motion: FlipperMotionFrame,
   deltaSeconds: number,
   solver: SolverPhysicsDefinition,
+  index: number,
 ): void => {
   const shiftedFlipper = offsetFlipper(flipper, state.tableNudge.offset);
-  const collisionAngles = getFlipperCollisionAngles(
-    motion,
-    board.physics.flipper.collisionAngleStep,
-  );
+  const carryingLiveCatch = state.ball.liveCatchFlipper === index;
+  const collisionAngles = carryingLiveCatch
+    ? [motion.next.angle]
+    : getFlipperCollisionAngles(
+        motion,
+        board.physics.flipper.collisionAngleStep,
+      );
 
   for (const angle of collisionAngles) {
     if (
@@ -66,6 +97,12 @@ const resolveFlipperCollision = (
         {
           angularVelocity: motion.next.angularVelocity,
           engaged: motion.next.engaged,
+          index,
+          carryingLiveCatch,
+          endingStroke:
+            motion.next.engaged &&
+            motion.previousAngle !== shiftedFlipper.activeAngle &&
+            Math.abs(motion.next.angle - shiftedFlipper.activeAngle) <= 0.08,
           bodyMass: board.physics.flipper.bodyMass,
           restitutionScale: board.physics.flipper.restitutionScale,
           passiveAngularVelocityThreshold:
@@ -96,6 +133,9 @@ const applyFlipperCollisionAtAngle = (
   motion: {
     angularVelocity: number;
     engaged: boolean;
+    index: number;
+    carryingLiveCatch: boolean;
+    endingStroke: boolean;
     bodyMass: number;
     restitutionScale: number;
     passiveAngularVelocityThreshold: number;
@@ -151,16 +191,33 @@ const applyFlipperCollisionAtAngle = (
     !motion.engaged &&
     Math.abs(motion.angularVelocity) <= motion.passiveAngularVelocityThreshold;
 
+  // Rubber at the end stop can absorb a descending ball when the last part
+  // of the upstroke meets it. Earlier stroke contacts still make full shots.
+  // Use the incoming ball's motion, not flipper-relative speed: an outgoing
+  // shot must not be caught merely because the bat is overtaking it.
+  const liveCatch =
+    motion.endingStroke &&
+    Math.abs(collisionAngle - flipper.activeAngle) <= 0.08 &&
+    collision.t >= 0.15 &&
+    collision.t <= 0.85 &&
+    (state.ball.linearVelocity.x - motion.tableVelocity.x) * fallbackNormal.x +
+      (state.ball.linearVelocity.y - motion.tableVelocity.y) *
+        fallbackNormal.y <
+      -200;
+
   if (
     isTopFace &&
     motion.engaged &&
-    Math.abs(motion.angularVelocity) <=
-      motion.passiveAngularVelocityThreshold &&
-    collision.t >= MIN_CRADLE_POSITION &&
-    collision.t <= MAX_CRADLE_POSITION &&
+    (liveCatch ||
+      motion.carryingLiveCatch ||
+      (Math.abs(motion.angularVelocity) <=
+        motion.passiveAngularVelocityThreshold &&
+        collision.t >= MIN_CRADLE_POSITION &&
+        collision.t <= MAX_CRADLE_POSITION)) &&
     Math.hypot(state.ball.linearVelocity.x, state.ball.linearVelocity.y) <=
       MAX_CRADLE_CAPTURE_SPEED
   ) {
+    if (liveCatch) state.ball.liveCatchFlipper = motion.index;
     // Absorb the normal impact, but retain motion along the bat. Gravity has
     // already been integrated; use the solid-sphere rolling fraction (5/7)
     // of its tangential acceleration instead of freezing the caught ball.

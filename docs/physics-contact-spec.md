@@ -11,6 +11,13 @@ and passive top-surface carry apply only to the upper face. A caught ball rolls
 along a held bat toward a heel pocket instead of freezing at its impact point;
 see [held contact behavior](flipper-feed-spec.md#held-contact-behavior).
 
+Timed end-of-upstroke live catches absorb a suitable descending impact and
+retain rolling contact through the final bat motion. Contact continuity belongs
+to the individual ball and clears on release, separation, or an invalid contact.
+Drop catches use the ordinary retreating-surface solver; dead bounces use
+passive rubber. See [advanced flipper skills](advanced-flipper-skills-spec.md)
+for the limits and all-table regression requirements.
+
 ## Slingshots
 
 Rendering, collisions, sandbox placement, and playability seed exclusion use
@@ -19,9 +26,10 @@ The front face midpoint is the component origin; body depth extends behind it.
 Only incoming front-face contacts trigger a powered kick and score. Side and
 rear contacts resolve passively. Table nudge translates the whole shape.
 
-Classic and the shared table foundation place slings 40 board units higher to
-keep the solid bodies clear of the inner return curves. Custom Harlem geometry
-retains its placement. Deep playability checks cover all built-in tables.
+Classic and the shared table foundation connect the lower sling posts to
+extended inner returns. Their 60° faces and closer posts support passive post
+passes; reference tables retain their authored arrangements. See
+[post-pass geometry](post-pass-spec.md). Deep playability checks cover all tables.
 
 ## Bumpers
 
@@ -48,6 +56,6 @@ contacts, sling geometry and active-face behavior, bumper impulse and rearming,
 rollover reentry, and two Classic lane completions in one ball.
 
 Held flippers capture normal return feeds on the movable upper face (8–58% of
-length, up to 1100 units/s). Static friction cancels gravity's tangential
-position drift during a hold; the fixed heel cannot latch a ball. See
+length, up to 1100 units/s). Rolling contact damps the incoming impact and lets
+the ball roll toward a heel pocket; the fixed heel cannot latch a ball. See
 [the flipper feed specification](flipper-feed-spec.md) for catch/release checks.

@@ -40,6 +40,12 @@ ball speed at or below 1100 board units/second. The previous 420-unit limit was
 below ordinary inlane arrival speeds after gravity accelerated these feeds.
 Faster impacts and moving-flipper strokes continue through the contact solver.
 
+A timed live catch during the final upstroke can establish rolling contact
+farther along the bat (15–85% of length). Its per-ball contact marker preserves
+the catch through the remaining motion and clears when contact is lost or the
+flipper is released. Ordinary held-feed capture remains 8–58%; see
+[advanced flipper skills](advanced-flipper-skills-spec.md) for exact conditions.
+
 Once caught, the ball retains tangential motion and rolls downhill toward the
 base. Normal impact is absorbed; catches arriving faster than 40 units/second
 into the face retain 10% of their tangential speed. Sustained contact uses 5/7

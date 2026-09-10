@@ -101,3 +101,13 @@ completed-ball duration is 11.52 seconds; longest unexplained near-rest is
 exceed the existing 4000-unit/s speed-review threshold (maximum 4330.2).
 These remain recorded physics-tuning observations. Post-pass regressions now
 cover four neighboring 50–75 ms releases in each direction.
+
+## Advanced-skills regression run
+
+After adding end-of-stroke live-catch continuity, the default 76-run report
+completes 15 games with nine time-limited games and 56 drained balls. Median
+completed-ball duration is 12.19 seconds. Longest unexplained near-rest remains
+0.02 seconds, with no bounds escapes or non-finite states. Fifteen runs exceed
+the existing speed-review threshold; maximum speed remains 4330.2 units/s.
+The dedicated advanced-skills suite separately verifies catches, passive
+transfers, release shots, and a timed nudge-assisted save on every table.

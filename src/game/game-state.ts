@@ -11,6 +11,8 @@ export interface Vector2 {
 }
 
 export interface BallState {
+  /** Continuous top-face contact following a timed end-of-stroke catch. */
+  liveCatchFlipper?: number;
   capturedSaucer?: number;
   launcherExited?: boolean;
   bumperContacts?: boolean[];

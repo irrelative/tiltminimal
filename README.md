@@ -118,6 +118,12 @@ Use the `Makefile` entrypoints:
 On-canvas control hints appear only while a ball is waiting to be plunged.
 They disappear during play; game-over and multiball status remain visible.
 
+Every table supports cradles, controlled release shots, dead bounces, post
+passes, live catches, drop catches, and timed slap saves. These require suitable
+ball position, speed, and timing; post-pass directions follow each table's
+geometry. See [advanced flipper skills](docs/advanced-flipper-skills-spec.md)
+for techniques, per-table coverage, and regression scenarios.
+
 See [physical contact behavior](docs/physics-contact-spec.md) for flipper, sling,
 bumper, and rollover collision rules and regression coverage.
 
