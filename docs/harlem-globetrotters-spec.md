@@ -157,7 +157,7 @@ references, and the distinction between this synthesis and ROM-exact sound.
 
 Each lower sling post now mounts at its return exit: the left follows the
 upper-left flipper and the right follows the bottom-right. Faces are 100 units
-long with 16.8-unit rubber radii. Shorter faces and a smooth upper rubber edge
+long with 15.68-unit rubber radii. Shorter faces and a smooth upper rubber edge
 prevent a pocket behind the upper-left sling. This replaces the former
 equal-height sling adaptation.
 

@@ -18,6 +18,51 @@ import type { GameEvent } from '../src/game/rules-types';
 import { createBlankTable } from './helpers/board-fixture';
 
 describe('connected sling rubber', () => {
+  it('treats the solid back as filled even with an inward corner', () => {
+    const board = createBlankTable();
+    const sling = {
+      x: 400,
+      y: 500,
+      width: 144,
+      height: 50,
+      angle: 0,
+      material: 'rubberPost' as const,
+      strength: 560,
+      score: 10,
+      backOutline: [
+        { x: 60, y: 60 },
+        { x: 0, y: 20 },
+        { x: -60, y: 60 },
+      ],
+    };
+    expect(
+      getSlingshotCollision({ x: 450, y: 535 }, 1, board, sling),
+    ).not.toBeNull();
+    expect(
+      getSlingshotCollision({ x: 400, y: 545 }, 1, board, sling),
+    ).toBeNull();
+  });
+
+  it.each(BUILT_IN_TABLES)(
+    '$id aims its connected sling faces upfield',
+    ({ board }) => {
+      for (const sling of board.slingshots.filter((s) => s.backOutline)) {
+        const angle = getSlingshotAngle(board, sling);
+        // The front is local -Y. Positive board Y points toward the drain.
+        expect(-Math.cos(angle)).toBeLessThan(-0.2);
+        const nearest = board.flippers.reduce((a, b) =>
+          Math.hypot(a.x - sling.x, a.y - sling.y) <
+          Math.hypot(b.x - sling.x, b.y - sling.y)
+            ? a
+            : b,
+        );
+        expect(
+          Math.sin(angle) * (nearest.side === 'left' ? 1 : -1),
+        ).toBeGreaterThan(0);
+      }
+    },
+  );
+
   it.each(BUILT_IN_TABLES)(
     '$id mounts each conventional lower post at a return exit',
     ({ board }) => {

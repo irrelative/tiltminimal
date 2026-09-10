@@ -59,8 +59,8 @@ const lowerOptions = {
   entryRise: rightPivot.y - laneEntryY,
   heelOffset: 32,
   slingWidth: 100,
-  slingHeight: 60,
-  slingAngle: 2.05,
+  slingHeight: 56,
+  slingAngle: 1.25,
   slingAtReturn: true,
 };
 const right = createLowerPlayfieldAssembly(lowerOptions);

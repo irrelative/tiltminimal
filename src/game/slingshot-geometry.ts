@@ -89,7 +89,7 @@ export const getSlingshotCollision = (
     sling.height,
     sling.backOutline,
   );
-  let inside = true,
+  let inside = false,
     distance = Infinity,
     edge = 0,
     closest = { x: 0, y: 0 },
@@ -99,7 +99,10 @@ export const getSlingshotCollision = (
       b = vertices[(i + 1) % vertices.length],
       x = b.x - a.x,
       y = b.y - a.y;
-    if (x * (p.y - a.y) - y * (p.x - a.x) < 0) inside = false;
+    // Connected return outlines can have an inward corner at the upper post.
+    // Ray crossing handles that boundary without assuming a convex wedge.
+    if (a.y > p.y !== b.y > p.y && p.x < a.x + ((p.y - a.y) * x) / y)
+      inside = !inside;
     const t = Math.max(
       0,
       Math.min(1, ((p.x - a.x) * x + (p.y - a.y) * y) / (x * x + y * y)),

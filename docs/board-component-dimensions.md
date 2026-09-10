@@ -188,7 +188,7 @@ then rotates that shape in board space.
 ## Connected sling outlines
 
 Optional backOutline vertices follow the two local front endpoints
-(-width/2, 0) and (width/2, 0), in convex boundary order. Connected outlines
+(-width/2, 0) and (width/2, 0), in boundary order. Connected outlines
 use the authored angle directly. Height remains the nominal legacy body depth
 and sets rubber radius to max(8, height × 0.28); the connected body's extent
 comes from its outline. Optional rubberEdges lists additional passive outline

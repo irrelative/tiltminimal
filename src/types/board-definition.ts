@@ -156,7 +156,7 @@ export interface SpinnerDefinition extends Point {
 }
 
 export interface SlingshotDefinition extends Point {
-  /** Local convex back boundary, after the two face endpoints, in authored angle coordinates. */
+  /** Local back boundary, after the two face endpoints, in authored angle coordinates. */
   backOutline?: Point[];
   /** Additional passive rubber edges on a connected outline; face edge 0 is always rubber. */
   rubberEdges?: number[];

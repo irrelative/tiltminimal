@@ -14,18 +14,19 @@ flipper or return therefore moves the sling with it. Conventional returns use
 radius is 76 and its exit angle offset is 0.15 radians: the lower post sits
 43.36 units outward and 98.85 units above its flipper pivot.
 
-The active face extends upward and inward. Its left angle is 2.05 radians;
-the right is its reflection, 2π − 2.05. Face length is 144 on Classic and
+From its lower post, the active face extends upward and outward, so its
+contact normal points inward and upfield. Its left angle is 1.25 radians;
+the right is its reflection, 2π − 1.25. Face length is 144 on Classic and
 foundation tables, and 100 on Harlem to keep its upper-left sling below the
 common lane-mouth baseline. The body fills the space back to the return wall.
 An upper rubber edge joins the lane-mouth post to the upper sling post without
 a ledge that could trap a ball.
 
 Rubber radius is max(8, height × 0.28): 14 on conventional tables, 11.2 on
-Andromeda's right sling, and 16.8 on Harlem. These are deliberate 2D playability
+Andromeda's right sling, and 15.68 on Harlem. These are deliberate 2D playability
 dimensions, not measurements of original hardware.
 
-SlingshotDefinition.backOutline stores a convex local back boundary after
+SlingshotDefinition.backOutline stores a local back boundary after
 the two face endpoints. Connected outlines use their authored angle, without
 the legacy nearest-flipper heuristic. Optional rubberEdges identifies
 additional passive rubber segments; face edge 0 is always rubber. Collision
@@ -73,9 +74,18 @@ timing sweeps complement that review; they do not prove every possible shot.
 
 ## Verification record
 
-The implementation passes 293 tests, production build, lint, and all-table
-deep validation with zero errors or warnings. Browser replays verified the
-supported transfers, held inlane catches/releases, and center drains on all
-six tables. Classic's 76-run playtest has no non-finite states or bounds escapes;
+The implementation passes 300 tests, production build, lint, and all-table
+deep validation with zero errors or warnings. The initial rollout's browser
+replays covered transfers, held inlane catches/releases, and center drains on
+all six tables. The orientation correction was reviewed with the physics overlay
+on Classic and Harlem, with the full transfer and feed regressions rerun.
+Classic's 76-run playtest has no non-finite states or bounds escapes;
 its remaining speed-threshold observations are recorded in
 [classic-playtest.md](classic-playtest.md).
+
+The face-orientation regression explicitly requires an inward horizontal normal
+and a negative vertical normal (upfield). This prevents a mirrored-looking
+assembly from accidentally kicking downward while its post-pass tests still pass.
+
+The final 300-test run used one worker after parallel worker timeouts; no
+repository test thresholds were changed.

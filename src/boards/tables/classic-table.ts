@@ -121,7 +121,7 @@ const lower = createLowerPlayfieldAssembly({
   heelOffset: 32,
   slingWidth: 144,
   slingHeight: 50,
-  slingAngle: 2.05,
+  slingAngle: 1.25,
   slingAtReturn: true,
 });
 const shooter = createShooterArchAssembly({

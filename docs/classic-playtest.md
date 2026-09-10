@@ -83,11 +83,11 @@ no physics constants were changed as part of this playtest implementation.
 
 ## Connected-sling regression run
 
-After the post-pass geometry update, the default 76-run report completes
-18 games with six time-limited runs and 62 drained balls. Median completed-ball
-duration is 10.32 seconds; longest unexplained near-rest remains 0.02 seconds.
-There are no non-finite states or bounds escapes. Sixteen runs exceed the
-4000-unit/s speed review threshold (maximum 4232.2); this heuristic remains a
-physics-tuning observation, not a clean speed-budget result. The focused
-post-pass suite separately verifies passive rebounds and stable receiving
-catches across neighboring timings.
+After correcting the connected sling faces to kick inward and upfield, the
+default 76-run report completes eight games with 16 time-limited runs and
+35 drained balls. Median completed-ball duration is 11.29 seconds; longest
+unexplained near-rest is 0.03 seconds. There are no non-finite states or bounds
+escapes. Fourteen runs exceed the 4000-unit/s speed review threshold (maximum
+4155.1); this remains a physics-tuning observation, not a clean speed-budget
+result. The focused post-pass suite separately verifies passive rebounds and
+stable receiving catches across neighboring timings.
