@@ -1,7 +1,8 @@
 # Table rule cards
 
 Every built-in table has a bottom-left Rule card button on Game and Physics.
-The button toggles a readable, scrollable card above it. Escape closes the card
+The compact toggle has a 24-pixel minimum height, 10-pixel text and narrow padding
+to leave the lower playfield visible. It toggles a readable, scrollable card above it. Escape closes the card
 when focus is on the button or card. The button exposes its expanded state and
 controls the labelled card region; the card can receive keyboard focus to scroll.
 Switching tables closes the card and replaces its contents.
