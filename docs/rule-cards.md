@@ -25,4 +25,4 @@ closing the card preserves those settings. Rule-card keydown events do not reach
 game controls; keyup events remain available to clear already-held controls.
 
 Validation: content/toggle tests, full test suite, build and lint; browser review
-of all six cards, mobile Harlem layout, and Escape closing on Game and Physics.
+of all five cards, mobile Harlem layout, and Escape closing on Game and Physics.

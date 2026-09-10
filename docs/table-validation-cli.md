@@ -41,7 +41,6 @@ Supported ids include:
 - `andromeda`
 - `double-crossed`
 - `harlem-globetrotters`
-- `mirror-match`
 - `starlight-em`
 
 ## Checks Run

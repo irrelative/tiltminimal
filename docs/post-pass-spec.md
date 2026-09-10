@@ -50,7 +50,7 @@ crossing an active face.
 
 | Table | Transfers |
 | --- | --- |
-| Classic, Double Crossed, Mirror Match, Starlight EM | Left ↔ right |
+| Classic, Double Crossed, Starlight EM | Left ↔ right |
 | Harlem Globetrotters | Upper-left → right; right → lower-left |
 | Andromeda | Right → left |
 
@@ -88,7 +88,7 @@ timing sweeps complement that review; they do not prove every possible shot.
 The initial implementation passed 300 tests, production build, lint, and all-table
 deep validation with zero errors or warnings. The initial rollout's browser
 replays covered transfers, held inlane catches/releases, and center drains on
-all six tables. The orientation correction was reviewed with the physics overlay
+all five tables. The orientation correction was reviewed with the physics overlay
 on Classic and Harlem, with the full transfer and feed regressions rerun.
 Classic's 76-run playtest has no non-finite states or bounds escapes;
 its remaining speed-threshold observations are recorded in
@@ -128,7 +128,7 @@ the four changed tables, with center drops and a Classic physics-overlay review.
 The harness adds no runtime assist to the shipped game.
 
 Final closer-post verification: 304 tests pass with one worker, production
-build and lint pass, and all six tables pass deep validation with zero errors
+build and lint pass, and all five tables pass deep validation with zero errors
 or warnings. The default parallel test run exceeded host timing limits; the
 successful run used `npm test -- --maxWorkers=1 --testTimeout=60000` without
 changing repository test thresholds. Classic's 76-run report and its remaining

@@ -29,7 +29,6 @@ controls have substantially more residual speed.
 | --- | --- | --- | --- |
 | Classic | Both flippers | Left ↔ right | Left lower tip |
 | Double Crossed | Both flippers | Left ↔ right | Left lower tip |
-| Mirror Match | Both flippers | Left ↔ right | Left lower tip |
 | Starlight EM | Both flippers | Left ↔ right | Left lower tip |
 | Harlem Globetrotters | All three flippers | Upper-left → right; right → lower-left | Lower-left tip |
 | Andromeda | Both flippers | Right → left | Left lower tip |
@@ -119,7 +118,7 @@ solver thresholds.
 ## Verification record
 
 All 368 tests pass with the normal `make test` command; production build and
-lint also pass. All six tables pass
+lint also pass. All five tables pass
 layout, geometry, and deep-playability validation without errors or warnings.
 Browser review replayed live catches and releases on all 13 flippers, plus
 representative dead bounces and drop catches on each table, using a temporary

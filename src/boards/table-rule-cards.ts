@@ -47,16 +47,6 @@ export const TABLE_RULE_CARDS: Record<string, TableRuleCard> = {
       'This recreation currently uses direct scoring. Original-machine bonus ladders, extra-ball and special rules are not implemented.',
     ],
   },
-  'mirror-match': {
-    balls: 3,
-    objective: 'Complete both target banks, then collect Mirror Match.',
-    rules: [
-      'Hit all three standups on each side to ready Mirror Match and score 3,000 points.',
-      'Shoot the center saucer when ready for an extra 7,000 and advance bonus multiplication up to 5×. Both target banks reset.',
-      'Complete the three top lanes for 2,000 points and advance bonus multiplication up to 4×.',
-      'An unlit saucer adds 1,000 bonus. Collect bonus × multiplier at the end of each ball.',
-    ],
-  },
   'starlight-em': {
     balls: 5,
     objective: 'Complete target banks and build a 3× bonus.',
