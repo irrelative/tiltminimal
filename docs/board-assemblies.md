@@ -125,3 +125,11 @@ passive route, the validator reruns each velocity with that input side held,
 requires a stable catch on the destination flipper, then lowers it and checks
 release. See [flipper feed geometry and capture behavior](flipper-feed-spec.md)
 for dimensions and acceptance criteria.
+
+## Sling mounting
+
+Omit slingOffset for a connected lower assembly, or set slingAtReturn to true.
+The lower sling post shares the inner return exit and the generated solid back
+fills the space to the return wall. Use a 2.05-radian left face for the
+conventional layout; the right is mirrored automatically. See
+[post-pass specification](post-pass-spec.md) for dimensions and transfer tests.

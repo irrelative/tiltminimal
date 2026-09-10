@@ -119,3 +119,12 @@ For Classic changes, also run `make playtest-classic` and review its timing swee
 and seeded-game report. That runner currently covers Classic only. Route and
 deep-drop checks sample trajectories; browser play remains necessary for shot
 readability, timing, and difficulty. No current check proves all shots playable.
+
+## Post-pass clearance
+
+Conventional lower slings mount their lower passive post at the inner return
+exit and leave the cradle-to-post and post-to-receiver paths open. Keep the
+solid back connected to the return wall with a smooth upper rubber joint.
+For lower assembly changes, run the [post-pass tests](post-pass-spec.md) along
+with feed and drain checks. Document unsupported transfers on reference tables
+instead of adding invented flippers or posts.

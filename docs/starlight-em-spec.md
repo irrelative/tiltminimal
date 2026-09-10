@@ -37,3 +37,11 @@ The existing rule script and bank indices remain unchanged:
 The shipped layout must clear geometry checks, every declared ball route,
 and deep playability analysis. Tests also verify the five-ball rules, spinner
 clearance, and full-plunge access to the upper playfield.
+
+## Post passes
+
+Lower sling posts now meet the inner return exits. Rounded passive rubber and
+connected solid bodies support left-to-right and right-to-left post passes.
+Returns use 148-unit outer radius, 72-unit lane width, and 174-unit bend rise.
+Existing feeds, drains, and scoring routes remain required; see
+[post-pass geometry and regression contracts](post-pass-spec.md).

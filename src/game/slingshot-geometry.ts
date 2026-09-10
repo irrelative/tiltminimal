@@ -7,6 +7,7 @@ export const getSlingshotAngle = (
   board: BoardDefinition,
   slingshot: BoardDefinition['slingshots'][number],
 ): number => {
+  if (slingshot.backOutline) return slingshot.angle;
   const targetTip = getNearestFlipperTip(board, slingshot);
   const currentTipDirection = {
     x: -Math.sin(slingshot.angle),
@@ -54,12 +55,21 @@ const getNearestFlipperTip = (
   return nearestTip;
 };
 
-export const getSlingshotVertices = (width: number, depth: number): Point[] => [
+export const getSlingshotRubberRadius = (sling: SlingshotDefinition): number =>
+  Math.max(8, sling.height * 0.28);
+
+export const getSlingshotVertices = (
+  width: number,
+  depth: number,
+  backOutline?: Point[],
+): Point[] => [
   { x: -width / 2, y: 0 },
   { x: width / 2, y: 0 },
-  { x: width * 0.34, y: depth * 0.58 },
-  { x: 0, y: depth },
-  { x: -width * 0.34, y: depth * 0.58 },
+  ...(backOutline ?? [
+    { x: width * 0.34, y: depth * 0.58 },
+    { x: 0, y: depth },
+    { x: -width * 0.34, y: depth * 0.58 },
+  ]),
 ];
 
 export const getSlingshotCollision = (
@@ -74,7 +84,11 @@ export const getSlingshotCollision = (
   const dx = point.x - sling.x,
     dy = point.y - sling.y;
   const p = { x: dx * cos + dy * sin, y: -dx * sin + dy * cos };
-  const vertices = getSlingshotVertices(sling.width, sling.height);
+  const vertices = getSlingshotVertices(
+    sling.width,
+    sling.height,
+    sling.backOutline,
+  );
   let inside = true,
     distance = Infinity,
     edge = 0,
@@ -99,18 +113,68 @@ export const getSlingshotCollision = (
       outward = { x: y / Math.hypot(x, y), y: -x / Math.hypot(x, y) };
     }
   }
-  if (!inside && distance >= radius) return null;
-  const n =
+  let rubberRadius = sling.backOutline ? 0 : getSlingshotRubberRadius(sling);
+  let overlap = inside
+    ? radius + rubberRadius + distance
+    : radius + rubberRadius - distance;
+  let n =
     inside || distance < 1e-9
       ? outward
       : { x: (p.x - closest.x) / distance, y: (p.y - closest.y) / distance };
+  if (sling.backOutline) {
+    // Union the solid infill with one rounded rubber face. Choose one contact
+    // so the face and its endpoint post cannot apply two impulses.
+    for (const rubberEdge of [0, ...(sling.rubberEdges ?? [])]) {
+      const start = vertices[rubberEdge],
+        end = vertices[(rubberEdge + 1) % vertices.length];
+      const vx = end.x - start.x,
+        vy = end.y - start.y;
+      const t = Math.max(
+        0,
+        Math.min(
+          1,
+          ((p.x - start.x) * vx + (p.y - start.y) * vy) / (vx * vx + vy * vy),
+        ),
+      );
+      const rubberPoint = { x: start.x + t * vx, y: start.y + t * vy };
+      const rubberDistance = Math.hypot(
+        p.x - rubberPoint.x,
+        p.y - rubberPoint.y,
+      );
+      const rubberOverlap =
+        radius + getSlingshotRubberRadius(sling) - rubberDistance;
+      if (rubberOverlap > overlap) {
+        closest = rubberPoint;
+        rubberRadius = getSlingshotRubberRadius(sling);
+        overlap = rubberOverlap;
+        n =
+          rubberDistance > 1e-9
+            ? {
+                x: (p.x - rubberPoint.x) / rubberDistance,
+                y: (p.y - rubberPoint.y) / rubberDistance,
+              }
+            : { x: vy / Math.hypot(vx, vy), y: -vx / Math.hypot(vx, vy) };
+        edge = rubberEdge;
+      }
+    }
+  }
+  if (overlap <= 0) return null;
   return {
     point: {
-      x: sling.x + closest.x * cos - closest.y * sin,
-      y: sling.y + closest.x * sin + closest.y * cos,
+      x:
+        sling.x +
+        (closest.x + n.x * rubberRadius) * cos -
+        (closest.y + n.y * rubberRadius) * sin,
+      y:
+        sling.y +
+        (closest.x + n.x * rubberRadius) * sin +
+        (closest.y + n.y * rubberRadius) * cos,
     },
     normal: { x: n.x * cos - n.y * sin, y: n.x * sin + n.y * cos },
-    overlap: inside ? radius + distance : radius - distance,
-    activeFace: edge === 0 && n.y < -0.5,
+    overlap,
+    activeFace:
+      edge === 0 &&
+      Math.abs(closest.x) < sling.width / 2 - rubberRadius &&
+      n.y < -0.99,
   };
 };

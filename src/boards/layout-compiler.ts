@@ -94,6 +94,8 @@ export const compileBoardLayout = (
     })),
     slingshots: (layout.slingshots ?? []).map((slingshot) => ({
       ...resolvePositionedElement(slingshot, context),
+      rubberEdges: slingshot.rubberEdges?.slice(),
+      backOutline: slingshot.backOutline?.map((point) => ({ ...point })),
       width: slingshot.width,
       height: slingshot.height,
       angle: slingshot.angle,

@@ -32,3 +32,11 @@ Tests verify device symmetry, scoring, launches, every assembly route, and
 zero layout/geometry/deep-playability diagnostics. Rails use precise
 coordinates without grid snapping; no decorative raised rail substitutes for
 a collision surface. Shared physics tests cover held-flipper cradle retention.
+
+## Post passes
+
+Lower sling posts now meet the inner return exits. Rounded passive rubber and
+connected solid bodies support left-to-right and right-to-left post passes.
+Returns use 148-unit outer radius, 72-unit lane width, and 174-unit bend rise.
+Existing feeds, drains, and scoring routes remain required; see
+[post-pass geometry and regression contracts](post-pass-spec.md).

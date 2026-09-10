@@ -41,9 +41,10 @@ export const traceSlingshotPath = (
   context: CanvasRenderingContext2D,
   width: number,
   depth: number,
+  backOutline?: { x: number; y: number }[],
 ): void => {
   context.beginPath();
-  getSlingshotVertices(width, depth).forEach((point, index) => {
+  getSlingshotVertices(width, depth, backOutline).forEach((point, index) => {
     if (index === 0) context.moveTo(point.x, point.y);
     else context.lineTo(point.x, point.y);
   });

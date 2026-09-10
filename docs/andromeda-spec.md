@@ -129,3 +129,12 @@ provides the corrected initial spinner progression, 80K bonus ceiling and
 5X-to-10X multiplier jump. Regressions cover those values, the single target row,
 four standups, real release shot, and bank runoff. Artwork stays a stylized
 vector interpretation, not a reproduction of Paul Faris's detailed painting.
+
+## Right post pass
+
+The right return uses the shared 148-unit radius, 72-unit lane width, and
+174-unit bend rise. Its sling joins the return exit with 11.2-unit rubber
+radius for the 120-unit flippers. The inlane rollover moves to x=754 to remain
+centered between its walls. The open left return and separate original sling
+remain intact. Right-to-left post passes have timing and catch regressions;
+the reverse is not promised. See [post passes](post-pass-spec.md).

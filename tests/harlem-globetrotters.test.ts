@@ -67,11 +67,14 @@ describe('harlemGlobetrottersTable', () => {
     expect(gap).toBeLessThan(b.ball.radius * 3);
   });
 
-  it('aligns the slingshots symmetrically around the table center', () => {
+  it('anchors mirrored slings to the staggered return flippers', () => {
     const b = harlemGlobetrottersTable;
     const [left, right] = b.slingshots;
-    expect(left.y).toBe(right.y);
-    expect((left.x + right.x) / 2).toBe(b.width / 2);
+    const [upperLeft, rightFlipper] = b.flippers;
+    expect(left.y - upperLeft.y).toBeCloseTo(right.y - rightFlipper.y);
+    expect(left.x - upperLeft.x).toBeCloseTo(-(right.x - rightFlipper.x));
+    expect(left.backOutline).toBeDefined();
+    expect(right.backOutline).toBeDefined();
   });
 
   it('aligns lane entry posts and feeds while keeping returns joined to their heels', () => {

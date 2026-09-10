@@ -1,3 +1,7 @@
+import {
+  getSlingshotRubberRadius,
+  getSlingshotVertices,
+} from '../game/slingshot-geometry';
 import { drawAndromedaPlayfield } from './andromeda-playfield-art';
 import { drawHarlemPlayfield } from './harlem-playfield-art';
 import { getSurfaceMaterial } from '../game/materials';
@@ -610,26 +614,49 @@ const drawSlingshots = (
 
   board.slingshots.forEach((slingshot, index) => {
     const compression = state?.slingshots[index]?.compression ?? 0;
-    const bodyDepth = slingshot.height * (1.65 - compression * 0.34);
+    const bodyDepth = slingshot.height;
     const renderAngle = getRenderedSlingshotAngle(board, slingshot);
-    const postRadius = Math.max(8, slingshot.height * 0.28);
+    const postRadius = getSlingshotRubberRadius(slingshot);
 
     context.save();
     context.translate(slingshot.x, slingshot.y);
     context.rotate(renderAngle);
-    traceSlingshotPath(context, slingshot.width, bodyDepth);
+    traceSlingshotPath(
+      context,
+      slingshot.width,
+      bodyDepth,
+      slingshot.backOutline,
+    );
     context.fillStyle = theme.guideMetalPrimary;
     context.fill();
 
-    context.lineWidth = 4;
-    context.strokeStyle = theme.guideMetalSecondary;
+    context.lineWidth = slingshot.backOutline ? 2 : postRadius * 2;
+    context.lineJoin = 'round';
+    context.strokeStyle = theme.guideRubberPrimary;
     context.stroke();
 
+    const vertices = getSlingshotVertices(
+      slingshot.width,
+      slingshot.height,
+      slingshot.backOutline,
+    );
+    for (const edge of slingshot.rubberEdges ?? []) {
+      const start = vertices[edge],
+        end = vertices[(edge + 1) % vertices.length];
+      context.beginPath();
+      context.moveTo(start.x, start.y);
+      context.lineTo(end.x, end.y);
+      context.lineWidth = postRadius * 2;
+      context.lineCap = 'round';
+      context.strokeStyle = theme.guideRubberPrimary;
+      context.stroke();
+    }
     context.beginPath();
     context.moveTo(-slingshot.width / 2, 0);
     context.lineTo(slingshot.width / 2, 0);
-    context.lineWidth = Math.max(7, slingshot.height * 0.32);
+    context.lineWidth = postRadius * 2;
     context.lineCap = 'round';
+    context.lineJoin = 'round';
     context.strokeStyle = theme.guideRubberPrimary;
     context.stroke();
 
@@ -637,7 +664,8 @@ const drawSlingshots = (
     context.moveTo(-slingshot.width / 2 + 2, 0);
     context.lineTo(slingshot.width / 2 - 2, 0);
     context.lineWidth = Math.max(3, slingshot.height * 0.14);
-    context.strokeStyle = theme.guideRubberSecondary;
+    context.strokeStyle =
+      compression > 0 ? theme.guideMetalPrimary : theme.guideRubberSecondary;
     context.stroke();
 
     context.fillStyle = theme.postRubberFill;

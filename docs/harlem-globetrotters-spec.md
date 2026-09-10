@@ -35,7 +35,7 @@ The 1000 × 2000 coordinate space approximates the original's long playfield.
   that exit clear rather than forcing the ball back through the target row.
 - Five standups run down the left edge. The sixth is recessed in the right-side
   Dunk Shot pocket. The center remains open for cross-court shots.
-- Staggered lower returns and outlanes, level mirrored slingshots, and four representative
+- Staggered lower returns and outlanes, return-mounted slingshots, and four representative
   rollover switches complete the layout. Painted GLOBE letters and bonus
   inserts are decoration, not invented rollover collision switches.
 
@@ -117,16 +117,9 @@ rubber edges center on x=500, half the table width. Return guides, lane entries,
 and held-feed destinations move with their flippers. The diagonal left pair
 and approximately 57-unit drain clearance are preserved.
 
-Both slingshots now share y=1490, at x=356 and x=644, with mirrored angles and
-equal dimensions. Their horizontal spacing clears the right inlane entry post;
-the return lanes retain their different heights to serve the diagonal left pair.
-This is an intentional playability/alignment adaptation of the estimated layout.
-
-Regression checks require the drain midpoint and sling midpoint to equal half
-the table width, and both slings to have equal heights. All 226 tests and all-table
-deep validation pass with no warnings. Browser review in `/physics` with the
-overlay checked the full table, lower alignment, center drop, and both inlane
-entries; automated route checks cover held catches and releases.
+The former equal-height sling placement has been replaced by the connected
+post-pass assembly described below. Drain centering and the diagonal flipper
+pair remain intact.
 
 ## Whole-board alignment baselines
 
@@ -138,7 +131,7 @@ Their different lengths and horizontal positions are intentional consequences
 of the three-flipper arrangement, not disconnected or mismatched lane mouths.
 
 The board definition names the lower centerline, lane entry height, sling height,
-and three pivot anchors. Sling offsets, lane lengths, direct feeds, and center
+and three pivot anchors. Sling mounts, lane lengths, direct feeds, and center
 routes derive from these anchors so moving a component cannot silently leave
 its route destination behind. The central court badge, bonus ladder, and bottom
 stripe apex now share the x=500 drain/sling centerline; the bottom stripe corners
@@ -159,3 +152,16 @@ shared mechanical sounds, including a synthesized Sweet Georgia Brown startup
 phrase and event-driven spinner, target, sling, bumper, and saucer cues.
 See [table audio](table-audio-spec.md) for event mappings, browser lifecycle,
 references, and the distinction between this synthesis and ROM-exact sound.
+
+## Connected slings and post passes
+
+Each lower sling post now mounts at its return exit: the left follows the
+upper-left flipper and the right follows the bottom-right. Faces are 100 units
+long with 16.8-unit rubber radii. Shorter faces and a smooth upper rubber edge
+prevent a pocket behind the upper-left sling. This replaces the former
+equal-height sling adaptation.
+
+Post passes are tested from upper-left to right and from right to lower-left.
+Both left flippers still move together; no post is added between them.
+The center drain, lane-mouth baseline, catches/releases, and outlane contracts
+remain required. See [post-pass specification](post-pass-spec.md).

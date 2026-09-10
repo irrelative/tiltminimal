@@ -36,3 +36,11 @@ The table must compile cleanly and pass geometry analysis, declared scoring
 and return routes, and the deep dropped-ball sweep without diagnostics.
 Scoring tests cover the retained lane and spinner rules. Route tests exercise
 multiple plunge powers, target approach speeds, and inlane feed velocities.
+
+## Post passes
+
+Lower sling posts now meet the inner return exits. Rounded passive rubber and
+connected solid bodies support left-to-right and right-to-left post passes.
+Returns use 148-unit outer radius, 72-unit lane width, and 174-unit bend rise.
+Existing feeds, drains, and scoring routes remain required; see
+[post-pass geometry and regression contracts](post-pass-spec.md).

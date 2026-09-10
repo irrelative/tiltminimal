@@ -26,6 +26,8 @@ lower.flippers.forEach((flipper) => {
 lower.guides = lower.guides!.slice(4);
 lower.posts = lower.posts!.slice(2);
 lower.slingshots = lower.slingshots!.slice(1);
+// Smaller post rubber suits the shorter 120-unit bats.
+lower.slingshots[0].height = 40;
 lower.routes = lower.routes.slice(2);
 // With no left return lane to rebound from, an unheld right feed crosses the
 // lower court. Its raised-flipper catch/release remains required for all speeds.
@@ -123,7 +125,7 @@ const field: BoardAssembly = {
   rollovers: [
     { position: { x: 832, y: 960 }, radius: 22, score: 3000 },
     { position: { x: 832, y: 1150 }, radius: 22, score: 3000 },
-    { position: { x: 770, y: 1350 }, radius: 20, score: 3000 },
+    { position: { x: 754, y: 1350 }, radius: 20, score: 3000 },
     { position: { x: 850, y: 1350 }, radius: 18, score: 5000 },
   ],
   routes: [

@@ -38,7 +38,11 @@ export const cloneBoardDefinition = (
   dropTargets: board.dropTargets.map((target) => ({ ...target })),
   saucers: board.saucers.map((saucer) => ({ ...saucer })),
   spinners: board.spinners.map((spinner) => ({ ...spinner })),
-  slingshots: board.slingshots.map((slingshot) => ({ ...slingshot })),
+  slingshots: board.slingshots.map((slingshot) => ({
+    ...slingshot,
+    rubberEdges: slingshot.rubberEdges?.slice(),
+    backOutline: slingshot.backOutline?.map((point) => ({ ...point })),
+  })),
   rollovers: board.rollovers.map((rollover) => ({ ...rollover })),
   guides: board.guides.map(cloneGuide),
   flippers: board.flippers.map((flipper) => ({ ...flipper })),

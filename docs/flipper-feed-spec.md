@@ -16,17 +16,15 @@ small downward slopes prevent balls balancing on horizontal endpoint caps.
 
 | Tables                                     | Outer radius | Lane width | Bend center above pivot |
 | ------------------------------------------ | -----------: | ---------: | ----------------------: |
-| Classic and Harlem                         |          148 |         72 |                     174 |
-| Double Crossed, Mirror Match, Starlight EM |          160 |         64 |                     180 |
+| All conventional returns                         |          148 |         72 |                     174 |
 
-The smaller Classic/Harlem returns preserve outlane clearance beside the cabinet
+The shared 148-unit returns preserve outlane clearance beside the cabinet
 and shooter walls. The shared assembly defaults `bendRise` to `returnRadius +
 20`; authors can override it, but must validate the complete table afterward.
 Harlem uses equal 110-unit bats, with the upper-left at (270, 1680),
 lower-left at (370, 1800), and right at (630, 1800). Its left return
 follows the upper pivot, and direct feeds follow both left pivots. Lane mouths
-share y=1480; the slings share y=1490 and mirror around x=500 independently
-of the staggered return exits. Harlem's left return permits a cross-playfield
+share y=1480; each sling follows its staggered return exit. Harlem's left return permits a cross-playfield
 passive release, and its right return permits lower-playfield entry followed by
 a center drain. Both returns still require a catch on their specified held
 flipper and a successful release.
@@ -79,3 +77,6 @@ The browser Physics sandbox can reproduce these feeds: hold the appropriate
 flipper before releasing the injected ball into the inlane. Cradling is a
 bounded 2D approximation; the tests establish behavior for the sampled feeds,
 not a guarantee that every possible incoming ball can be caught.
+
+The slings now join these exits with rounded passive posts. See
+[post passes](post-pass-spec.md) for supported transfers and timing regressions.

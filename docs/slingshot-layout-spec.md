@@ -26,21 +26,21 @@ Runtime slingshots are first-class board elements with:
 
 The current physics model treats the slingshot as:
 
-1. a solid wedge polygon shared with rendering and spawn validation
+1. a solid polygon and rounded rubber union shared with rendering and spawn validation
 2. normal collision resolution using the surface material
 3. a one-shot kick impulse on the front face when the ball arrives with enough inward speed; sides and back remain passive
 4. a short re-arm cooldown
 5. a compression animation for rendering feedback
 
-For lower-playfield tables, the rendered and collidable slingshot body is oriented toward the
-nearest flipper tip so mirrored left/right slings visually point into the
-flipper area instead of drawing the same wedge handedness on both sides.
+Connected lower assemblies use an explicit authored orientation, with the active
+face toward the open field and the solid back following the inner return wall.
+Legacy wedges retain the nearest-flipper orientation heuristic.
 
 The renderer now draws the slingshot as:
 
 - a triangular body behind the active face
 - a distinct front rubber face
-- small end-post cues at the face endpoints
+- physical rounded rubber posts at the face endpoints
 
 This keeps the collision model simple while making the lower third read much
 closer to a real table sling assembly.
@@ -130,3 +130,11 @@ playability, but lower-third layouts should at minimum satisfy:
   `plane: 'raised'`
 
 Future validation should extend this with explicit lower shot-corridor checks.
+
+## Connected slings
+
+New lower assemblies mount the lower post at the inner return exit when
+slingOffset is omitted, or slingAtReturn is true. The generated backOutline
+and passive rubberEdges close the space behind the face and smooth the top
+joint. Legacy midpoint placement remains available through slingOffset. See
+[post-pass geometry and validation](post-pass-spec.md).

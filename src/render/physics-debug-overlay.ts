@@ -1,7 +1,11 @@
 import type { BallState, GameState } from '../game/game-state';
 import type { PhysicsDebug } from '../game/physics-debug';
 import type { BoardDefinition, Point } from '../types/board-definition';
-import { getSlingshotAngle } from '../game/slingshot-geometry';
+import {
+  getSlingshotAngle,
+  getSlingshotRubberRadius,
+  getSlingshotVertices,
+} from '../game/slingshot-geometry';
 import { getArcGuideSweep } from '../game/guide-geometry';
 import {
   getPlungerGuideSegments,
@@ -114,12 +118,36 @@ export const drawPhysicsDebug = (
     c.save();
     c.translate(s.x, s.y);
     c.rotate(getSlingshotAngle(board, s));
-    traceSlingshotPath(c, s.width, s.height);
+    traceSlingshotPath(c, s.width, s.height, s.backOutline);
+    c.lineWidth = s.backOutline ? 2 : getSlingshotRubberRadius(s) * 2;
+    c.lineJoin = 'round';
+    c.globalAlpha = 0.4;
     c.stroke();
+    const vertices = getSlingshotVertices(s.width, s.height, s.backOutline);
+    for (const edge of [0, ...(s.rubberEdges ?? [])]) {
+      const start = vertices[edge],
+        end = vertices[(edge + 1) % vertices.length];
+      c.beginPath();
+      c.moveTo(start.x, start.y);
+      c.lineTo(end.x, end.y);
+      c.lineWidth = getSlingshotRubberRadius(s) * 2;
+      c.lineCap = 'round';
+      c.stroke();
+    }
+    c.globalAlpha = 1;
+    c.lineWidth = 2;
+    circle({ x: -s.width / 2, y: 0 }, getSlingshotRubberRadius(s));
+    circle({ x: s.width / 2, y: 0 }, getSlingshotRubberRadius(s));
     c.strokeStyle = '#ffdb61';
     c.beginPath();
-    c.moveTo(-s.width / 2, 0);
-    c.lineTo(s.width / 2, 0);
+    c.moveTo(
+      -s.width / 2 + getSlingshotRubberRadius(s),
+      -getSlingshotRubberRadius(s),
+    );
+    c.lineTo(
+      s.width / 2 - getSlingshotRubberRadius(s),
+      -getSlingshotRubberRadius(s),
+    );
     c.stroke();
     c.restore();
   });

@@ -13,7 +13,10 @@ export interface LowerPlayfieldOptions {
   entryRise: number;
   bendRise?: number;
   heelOffset: number;
-  slingOffset: Point;
+  /** Legacy midpoint placement; omit for a connected return-mounted sling. */
+  slingOffset?: Point;
+  /** Mount the lower rubber post at the inner return exit (default without slingOffset). */
+  slingAtReturn?: boolean;
   slingWidth: number;
   slingHeight: number;
   slingAngle: number;
@@ -25,6 +28,9 @@ export interface LowerPlayfieldOptions {
 
 export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
   const ballRadius = o.ballRadius ?? 16;
+  const slingAtReturn = o.slingAtReturn ?? !o.slingOffset;
+  if (!slingAtReturn && !o.slingOffset)
+    throw new Error('Legacy sling placement requires slingOffset.');
   requireClearance(o.laneWidth, ballRadius * 2 + 24, 'Inlane width');
   requireClearance(o.returnRadius, o.laneWidth, 'Return radius');
   // Leave room above the heel for the ball to meet the held flipper's top face.
@@ -99,24 +105,70 @@ export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
       timeoutSeconds: 4,
     });
   }
-  return {
-    ...part,
-    flippers,
-    slingshots: createSlingshotPair({
-      leftCenter: {
-        x: o.center.x - o.slingOffset.x,
-        y: o.center.y - o.slingOffset.y,
-      },
-      rightCenter: {
-        x: o.center.x + o.slingOffset.x,
-        y: o.center.y - o.slingOffset.y,
-      },
-      width: o.slingWidth,
-      height: o.slingHeight,
-      leftAngle: o.slingAngle,
-      rightAngle: Math.PI - o.slingAngle,
-      score: 10,
-      strength: o.slingStrength ?? 560,
-    }).slingshots,
-  };
+  const lowerPostX =
+    o.heelOffset + (o.returnRadius - o.laneWidth) * Math.sin(0.15);
+  const lowerPostY = bendRise - (o.returnRadius - o.laneWidth) * Math.cos(0.15);
+  const slingX = slingAtReturn
+    ? o.pivotSpacing / 2 +
+      lowerPostX +
+      (Math.cos(o.slingAngle) * o.slingWidth) / 2
+    : o.slingOffset!.x;
+  const slingY = slingAtReturn
+    ? lowerPostY + (Math.sin(o.slingAngle) * o.slingWidth) / 2
+    : o.slingOffset!.y;
+  const slingshots = createSlingshotPair({
+    leftCenter: {
+      x: o.center.x - slingX,
+      y: o.center.y - slingY,
+    },
+    rightCenter: {
+      x: o.center.x + slingX,
+      y: o.center.y - slingY,
+    },
+    width: o.slingWidth,
+    height: o.slingHeight,
+    leftAngle: o.slingAngle,
+    rightAngle: (slingAtReturn ? 2 : 1) * Math.PI - o.slingAngle,
+    score: 10,
+    strength: o.slingStrength ?? 560,
+  }).slingshots;
+  if (slingAtReturn) {
+    slingshots.forEach((sling, index) => {
+      const sign = index === 0 ? -1 : 1;
+      const pivotX = o.center.x + (sign * o.pivotSpacing) / 2;
+      const center = {
+        x: pivotX + sign * o.heelOffset,
+        y: o.center.y - bendRise,
+      };
+      const radius = o.returnRadius - o.laneWidth;
+      const start = index === 0 ? Math.PI / 2 + 0.15 : 0;
+      const end = index === 0 ? Math.PI : Math.PI / 2 - 0.15;
+      const curve = Array.from({ length: 17 }, (_, i) => {
+        const angle = start + ((end - start) * i) / 16;
+        return {
+          x: center.x + Math.cos(angle) * radius,
+          y: center.y + Math.sin(angle) * radius,
+        };
+      });
+      const mouth = {
+        x: center.x + sign * radius,
+        y: o.center.y - o.entryRise,
+      };
+      // Follow the inner return boundary, filling the otherwise trapping pocket
+      // behind the active rubber. The return rail remains the inlane wall.
+      const back =
+        index === 0
+          ? [...curve.slice(1), mouth]
+          : [mouth, ...curve.slice(0, -1)];
+      const position = sling.position as Point;
+      const cos = Math.cos(sling.angle),
+        sin = Math.sin(sling.angle);
+      sling.rubberEdges = [index === 0 ? back.length + 1 : 1];
+      sling.backOutline = back.map((p) => ({
+        x: (p.x - position.x) * cos + (p.y - position.y) * sin,
+        y: -(p.x - position.x) * sin + (p.y - position.y) * cos,
+      }));
+    });
+  }
+  return { ...part, flippers, slingshots };
 };

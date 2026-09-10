@@ -90,3 +90,11 @@ The plunger uses a 0–2800 release-speed range with a monotonic charge response
 Very short pulls return to the shooter; the tested 55%, 70%, 85%, and 100%
 pulls feed the top lanes. The old 5200–6000 range compensated for the former
 frame-dependent plunger contact calculation and is no longer used.
+
+## Post passes
+
+Lower sling posts now meet the inner return exits. Rounded passive rubber and
+connected solid bodies support left-to-right and right-to-left post passes.
+Returns use 148-unit outer radius, 72-unit lane width, and 174-unit bend rise.
+Existing feeds, drains, and scoring routes remain required; see
+[post-pass geometry and regression contracts](post-pass-spec.md).

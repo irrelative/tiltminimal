@@ -80,3 +80,14 @@ The first default run produced 52 controlled shots and 24 simulated games:
 The highest-speed controlled shot and a high-speed full game (`game-1983`)
 replayed to identical final states. The baseline preserves current tuning;
 no physics constants were changed as part of this playtest implementation.
+
+## Connected-sling regression run
+
+After the post-pass geometry update, the default 76-run report completes
+18 games with six time-limited runs and 62 drained balls. Median completed-ball
+duration is 10.32 seconds; longest unexplained near-rest remains 0.02 seconds.
+There are no non-finite states or bounds escapes. Sixteen runs exceed the
+4000-unit/s speed review threshold (maximum 4232.2); this heuristic remains a
+physics-tuning observation, not a clean speed-budget result. The focused
+post-pass suite separately verifies passive rebounds and stable receiving
+catches across neighboring timings.

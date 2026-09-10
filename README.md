@@ -152,3 +152,7 @@ scores remain available for the current page session only.
 User preferences are available under **Settings** in the left sidebar: sound,
 volume, ball spin markers, and motion trails. They apply immediately across tables
 and are saved in this browser. See [User settings](docs/user-settings.md).
+
+Post passes use a quick release/re-flip from a cradle while holding the receiver.
+Connected lower slings now provide passive rebound posts. See
+[supported transfers and geometry](docs/post-pass-spec.md).

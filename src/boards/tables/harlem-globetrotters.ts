@@ -39,14 +39,12 @@ shooter.routes[0]!.goals = [
   { type: 'region', min: { x: 240, y: 250 }, max: { x: 840, y: 700 } },
 ];
 
-// Shared visual baselines are independent of the staggered flipper heels.
+// Lane mouths share a baseline; slings and return exits follow their flipper heels.
 const lowerCenterX = 500;
 const laneEntryY = 1480;
-const slingY = 1490;
 const upperLeftPivot = { x: lowerCenterX - 230, y: 1680 };
 const lowerLeftPivot = { x: lowerCenterX - 130, y: 1800 };
 const rightPivot = { x: lowerCenterX + 130, y: 1800 };
-const slingSpacing = 288;
 const rightAssemblyCenterX = rightPivot.x - 160;
 const leftAssemblyCenterX = upperLeftPivot.x + 160;
 const lowerOptions = {
@@ -60,23 +58,16 @@ const lowerOptions = {
   bendRise: 174,
   entryRise: rightPivot.y - laneEntryY,
   heelOffset: 32,
-  slingOffset: {
-    x: lowerCenterX + slingSpacing / 2 - rightAssemblyCenterX,
-    y: rightPivot.y - slingY,
-  },
-  slingWidth: 144,
-  slingHeight: 50,
-  slingAngle: 0.65,
+  slingWidth: 100,
+  slingHeight: 60,
+  slingAngle: 2.05,
+  slingAtReturn: true,
 };
 const right = createLowerPlayfieldAssembly(lowerOptions);
 const left = createLowerPlayfieldAssembly({
   ...lowerOptions,
   id: 'harlem-left-return',
   entryRise: upperLeftPivot.y - laneEntryY,
-  slingOffset: {
-    x: leftAssemblyCenterX - (lowerCenterX - slingSpacing / 2),
-    y: upperLeftPivot.y - slingY,
-  },
   restingAngle: 0.55,
   center: { x: leftAssemblyCenterX, y: upperLeftPivot.y },
 });

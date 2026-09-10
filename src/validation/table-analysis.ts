@@ -1,5 +1,6 @@
 import {
   getSlingshotAngle,
+  getSlingshotRubberRadius,
   getSlingshotVertices,
   getSlingshotCollision,
 } from '../game/slingshot-geometry';
@@ -566,6 +567,7 @@ const collectAnalyzableElements = (
     const vertices = getSlingshotVertices(
       slingshot.width,
       slingshot.height,
+      slingshot.backOutline,
     ).map((p) => ({
       x: slingshot.x + p.x * cos - p.y * sin,
       y: slingshot.y + p.x * sin + p.y * cos,
@@ -573,7 +575,15 @@ const collectAnalyzableElements = (
     elements.push({
       ref: createRef('slingshot', index, 'Slingshot'),
       samples: vertices.flatMap((point, i) =>
-        sampleSegment(point, vertices[(i + 1) % vertices.length], 2),
+        sampleSegment(
+          point,
+          vertices[(i + 1) % vertices.length],
+          slingshot.backOutline &&
+            i !== 0 &&
+            !slingshot.rubberEdges?.includes(i)
+            ? 0
+            : getSlingshotRubberRadius(slingshot),
+        ),
       ),
     });
   });
@@ -881,8 +891,37 @@ const isIntentionalAttachment = (
   left: TableAnalysisElementRef,
   right: TableAnalysisElementRef,
 ): boolean =>
+  isSlingMountPost(board, left, right) ||
   isGuidePostJoin(board, left, right) ||
   isGuideSlingshotJoin(board, left, right);
+
+const isSlingMountPost = (
+  board: BoardDefinition,
+  left: TableAnalysisElementRef,
+  right: TableAnalysisElementRef,
+): boolean => {
+  const postRef =
+    left.kind === 'post' ? left : right.kind === 'post' ? right : null;
+  const slingRef =
+    left.kind === 'slingshot'
+      ? left
+      : right.kind === 'slingshot'
+        ? right
+        : null;
+  if (!postRef || !slingRef) return false;
+  const post = board.posts[postRef.index],
+    sling = board.slingshots[slingRef.index];
+  const angle = getSlingshotAngle(board, sling);
+  return (
+    sling.backOutline?.some(
+      (p) =>
+        getPointDistance(post, {
+          x: sling.x + p.x * Math.cos(angle) - p.y * Math.sin(angle),
+          y: sling.y + p.x * Math.sin(angle) + p.y * Math.cos(angle),
+        }) < 0.01,
+    ) ?? false
+  );
+};
 
 const isGuidePostJoin = (
   board: BoardDefinition,
@@ -938,6 +977,24 @@ const isGuideSlingshotJoin = (
   }
 
   const { guide, slingshot } = pair;
+  if (slingshot.backOutline) {
+    // A return wall can share the solid sling's back boundary, but a rail
+    // crossing its interior or active face must still be reported.
+    return createGuideSamples(guide).every((sample) => {
+      const contact = getSlingshotCollision(
+        sample,
+        guide.thickness / 2 + 2,
+        board,
+        slingshot,
+      );
+      return (
+        contact &&
+        !contact.activeFace &&
+        getPointDistance(sample, contact.point) <=
+          getSlingshotRubberRadius(slingshot) + guide.thickness / 2 + 3
+      );
+    });
+  }
 
   if (isArcGuide(guide)) {
     return false;
