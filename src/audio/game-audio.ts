@@ -1,3 +1,4 @@
+import { synthesizeBallImpact } from './ball-impact';
 import type { GameEvent } from '../game/rules-types';
 import {
   getTableAudioProfile,
@@ -106,7 +107,8 @@ export class GameAudio {
   }
 
   private unlockBound = false;
-  private noiseBuffer: AudioBuffer | null = null;
+  private readonly impactBuffers = new Map<string, AudioBuffer>();
+  private impactVariant = 0;
   private lastBounceTime = -Infinity;
 
   private profile: TableAudioProfile | null = null;
@@ -280,74 +282,40 @@ export class GameAudio {
     startTime: number,
     event: Extract<GameAudioEvent, { type: 'ball-bounce' }>,
   ): void {
-    const tone = context.createOscillator();
-    tone.type = getBounceWaveform(event.material);
-    tone.frequency.setValueAtTime(
-      getBounceFrequency(event.material),
-      startTime,
-    );
-    tone.frequency.exponentialRampToValueAtTime(
-      Math.max(90, getBounceFrequency(event.material) * 0.58),
-      startTime + 0.08,
-    );
-
-    const toneGain = context.createGain();
-    toneGain.gain.setValueAtTime(0.0001, startTime);
-    toneGain.gain.exponentialRampToValueAtTime(
-      0.065 * event.intensity,
-      startTime + 0.003,
-    );
-    toneGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.1);
-
+    const variant = this.impactVariant++ % 5;
+    const key = `${event.material}:${variant}`;
+    let buffer = this.impactBuffers.get(key);
+    if (!buffer) {
+      const samples = synthesizeBallImpact(
+        event.material,
+        context.sampleRate,
+        variant,
+      );
+      buffer = context.createBuffer(1, samples.length, context.sampleRate);
+      buffer.getChannelData(0).set(samples);
+      this.impactBuffers.set(key, buffer);
+    }
+    const source = context.createBufferSource();
+    source.buffer = buffer;
+    const gain = context.createGain();
+    // Preserve quiet grazes; reserve the sharpest, loudest impact for hard hits.
+    gain.gain.value = 0.22 * Math.pow(event.intensity, 1.35);
+    const filter = context.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 1800 + event.intensity * 10000;
+    filter.Q.value = 0.5;
     const panner = createStereoPanner(context, event.pan);
-    tone.connect(toneGain);
-    toneGain.connect(panner);
-
-    const noiseSource = context.createBufferSource();
-    noiseSource.buffer = this.getNoiseBuffer(context);
-    const noiseFilter = context.createBiquadFilter();
-    noiseFilter.type =
-      event.material === 'metalGuide' ? 'highpass' : 'bandpass';
-    noiseFilter.frequency.setValueAtTime(
-      event.material === 'metalGuide' ? 1800 : 720,
-      startTime,
-    );
-
-    const noiseGain = context.createGain();
-    noiseGain.gain.setValueAtTime(0.0001, startTime);
-    noiseGain.gain.exponentialRampToValueAtTime(
-      0.03 * event.intensity,
-      startTime + 0.002,
-    );
-    noiseGain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.045);
-
-    noiseSource.connect(noiseFilter);
-    noiseFilter.connect(noiseGain);
-    noiseGain.connect(panner);
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(panner);
     panner.connect(this.masterGain!);
-
-    tone.start(startTime);
-    tone.stop(startTime + 0.11);
-    noiseSource.start(startTime);
-    noiseSource.stop(startTime + 0.05);
-  }
-
-  private getNoiseBuffer(context: AudioContext): AudioBuffer {
-    if (this.noiseBuffer) {
-      return this.noiseBuffer;
-    }
-
-    const sampleRate = context.sampleRate;
-    const length = Math.floor(sampleRate * 0.14);
-    const buffer = context.createBuffer(1, length, sampleRate);
-    const channel = buffer.getChannelData(0);
-
-    for (let index = 0; index < length; index += 1) {
-      channel[index] = (Math.random() * 2 - 1) * (1 - index / length);
-    }
-
-    this.noiseBuffer = buffer;
-    return buffer;
+    source.onended = () => {
+      source.disconnect();
+      filter.disconnect();
+      gain.disconnect();
+      panner.disconnect();
+    };
+    source.start(startTime);
   }
 }
 
@@ -513,32 +481,6 @@ const distanceToOrientedSegment = (
   const closestY = start.y + segmentY * projection;
 
   return Math.hypot(point.x - closestX, point.y - closestY);
-};
-
-const getBounceFrequency = (material: SurfaceMaterialName): number => {
-  switch (material) {
-    case 'metalGuide':
-      return 960;
-    case 'rubberPost':
-      return 380;
-    case 'flipperRubber':
-      return 290;
-    case 'playfieldWood':
-      return 220;
-  }
-};
-
-const getBounceWaveform = (material: SurfaceMaterialName): OscillatorType => {
-  switch (material) {
-    case 'metalGuide':
-      return 'triangle';
-    case 'rubberPost':
-      return 'sine';
-    case 'flipperRubber':
-      return 'square';
-    case 'playfieldWood':
-      return 'triangle';
-  }
 };
 
 const getStereoPan = (x: number, width: number): number =>

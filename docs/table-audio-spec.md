@@ -80,3 +80,17 @@ unlock, table switching, and scheduled-node cleanup. A browser OfflineAudioConte
 render of the startup produces nonzero audio, a peak below 0.08 full scale, and
 a silent tail after the phrase. Browser gesture playback verifies a running
 AudioContext. Run `make test`, `make build`, and `make lint`.
+
+## Ball impact texture
+
+All tables use short synthesized impact buffers for mechanical ball bounces.
+Metal guides have bright, inharmonic ticks; rubber posts have a damped low knock;
+flipper rubber has a shorter, deeper contact; wood has a hollow body. Filtered
+noise supplies the initial contact, with decaying resonances underneath instead
+of a swept electronic tone. Five cached variations per material avoid identical
+repeated hits. Impact strength controls both loudness and brightness, and ball
+position controls stereo placement. Buffers fade at their boundaries and playback
+nodes disconnect after completion. Existing collision detection and the 45 ms
+bounce limiter remain unchanged. These are designed textures, not sampled machine
+recordings. Signal tests cover common sample rates, finite bounded output, decay,
+and variation.
