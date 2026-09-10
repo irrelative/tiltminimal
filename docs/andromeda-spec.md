@@ -138,3 +138,8 @@ radius for the 120-unit flippers. The inlane rollover moves to x=754 to remain
 centered between its walls. The open left return and separate original sling
 remain intact. Right-to-left post passes have timing and catch regressions;
 the reverse is not promised. See [post passes](post-pass-spec.md).
+
+Andromeda explicitly retains the unextended return and 1.25-radian sling angle
+when composing the shared foundation. Its short bats and open opposite side
+use their own post-pass regression timings; Classic's closer-post defaults do
+not apply to this reference layout.

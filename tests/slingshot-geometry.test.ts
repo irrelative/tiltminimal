@@ -18,6 +18,31 @@ import type { GameEvent } from '../src/game/rules-types';
 import { createBlankTable } from './helpers/board-fixture';
 
 describe('connected sling rubber', () => {
+  it.each(
+    BUILT_IN_TABLES.filter(
+      ({ id }) => !['andromeda', 'harlem-globetrotters'].includes(id),
+    ),
+  )(
+    '$id keeps its post close to the heel with a diagonal active face',
+    ({ board }) => {
+      board.slingshots.forEach((sling, i) => {
+        const angle = getSlingshotAngle(board, sling);
+        const sign = i === 0 ? 1 : -1;
+        const post = {
+          x: sling.x + (sign * Math.cos(angle) * sling.width) / 2,
+          y: sling.y + (sign * Math.sin(angle) * sling.width) / 2,
+        };
+        const pivot = board.flippers[i];
+        expect(Math.abs(post.x - pivot.x)).toBeCloseTo(30);
+        expect(pivot.y - post.y).toBeCloseTo(80);
+        expect(Math.hypot(post.x - pivot.x, post.y - pivot.y)).toBeLessThan(86);
+        expect(
+          Math.abs(Math.atan2(Math.sin(angle), Math.cos(angle))),
+        ).toBeCloseTo(Math.PI / 3);
+      });
+    },
+  );
+
   it('treats the solid back as filled even with an inward corner', () => {
     const board = createBlankTable();
     const sling = {
@@ -75,7 +100,11 @@ describe('connected sling rubber', () => {
         };
         expect(
           board.guides.some((guide) => {
-            if (guide.kind !== 'arc') return false;
+            if (guide.kind !== 'arc') {
+              return [guide.start, guide.end].some(
+                (p) => Math.hypot(p.x - post.x, p.y - post.y) < 0.01,
+              );
+            }
             return [guide.startAngle, guide.endAngle].some((a) => {
               const endpoint = getArcGuidePoint(guide, a);
               return (

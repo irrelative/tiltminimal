@@ -17,6 +17,8 @@ export interface LowerPlayfieldOptions {
   slingOffset?: Point;
   /** Mount the lower rubber post at the inner return exit (default without slingOffset). */
   slingAtReturn?: boolean;
+  /** Extend the inner return to this outward/upward offset from its pivot. */
+  lowerPostOffset?: Point;
   slingWidth: number;
   slingHeight: number;
   slingAngle: number;
@@ -75,6 +77,20 @@ export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
         radius: 12,
         material: 'rubberPost',
       });
+      if (radius === radii[1] && o.lowerPostOffset) {
+        part.guides!.push(
+          rail(
+            {
+              x: center.x + sign * radius * Math.sin(0.15),
+              y: center.y + radius * Math.cos(0.15),
+            },
+            {
+              x: pivot.x + sign * o.lowerPostOffset.x,
+              y: pivot.y - o.lowerPostOffset.y,
+            },
+          ),
+        );
+      }
     }
     const laneX = center.x + sign * (o.returnRadius - o.laneWidth / 2);
     part.routes.push({
@@ -106,8 +122,11 @@ export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
     });
   }
   const lowerPostX =
+    o.lowerPostOffset?.x ??
     o.heelOffset + (o.returnRadius - o.laneWidth) * Math.sin(0.15);
-  const lowerPostY = bendRise - (o.returnRadius - o.laneWidth) * Math.cos(0.15);
+  const lowerPostY =
+    o.lowerPostOffset?.y ??
+    bendRise - (o.returnRadius - o.laneWidth) * Math.cos(0.15);
   const slingX = slingAtReturn
     ? o.pivotSpacing / 2 +
       lowerPostX +
@@ -158,8 +177,8 @@ export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
       // behind the active rubber. The return rail remains the inlane wall.
       const back =
         index === 0
-          ? [...curve.slice(1), mouth]
-          : [mouth, ...curve.slice(0, -1)];
+          ? [...(o.lowerPostOffset ? curve : curve.slice(1)), mouth]
+          : [mouth, ...(o.lowerPostOffset ? curve : curve.slice(0, -1))];
       const position = sling.position as Point;
       const cos = Math.cos(sling.angle),
         sin = Math.sin(sling.angle);

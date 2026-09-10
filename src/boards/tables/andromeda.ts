@@ -9,7 +9,10 @@ import { arc, rail, type BoardAssembly } from '../assemblies/shared';
 import { andromedaRulesScript } from './andromeda-rules';
 
 // Relative arrangement estimated from Game Plan's flyer and playfield photos.
-const foundation = createFoundation('andromeda', 3, 1800);
+const foundation = createFoundation('andromeda', 3, 1800, {
+  slingAngle: 1.25,
+  lowerPostOffset: undefined,
+});
 const { lower, shooter } = foundation;
 // A hard plunge can pass the right of the top lanes and hit the two standups.
 // Require upper-arch arrival and live-field continuation, not an incidental

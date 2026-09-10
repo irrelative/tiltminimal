@@ -91,3 +91,13 @@ escapes. Fourteen runs exceed the 4000-unit/s speed review threshold (maximum
 4155.1); this remains a physics-tuning observation, not a clean speed-budget
 result. The focused post-pass suite separately verifies passive rebounds and
 stable receiving catches across neighboring timings.
+
+## Closer-post regression run
+
+With the 60° faces and 30-outward/80-upward lower posts, the 76-run report
+completes 14 games, with 10 time-limited games and 57 drained balls. Median
+completed-ball duration is 11.52 seconds; longest unexplained near-rest is
+0.02 seconds. There are no bounds escapes or non-finite states. Sixteen runs
+exceed the existing 4000-unit/s speed-review threshold (maximum 4330.2).
+These remain recorded physics-tuning observations. Post-pass regressions now
+cover four neighboring 50–75 ms releases in each direction.

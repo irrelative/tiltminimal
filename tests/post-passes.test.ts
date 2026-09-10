@@ -25,7 +25,10 @@ describe('post passes using ordinary flipper inputs', () => {
       it(`${id} passes from flipper ${transfer.source + 1} to ${transfer.receiver + 1} across neighboring release timings`, () => {
         const cradle = createPostPassCradle(board, transfer.source);
         expect(isSettledOn(cradle, board, transfer.source)).toBe(true);
-        for (const release of [3, 4, 5]) {
+        const releases = ['andromeda', 'harlem-globetrotters'].includes(id)
+          ? [3, 4, 5]
+          : [6, 7, 8, 9];
+        for (const release of releases) {
           expect(
             simulatePostPass(
               board,

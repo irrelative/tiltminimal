@@ -13,6 +13,9 @@ All built-in lower returns use flipper-relative anchors. Each return curve's
 center sits 32 units outside its flipper pivot. The inner rail ends 0.15 radians
 before a full quarter turn; the outer rail ends 0.005 radians before it. These
 small downward slopes prevent balls balancing on horizontal endpoint caps.
+Classic and foundation tables continue the inner arc with a solid guide to
+30 units outside and 80 above the flipper pivot, bringing the lower sling
+post closer while preserving the outer return and lane entry coordinates.
 
 | Tables                                     | Outer radius | Lane width | Bend center above pivot |
 | ------------------------------------------ | -----------: | ---------: | ----------------------: |

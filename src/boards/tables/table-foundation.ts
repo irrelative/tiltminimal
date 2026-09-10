@@ -7,9 +7,17 @@ import {
   createSaucerPocketAssembly,
 } from '../assemblies';
 import type { Point } from '../../types/board-definition';
+import type { LowerPlayfieldOptions } from '../assemblies/lower-playfield';
 
 // Shared cabinet and ball returns; scoring arrangements remain table-specific.
-export function createFoundation(id: string, laneCount: number, height = 1400) {
+export function createFoundation(
+  id: string,
+  laneCount: number,
+  height = 1400,
+  lowerOverrides: Partial<
+    Pick<LowerPlayfieldOptions, 'slingAngle' | 'lowerPostOffset'>
+  > = {},
+) {
   const lower = createLowerPlayfieldAssembly({
     id: `${id}-lower`,
     center: { x: 450, y: height - 180 },
@@ -22,8 +30,10 @@ export function createFoundation(id: string, laneCount: number, height = 1400) {
     heelOffset: 32,
     slingWidth: 144,
     slingHeight: 50,
-    slingAngle: 1.25,
+    slingAngle: Math.PI / 3,
+    lowerPostOffset: { x: 30, y: 80 },
     slingAtReturn: true,
+    ...lowerOverrides,
   });
   const shooter = createShooterArchAssembly({
     id: `${id}-shooter`,

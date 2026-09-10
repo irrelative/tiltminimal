@@ -133,3 +133,9 @@ The lower sling post shares the inner return exit and the generated solid back
 fills the space to the return wall. Use a 1.25-radian left face for the
 conventional layout; the right is mirrored automatically. See
 [post-pass specification](post-pass-spec.md) for dimensions and transfer tests.
+
+`lowerPostOffset: { x, y }` optionally extends the inner return with a solid
+guide to a lower post `x` units outward and `y` units above the flipper pivot.
+The connected sling back follows that extension. Classic and foundation tables
+use `{ x: 30, y: 80 }` with 60° active faces. Validate feeds, flipper clearance,
+and passive post-pass transfers after changing either dimension.
