@@ -636,43 +636,27 @@ body[data-session-route='physics'] .play-route-panel {
 }
 
 .rule-card-layer {
-  position: absolute;
-  pointer-events: none;
+  display: grid;
+  gap: 12px;
 }
 
-.rule-card-toggle {
-  position: absolute;
-  left: 8px;
-  bottom: 8px;
-  min-height: 24px;
-  padding: 2px 6px;
-  background: #f3e5c6;
-  color: #29231c;
-  border: 1px solid #a28b62;
-  border-radius: 0;
-  font-size: 10px;
-  line-height: 1.2;
-  pointer-events: auto;
+.control-panel .rule-card-toggle {
+  justify-self: start;
+  min-height: 28px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--cool);
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
 }
 
 .rule-card {
-  position: absolute;
-  left: 8px;
-  bottom: 40px;
-  width: min(360px, calc(100% - 16px));
-  max-height: calc(100% - 52px);
-  overflow: auto;
-  padding: 18px;
-  box-sizing: border-box;
-  background: #f3e5c6;
-  color: #29231c;
-  border: 1px solid #a28b62;
-  border-radius: 0;
-  box-shadow: 0 8px 28px #0009;
-  font-size: 14px;
-  line-height: 1.45;
-  pointer-events: auto;
-  overscroll-behavior: contain;
+  padding: 0;
+  color: var(--text);
+  font-size: 0.85rem;
+  line-height: 1.55;
 }
 
 .rule-card h2 {
@@ -701,8 +685,7 @@ body[data-session-route='physics'] .play-route-panel {
 }
 
 .rule-card-toggle:hover {
-  background: #fff1d2;
-  border-color: #a28b62;
+  color: var(--text);
 }
 
 /* HTML shell: flat panels and compact controls; canvas rendering is independent. */

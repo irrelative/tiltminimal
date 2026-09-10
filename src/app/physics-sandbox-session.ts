@@ -2,7 +2,6 @@ import type { BuiltInTable } from '../boards/table-library';
 import { cloneBoardDefinition } from '../boards/board-codec';
 import { PlayInput } from '../input/keyboard-input';
 import type { CanvasRenderer } from '../render/canvas-renderer';
-import type { BoardDefinition } from '../types/board-definition';
 import {
   createPhysicsSandboxLoop,
   getPhysicsSandboxDebugBall,
@@ -12,8 +11,6 @@ interface SyncPhysicsRoutePanelOptions {
   tables: BuiltInTable[];
   activeTableId: string;
   tableSelect: HTMLSelectElement;
-  tableMeta: HTMLElement;
-  getFeatureCount: (board: BoardDefinition) => number;
 }
 
 interface StartPhysicsSandboxSessionOptions {
@@ -33,8 +30,6 @@ export const syncPhysicsRoutePanel = ({
   tables,
   activeTableId,
   tableSelect,
-  tableMeta,
-  getFeatureCount,
 }: SyncPhysicsRoutePanelOptions): void => {
   tableSelect.replaceChildren(
     ...tables.map((table) => {
@@ -46,16 +41,6 @@ export const syncPhysicsRoutePanel = ({
       return option;
     }),
   );
-
-  const active =
-    tables.find((table) => table.id === activeTableId) ?? tables[0] ?? null;
-
-  if (!active) {
-    tableMeta.textContent = '';
-    return;
-  }
-
-  tableMeta.textContent = `${getFeatureCount(active.board)} features`;
 };
 
 export const startPhysicsSandboxSession = ({

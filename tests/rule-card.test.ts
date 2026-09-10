@@ -20,18 +20,15 @@ describe('table rule cards', () => {
   });
 
   it('toggles suspension, closes with Escape, and resets content on table changes', () => {
-    vi.stubGlobal(
-      'ResizeObserver',
-      class {
-        observe() {}
-      },
-    );
-    document.body.innerHTML = '<div><canvas></canvas></div>';
+    document.body.innerHTML =
+      '<aside><div id="rules"></div></aside><canvas></canvas>';
     const pause = vi.fn();
-    const ui = new RuleCard(document.querySelector('canvas')!, pause);
+    const ui = new RuleCard(document.querySelector('#rules')!, pause);
     ui.setTable(BUILT_IN_TABLES[0]);
     const button = document.querySelector('button')!;
     const card = document.querySelector<HTMLElement>('#table-rule-card')!;
+    expect(document.querySelector('aside')!.contains(card)).toBe(true);
+    expect(document.querySelector('canvas')!.children).toHaveLength(0);
     expect(card.hidden).toBe(true);
     button.click();
     expect(card.hidden).toBe(false);

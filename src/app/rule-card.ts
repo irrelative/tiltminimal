@@ -8,7 +8,7 @@ export class RuleCard {
   private open = false;
 
   constructor(
-    canvas: HTMLCanvasElement,
+    host: HTMLElement,
     private readonly onToggle: (open: boolean) => void,
   ) {
     this.layer.className = 'rule-card-layer';
@@ -22,8 +22,8 @@ export class RuleCard {
     this.card.tabIndex = 0;
     this.card.setAttribute('aria-labelledby', 'rule-card-title');
     this.card.hidden = true;
-    this.layer.append(this.card, this.toggle);
-    canvas.parentElement!.append(this.layer);
+    this.layer.append(this.toggle, this.card);
+    host.append(this.layer);
     this.toggle.addEventListener('click', () => this.setOpen(!this.open));
     this.layer.addEventListener('keydown', (event) => {
       event.stopPropagation();
@@ -32,13 +32,6 @@ export class RuleCard {
         this.toggle.focus();
       }
     });
-    // Match the canvas, including horizontal or vertical letterboxing.
-    const position = (): void => {
-      this.layer.style.width = `${canvas.clientWidth}px`;
-      this.layer.style.height = `${canvas.clientHeight}px`;
-    };
-    new ResizeObserver(position).observe(canvas);
-    position();
   }
 
   setTable(table: BuiltInTable): void {

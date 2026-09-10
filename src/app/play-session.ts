@@ -6,14 +6,11 @@ import { createInitialGameState } from '../game/game-state';
 import { GameLoop } from '../game/game-loop';
 import { PlayInput, type InputSource } from '../input/keyboard-input';
 import type { CanvasRenderer } from '../render/canvas-renderer';
-import type { BoardDefinition } from '../types/board-definition';
 
 interface SyncPlayRoutePanelOptions {
   tables: BuiltInTable[];
   activeTableId: string;
   playTableSelect: HTMLSelectElement;
-  playTableMeta: HTMLElement;
-  getFeatureCount: (board: BoardDefinition) => number;
 }
 
 interface StartStandalonePlaySessionOptions {
@@ -33,8 +30,6 @@ export const syncPlayRoutePanel = ({
   tables,
   activeTableId,
   playTableSelect,
-  playTableMeta,
-  getFeatureCount,
 }: SyncPlayRoutePanelOptions): void => {
   playTableSelect.replaceChildren(
     ...tables.map((table) => {
@@ -46,16 +41,6 @@ export const syncPlayRoutePanel = ({
       return option;
     }),
   );
-
-  const active =
-    tables.find((table) => table.id === activeTableId) ?? tables[0] ?? null;
-
-  if (!active) {
-    playTableMeta.textContent = '';
-    return;
-  }
-
-  playTableMeta.textContent = `${getFeatureCount(active.board)} features`;
 };
 
 export const startStandalonePlaySession = ({

@@ -15,7 +15,7 @@ import { GameAudio } from './audio/game-audio';
 import type { GameLoop } from './game/game-loop';
 import type { PhysicsSandboxLoop } from './game/physics-sandbox-loop';
 import { CanvasRenderer } from './render/canvas-renderer';
-import type { BoardDefinition, Point } from './types/board-definition';
+import type { Point } from './types/board-definition';
 import './styles.css';
 
 const required = <T extends Element>(selector: string): T => {
@@ -27,7 +27,6 @@ const canvas = required<HTMLCanvasElement>('#game');
 const tableSelect = required<HTMLSelectElement>('#play-table-select');
 const modeTitle = required<HTMLElement>('#mode-title');
 const modeCopy = required<HTMLElement>('#mode-copy');
-const playMeta = required<HTMLElement>('#play-table-meta');
 const highScores = new HighScores();
 const showHighScores = (): void =>
   renderHighScores(
@@ -86,25 +85,13 @@ const state: {
 const table = (): BuiltInTable =>
   BUILT_IN_TABLES.find((item) => item.id === state.tableId) ??
   BUILT_IN_TABLES[0]!;
-const features = (board: BoardDefinition): number =>
-  board.posts.length +
-  board.bumpers.length +
-  board.standupTargets.length +
-  board.dropTargets.length +
-  board.saucers.length +
-  board.spinners.length +
-  board.slingshots.length +
-  board.rollovers.length +
-  board.guides.length +
-  board.flippers.length;
-const ruleCard = new RuleCard(canvas, (open) => {
+const ruleCard = new RuleCard(required<HTMLElement>('#table-rules'), (open) => {
   const loop = state.loop ?? state.sandbox;
   if (loop) loop.suspended = open;
 });
 const restart = (): void => {
   ruleCard.setTable(table());
   showHighScores();
-  playMeta.textContent = `${features(table().board)} features${table().description ? ' · ' + table().description : ''}`;
   state.loop?.stop();
   state.sandbox?.stop();
   if (route === 'physics') {
@@ -150,8 +137,6 @@ if (route === 'physics') {
     tables: BUILT_IN_TABLES,
     activeTableId: state.tableId,
     tableSelect,
-    tableMeta: playMeta,
-    getFeatureCount: features,
   });
   modeCopy.textContent =
     'Inject balls to inspect the code-authored table physics.';
@@ -207,8 +192,6 @@ if (route === 'physics') {
     tables: BUILT_IN_TABLES,
     activeTableId: state.tableId,
     playTableSelect: tableSelect,
-    playTableMeta: playMeta,
-    getFeatureCount: features,
   });
   required<HTMLButtonElement>('#play-reset-ball').addEventListener(
     'click',

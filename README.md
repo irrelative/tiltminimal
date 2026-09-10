@@ -165,7 +165,8 @@ Post passes use a quick release/re-flip from a cradle while holding the receiver
 Connected lower slings now provide passive rebound posts. See
 [supported transfers and geometry](docs/post-pass-spec.md).
 
-Click **Rule card** at the bottom-left of any table to read its scoring rules.
+Click **Rule card** beneath the table selector to read its scoring rules in the
+sidebar. Feature counts and table descriptions are replaced by this card.
 Click **Close rules** (or press Escape while focused there) to resume. Cards pause
 both Game and Physics without changing debug pause/speed settings. Switching or
 restarting a table closes its card. The cards describe the browser game's current
