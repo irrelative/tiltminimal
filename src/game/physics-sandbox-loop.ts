@@ -19,6 +19,7 @@ import {
 import { clampFrameDeltaSeconds } from './physics-engine-types';
 
 export class PhysicsSandboxLoop {
+  suspended = false;
   readonly debug = new PhysicsDebug();
   private animationFrameId = 0;
   private lastFrameTime = 0;
@@ -118,13 +119,15 @@ export class PhysicsSandboxLoop {
       return;
     }
 
-    const deltaSeconds = this.debug.delta(
-      clampFrameDeltaSeconds(
-        this.lastFrameTime === 0
-          ? 1 / 60
-          : (frameTime - this.lastFrameTime) / 1000,
-      ),
-    );
+    const deltaSeconds = this.suspended
+      ? 0
+      : this.debug.delta(
+          clampFrameDeltaSeconds(
+            this.lastFrameTime === 0
+              ? 1 / 60
+              : (frameTime - this.lastFrameTime) / 1000,
+          ),
+        );
     this.lastFrameTime = frameTime;
     if (deltaSeconds > 0)
       this.state = this.debug.capture(deltaSeconds, () =>

@@ -15,6 +15,7 @@ import { getPlungerPullRatio, stepGameFrame } from './physics-engine';
 import { clampFrameDeltaSeconds } from './physics-engine-types';
 
 export class GameLoop {
+  suspended = false;
   readonly debug = new PhysicsDebug();
   private animationFrameId = 0;
   private lastFrameTime = 0;
@@ -75,13 +76,15 @@ export class GameLoop {
       return;
     }
 
-    const deltaSeconds = this.debug.delta(
-      clampFrameDeltaSeconds(
-        this.lastFrameTime === 0
-          ? 1 / 60
-          : (frameTime - this.lastFrameTime) / 1000,
-      ),
-    );
+    const deltaSeconds = this.suspended
+      ? 0
+      : this.debug.delta(
+          clampFrameDeltaSeconds(
+            this.lastFrameTime === 0
+              ? 1 / 60
+              : (frameTime - this.lastFrameTime) / 1000,
+          ),
+        );
     this.lastFrameTime = frameTime;
     const input = this.input.getState();
     if (deltaSeconds === 0) {

@@ -1,3 +1,4 @@
+import { RuleCard } from './app/rule-card';
 import { UserSettingsStore } from './app/user-settings';
 import { HighScores, renderHighScores } from './app/high-scores';
 import { BUILT_IN_TABLES, type BuiltInTable } from './boards/table-library';
@@ -96,7 +97,12 @@ const features = (board: BoardDefinition): number =>
   board.rollovers.length +
   board.guides.length +
   board.flippers.length;
+const ruleCard = new RuleCard(canvas, (open) => {
+  const loop = state.loop ?? state.sandbox;
+  if (loop) loop.suspended = open;
+});
 const restart = (): void => {
+  ruleCard.setTable(table());
   showHighScores();
   playMeta.textContent = `${features(table().board)} features${table().description ? ' · ' + table().description : ''}`;
   state.loop?.stop();

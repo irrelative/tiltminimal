@@ -639,3 +639,76 @@ body[data-session-route='physics'] .play-route-panel {
   width: 100%;
   accent-color: var(--accent);
 }
+
+.playfield-frame {
+  position: relative;
+}
+
+.rule-card-layer {
+  position: absolute;
+  pointer-events: none;
+}
+
+.rule-card-toggle {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  min-height: 36px;
+  padding: 6px 12px;
+  background: #f3e5c6;
+  color: #29231c;
+  border: 1px solid #a28b62;
+  border-radius: 4px;
+  font-size: 12px;
+  pointer-events: auto;
+}
+
+.rule-card {
+  position: absolute;
+  left: 8px;
+  bottom: 52px;
+  width: min(360px, calc(100% - 16px));
+  max-height: calc(100% - 64px);
+  overflow: auto;
+  padding: 18px;
+  box-sizing: border-box;
+  background: #f3e5c6;
+  color: #29231c;
+  border: 1px solid #a28b62;
+  border-radius: 4px;
+  box-shadow: 0 8px 28px #0009;
+  font-size: 14px;
+  line-height: 1.45;
+  pointer-events: auto;
+  overscroll-behavior: contain;
+}
+
+.rule-card h2 {
+  font-size: 22px;
+  line-height: 1.15;
+  margin: 0 0 10px;
+}
+
+.rule-card p {
+  margin: 0 0 12px;
+}
+.rule-card ul {
+  padding-left: 18px;
+  margin: 0;
+}
+.rule-card li + li {
+  margin-top: 10px;
+}
+.rule-card .rule-card-footer {
+  margin: 16px 0 0;
+  font-size: 12px;
+}
+.rule-card-toggle:focus-visible {
+  outline: 3px solid #55cfff;
+  outline-offset: 2px;
+}
+
+.rule-card-toggle:hover {
+  background: #fff1d2;
+  border-color: #a28b62;
+}
