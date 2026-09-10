@@ -103,9 +103,9 @@ body[data-route='physics'] .workspace {
 .control-panel,
 .stage-shell {
   min-height: 0;
-  border: 1px solid var(--panel-border);
+  border: 0;
   border-radius: 0;
-  background: var(--panel);
+  background: transparent;
   box-shadow: var(--shadow);
 }
 
@@ -132,7 +132,7 @@ body[data-route='physics'] .control-panel {
   border-radius: 0;
   background: transparent;
   border: 0;
-  border-bottom: 1px solid var(--panel-border);
+  border-bottom: 0;
 }
 
 .eyebrow {
@@ -709,7 +709,7 @@ body[data-session-route='physics'] .play-route-panel {
 .control-panel > .debug-menu {
   padding: 16px 0;
   border: 0;
-  border-bottom: 1px solid var(--panel-border);
+  border-bottom: 0;
   background: transparent;
   gap: 0;
 }
@@ -733,7 +733,7 @@ body[data-session-route='physics'] .play-route-panel {
   min-width: 0;
   padding: 18px 0;
   border: 0;
-  border-bottom: 1px solid var(--panel-border);
+  border-bottom: 0;
   background: transparent;
 }
 .control-panel button {

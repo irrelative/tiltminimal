@@ -2,7 +2,7 @@ import { RuleCard } from './app/rule-card';
 import { UserSettingsStore } from './app/user-settings';
 import { HighScores, renderHighScores } from './app/high-scores';
 import { BUILT_IN_TABLES, type BuiltInTable } from './boards/table-library';
-import { buildAppRoutePath, getAppRouteFromPathname } from './app/routes';
+import { getAppRouteFromPathname } from './app/routes';
 import {
   startStandalonePlaySession,
   syncPlayRoutePanel,
@@ -68,7 +68,6 @@ for (const control of [soundToggle, volumeSlider, spinToggle, trailToggle]) {
 const basePath = import.meta.env.BASE_URL;
 const route = getAppRouteFromPathname(window.location.pathname, basePath);
 document.body.dataset.sessionRoute = route;
-required(`#${route}-link`).setAttribute('aria-current', 'page');
 const state: {
   tableId: string;
   loop: GameLoop | null;
@@ -220,11 +219,6 @@ const syncTableUrl = (): void => {
   const url = new URL(window.location.href);
   url.searchParams.set('table', state.tableId);
   window.history.replaceState(window.history.state, '', url);
-  for (const mode of ['play', 'physics'] as const) {
-    const link = new URL(buildAppRoutePath(mode, basePath), url);
-    link.searchParams.set('table', state.tableId);
-    required<HTMLAnchorElement>(`#${mode}-link`).href = link.href;
-  }
 };
 tableSelect.addEventListener('change', () => {
   state.tableId = tableSelect.value;

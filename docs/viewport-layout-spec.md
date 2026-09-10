@@ -1,18 +1,18 @@
 # Board viewport layout
 
 Game (`/`) and Physics (`/physics`) share the same stage layout. Desktop space
-is reserved for the complete table, with navigation and controls beside it.
+is reserved for the complete table, with controls beside it.
 
 ## Desktop sizing
 
 Above 1080 CSS pixels wide, the workspace is a two-column grid with a 320-pixel sidebar and 12-pixel gap, bounded to
 `100dvh` minus an 8-pixel outer inset on each side. The sidebar scrolls
 independently; expanding debugging controls must not shrink the playfield or
-make the entire page taller. Game/Physics navigation belongs in the sidebar.
+make the entire page taller. Physics is available directly at `/physics`; no mode navigation is shown.
 Do not add a toolbar row above the canvas.
 
 The stage and playfield frame have no internal padding and occupy the full
-workspace height. Their borders leave approximately 9 pixels between each
+workspace height. The outer inset leaves approximately 8 pixels between each
 vertical window edge and a height-limited board. The frame centers the canvas.
 Empty horizontal space is expected for a portrait table on a wide display.
 
@@ -33,7 +33,7 @@ and the shooter must remain visible together.
 At 1080 CSS pixels or below, controls and stage stack and the document may
 scroll. The stage has a bounded height of `80svh`; the same renderer fits each
 table within that area. This avoids an intrinsic canvas-size feedback loop in
-an auto-height container. Navigation remains accessible in the controls.
+an auto-height container. The Physics route remains available by direct URL.
 Touch input continues to map through the displayed canvas rectangle.
 
 ## Review
@@ -49,7 +49,7 @@ After changing the shell or canvas sizing:
   board. Width-limited letterboxing is acceptable.
 - Run `make build` and `make lint`.
 
-The September 2026 change moved navigation into the sidebar, removed nested
+The September 2026 sizing change removed nested
 stage padding, and verified full-height Classic and Harlem in the browser,
 including the Physics route. Table geometry and physics are unaffected.
 
@@ -57,11 +57,10 @@ including the Physics route. Table geometry and physics are unaffected.
 ## HTML shell styling
 
 The table surround, sidebar, controls and rule-card containers use square corners.
-A flat dark surface and thin separators replace nested translucent cards,
+A borderless dark surface replaces nested translucent cards,
 gradients and large shadows. The sidebar uses compact headings, restrained reset
-buttons and tabular score/debug numbers. Game/Physics navigation marks the current
-page with `aria-current`, a contrasting fill and a cyan underline. Focus outlines
-remain visible on controls, links and settings disclosure.
+buttons and tabular score/debug numbers. Game/Physics navigation is omitted; `/physics` remains a direct-access tool.
+Focus outlines remain visible on controls and settings disclosure.
 
 Sidebar typography is independent of the canvas fonts. This styling revision
 changes no table artwork, geometry, scoring or physics. Canvas sizing remains
