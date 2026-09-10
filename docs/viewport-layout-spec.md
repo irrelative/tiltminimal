@@ -68,3 +68,7 @@ proportional and the parent stays padding-free. Numeric sandbox fields remain in
 two columns on narrow screens. Review covered Game and Physics, Classic and
 Harlem, expanded settings/debug controls, a short desktop window and a 390-pixel
 mobile viewport including the rule card. Build and lint pass.
+
+The Physics overlay toggle and its debug controls live inside the Settings
+disclosure. Collapsing Settings hides these controls without changing the overlay
+or simulation state. The overlay remains a session control, not a saved preference.
