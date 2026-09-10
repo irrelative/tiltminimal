@@ -115,6 +115,9 @@ Use the `Makefile` entrypoints:
 * Touch swipe left/right/up on the playfield: nudge
 * Touch swipe down on the right side: plunger pull/release
 
+On-canvas control hints appear only while a ball is waiting to be plunged.
+They disappear during play; game-over and multiball status remain visible.
+
 See [physical contact behavior](docs/physics-contact-spec.md) for flipper, sling,
 bumper, and rollover collision rules and regression coverage.
 

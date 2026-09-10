@@ -150,7 +150,7 @@ export const getStatusLabel = (
   board: BoardDefinition,
 ): string => {
   if (state.status === 'game-over') {
-    return 'Game over. Hold Arrow Up to start a new game.';
+    return 'Game over.';
   }
 
   if (state.additionalBalls.length)
@@ -172,5 +172,5 @@ export const getStatusLabel = (
     return 'Hold Arrow Up or swipe down on the right side to pull back the plunger. Release to launch.';
   }
 
-  return 'Left Shift / Left Arrow and Right Shift / Right Arrow flip. On touch, hold the lower left or right playfield to flip, swipe left/right/up to nudge, and swipe down on the right side to plunge.';
+  return '';
 };
