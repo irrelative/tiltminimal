@@ -1,182 +1,162 @@
 # Pinball Browser
 
-A browser based pinball game. Some overall requirements:
+A TypeScript browser pinball game with five built-in tables, a 2D canvas
+playfield, keyboard and touch controls, and synthesized audio. Shared physics,
+rendering, and reusable board assemblies support table-specific layouts and rules,
+including ball locks and two-ball multiball.
 
-* High performance. The current implementation uses a 2D canvas renderer; WebGL remains future-facing rather than implemented today.
-* Board decoupled from game logic; there should be a way to create a new board layout that plugs into existing game system
+[Play in your browser](https://irrelative.github.io/tiltminimal/).
 
-## Current scaffold
+## Tables
 
-The repository now includes a TypeScript + Vite browser game with:
+| Table                | Balls | What to shoot for                                                                                  |
+| -------------------- | ----- | -------------------------------------------------------------------------------------------------- |
+| Classic              | 3     | Complete the top lanes, build bonus, and shoot the saucer.                                         |
+| Andromeda            | 3     | Clear the guard, lock a ball, then hit RELEASE for two-ball multiball.                             |
+| Double Crossed       | 3     | Complete both CROSS banks, lock a ball, and plunge for multiball. Both spinners light the jackpot. |
+| Harlem Globetrotters | 3     | Use three flippers to reach sweeping lanes and high-value upper saucers.                           |
+| Starlight            | 5     | Spell STAR, light COMET and NOVA, and collect rising observatory awards.                           |
 
-* a 2D canvas-based playfield
-* 2D ball physics with planar position/velocity and 2-axis rolling spin
-* multiple built-in, code-authored tables
-* separated game loop, physics, input, and rendering modules
-* Vitest and GitHub Actions wiring for basic verification
+Andromeda and Harlem are reference-based adaptations. Harlem currently uses
+simplified direct scoring, and its synthesized early Bally-style sound is an
+approximation rather than ROM emulation. Each table's **Rule card** describes
+the rules implemented in this game.
 
-## Local commands
+## Playing
 
-Use the `Makefile` entrypoints:
+The home page opens a **Select a table** preview gallery. Choosing a table puts
+its ID in the URL, for example `?table=double-crossed`, so refreshing starts the
+same table. Missing, invalid, or removed IDs show the gallery. Use the sidebar's
+**Select a table** link to return; leaving or refreshing does not save an in-progress
+game.
 
-* `make install`
-* `make dev`
-* `make build`
-* `make lint`
-* `make test`
-* `make cloc`
-* `make validate-table TABLE=classic-table`
-* `make fmt`
+The canvas shows score and current ball number. The sidebar contains the table
+name, its top-five high scores, a compact **Reset ball** action, **Rule card**,
+and **Settings**. Opening the rule card pauses play; closing it resumes play.
+Keyboard hints appear on the playfield only before the ball is plunged.
 
-## Structure
+| Action             | Keyboard                       | Touch                                             |
+| ------------------ | ------------------------------ | ------------------------------------------------- |
+| Left flipper       | Left Shift, Left Arrow, or A   | Hold the lower-left playfield                     |
+| Right flipper      | Right Shift, Right Arrow, or D | Hold the lower-right playfield                    |
+| Plunger            | Hold Up Arrow, then release    | Swipe down on the right side, hold, then lift     |
+| Left / right nudge | Z / slash                      | Swipe left / right outside the flipper hold zones |
+| Forward nudge      | Space                          | Swipe up outside the flipper hold zones           |
 
-* `src/boards/` shared board authoring, codec, and library modules
-* `src/boards/tables/` built-in table implementations and rules scripts
-* `src/cli/` terminal entrypoints for validation and other repo tooling
-* `src/validation/` simulation-based table analysis and playability checks
-* `src/game/` runtime state and physics
-* `src/render/` canvas rendering
-* `src/input/` player controls
-* `tests/` unit tests
+Touch supports simultaneous flipper holds. Long presses on the playfield suppress
+browser text selection and touch callouts. See [mobile controls](docs/mobile-controls-spec.md).
 
-## Additional docs
+All tables have regression coverage for cradles, controlled release shots, dead
+bounces, post passes, bump passes, live catches, drop catches, and timed slap saves.
+These moves depend on ball position, speed, and timing; transfer directions vary
+with table geometry. See [advanced flipper skills](docs/advanced-flipper-skills-spec.md)
+for techniques and verified scenarios.
 
-* [docs/andromeda-spec.md](docs/andromeda-spec.md) describes Andromeda's reference
-  layout, guarded lock, two-ball multiball, rules, and fidelity limits
-* [docs/multiball-spec.md](docs/multiball-spec.md) defines shared ball ownership,
-  lock/serve/release behavior, rules APIs, and final-drain handling
+### Settings, scores, and sound
 
-* [docs/viewport-layout-spec.md](docs/viewport-layout-spec.md) defines full-height
-  desktop board sizing, sidebar scrolling, and narrow-window behavior
+**Settings** provides sound on/off, volume, the ball's spin marker, and motion
+trails. Sound, markers, and trails default to on. Preferences apply across tables
+and persist in this browser. **Physics overlay**, also inside Settings, reveals
+physics diagnostics and pause, step, and slow-motion controls.
 
-* [docs/board-assemblies.md](docs/board-assemblies.md) describes reusable
-  mechanisms, their configuration, and automatic ball-route validation
+Each table saves its five highest positive completed-game scores in browser local
+storage. Partial games and sandbox sessions do not submit scores. Scores and
+preferences are local to the browser, with no account or cross-device sync; if
+storage is unavailable, changes last only for the current page session.
 
-* [docs/classic-table-spec.md](docs/classic-table-spec.md) defines Classic’s
-  connected lanes, scoring shots, shooter gate, and route verification
-* [docs/codebase-overview.md](docs/codebase-overview.md) explains the current
-  folder layout, runtime flow, route responsibilities, and important module
-  boundaries
-* [docs/table-validation-cli.md](docs/table-validation-cli.md) defines the
-  terminal entrypoint for validating built-in table implementations
-* [docs/physics-sandbox-spec.md](docs/physics-sandbox-spec.md) defines the
-  dedicated `/physics` route for click-to-spawn physics testing outside the
-  normal game/rules lifecycle
-* [docs/board-component-dimensions.md](docs/board-component-dimensions.md)
-  defines the dimensional meaning of every board component field
-* [docs/table-analysis-spec.md](docs/table-analysis-spec.md) defines the CLI
-  geometry analysis workflow and the current warning set for overlap, bounds,
-  shooter-lane, flipper, spinner, saucer-eject, and rules-coverage issues
-* [docs/physics-and-animation.md](docs/physics-and-animation.md) explains how
-  the frame loop, physics solver, rolling spin, and renderer fit together
-* [docs/table-layout-authoring.md](docs/table-layout-authoring.md) explains the
-  higher-level layout DSL, compiler, and validation flow for built-in and
-  agent-generated tables
-* [docs/conventional-layout-guidelines.md](docs/conventional-layout-guidelines.md)
-  defines the shared layout standard: connected mechanisms, center-drain
-  clearance, flipper-relative feeds, cradling, and acceptance checks
-* [docs/gpt-table-generation.md](docs/gpt-table-generation.md) defines the
-  required anatomy-first workflow for GPT-authored table layouts
-* [docs/layout-playability-spec.md](docs/layout-playability-spec.md) defines
-  the semantic shooter-lane and top-arch primitives plus the current
-  playability validation guarantees for DSL-authored tables
-* [docs/mobile-controls-spec.md](docs/mobile-controls-spec.md) defines the
-  touch control scheme for playing on phones and tablets
-* [docs/slingshot-layout-spec.md](docs/slingshot-layout-spec.md) defines the
-  active slingshot component and the lower-lane DSL patterns used to build
-  playable lower thirds
-* [docs/starlight-em-spec.md](docs/starlight-em-spec.md) defines the behavior
-  and layout goals for the built-in 1970s EM-style table
-* [docs/harlem-globetrotters-spec.md](docs/harlem-globetrotters-spec.md) describes
-  the reference-based court layout, inline target lane, and staggered left flippers
-* [docs/double-crossed-spec.md](docs/double-crossed-spec.md) defines the
-  behavior and validation goals for the built-in `Double Crossed` table
+A pointer or keyboard interaction unlocks audio. Tables share mechanical sounds;
+Harlem adds electronic scoring cues and a synthesized Sweet Georgia Brown opening
+phrase. See [audio behavior and fidelity limits](docs/table-audio-spec.md) and
+[user settings](docs/user-settings.md).
 
-## Static Deployment
+## Local development
 
-* GitHub Pages: https://irrelative.github.io/tiltminimal/
-* Deployed routes:
-  * Game: `https://irrelative.github.io/tiltminimal/`
-* Physics Sandbox: `https://irrelative.github.io/tiltminimal/physics`
-* Deployment is handled by `.github/workflows/deploy-pages.yml`, which builds with the Pages-provided base path and publishes the `dist/` output.
+Use Node.js 22 (the version used in CI), npm, and Make:
 
-## Play Controls
+```sh
+make install
+make dev
+```
 
-* `Left Shift` / `Left Arrow`: left flipper
-* `Right Shift` / `Right Arrow`: right flipper
-* `Arrow Up`: plunger
-* `Z`: left nudge
-* `/`: right nudge
-* `Space`: forward/up nudge
-* Touch lower-left playfield: hold left flipper
-* Touch lower-right playfield: hold right flipper
-* Touch swipe left/right/up on the playfield: nudge
-* Touch swipe down on the right side: plunger pull/release
+Open the local URL printed by Vite. The project uses TypeScript, Vite, ESLint,
+Prettier, and Vitest; rendering uses Canvas 2D.
 
-On-canvas control hints appear only while a ball is waiting to be plunged.
-They disappear during play; game-over and multiball status remain visible.
+| Command                                   | Purpose                                             |
+| ----------------------------------------- | --------------------------------------------------- |
+| `make build`                              | Type-check and build production assets into `dist/` |
+| `make lint`                               | Run ESLint                                          |
+| `make test`                               | Run the Vitest suite                                |
+| `make fmt`                                | Format the repository with Prettier                 |
+| `make validate-table TABLE=classic-table` | Validate a built-in table                           |
+| `make playtest-classic`                   | Run Classic timing sweeps and seeded games          |
+| `make cloc`                               | Count source lines; requires `cloc` installed       |
+| `make clean`                              | Remove generated build and coverage output          |
 
-Every table supports cradles, controlled release shots, dead bounces, post
-passes, live catches, drop catches, and timed slap saves. These require suitable
-ball position, speed, and timing; post-pass directions follow each table's
-geometry. See [advanced flipper skills](docs/advanced-flipper-skills-spec.md)
-for techniques, per-table coverage, and regression scenarios.
+CI runs lint, build, and tests on pull requests and pushes to `main`.
 
-See [physical contact behavior](docs/physics-contact-spec.md) for flipper, sling,
-bumper, and rollover collision rules and regression coverage.
+### Physics and playtesting
 
-Enable **Physics overlay** in Game or Physics for collision outlines, contact
-normals, ball speed, recent triggers, and pause/step/slow-motion controls.
-See [the debugging guide](docs/physics-debug-overlay.md).
+The separate `/physics?table=classic-table` route opens a click-to-spawn physics
+sandbox outside the normal scoring and ball lifecycle. It is intentionally absent
+from the player navigation. Without a valid table ID, `/physics` shows the gallery.
+The sandbox is silent and does not record high scores.
 
-Run `make playtest-classic` for a focused Classic timing sweep and seeded game
-batch. It saves a Markdown report and replayable JSON under `playtest-results/`.
-See [Classic playtest scenarios and baseline findings](docs/classic-playtest.md).
+Use **Settings → Physics overlay** for collision outlines, contact normals, ball
+state, recent triggers, and simulation controls. See the
+[debugging guide](docs/physics-debug-overlay.md) and
+[sandbox specification](docs/physics-sandbox-spec.md).
 
-All tables validate their intended passive inlane paths and held-flipper
-catch/release. See [the flipper feed specification](docs/flipper-feed-spec.md).
+`make playtest-classic` writes a Markdown report and replayable simulation JSON
+under `playtest-results/`. This is developer tooling; recording and replaying a
+live game is not currently a player-facing feature. See
+[Classic playtests](docs/classic-playtest.md).
 
-Harlem has table-specific early Bally-style electronic scoring sounds and a
-synthesized Sweet Georgia Brown startup phrase. Click or press a key in Game
-to unlock audio. See [table audio and fidelity limits](docs/table-audio-spec.md).
+## Code organization and table authoring
 
-The selected table is stored in the URL as `?table=harlem-globetrotters` (using
-its built-in table ID). Refreshing or switching between Game and Physics keeps
-that selection. Missing or invalid IDs fall back to the first table. Changing
-tables updates the current URL without adding browser history entries; other
-query parameters and the URL fragment are preserved.
+| Path                 | Responsibility                                                           |
+| -------------------- | ------------------------------------------------------------------------ |
+| `src/app/`           | Gallery, game and sandbox sessions, routes, rule cards, scores, settings |
+| `src/boards/`        | Board schema helpers, layout compiler, assemblies, and table library     |
+| `src/boards/tables/` | Built-in layouts and table-specific rules                                |
+| `src/game/`          | Runtime state, game loop, physics, and shared rules systems              |
+| `src/render/`        | Canvas rendering and table artwork                                       |
+| `src/input/`         | Keyboard and touch controls                                              |
+| `src/audio/`         | Synthesized mechanical sounds and table audio profiles                   |
+| `src/validation/`    | Geometry analysis and simulated playability checks                       |
+| `src/playtest/`      | Simulation, scenarios, and replay tooling                                |
+| `src/cli/`           | Validation and playtest entrypoints                                      |
+| `tests/`             | Automated regression tests                                               |
+| `docs/`              | Behavior specifications and authoring guides                             |
 
-Every table shows the current ball number beside the score on the playfield HUD
-(e.g. `Ball 2 of 3`), including when Physics overlay is off. The canvas header
-shows score and ball; the table name appears in the left sidebar.
+Before changing a layout, read the
+[conventional layout guidelines](docs/conventional-layout-guidelines.md) and its
+table-specific spec. Use connected assemblies, preserve a ball-sized center
+drain, and verify inlane feeds and held-flipper catch/release behavior. Follow the
+guide's regression tests and browser review workflow, including all-table validation:
 
-Each table has a top-five high-score list beneath its name in the left sidebar.
-Positive final scores are recorded once when a game ends and saved in this
-browser's local storage. Refreshes preserve the list; changing tables shows that
-table's scores. Tied scores from separate games occupy separate places. Partial
-games and Physics sandbox play do not submit scores. If storage is unavailable,
-scores remain available for the current page session only.
+```sh
+make validate-table TABLE='--all --deep-playability --fail-on-warnings'
+```
 
-User preferences are available under **Settings** in the left sidebar: sound,
-volume, ball spin markers, and motion trails. They apply immediately across tables
-and are saved in this browser. See [User settings](docs/user-settings.md).
+Start with the [codebase overview](docs/codebase-overview.md),
+[layout authoring guide](docs/table-layout-authoring.md),
+[reusable assemblies](docs/board-assemblies.md), and
+[validation CLI](docs/table-validation-cli.md). The
+[component dimensions](docs/board-component-dimensions.md),
+[physics and animation](docs/physics-and-animation.md), and
+[multiball specification](docs/multiball-spec.md) cover the shared systems.
 
-Post passes use a quick release/re-flip from a cradle while holding the receiver.
-Connected lower slings now provide passive rebound posts. See
-[supported transfers and geometry](docs/post-pass-spec.md).
+Table specs: [Classic](docs/classic-table-spec.md),
+[Andromeda](docs/andromeda-spec.md), [Double Crossed](docs/double-crossed-spec.md),
+[Harlem Globetrotters](docs/harlem-globetrotters-spec.md), and
+[Starlight](docs/starlight-em-spec.md).
 
-Click **Rule card** in the game sidebar to read its scoring rules in the
-sidebar. Feature counts and table descriptions are replaced by this card.
-Click **Rule card** again (or press Escape while focused there) to resume. Cards pause
-both Game and Physics without changing debug pause/speed settings. Switching or
-restarting a table closes its card. The cards describe the browser game's current
-rules; Harlem's card identifies its simplified scoring.
-See [rule-card behavior and authoring](docs/rule-cards.md).
+## Deployment
 
-Bump passes are verified on every table: release a cradle, hold the opposite
-flipper, and tap Space to nudge the rolling ball across. See the
-[verified timings and coverage](docs/advanced-flipper-skills-spec.md#verified-bump-passes).
+[GitHub Pages](https://irrelative.github.io/tiltminimal/) hosts the static game.
+The [deployment workflow](.github/workflows/deploy-pages.yml) runs on pushes to
+`main` or manual dispatch, verifies the project, builds with the Pages-provided
+base path, and publishes `dist/` with a `404.html` fallback for direct routes.
 
-Open the home page to **Select a table** from the preview gallery. Use the
-sidebar’s **Select a table** link to choose another game. Direct `?table=` links
-keep the selected table on refresh. See [table selection](docs/table-selection.md).
+For another static host, build with `VITE_BASE_PATH` set to the deployment subpath
+when needed, serve `dist/`, and configure an index-page fallback for `/physics`.
