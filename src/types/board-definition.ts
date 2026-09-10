@@ -10,6 +10,7 @@ export type BoardThemeId =
   | 'classic'
   | 'midnight'
   | 'sunburst'
+  | 'starlight'
   | 'grayscale'
   | 'harlem'
   | 'andromeda';

@@ -1,4 +1,8 @@
 import {
+  drawStarlightPlayfield,
+  drawStarlightInserts,
+} from './starlight-playfield-art';
+import {
   getSlingshotRubberRadius,
   getSlingshotVertices,
 } from '../game/slingshot-geometry';
@@ -56,7 +60,11 @@ export const drawStaticBoardBase = (
   drawGuides(context, board, 'playfield');
   drawPlungerLane(context, board);
   drawPosts(context, board);
-  drawBumpers(context, board, options.showBumperScores ?? false);
+  drawBumpers(
+    context,
+    board,
+    board.themeId !== 'starlight' && (options.showBumperScores ?? false),
+  );
 };
 
 export const drawDynamicBoard = (
@@ -64,6 +72,8 @@ export const drawDynamicBoard = (
   board: BoardDefinition,
   state?: GameState,
 ): void => {
+  if (board.themeId === 'starlight')
+    drawStarlightInserts(context, board, state);
   drawPlungerBody(context, board, state);
   const gate = getPlungerReturnGate(board);
   if (gate) {
@@ -304,6 +314,10 @@ const drawBackground = (
   board: BoardDefinition,
 ): void => {
   const theme = getBoardTheme(board.themeId);
+  if (board.themeId === 'starlight') {
+    drawStarlightPlayfield(context, board);
+    return;
+  }
   if (board.themeId === 'andromeda') {
     drawAndromedaPlayfield(context, board.width, board.height);
     return;
@@ -406,7 +420,7 @@ const drawBumpers = (
       context.textAlign = 'center';
       context.fillStyle = theme.bumperText;
       context.fillText(String(bumper.score), bumper.x, bumper.y + 8);
-    } else {
+    } else if (board.themeId !== 'starlight') {
       context.fillStyle = theme.bumperText;
       context.beginPath();
       context.arc(bumper.x, bumper.y, bumper.radius * 0.18, 0, Math.PI * 2);

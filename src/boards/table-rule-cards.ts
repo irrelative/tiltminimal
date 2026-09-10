@@ -49,12 +49,13 @@ export const TABLE_RULE_CARDS: Record<string, TableRuleCard> = {
   },
   'starlight-em': {
     balls: 5,
-    objective: 'Complete target banks and build a 3× bonus.',
+    objective: 'Light the constellation and collect the observatory.',
     rules: [
-      'Complete either three-target standup bank for 3,000 points, 1,000 bonus and a multiplier advance.',
-      'Complete all four top lanes for 2,000 points and a multiplier advance.',
-      'The saucer adds 1,500 bonus and advances the multiplier. Bonus multiplication tops out at 3×.',
-      'Bumpers, spinner, slings, lanes and targets build bonus. Collect bonus × multiplier when the ball drains.',
+      'Spell STAR in the four top lanes for 2,000, light 1,000-point pops, and advance bonus multiplication up to 5×.',
+      'Complete the left COMET bank to light its orbit spinner for 500 per spin. Complete the right NOVA bank to light the center spinner for 1,000.',
+      'With both banks lit, the observatory saucer collects 10,000, rising by 5,000 each collection up to 25,000. Both banks and spinner lights reset after collection.',
+      'Complete STAR before collecting the lit observatory to earn an extra ball, once per game.',
+      'Build up to 20,000 bonus and collect it × multiplier on drain. Feature lights reset each ball; the observatory award carries across balls.',
     ],
   },
 };

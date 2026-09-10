@@ -65,7 +65,7 @@ export interface BoardTheme {
 export const DEFAULT_BOARD_THEME_ID: BoardThemeId = 'classic';
 
 const BASE_THEMES: Record<
-  Exclude<BoardThemeId, 'harlem' | 'andromeda'>,
+  Exclude<BoardThemeId, 'harlem' | 'andromeda' | 'starlight'>,
   BoardTheme
 > = {
   classic: {
@@ -316,6 +316,21 @@ const BASE_THEMES: Record<
 
 export const BOARD_THEMES: Record<BoardThemeId, BoardTheme> = {
   ...BASE_THEMES,
+  starlight: {
+    ...BASE_THEMES.midnight,
+    id: 'starlight',
+    label: 'Starlight',
+    bumperColors: ['#f4c66b', '#6dc8b6', '#df7866'],
+    bumperCap: '#fff1cd',
+    bumperText: '#192e43',
+    flipperFill: '#fff1cd',
+    flipperCore: '#bb624f',
+    guideMetalPrimary: '#f4db9d',
+    guideMetalSecondary: '#568e99',
+    standupFill: '#e78c6e',
+    hudText: '#fff1cd',
+    hudMuted: '#ead6a5',
+  },
   andromeda: {
     ...BASE_THEMES.midnight,
     id: 'andromeda',

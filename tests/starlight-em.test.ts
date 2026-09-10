@@ -10,7 +10,7 @@ import { idleInput, launchBall } from './helpers/game-fixture';
 describe('starlightEmTable', () => {
   it('exposes a valid EM-style built-in table', () => {
     expect(starlightEmTable.name).toBe('Starlight EM');
-    expect(starlightEmTable.themeId).toBe('sunburst');
+    expect(starlightEmTable.themeId).toBe('starlight');
     expect(starlightEmTable.rulesScript).toContain('BALLS_PER_GAME = 5');
     expect(starlightEmTable.bumpers).toHaveLength(3);
     expect(starlightEmTable.spinners).toHaveLength(2);

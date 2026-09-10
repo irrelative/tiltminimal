@@ -37,6 +37,8 @@ export const BUILT_IN_TABLES: BuiltInTable[] = [
   {
     id: 'starlight-em',
     board: starlightEmTable,
+    description:
+      'Spell STAR, light COMET and NOVA spinners, then collect the observatory constellation award.',
   },
 ];
 
