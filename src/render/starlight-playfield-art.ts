@@ -56,7 +56,7 @@ export const drawStarlightPlayfield = (
   }
   c.restore();
   label(c, 'COMET', 245, 685, 24);
-  label(c, 'NOVA', 710, 760, 24);
+  label(c, 'NOVA', 685, 685, 24);
   label(c, 'OBSERVATORY', 750, 295, 18);
   label(c, 'LIGHT BOTH BANKS', 750, 320, 13);
   label(c, 'CONSTELLATION', 450, 1065, 24);
