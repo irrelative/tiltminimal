@@ -140,7 +140,8 @@ tables updates the current URL without adding browser history entries; other
 query parameters and the URL fragment are preserved.
 
 Every table shows the current ball number beside the score on the playfield HUD
-(e.g. `Ball 2 of 3`), including when Physics overlay is off.
+(e.g. `Ball 2 of 3`), including when Physics overlay is off. The canvas header
+shows score and ball; the table name appears in the left sidebar.
 
 Each table has a top-five high-score list beneath its name in the left sidebar.
 Positive final scores are recorded once when a game ends and saved in this

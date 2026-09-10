@@ -15,20 +15,19 @@ export const drawHud = (
   const theme = getBoardTheme(board.themeId);
   context.fillStyle = theme.hudText;
   context.font = `600 28px ${UI_FONT_FAMILY}`;
-  context.fillText(board.name, 48, 64);
   context.fillText(
     `Score ${state.score} · Ball ${state.rules.currentBall} of ${state.rules.ballsPerGame}`,
     48,
-    104,
+    64,
   );
 
   if (typeof state.rules.machineValues['table-status'] === 'string') {
     context.font = `500 20px ${UI_FONT_FAMILY}`;
-    context.fillText(state.rules.machineValues['table-status'], 48, 138);
+    context.fillText(state.rules.machineValues['table-status'], 48, 98);
     context.fillText(
       `Bonus ${state.rules.bonus} × ${state.rules.bonusMultiplier}`,
       48,
-      166,
+      126,
     );
   }
 
