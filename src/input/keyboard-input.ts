@@ -143,6 +143,8 @@ export class PlayInput implements InputSource {
     }
 
     this.keyboard.connect();
+    this.element.addEventListener('contextmenu', this.preventBrowserGesture);
+    this.element.addEventListener('selectstart', this.preventBrowserGesture);
     this.element.addEventListener('pointerdown', this.onPointerDown);
     this.element.addEventListener('pointermove', this.onPointerMove);
     this.element.addEventListener('pointerup', this.onPointerUp);
@@ -158,6 +160,8 @@ export class PlayInput implements InputSource {
     }
 
     this.keyboard.disconnect();
+    this.element.removeEventListener('contextmenu', this.preventBrowserGesture);
+    this.element.removeEventListener('selectstart', this.preventBrowserGesture);
     this.element.removeEventListener('pointerdown', this.onPointerDown);
     this.element.removeEventListener('pointermove', this.onPointerMove);
     this.element.removeEventListener('pointerup', this.onPointerUp);
@@ -190,6 +194,10 @@ export class PlayInput implements InputSource {
 
     return nextState;
   }
+
+  private readonly preventBrowserGesture = (event: Event): void => {
+    event.preventDefault();
+  };
 
   private readonly onPointerDown = (event: PointerEvent): void => {
     if (!isTouchLikePointer(event)) {

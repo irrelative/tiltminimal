@@ -81,3 +81,8 @@ sidebar link back to selection.
 Reset ball is a compact icon-and-text action in the table header below the high
 scores. It sits outside the Rule card and Settings disclosures and is hidden on
 the Physics route, which retains its own sandbox reset.
+
+Long presses on the playfield suppress text selection and touch callouts, including
+WebKit-specific selection behavior. Connected play input also cancels canvas
+selection/context-menu events. Sidebar text and form controls keep normal browser
+behavior; multi-touch flipper input and pointer release/cancellation are unchanged.

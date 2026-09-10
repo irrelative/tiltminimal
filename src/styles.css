@@ -929,3 +929,11 @@ body[data-session-route='physics'] .play-route-panel {
 body[data-session-route='physics'] .reset-ball-action {
   display: none;
 }
+
+/* Holding a flipper is gameplay, not a browser text-selection gesture. */
+.stage-shell,
+#game {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}

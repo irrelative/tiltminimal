@@ -232,6 +232,27 @@ describe('PlayInput', () => {
   });
 });
 
+it('suppresses playfield long-press defaults only while input is connected', () => {
+  const canvas = document.createElement('canvas');
+  const sidebar = document.createElement('div');
+  const input = new PlayInput(canvas);
+  input.connect();
+  for (const type of ['contextmenu', 'selectstart']) {
+    const event = new Event(type, { cancelable: true });
+    canvas.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(true);
+    const outside = new Event(type, { cancelable: true });
+    sidebar.dispatchEvent(outside);
+    expect(outside.defaultPrevented).toBe(false);
+  }
+  input.disconnect();
+  for (const type of ['contextmenu', 'selectstart']) {
+    const event = new Event(type, { cancelable: true });
+    canvas.dispatchEvent(event);
+    expect(event.defaultPrevented).toBe(false);
+  }
+});
+
 const dispatchPointer = (
   target: EventTarget,
   type: string,
