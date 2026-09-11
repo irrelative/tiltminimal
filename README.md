@@ -70,11 +70,12 @@ storage. Partial games and sandbox sessions do not submit scores. Scores and
 preferences are local to the browser, with no account or cross-device sync; if
 storage is unavailable, changes last only for the current page session.
 
-Just One More is a silent r/pinball tribute in this first version. Its simple
+Just One More is an r/pinball tribute with shared mechanical sounds and no music
+or callouts. Its simple
 PLAY / FIX / COLLECT progression uses the same tested open fan geometry as Switchyard.
 See [Just One More rules and layout](docs/just-one-more-spec.md).
 
-A pointer or keyboard interaction unlocks audio. Other tables share mechanical sounds;
+A pointer or keyboard interaction unlocks audio. Tables share mechanical sounds;
 Harlem adds electronic scoring cues and a synthesized Sweet Georgia Brown opening
 phrase. See [audio behavior and fidelity limits](docs/table-audio-spec.md) and
 [user settings](docs/user-settings.md).

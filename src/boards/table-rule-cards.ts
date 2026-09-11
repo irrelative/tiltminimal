@@ -15,7 +15,7 @@ export const TABLE_RULE_CARDS: Record<string, TableRuleCard> = {
       'With PLAY and FIX complete, shoot NEW PIN DAY to score 5,000 and lock one ball. Plunge the replacement for two-ball multiball on the same turn.',
       'In multiball, spin both different spinners to light a 10,000-point NEW PIN DAY jackpot. Collect it, then spin both again to relight.',
       'Spinners score 100 per spin. Repair targets score 500; completing all four outside multiball adds 2,000 once per qualification. Unlit saucer captures score 1,000.',
-      'Losing one ball ends multiball and clears progress. The remaining ball continues. Each new ball starts fresh; no end-of-ball bonus or extra balls. This first version has no audio.',
+      'Losing one ball ends multiball and clears progress. The remaining ball continues. Each new ball starts fresh; no end-of-ball bonus or extra balls.',
     ],
   },
   switchyard: {

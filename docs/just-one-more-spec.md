@@ -2,7 +2,7 @@
 
 An original, unofficial r/pinball tribute at `?table=just-one-more`, visible in
 the gallery. Three balls, two flippers, a single-ball lock and two-ball multiball.
-This first version is deliberately small and silent, including mechanical audio.
+This version uses shared mechanical audio, with no music or callouts.
 No timed modes, extra balls, bonus ladder, skill detection or callouts.
 
 ## Theme and layout
@@ -55,7 +55,7 @@ but do not score or qualify anything here: a spinner pulse is sufficient.
 - Final drain advances the turn once, including simultaneous drains. Three
   completed turns end the game. No drain bonus. Reset clears all progress/locks.
 - Slings score their authored values. The shared local top-five scoreboard and
-  settings apply; this version bypasses audio without changing saved settings.
+  settings apply, including sound on/off and volume for mechanical effects.
 
 ## Verification
 
@@ -64,7 +64,8 @@ physical lock/replacement launch, repeated jackpots, single/simultaneous drains,
 reset and game over. The open fan geometry regression suite runs for both
 Switchyard and Just One More, including actual cradle-to-shot timing samples.
 All-table suites exercise feeds, center drains, post/bump passes and catches.
-A game-loop test verifies that no audio calls occur for the new table.
+A game-loop test verifies shared mechanical audio forwarding and the absence of
+a music/callout profile.
 
 Acceptance results: all 466 tests passed; build and lint passed; all seven tables
 passed deep CLI validation with zero warnings/errors. Browser review covered the

@@ -1,3 +1,4 @@
+import { getTableAudioProfile } from '../src/audio/table-audio-profiles';
 import { justOneMoreTable } from '../src/boards/tables/just-one-more';
 import { afterEach, expect, it, vi } from 'vitest';
 import { GameLoop } from '../src/game/game-loop';
@@ -96,7 +97,7 @@ it('forwards actual scoring events once and starts the tune only on a game resta
   restart.stop();
 });
 
-it('keeps Just One More silent even when an audio service is supplied', () => {
+it('plays shared mechanical audio for Just One More without a music or callout profile', () => {
   let frame!: FrameRequestCallback;
   vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
     frame = callback;
@@ -110,22 +111,30 @@ it('keeps Just One More silent even when an audio service is supplied', () => {
     playGameEvents: vi.fn(),
     startGame: vi.fn(),
   };
+  let leftPressed = false;
   const loop = new GameLoop(
     createInitialGameState(justOneMoreTable),
     justOneMoreTable,
     {
       connect: vi.fn(),
       disconnect: vi.fn(),
-      getState: () => ({ ...idleInput, leftPressed: true }),
+      getState: () => ({ ...idleInput, leftPressed }),
     },
     { renderGame: vi.fn() } as unknown as CanvasRenderer,
     audio as unknown as GameAudio,
   );
   loop.start();
+  leftPressed = true;
   frame(100);
   frame(116);
   loop.stop();
-  Object.values(audio).forEach((method) =>
-    expect(method).not.toHaveBeenCalled(),
+  expect(audio.connect).toHaveBeenCalledWith(justOneMoreTable);
+  expect(audio.playEvents).toHaveBeenCalledWith(
+    expect.arrayContaining([
+      expect.objectContaining({ type: 'flipper-trigger', side: 'left' }),
+    ]),
   );
+  expect(audio.playGameEvents).toHaveBeenCalled();
+  expect(audio.disconnect).toHaveBeenCalledOnce();
+  expect(getTableAudioProfile(justOneMoreTable)).toBeNull();
 });

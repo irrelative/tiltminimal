@@ -30,8 +30,6 @@ export class GameLoop {
     private readonly renderer: CanvasRenderer,
     private readonly audio?: GameAudio,
   ) {
-    // This first version is intentionally silent, including mechanical effects.
-    if (board.themeId === 'just-one-more') this.audio = undefined;
     this.state = initializeRulesState(this.state, this.board);
     this.lastInputState = this.input.getState();
   }
