@@ -10,6 +10,7 @@ export type BoardThemeId =
   | 'classic'
   | 'midnight'
   | 'sunburst'
+  | 'switchyard'
   | 'starlight'
   | 'double-crossed'
   | 'grayscale'
@@ -173,6 +174,8 @@ export interface SlingshotDefinition extends Point {
 }
 
 export interface RolloverDefinition extends Point {
+  /** Approach direction in radians for authoring validation; defaults upward. */
+  approachAngle?: number;
   // Circular trigger radius from center to outer edge.
   radius: number;
   score: number;

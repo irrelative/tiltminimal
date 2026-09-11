@@ -106,6 +106,7 @@ export const compileBoardLayout = (
     rollovers: (layout.rollovers ?? []).map((rollover) => ({
       ...resolvePositionedElement(rollover, context),
       radius: rollover.radius,
+      approachAngle: rollover.approachAngle,
       score: rollover.score,
     })),
     guides: (layout.guides ?? []).map((guide) =>

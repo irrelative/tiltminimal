@@ -12,7 +12,7 @@ every feed works. The same contact solver runs in Game and the Physics sandbox.
 | Cradle / hold catch | Hold the flipper; a suitable return loses normal speed, rolls to the heel, and stays controllable. | Every flipper; all declared held feeds and release checks. |
 | Controlled release shot | Lower a cradled flipper, let the ball advance, then flip. Release timing changes the outgoing shot. | Two different shot timings on every flipper reach 220 units upfield without an active sling kick. |
 | Dead bounce / dead flip / bounce pass | Leave the source flipper down and let its rubber rebound send the ball toward an opposite flipper. | Every flipper, two incoming speeds, no flipper or nudge input and no powered sling. |
-| Bump pass | Release a cradle and give one forward nudge as the ball rolls down the lowered flipper; hold the opposite flipper to catch the transfer. No source re-flip. | All 11 flippers across five tables; stable receiver catch, no post/sling contact, and an unnudged control. |
+| Bump pass | Release a cradle and give one forward nudge as the ball rolls down the lowered flipper; hold the opposite flipper to catch the transfer. No source re-flip. | All 13 flippers across six tables; stable receiver catch, no post/sling contact, and an unnudged control. |
 | Post pass | Briefly release and re-flip a cradle into the passive lower sling post, transferring to a held receiver. | At least one transfer on every table; existing multi-timing post-contact and stable-catch tests. |
 | Live catch | Raise the flipper so a descending ball meets the end of the upstroke; absorb the impact and roll into a cradle. | Every flipper, three incoming speeds, early/late controls, stable catch and release. |
 | Drop catch | Release a raised flipper as the descending ball arrives; the retreating surface reduces the rebound and leaves a slower ball to play. | Every flipper, three incoming speeds; compare with releasing too early. A drop catch is not an automatic held cradle. |
@@ -28,6 +28,7 @@ controls have substantially more residual speed.
 
 | Table | Cradles, shots, dead bounces, live and drop catches | Post-pass routes | Slap-save sample |
 | --- | --- | --- | --- |
+| Switchyard | Both flippers | Left ↔ right | Left lower tip |
 | Classic | Both flippers | Left ↔ right | Left lower tip |
 | Double Crossed | Both flippers | Left ↔ right | Left lower tip |
 | Starlight EM | Both flippers | Left ↔ right | Left lower tip |
@@ -159,3 +160,7 @@ The harness is not included in the shipped application.
 The 76-run Classic playtest has no non-finite states, bounds escapes, or
 unexplained near-rest beyond 0.02 seconds. It records 15 speed-review flags;
 see [the playtest report](classic-playtest.md) for the remaining tuning limits.
+
+Switchyard uses the same connected lower assembly and is included in the shared
+all-table regression suites. Its dedicated fan-shot timing samples are in
+[switchyard-spec.md](switchyard-spec.md).

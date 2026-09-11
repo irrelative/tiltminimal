@@ -25,6 +25,8 @@ export interface RulesState {
 }
 
 interface BaseGameEvent {
+  /** Physical ball responsible for a switch event, when applicable. */
+  ballId?: number;
   tick: number;
 }
 

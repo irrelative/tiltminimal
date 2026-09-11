@@ -18,6 +18,8 @@ export function lockCapturedBall(
     return false;
   state.lockedBalls.push({ ball: state.ball, saucerIndex: index });
   state.ball = createBallState(board);
+  state.ball.id =
+    Math.max(...state.lockedBalls.map((lock) => lock.ball.id ?? 0)) + 1;
   state.launcherExited = false;
   state.plunger = { pullback: 0, releaseSpeed: 0 };
   state.status = 'waiting-launch';

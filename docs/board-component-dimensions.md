@@ -119,6 +119,10 @@ wedge's overall bounding dimensions.
 
 `RolloverDefinition`
 
+- Optional `approachAngle`: authoring-validation approach direction in radians;
+  defaults to upward (`-π/2`). Horizontal orbit switches can use `0`. It does
+  not rotate the circular trigger or change physics.
+
 - `x`, `y`: rollover center
 - `radius`: circular trigger radius from center to outer edge
 

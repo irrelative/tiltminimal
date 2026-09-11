@@ -1,3 +1,7 @@
+import {
+  drawSwitchyardPlayfield,
+  drawSwitchyardInserts,
+} from './switchyard-playfield-art';
 import { drawDoubleCrossedInserts } from './double-crossed-inserts';
 import {
   drawStarlightPlayfield,
@@ -73,6 +77,8 @@ export const drawDynamicBoard = (
   board: BoardDefinition,
   state?: GameState,
 ): void => {
+  if (board.themeId === 'switchyard')
+    drawSwitchyardInserts(context, board, state);
   if (board.themeId === 'starlight')
     drawStarlightInserts(context, board, state);
   if (board.themeId === 'double-crossed')
@@ -102,7 +108,7 @@ export const drawDynamicBoard = (
   drawSlingshots(context, board, state);
   drawSaucers(context, board, state);
   drawSpinners(context, board, state);
-  drawRollovers(context, board, state);
+  if (board.themeId !== 'switchyard') drawRollovers(context, board, state);
 
   for (const [index, flipper] of board.flippers.entries()) {
     drawFlipper(
@@ -317,6 +323,10 @@ const drawBackground = (
   board: BoardDefinition,
 ): void => {
   const theme = getBoardTheme(board.themeId);
+  if (board.themeId === 'switchyard') {
+    drawSwitchyardPlayfield(context, board);
+    return;
+  }
   if (board.themeId === 'starlight') {
     drawStarlightPlayfield(context, board);
     return;

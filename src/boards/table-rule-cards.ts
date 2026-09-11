@@ -6,6 +6,17 @@ export interface TableRuleCard {
 
 /** Summaries of this game's rule scripts, including simplified recreations. */
 export const TABLE_RULE_CARDS: Record<string, TableRuleCard> = {
+  switchyard: {
+    balls: 3,
+    objective: 'Connect five routes, then lock at Dispatch for multiball.',
+    rules: [
+      'Complete each full Express orbit, hit both Cargo targets and both Signal targets, and shoot Dispatch to connect all five routes. Spins alone do not complete an orbit.',
+      'With all five connected, shoot Dispatch again to lock one ball. Plunge the replacement to start two-ball multiball without using another turn.',
+      'In multiball, each full Express orbit and either target in each bank collect a different 10,000-point jackpot. Collect all four, then shoot Dispatch for 50,000 and relight them.',
+      'Outside multiball, complete a different orbit or bank within four seconds for a 2,000-point combo. Dispatch clears the combo window.',
+      'Build up to 20,000 bonus and collect it on the final drain. Losing one ball ends multiball and clears network progress; new balls start with fresh routes and bonus.',
+    ],
+  },
   'classic-table': {
     balls: 3,
     objective: 'Build bonus and complete the top lanes.',

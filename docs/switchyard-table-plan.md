@@ -1,6 +1,8 @@
 # Switchyard — modern flat fan-shot table plan
 
-Status: proposed; no table or gameplay implementation yet.
+Status: implemented. See [the final specification](switchyard-spec.md) for
+measured geometry, deliberate refinements and regression evidence. This document
+retains the original design proposal.
 
 ## Design intent
 

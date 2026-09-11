@@ -2,7 +2,7 @@
 
 Use `src/boards/assemblies/index.ts` to author connected pinball mechanisms.
 Assemblies generate both collision geometry and behavioral route definitions.
-All five built-in tables use these assemblies alongside table-specific geometry. Classic Table is the smallest
+All six built-in tables use these assemblies alongside table-specific geometry. Classic Table is the smallest
 complete working example.
 
 Follow [the shared layout requirements](conventional-layout-guidelines.md) when

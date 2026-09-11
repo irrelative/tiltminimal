@@ -1,6 +1,6 @@
 # Pinball Browser
 
-A TypeScript browser pinball game with five built-in tables, a 2D canvas
+A TypeScript browser pinball game with six built-in tables, a 2D canvas
 playfield, keyboard and touch controls, and synthesized audio. Shared physics,
 rendering, and reusable board assemblies support table-specific layouts and rules,
 including ball locks and two-ball multiball.
@@ -16,6 +16,7 @@ including ball locks and two-ball multiball.
 | Double Crossed       | 3     | Complete both CROSS banks, lock a ball, and plunge for multiball. Both spinners light the jackpot. |
 | Harlem Globetrotters | 3     | Use three flippers to reach sweeping lanes and high-value upper saucers.                           |
 | Starlight            | 5     | Spell STAR, light COMET and NOVA, and collect rising observatory awards.                           |
+| Switchyard           | 3     | Connect five fan shots, lock at Dispatch, and collect multiball jackpots.                          |
 
 Andromeda and Harlem are reference-based adaptations. Harlem currently uses
 simplified direct scoring, and its synthesized early Bally-style sound is an
@@ -149,7 +150,7 @@ Start with the [codebase overview](docs/codebase-overview.md),
 Table specs: [Classic](docs/classic-table-spec.md),
 [Andromeda](docs/andromeda-spec.md), [Double Crossed](docs/double-crossed-spec.md),
 [Harlem Globetrotters](docs/harlem-globetrotters-spec.md), and
-[Starlight](docs/starlight-em-spec.md).
+[Starlight](docs/starlight-em-spec.md), and [Switchyard](docs/switchyard-spec.md).
 
 ## Deployment
 

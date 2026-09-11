@@ -217,7 +217,8 @@ const validateTopRolloverReachability = (
       return;
     }
 
-    const entryY = Math.min(board.height * 0.42, rollover.y + 160);
+    const approach = rollover.approachAngle ?? -Math.PI / 2;
+    const reach = Math.min(160, board.height * 0.42 - rollover.y);
     const entryOffsets = [
       -rollover.radius * 2,
       -rollover.radius,
@@ -225,13 +226,23 @@ const validateTopRolloverReachability = (
       rollover.radius,
       rollover.radius * 2,
     ];
-    const reachable = entryOffsets.some((offsetX) =>
-      !pathBlockedByGuide(
-        board,
-        { x: rollover.x + offsetX, y: entryY },
-        { x: rollover.x, y: rollover.y },
-        8,
-      ),
+    const reachable = entryOffsets.some(
+      (offsetX) =>
+        !pathBlockedByGuide(
+          board,
+          {
+            x:
+              rollover.x -
+              Math.cos(approach) * reach -
+              Math.sin(approach) * offsetX,
+            y:
+              rollover.y -
+              Math.sin(approach) * reach +
+              Math.cos(approach) * offsetX,
+          },
+          { x: rollover.x, y: rollover.y },
+          8,
+        ),
     );
 
     if (!reachable) {

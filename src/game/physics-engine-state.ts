@@ -134,6 +134,17 @@ export const stepPlayingState = (
     (rollover) => rollover.occupied,
   );
   let balls = [next.ball, ...next.additionalBalls];
+  let nextId =
+    Math.max(
+      0,
+      ...balls.map((ball) => ball.id ?? 0),
+      ...next.lockedBalls.map((lock) => lock.ball.id ?? 0),
+    ) + 1;
+  const usedIds = new Set<number>();
+  for (const ball of balls) {
+    if (ball.id === undefined || usedIds.has(ball.id)) ball.id = nextId++;
+    usedIds.add(ball.id);
+  }
   let remainingSeconds = deltaSeconds;
   do {
     const stepSeconds = Math.min(
@@ -188,6 +199,7 @@ export const stepPlayingState = (
       resolvePlungerCollision(next, board, plungerFrame, board.physics.solver);
       resolvePlungerGuideCollisions(next, board, board.physics.solver);
       constrainBallToLauncherLane(next, board);
+      const eventStart = events.length;
       resolveStandupTargetCollisions(next, board, board.physics.solver, events);
       resolveDropTargetCollisions(next, board, board.physics.solver, events);
       resolveSlingshotCollisions(next, board, board.physics.solver, events);
@@ -202,6 +214,8 @@ export const stepPlayingState = (
       resolveSaucerCaptures(next, board, events);
       resolveSpinnerInteractions(next, board, board.physics.solver, events);
       resolveRolloverTriggers(next, board, events);
+      for (let i = eventStart; i < events.length; i++)
+        events[i].ballId = ball.id;
 
       // A weak plunge that never crossed the gate is still the same ball.
       // Re-seat it for the next pull instead of leaving it in live-play state.

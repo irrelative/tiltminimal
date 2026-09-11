@@ -1,3 +1,4 @@
+import { switchyardTable } from './tables/switchyard';
 import { andromedaTable } from './tables/andromeda';
 import { classicTable } from './tables/classic-table';
 import { doubleCrossedTable } from './tables/double-crossed';
@@ -45,6 +46,12 @@ export const BUILT_IN_TABLES: BuiltInTable[] = [
     board: starlightEmTable,
     description:
       'Spell STAR, light COMET and NOVA spinners, then collect the observatory constellation award.',
+  },
+  {
+    id: 'switchyard',
+    board: switchyardTable,
+    description:
+      'Five open fan shots. Connect the network, lock at Dispatch, and collect two-ball multiball jackpots.',
   },
 ];
 

@@ -11,6 +11,8 @@ export interface Vector2 {
 }
 
 export interface BallState {
+  /** Stable within a turn, including lock/release and primary-ball promotion. */
+  id?: number;
   /** Continuous top-face contact following a timed end-of-stroke catch. */
   liveCatchFlipper?: number;
   capturedSaucer?: number;
@@ -157,6 +159,7 @@ export const createBallState = (board: BoardDefinition): BallState => {
   const mass = board.ball.mass;
 
   return {
+    id: 0,
     position: {
       x: board.launchPosition.x,
       y: board.launchPosition.y,

@@ -1,7 +1,7 @@
 # Table selection
 
 The root URL without a valid `?table=` parameter opens a “Select a table” landing
-page. Five native links show static canvas previews, table names, ball counts,
+page. Six native links show static canvas previews, table names, ball counts,
 and short descriptions. The responsive gallery uses three, two, or one column.
 No game loop, keyboard gameplay input or audio is started on this page.
 

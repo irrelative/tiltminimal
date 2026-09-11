@@ -54,3 +54,7 @@ higher multiplier and update the cards and characterization tests together.
 Harlem's direct awards, and both lower-cap discrepancies. Existing Andromeda,
 Starlight and Double Crossed multiball tests cover their main feature sequences.
 This audit does not prove every possible event ordering or physical shot.
+
+Switchyard adds the sixth card. It describes directed orbits, five-route lock
+qualification, different-shot combos and four jackpots leading to a Super.
+See [Switchyard](switchyard-spec.md) and its rules/layout regression tests.

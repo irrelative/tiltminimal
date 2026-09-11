@@ -67,7 +67,7 @@ export const DEFAULT_BOARD_THEME_ID: BoardThemeId = 'classic';
 const BASE_THEMES: Record<
   Exclude<
     BoardThemeId,
-    'harlem' | 'andromeda' | 'starlight' | 'double-crossed'
+    'harlem' | 'andromeda' | 'starlight' | 'double-crossed' | 'switchyard'
   >,
   BoardTheme
 > = {
@@ -319,6 +319,18 @@ const BASE_THEMES: Record<
 
 export const BOARD_THEMES: Record<BoardThemeId, BoardTheme> = {
   ...BASE_THEMES,
+  switchyard: {
+    ...BASE_THEMES.midnight,
+    id: 'switchyard',
+    label: 'Switchyard',
+    guideMetalPrimary: '#9bb3bd',
+    guideMetalSecondary: '#425765',
+    flipperFill: '#eaf2e9',
+    flipperCore: '#e9ab4b',
+    standupFill: '#e9ab4b',
+    hudText: '#eaf2e9',
+    hudMuted: '#a4bac7',
+  },
   'double-crossed': {
     ...BASE_THEMES.midnight,
     id: 'double-crossed',

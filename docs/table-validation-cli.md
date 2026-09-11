@@ -42,6 +42,7 @@ Supported ids include:
 - `double-crossed`
 - `harlem-globetrotters`
 - `starlight-em`
+- `switchyard`
 
 ## Checks Run
 
