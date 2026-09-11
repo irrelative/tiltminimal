@@ -1,5 +1,8 @@
+import { softPlungeRules } from './soft-plunge-rules';
+
 /** A small collecting loop: play both spinners, repair four targets, collect a pin. */
 export const justOneMoreRulesScript = `
+${softPlungeRules}
 function reset(ctx) {
   ctx.setPlayer('play', 0); ctx.setPlayer('fix', 0);
   ctx.setBall('phase', 'qualify');
@@ -8,12 +11,14 @@ function reset(ctx) {
 return {
   onGameStart(ctx) { reset(ctx); ctx.setBallsPerGame(3); ctx.setBallsRemaining(3); ctx.setCurrentBall(1); },
   onBallStart(ctx) {
+    ctx.setBall('skill-shot', 'ready');
     ctx.setBall('phase', 'qualify'); ctx.setBall('jackpots', 0);
     ctx.setBall('play', Number(ctx.getPlayer('play') || 0));
     ctx.setBall('fix', Number(ctx.getPlayer('fix') || 0));
     ctx.setBonus(0); ctx.setBonusMultiplier(1);
   },
   onEvent(event, ctx) {
+    if (skillShot(event, ctx)) return;
     // Orbit sensors support physical route validation; only spinners qualify PLAY.
     if (event.type === 'rollover-hit') return;
     if (event.type === 'spinner-spin') {

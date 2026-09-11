@@ -1,5 +1,8 @@
+import { softPlungeRules } from './soft-plunge-rules';
+
 /** Network qualification and flat, directed orbit shots. All clocks use simulation time. */
 export const switchyardRulesScript = `
+${softPlungeRules}
 function resetNetwork(ctx) {
   ctx.setBall('network', 0); ctx.setBall('cargo', 0); ctx.setBall('signal', 0);
   ctx.setBall('phase', 'qualify'); ctx.setBall('jackpots', 0);
@@ -19,9 +22,10 @@ function made(ctx, shot) {
 }
 return {
   onGameStart(ctx) { ctx.setBallsPerGame(3); ctx.setBallsRemaining(3); ctx.setCurrentBall(1); },
-  onBallStart(ctx) { resetNetwork(ctx); ctx.setBall('clock', 0); ctx.setBonus(0); ctx.setBonusMultiplier(1); },
+  onBallStart(ctx) { ctx.setBall('skill-shot', 'ready'); resetNetwork(ctx); ctx.setBall('clock', 0); ctx.setBonus(0); ctx.setBonusMultiplier(1); },
   onTick(ms, ctx) { ctx.setBall('clock', Number(ctx.getBall('clock') || 0) + ms); },
   onEvent(event, ctx) {
+    if (skillShot(event, ctx)) return;
     if (event.type === 'rollover-hit') {
       if (event.ballId === undefined) return;
       const tracks = ctx.getBall('orbits') || {};

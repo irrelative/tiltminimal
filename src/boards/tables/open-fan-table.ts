@@ -78,6 +78,9 @@ export function createOpenFanTable(
     { position: { x: 140, y: 550 }, radius: 35, score: 0 },
     { position: { x: 450, y: 170 }, radius: 60, score: 0, approachAngle: 0 },
     { position: { x: 800, y: 550 }, radius: 65, score: 0 },
+    // Skill exit below the gate, then an overshoot switch across the arch.
+    { position: { x: 738, y: 225 }, radius: 18, score: 0 },
+    { position: { x: 677, y: 116 }, radius: 18, score: 0, approachAngle: 0.47 },
   ];
   for (const [side, x] of [145, 824].entries()) {
     const order = side === 0 ? [0, 1, 2] : [2, 1, 0];

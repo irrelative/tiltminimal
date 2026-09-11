@@ -1,3 +1,4 @@
+import { drawSoftPlungeInsert } from './soft-plunge-insert';
 import type { BoardDefinition } from '../types/board-definition';
 import type { GameState } from '../game/game-state';
 const shots = [
@@ -49,6 +50,7 @@ export function drawSwitchyardInserts(
   _board: BoardDefinition,
   state?: GameState,
 ) {
+  drawSoftPlungeInsert(c, state);
   const values = state?.rules.ballValues ?? {};
   const phase = values.phase ?? 'qualify';
   const network = Number(values.network || 0),

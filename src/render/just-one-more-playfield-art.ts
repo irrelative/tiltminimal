@@ -1,3 +1,4 @@
+import { drawSoftPlungeInsert } from './soft-plunge-insert';
 import type { BoardDefinition } from '../types/board-definition';
 import type { GameState } from '../game/game-state';
 
@@ -79,6 +80,7 @@ export function drawJustOneMoreInserts(
   _board: BoardDefinition,
   state?: GameState,
 ) {
+  drawSoftPlungeInsert(c, state);
   const v = state?.rules.ballValues ?? {};
   const multiball = v.phase === 'multiball',
     locked = v.phase === 'locked';

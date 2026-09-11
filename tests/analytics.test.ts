@@ -117,7 +117,7 @@ describe('analytics API', () => {
         type: 'start',
         tableId: 'classic-table',
         gameId: 'bad',
-        version: '2026-09-10',
+        version: '2026-09-10-skill-shot',
       }),
     ).toBe(false);
   });

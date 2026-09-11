@@ -11,6 +11,7 @@ export const TABLE_RULE_CARDS: Record<string, TableRuleCard> = {
     objective:
       'Play, fix, and collect your next pin for Just One More multiball.',
     rules: [
+      'SKILL SHOT: soft plunge through the opening below the gate for 5,000. Passing the opening around the upper arch cancels it. A plunge that rolls back before clearing the gate can be retried; once per ball, excluding multiball replacements.',
       'PLAY: spin both different spinners. FIX: hit all four different repair targets. Complete these in any order; partial progress and the lit COLLECT lock carry between balls.',
       'With PLAY and FIX complete, shoot NEW PIN DAY to score 5,000 and lock one ball. Plunge the replacement for two-ball multiball on the same turn.',
       'In multiball, spin both different spinners to light a 10,000-point NEW PIN DAY jackpot. Collect it, then spin both again to relight.',
@@ -22,6 +23,7 @@ export const TABLE_RULE_CARDS: Record<string, TableRuleCard> = {
     balls: 3,
     objective: 'Connect five routes, then lock at Dispatch for multiball.',
     rules: [
+      'SKILL SHOT: soft plunge through the opening below the gate for 5,000. Passing the opening around the upper arch cancels it. A plunge that rolls back before clearing the gate can be retried; once per ball, excluding multiball replacements.',
       'Complete each full Express orbit, hit both Cargo targets and both Signal targets, and shoot Dispatch to connect all five routes. Spins alone do not complete an orbit.',
       'With all five connected, shoot Dispatch again to lock one ball. Plunge the replacement to start two-ball multiball without using another turn.',
       'In multiball, each full Express orbit and either target in each bank collect a different 10,000-point jackpot. Collect all four, then shoot Dispatch for 50,000 and relight them.',

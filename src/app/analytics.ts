@@ -1,7 +1,7 @@
 import type { GameState } from '../game/game-state';
 
 // Change this when scoring rules change, so unlike scores can be separated.
-export const RULES_VERSION = '2026-09-10';
+export const RULES_VERSION = '2026-09-10-skill-shot';
 const productionHosts = new Set(['tiltminimal.com', 'www.tiltminimal.com']);
 export const analyticsEnabled = (): boolean =>
   productionHosts.has(window.location.hostname);

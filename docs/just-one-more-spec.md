@@ -3,7 +3,7 @@
 An original, unofficial r/pinball tribute at `?table=just-one-more`, visible in
 the gallery. Three balls, two flippers, a single-ball lock and two-ball multiball.
 This version uses shared mechanical audio, with no music or callouts.
-No timed modes, extra balls, bonus ladder, skill detection or callouts.
+No timed modes, extra balls, bonus ladder or callouts.
 
 ## Theme and layout
 
@@ -89,3 +89,22 @@ gate formed a pocket that held slow returning balls. The gate remains one-way,
 and the existing plunge and ordered orbit scoring routes remain required.
 Slow-return tests sample four positions across every built-in gate at zero
 and 80 units/second, requiring clearance without a nudge within three seconds.
+
+## Soft-plunge skill shot
+
+At the start of each numbered ball, light a 5,000-point SKILL SHOT insert at the
+plunge-gate relief. A real plunge arms it. A non-solid rollover at (738,225),
+radius 18, awards it when the ball drops through the opening. An overshoot
+rollover at (677,116), radius 18, cancels it when the ball continues around the
+upper arch; its approach follows the arch tangent. These are indices 3 and 4,
+after the existing three orbit switches. They neither advance orbit sequences
+nor score independently. Ordinary playfield scoring switches also cancel an
+uncollected opportunity, preventing a later return from collecting it.
+
+Only one award is available per numbered ball. A weak plunge that settles back
+at the plunger without leaving the shooter can be retried. Multiball replacement
+plunges and multiball ending do not relight it; the next numbered ball does.
+The insert is lit while ready or armed, dims when missed, and shows “5,000 MADE”
+after collection. No music or callout is added. Shared rules live in
+`soft-plunge-rules.ts`; rule tests include actual 68–70-frame soft plunges,
+71-frame overshoots, weak-plunge retries, and duplicate prevention at 120 Hz.
