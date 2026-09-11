@@ -11,6 +11,10 @@ The collector joke “there is room if you move the couch” supplies the centra
 PLAY / FIX / COLLECT loop. Orange upvote inserts, a crossed-out couch floor plan,
 ARCADE / ROAD TRIP spinners, four repair targets and a NEW PIN DAY saucer identify
 the objectives. Art and progress inserts live in their own renderer module.
+NEW PIN DAY and its subtitle center between the target-bank guides (x=455),
+while r/pinball centers above the offset saucer (x=480). Paired bank captions
+and spinner labels use symmetric anchors; each text draw sets its own centered
+alignment and baseline.
 
 The community references come from discussions of
 [machines multiplying](https://www.reddit.com/r/pinball/comments/1d8udpo/),

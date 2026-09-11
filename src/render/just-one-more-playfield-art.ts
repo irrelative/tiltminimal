@@ -12,6 +12,8 @@ function text(
   size = 18,
   color = ink,
 ) {
+  c.textAlign = 'center';
+  c.textBaseline = 'alphabetic';
   c.fillStyle = color;
   c.font = `700 ${size}px sans-serif`;
   c.fillText(label, x, y);
@@ -58,13 +60,16 @@ export function drawJustOneMorePlayfield(
   c.stroke();
   c.setLineDash([]);
   text(c, 'COUCH GOES HERE?', 450, 790, 14, muted);
-  text(c, 'r/pinball', 450, 330, 24, orange);
-  text(c, 'NEW PIN DAY', 480, 562, 23);
-  text(c, 'COLLECT / LOCK', 480, 585, 13, muted);
-  text(c, 'JUST A FUSE', 319, 680, 17, orange);
-  text(c, 'ONE MORE FIX', 577, 680, 17, orange);
+  // The bank guides frame this label; their center differs from the saucer's.
+  const guideCenter =
+    (board.standupTargets[0].x + board.standupTargets[2].x) / 2;
+  text(c, 'r/pinball', board.saucers[0].x, 330, 24, orange);
+  text(c, 'NEW PIN DAY', guideCenter, 562, 23);
+  text(c, 'COLLECT / LOCK', guideCenter, 585, 13, muted);
+  text(c, 'JUST A FUSE', guideCenter - 136, 680, 17, orange);
+  text(c, 'ONE MORE FIX', guideCenter + 136, 680, 17, orange);
   text(c, 'ARCADE', 177, 781, 18);
-  text(c, 'ROAD TRIP', 722, 781, 18);
+  text(c, 'ROAD TRIP', 723, 781, 18);
   text(c, 'JUST ONE MORE', 450, 970, 42);
   text(c, 'THERE’S ROOM IF YOU MOVE THE COUCH', 450, 1000, 13, muted);
   c.restore();
@@ -83,7 +88,7 @@ export function drawJustOneMoreInserts(
   const ready = play === 3 && fix === 15;
   c.save();
   c.textAlign = 'center';
-  for (const [i, x] of [177, 722].entries()) {
+  for (const [i, x] of [177, 723].entries()) {
     upvote(
       c,
       x,
@@ -95,7 +100,7 @@ export function drawJustOneMoreInserts(
   const repairs = [
     { x: 244, y: 586, name: 'FUSE' },
     { x: 307, y: 646, name: 'SWITCH' },
-    { x: 667, y: 586, name: 'COIL' },
+    { x: 666, y: 586, name: 'COIL' },
     { x: 603, y: 646, name: 'RUBBER' },
   ];
   repairs.forEach((r, i) =>
