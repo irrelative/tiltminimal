@@ -7,7 +7,10 @@ independent deployment; its host and local development do not send game analytic
 
 ## Deploy
 
-Wrangler is a project development dependency. Authenticate with
+Wrangler is a project development dependency and requires Node.js 22 or newer.
+The repository’s `.nvmrc` selects Node 22: run `nvm install` once and `nvm use`
+in an existing terminal before deployment. New terminals use your nvm default.
+Authenticate with
 `npx wrangler login`, then run `make deploy`. This builds for `/`, applies remote
 D1 migrations, and publishes the Worker and static assets, including custom-domain
 routes. `wrangler.jsonc` contains public resource IDs only. Keep the Free plan;

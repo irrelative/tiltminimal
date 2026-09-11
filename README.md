@@ -94,9 +94,12 @@ Run `make deploy` after `npx wrangler login` to publish future updates.
 
 ## Local development
 
-Use Node.js 22 (the version used in CI), npm, and Make:
+Use Node.js 22 (the version used in CI), npm, and Make. Wrangler requires
+Node 22 or newer. With nvm, select the project runtime before installing:
 
 ```sh
+nvm install
+nvm use
 make install
 make dev
 ```
