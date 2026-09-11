@@ -1,4 +1,4 @@
-.PHONY: help install dev build lint test cloc fmt clean validate-table playtest-classic
+.PHONY: deploy preview-cloudflare help install dev build lint test cloc fmt clean validate-table playtest-classic
 
 help:
 	@printf "Available targets:\n"
@@ -42,3 +42,14 @@ clean:
 
 playtest-classic:
 	npm run playtest:classic -- $(ARGS)
+
+# Cloudflare production (requires wrangler login).
+deploy:
+	VITE_BASE_PATH=/ $(MAKE) build
+	npx wrangler d1 migrations apply pinball-stats --remote
+	npx wrangler deploy
+
+preview-cloudflare:
+	$(MAKE) build
+	npx wrangler d1 migrations apply pinball-stats --local
+	npx wrangler dev

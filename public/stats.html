@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Tilt Minimal · Statistics</title>
+    <style>
+      body {
+        background: #0b1219;
+        color: #f5eddc;
+        font: 16px/1.6 system-ui;
+        margin: 0;
+      }
+      main {
+        max-width: 1100px;
+        margin: 40px auto;
+        padding: 0 24px;
+      }
+      a {
+        color: #91d5df;
+      }
+      h1 {
+        font-size: 32px;
+      }
+      h2 {
+        margin-top: 32px;
+      }
+      input,
+      button {
+        font: inherit;
+        padding: 10px;
+        background: #1e2b35;
+        color: inherit;
+        border: 1px solid #617482;
+      }
+      input {
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+      button {
+        cursor: pointer;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        text-align: left;
+      }
+      td,
+      th {
+        padding: 10px;
+        border-bottom: 1px solid #33414c;
+      }
+      small,
+      p {
+        color: #b0bdc6;
+      }
+      .scroll {
+        overflow-x: auto;
+      }
+      #message {
+        min-height: 1.6em;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <a href="/">← Play Tilt Minimal</a>
+      <h1>Game statistics</h1>
+      <p>
+        Private dashboard · Last 30 days of traffic and play · All-time top five
+        scores per table and rules version
+      </p>
+      <form id="login">
+        <label
+          >Dashboard key
+          <input id="key" type="password" autocomplete="off" required
+        /></label>
+        <button>Load statistics</button>
+      </form>
+      <p id="message" role="status"></p>
+      <div id="reports"></div>
+      <p>
+        Views count page loads, not unique people. Starts count the first plunge
+        of each game. Completed scores are browser-reported, not independently
+        verified. Reset/debug games are excluded from completed scores.
+        Unfinished games may be abandoned or still in progress. All dates are
+        UTC.
+      </p>
+    </main>
+    <script src="/stats.js" defer></script>
+  </body>
+</html>

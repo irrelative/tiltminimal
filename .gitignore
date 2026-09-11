@@ -6,3 +6,7 @@ coverage/
 *.tsbuildinfo
 .vite/
 playtest-results/
+
+.wrangler/
+.dev.vars*
+.cloudflare-admin-token

@@ -5,7 +5,7 @@ playfield, keyboard and touch controls, and synthesized audio. Shared physics,
 rendering, and reusable board assemblies support table-specific layouts and rules,
 including ball locks and two-ball multiball.
 
-[Play in your browser](https://irrelative.github.io/tiltminimal/).
+[Play in your browser](https://tiltminimal.com/).
 
 ## Tables
 
@@ -80,6 +80,17 @@ A pointer or keyboard interaction unlocks audio. Tables share mechanical sounds;
 Harlem adds electronic scoring cues and a synthesized Sweet Georgia Brown opening
 phrase. See [audio behavior and fidelity limits](docs/table-audio-spec.md) and
 [user settings](docs/user-settings.md).
+
+## Hosting and online statistics
+
+Production runs at [tiltminimal.com](https://tiltminimal.com/) on Cloudflare
+Workers with D1. Anonymous page views, games started/completed, and final scores
+feed a private statistics dashboard at `/stats`. These online records are
+separate from each player's local high-score list. Cloudflare Web Analytics
+also reports traffic and performance. See [hosting and analytics](docs/hosting-and-analytics.md)
+for deployment, dashboard access, data handling and limitations.
+
+Run `make deploy` after `npx wrangler login` to publish future updates.
 
 ## Local development
 
@@ -165,7 +176,7 @@ Table specs: [Classic](docs/classic-table-spec.md),
 
 ## Deployment
 
-[GitHub Pages](https://irrelative.github.io/tiltminimal/) hosts the static game.
+[GitHub Pages](https://tiltminimal.com/) hosts the static game.
 The [deployment workflow](.github/workflows/deploy-pages.yml) runs on pushes to
 `main` or manual dispatch, verifies the project, builds with the Pages-provided
 base path, and publishes `dist/` with a `404.html` fallback for direct routes.

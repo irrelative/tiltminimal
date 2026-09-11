@@ -65,6 +65,7 @@ required<HTMLAnchorElement>('#choose-table').href = buildAppRoutePath(
 );
 const state: {
   tableId: string;
+  excludeAnalytics?: () => void;
   loop: GameLoop | null;
   sandbox: PhysicsSandboxLoop | null;
 } = {
@@ -122,6 +123,7 @@ const restart = (): void => {
       playDebugSpin: required('#play-debug-spin'),
     });
     state.loop = session.loop;
+    state.excludeAnalytics = session.excludeAnalytics;
     state.sandbox = null;
   }
   const debug = (state.loop ?? state.sandbox)!.debug;
@@ -181,7 +183,10 @@ if (route === 'physics') {
 } else {
   required<HTMLButtonElement>('#play-reset-ball').addEventListener(
     'click',
-    () => state.loop?.resetBall(),
+    () => {
+      state.excludeAnalytics?.();
+      state.loop?.resetBall();
+    },
   );
 }
 const syncTableUrl = (): void => {

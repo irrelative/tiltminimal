@@ -1,3 +1,4 @@
+import { createGameAnalytics } from './analytics';
 import { createGameScoreRecorder } from './high-scores';
 import type { BuiltInTable } from '../boards/table-library';
 import { cloneBoardDefinition } from '../boards/board-codec';
@@ -34,6 +35,7 @@ export const startStandalonePlaySession = ({
 }: StartStandalonePlaySessionOptions): {
   input: InputSource;
   loop: GameLoop;
+  excludeAnalytics: () => void;
 } => {
   const board = cloneBoardDefinition(activeTable.board);
   const input = new PlayInput(canvas);
@@ -46,8 +48,14 @@ export const startStandalonePlaySession = ({
   );
 
   modeTitle.textContent = board.name;
+  const analytics = createGameAnalytics(activeTable.id);
   const recordScore = createGameScoreRecorder((score) => onGameOver?.(score));
   loop.setOnStateChange((nextState) => {
+    analytics.observe(
+      nextState,
+      loop.suspended || loop.debug.paused || document.hidden,
+      loop.debug.enabled,
+    );
     recordScore(nextState);
     playDebugStatus.textContent = `${nextState.status} · Ball ${nextState.rules.currentBall}/${nextState.rules.ballsPerGame} · Score ${nextState.score}${nextState.additionalBalls.length || nextState.lockedBalls.length ? ` · ${nextState.status === 'playing' ? 1 + nextState.additionalBalls.length : 0} live / ${nextState.lockedBalls.length} locked` : ''}`;
     playDebugPosition.textContent = formatVector2(
@@ -68,6 +76,7 @@ export const startStandalonePlaySession = ({
   return {
     input,
     loop,
+    excludeAnalytics: analytics.exclude,
   };
 };
 

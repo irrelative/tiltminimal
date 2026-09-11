@@ -1,3 +1,4 @@
+import { createAnalyticsSender } from './app/analytics';
 import { BUILT_IN_TABLES } from './boards/table-library';
 import { renderTableSelection } from './app/table-selection';
 import './styles.css';
@@ -13,4 +14,13 @@ if (BUILT_IN_TABLES.some((table) => table.id === selected)) {
     window.location.href,
     import.meta.env.BASE_URL,
   );
+}
+
+if (!/\/physics\/?$/.test(window.location.pathname)) {
+  createAnalyticsSender()({
+    type: 'view',
+    tableId: BUILT_IN_TABLES.some((t) => t.id === selected)
+      ? selected!
+      : 'gallery',
+  });
 }
