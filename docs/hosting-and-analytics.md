@@ -53,8 +53,10 @@ rate limiting. Anonymous data is retained for historical comparison. The public
 Requests require same-origin JSON, bounded bodies and valid table/event fields.
 The Worker limits an IP to 60 API requests/minute per Cloudflare location.
 Scores are client-reported, not anti-cheat verified. The backend rejects repeated
-finishes and excluded games. Increment `RULES_VERSION` in `src/app/analytics.ts`
-when scoring changes so records from different rules can be distinguished.
+finishes and excluded games. Update `rulesVersionForTable` in `src/app/analytics.ts` when a single table changes;
+update the default `RULES_VERSION` for a shared scoring change. Switchyard’s
+asymmetric layout has its own version, preserving every other table’s version.
+The frontend and Worker share this lookup so unlike scores can be distinguished.
 
 ## Private dashboard
 

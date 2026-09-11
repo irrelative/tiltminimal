@@ -177,6 +177,8 @@ export interface SlingshotDefinition extends Point {
 export interface RolloverDefinition extends Point {
   /** Approach direction in radians for authoring validation; defaults upward. */
   approachAngle?: number;
+  /** Length of the straight validation approach for compact curved lanes. */
+  approachDistance?: number;
   // Circular trigger radius from center to outer edge.
   radius: number;
   score: number;

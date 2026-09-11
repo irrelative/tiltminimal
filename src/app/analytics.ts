@@ -2,6 +2,8 @@ import type { GameState } from '../game/game-state';
 
 // Change this when scoring rules change, so unlike scores can be separated.
 export const RULES_VERSION = '2026-09-10-skill-shot';
+export const rulesVersionForTable = (tableId: string): string =>
+  tableId === 'switchyard' ? '2026-09-11-switchyard-asymmetry' : RULES_VERSION;
 const productionHosts = new Set(['tiltminimal.com', 'www.tiltminimal.com']);
 export const analyticsEnabled = (): boolean =>
   productionHosts.has(window.location.hostname);
@@ -86,7 +88,12 @@ export function createGameAnalytics(
           lastStatus = state.status;
           return;
         }
-        send({ type: 'start', tableId, gameId, version: RULES_VERSION });
+        send({
+          type: 'start',
+          tableId,
+          gameId,
+          version: rulesVersionForTable(tableId),
+        });
       }
       if (gameId && !paused && lastStatus === 'playing') activeMs += elapsed;
       if (gameId && !invalid && !finished && state.status === 'game-over') {

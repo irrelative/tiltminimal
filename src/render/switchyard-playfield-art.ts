@@ -3,10 +3,10 @@ import type { BoardDefinition } from '../types/board-definition';
 import type { GameState } from '../game/game-state';
 const shots = [
   { x: 180, y: 790, name: 'WEST', color: '#67d5c4', bit: 0 },
-  { x: 323, y: 682, name: 'CARGO', color: '#f0b759', bit: 1 },
-  { x: 480, y: 545, name: 'DISPATCH', color: '#e6edf4', bit: 4 },
-  { x: 565, y: 690, name: 'SIGNAL', color: '#ed8c9c', bit: 2 },
-  { x: 720, y: 790, name: 'EAST', color: '#80b8f2', bit: 3 },
+  { x: 340, y: 770, name: 'CARGO', color: '#f0b759', bit: 1 },
+  { x: 380, y: 505, name: 'DISPATCH', color: '#e6edf4', bit: 4 },
+  { x: 500, y: 630, name: 'SIGNAL', color: '#ed8c9c', bit: 2 },
+  { x: 710, y: 790, name: 'EAST', color: '#80b8f2', bit: 3 },
 ];
 export function drawSwitchyardPlayfield(
   c: CanvasRenderingContext2D,
@@ -91,11 +91,15 @@ export function drawSwitchyardInserts(
           ? 'LOCK LIT'
           : lit
             ? 'CONNECTED'
-            : shot.bit === 0 || shot.bit === 3
+            : shot.bit === 0
               ? 'FULL ORBIT'
-              : shot.bit === 4
-                ? 'CONTROL'
-                : 'HIT BOTH';
+              : shot.bit === 3
+                ? 'SHORT LOOP'
+                : shot.bit === 4
+                  ? 'CONTROL'
+                  : shot.bit === 1
+                    ? 'DROP ALL 3'
+                    : 'HIT BOTH';
     c.fillText(detail, shot.x, shot.y + 51);
   });
   c.fillStyle = '#e6edf4';

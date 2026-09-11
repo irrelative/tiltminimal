@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { justOneMoreTable } from '../src/boards/tables/just-one-more';
 import { describe, expect, it } from 'vitest';
 import { switchyardTable } from '../src/boards/tables/switchyard';
@@ -20,12 +21,15 @@ describe.each([switchyardTable, justOneMoreTable])(
   (board) => {
     it('keeps scoring obstacles above the open lower middle and a ball-sized center drain', () => {
       expect(board.bumpers).toHaveLength(0);
-      expect(board.dropTargets).toHaveLength(0);
+      expect(board.dropTargets).toHaveLength(board === switchyardTable ? 3 : 0);
       expect(board.flippers).toHaveLength(2);
       expect(
-        [...board.standupTargets, ...board.saucers, ...board.spinners].every(
-          (element) => element.y < 760,
-        ),
+        [
+          ...board.standupTargets,
+          ...board.dropTargets,
+          ...board.saucers,
+          ...board.spinners,
+        ].every((element) => element.y < 760),
       ).toBe(true);
       expect(
         board.posts.every(
@@ -45,17 +49,31 @@ describe.each([switchyardTable, justOneMoreTable])(
       expect(clearance).toBeGreaterThan(board.ball.radius * 2 + 10);
     });
 
-    it.each([
-      [0, 'standup-target-hit:1', [129, 130]],
-      [1, 'standup-target-hit:0', [172, 173]],
-      [0, 'standup-target-hit:3', [121, 122]],
-      [1, 'standup-target-hit:2', [155, 156]],
-      [0, 'saucer-captured:0', [192, 193]],
-      [1, 'saucer-captured:0', [183, 184]],
-      [0, 'orbit:2', [217, 218]],
-      [1, 'orbit:0', [217, 218]],
-    ] as const)(
-      'flipper %s reaches %s across neighboring release timings',
+    const shotCases: readonly (readonly [number, string, readonly number[]])[] =
+      board === switchyardTable
+        ? ([
+            [0, 'drop-target-hit:2', [128, 129]],
+            [0, 'drop-target-hit:1', [130, 131]],
+            [1, 'drop-target-hit:0', [104, 105]],
+            [0, 'standup-target-hit:0', [192, 193]],
+            [0, 'standup-target-hit:1', [196, 197]],
+            [0, 'saucer-captured:0', [189, 190]],
+            [1, 'saucer-captured:0', [195, 196]],
+            [1, 'orbit:0', [217, 218]],
+            [0, 'orbit:5', [214, 218]],
+          ] as const)
+        : ([
+            [0, 'standup-target-hit:1', [129, 130]],
+            [1, 'standup-target-hit:0', [172, 173]],
+            [0, 'standup-target-hit:3', [121, 122]],
+            [1, 'standup-target-hit:2', [155, 156]],
+            [0, 'saucer-captured:0', [192, 193]],
+            [1, 'saucer-captured:0', [183, 184]],
+            [0, 'orbit:2', [217, 218]],
+            [1, 'orbit:0', [217, 218]],
+          ] as const);
+    it.each(shotCases)(
+      'flipper %s reaches %s from the tested release timings',
       (source, expected, delays) => {
         const cradle = createPostPassCradle(board, source);
         for (const delay of delays) {
@@ -81,12 +99,28 @@ describe.each([switchyardTable, justOneMoreTable])(
             for (const event of r.events) {
               if (
                 event.type === 'standup-target-hit' ||
+                event.type === 'drop-target-hit' ||
                 event.type === 'saucer-captured'
               ) {
                 outcome = event.type + ':' + event.index;
                 break;
               }
-              if (event.type === 'rollover-hit') {
+              if (event.type === 'rollover-hit' && board === switchyardTable) {
+                if (
+                  top &&
+                  event.index === (entry === 0 ? 2 : entry === 5 ? 7 : 5)
+                )
+                  outcome = 'orbit:' + (entry === 7 ? 5 : entry);
+                else if (
+                  event.index === 0 ||
+                  event.index === 5 ||
+                  event.index === 7
+                ) {
+                  entry = event.index;
+                  top = false;
+                } else if (entry >= 0 && event.index === (entry === 0 ? 1 : 6))
+                  top = true;
+              } else if (event.type === 'rollover-hit') {
                 if (event.index === 1) top = entry >= 0;
                 else if (entry >= 0 && top && entry !== event.index) {
                   outcome = 'orbit:' + entry;
@@ -164,3 +198,15 @@ describe.each([switchyardTable, justOneMoreTable])(
     });
   },
 );
+
+it('preserves the entire Just One More definition while giving Switchyard distinct shots', () => {
+  expect(
+    createHash('sha256').update(JSON.stringify(justOneMoreTable)).digest('hex'),
+  ).toBe('4fd44a55bf54ea0a65e5add5819188c26cd7252a347cf6228dd69c0400d497ae');
+  expect(switchyardTable.spinners).toHaveLength(1);
+  expect(switchyardTable.standupTargets).toHaveLength(2);
+  expect(switchyardTable.dropTargets).toHaveLength(3);
+  expect(switchyardTable.saucers[0].x).toBeLessThan(450);
+  expect(switchyardTable.flippers).toEqual(justOneMoreTable.flippers);
+  expect(switchyardTable.slingshots).toEqual(justOneMoreTable.slingshots);
+});

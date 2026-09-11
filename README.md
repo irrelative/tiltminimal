@@ -17,7 +17,7 @@ including ball locks and two-ball multiball.
 | Double Crossed       | 3     | Complete both CROSS banks, lock a ball, and plunge for multiball. Both spinners light the jackpot. |
 | Harlem Globetrotters | 3     | Use three flippers to reach sweeping lanes and high-value upper saucers.                           |
 | Starlight            | 5     | Spell STAR, light COMET and NOVA, and collect rising observatory awards.                           |
-| Switchyard           | 3     | Connect five fan shots, lock at Dispatch, and collect multiball jackpots.                          |
+| Switchyard           | 3     | Link a full orbit, short loop, Cargo drops and Signal standups; lock at Dispatch for multiball.    |
 
 The gallery shows Just One More, Classic, Double Crossed, Starlight and Switchyard. Andromeda
 and Harlem are hidden from selection but remain playable through direct
@@ -73,7 +73,7 @@ storage is unavailable, changes last only for the current page session.
 
 Just One More is an r/pinball tribute with shared mechanical sounds and no music
 or callouts. Its simple
-PLAY / FIX / COLLECT progression uses the same tested open fan geometry as Switchyard.
+PLAY / FIX / COLLECT progression uses the original open fan geometry. Switchyard has its own asymmetric shot layout.
 See [Just One More rules and layout](docs/just-one-more-spec.md).
 
 A pointer or keyboard interaction unlocks audio. Tables share mechanical sounds;

@@ -4,7 +4,7 @@ import { softPlungeRules } from './soft-plunge-rules';
 export const switchyardRulesScript = `
 ${softPlungeRules}
 function resetNetwork(ctx) {
-  ctx.setBall('network', 0); ctx.setBall('cargo', 0); ctx.setBall('signal', 0);
+  ctx.resetDropTargets([0,1,2]); ctx.setBall('network', 0); ctx.setBall('cargo', 0); ctx.setBall('signal', 0);
   ctx.setBall('phase', 'qualify'); ctx.setBall('jackpots', 0);
   ctx.setBall('orbits', {}); ctx.setBall('combo-shot', -1); ctx.stopMode('combo');
 }
@@ -25,6 +25,7 @@ return {
   onBallStart(ctx) { ctx.setBall('skill-shot', 'ready'); resetNetwork(ctx); ctx.setBall('clock', 0); ctx.setBonus(0); ctx.setBonusMultiplier(1); },
   onTick(ms, ctx) { ctx.setBall('clock', Number(ctx.getBall('clock') || 0) + ms); },
   onEvent(event, ctx) {
+    if (event.type === 'drop-target-hit' && ['ready','armed'].includes(ctx.getBall('skill-shot'))) ctx.setBall('skill-shot', 'missed');
     if (skillShot(event, ctx)) return;
     if (event.type === 'rollover-hit') {
       if (event.ballId === undefined) return;
@@ -32,30 +33,35 @@ return {
       const key = String(event.ballId), now = Number(ctx.getBall('clock') || 0);
       let track = tracks[key];
       if (track && now - track.time > 5000) track = undefined;
-      if (event.index === 1) {
-        if (track) track.top = true;
-      } else if (event.index === 0 || event.index === 2) {
-        if (track && track.top && track.entry !== event.index) {
-          ctx.addScore(2000); made(ctx, track.entry === 0 ? 0 : 3);
-          delete tracks[key]; ctx.setBall('orbits', tracks); return;
-        }
+      if (track && event.index === (track.entry === 0 ? 2 : track.entry === 5 ? 7 : 5)) {
+        if (track.top) { ctx.addScore(2000); made(ctx, track.entry === 0 ? 0 : 3); }
+        track = undefined;
+      } else if (event.index === 0 || event.index === 5 || event.index === 7) {
         track = { entry: event.index, top: false, time: now };
+      } else if (track && event.index === (track.entry === 0 ? 1 : 6)) {
+        track.top = true;
       }
       if (track) tracks[key] = track; else delete tracks[key];
       ctx.setBall('orbits', tracks);
-    } else if (event.type === 'standup-target-hit') {
+    } else if (event.type === 'standup-target-hit' || event.type === 'drop-target-hit') {
       ctx.addScore(500);
-      const key = event.index < 2 ? 'cargo' : 'signal', shot = event.index < 2 ? 1 : 2;
-      if (ctx.getBall('phase') === 'multiball') { made(ctx, shot); return; }
-      const mask = Number(ctx.getBall(key) || 0) | (1 << (event.index % 2));
+      const cargo = event.type === 'drop-target-hit';
+      const key = cargo ? 'cargo' : 'signal', shot = cargo ? 1 : 2;
+      const mask = Number(ctx.getBall(key) || 0) | (1 << event.index);
       ctx.setBall(key, mask);
-      if (mask === 3) { ctx.addScore(3000); ctx.setBall(key, 0); made(ctx, shot); }
+      const complete = mask === (cargo ? 7 : 3);
+      if (ctx.getBall('phase') === 'multiball') made(ctx, shot);
+      else if (complete) { ctx.addScore(3000); made(ctx, shot); }
+      if (complete) {
+        ctx.setBall(key, 0);
+        if (cargo) ctx.resetDropTargets([0,1,2]);
+      }
     } else if (event.type === 'spinner-spin' || event.type === 'slingshot-hit') {
       ctx.addScore(event.score);
     } else if (event.type === 'saucer-captured') {
       ctx.stopMode('combo'); ctx.setBall('combo-shot', -1); ctx.setBall('orbits', {});
       if (ctx.getBall('phase') === 'multiball' && ctx.getBall('jackpots') === 15) {
-        ctx.addScore(50000); ctx.setBall('jackpots', 0);
+        ctx.addScore(50000); ctx.setBall('jackpots', 0); ctx.setBall('cargo', 0); ctx.resetDropTargets([0,1,2]);
       } else {
         ctx.addScore(2000); bonus(ctx);
         if (ctx.getBall('phase') === 'qualify') {
@@ -64,7 +70,7 @@ return {
         }
       }
     } else if (event.type === 'ball-launched' && ctx.getBall('phase') === 'locked') {
-      if (ctx.releaseLockedBalls() === 1) { ctx.setBall('phase', 'multiball'); ctx.setBall('jackpots', 0); }
+      if (ctx.releaseLockedBalls() === 1) { ctx.setBall('phase', 'multiball'); ctx.setBall('jackpots', 0); ctx.setBall('cargo',0); ctx.resetDropTargets([0,1,2]); }
     } else if (event.type === 'multiball-ended') {
       resetNetwork(ctx);
     } else if (event.type === 'ball-drained') {

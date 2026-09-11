@@ -240,3 +240,51 @@ describe('stationary heel connections', () => {
     expect(keepouts()).not.toEqual([]);
   });
 });
+
+describe('compact curved rollover approaches', () => {
+  it.each([0, -1, 31, NaN, Infinity])(
+    'rejects invalid approach length %s',
+    (approachDistance) => {
+      const b = createBlankTable('Compact lane');
+      b.rollovers = [
+        { x: 450, y: 200, radius: 18, score: 0, approachDistance },
+      ];
+      expect(
+        validateCompiledBoardLayout(b).some(
+          (d) => d.code === 'rollover-approach-invalid',
+        ),
+      ).toBe(true);
+    },
+  );
+  it('still detects a physical wall across a short tangent approach', () => {
+    const b = createBlankTable('Compact lane');
+    b.rollovers = [
+      {
+        x: 450,
+        y: 200,
+        radius: 18,
+        score: 0,
+        approachAngle: 0,
+        approachDistance: 60,
+      },
+    ];
+    expect(
+      validateCompiledBoardLayout(b).filter(
+        (d) => d.code === 'rollover-unreachable',
+      ),
+    ).toEqual([]);
+    b.guides = [
+      {
+        start: { x: 420, y: 100 },
+        end: { x: 420, y: 300 },
+        thickness: 12,
+        material: 'metalGuide',
+      },
+    ];
+    expect(
+      validateCompiledBoardLayout(b).some(
+        (d) => d.code === 'rollover-unreachable',
+      ),
+    ).toBe(true);
+  });
+});

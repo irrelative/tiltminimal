@@ -213,12 +213,27 @@ const validateTopRolloverReachability = (
   diagnostics: LayoutDiagnostic[],
 ): void => {
   board.rollovers.forEach((rollover, index) => {
+    if (
+      rollover.approachDistance !== undefined &&
+      (!Number.isFinite(rollover.approachDistance) ||
+        rollover.approachDistance < board.ball.radius * 2)
+    ) {
+      diagnostics.push({
+        severity: 'error',
+        code: 'rollover-approach-invalid',
+        message: `Rollover ${index + 1} approach distance must be finite and at least one ball diameter.`,
+      });
+      return;
+    }
     if (rollover.y > board.height * 0.3) {
       return;
     }
 
     const approach = rollover.approachAngle ?? -Math.PI / 2;
-    const reach = Math.min(160, board.height * 0.42 - rollover.y);
+    const reach = Math.min(
+      rollover.approachDistance ?? 160,
+      board.height * 0.42 - rollover.y,
+    );
     const entryOffsets = [
       -rollover.radius * 2,
       -rollover.radius,

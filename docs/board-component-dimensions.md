@@ -122,6 +122,9 @@ wedge's overall bounding dimensions.
 - Optional `approachAngle`: authoring-validation approach direction in radians;
   defaults to upward (`-π/2`). Horizontal orbit switches can use `0`. It does
   not rotate the circular trigger or change physics.
+- Optional `approachDistance`: straight validation sample length for a compact
+  curved lane; defaults to 160 units and must be at least one ball diameter.
+  Pair short samples with complete simulated traversal routes.
 
 - `x`, `y`: rollover center
 - `radius`: circular trigger radius from center to outer edge

@@ -1,4 +1,4 @@
-import { RULES_VERSION } from '../app/analytics';
+import { rulesVersionForTable } from '../app/analytics';
 
 interface Statement {
   bind(...values: unknown[]): Statement;
@@ -46,7 +46,7 @@ export function validEvent(e: Record<string, unknown>): boolean {
   if (e.type === 'view')
     return e.tableId === 'gallery' || TABLE_IDS.includes(e.tableId);
   if (!TABLE_IDS.includes(e.tableId) || !uuid(e.gameId)) return false;
-  if (e.type === 'start') return e.version === RULES_VERSION;
+  if (e.type === 'start') return e.version === rulesVersionForTable(e.tableId);
   if (e.type === 'exclude') return true;
   return (
     e.type === 'finish' &&

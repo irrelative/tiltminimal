@@ -1,6 +1,7 @@
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import {
   createGameAnalytics,
+  rulesVersionForTable,
   createAnalyticsSender,
 } from '../src/app/analytics';
 import worker, { type Env, validEvent, TABLE_IDS } from '../src/server/worker';
@@ -150,4 +151,21 @@ describe('analytics API', () => {
     ).toBe(429);
     expect(e.DB.prepare).not.toHaveBeenCalled();
   });
+});
+
+it('versions the Switchyard redesign without changing other tables', () => {
+  const send = vi.fn();
+  createGameAnalytics(
+    'switchyard',
+    send,
+    () => 0,
+    () => crypto.randomUUID(),
+  ).observe({ status: 'playing', score: 0 });
+  const event = send.mock.calls[0][0];
+  expect(event.version).toBe('2026-09-11-switchyard-asymmetry');
+  expect(validEvent(event)).toBe(true);
+  expect(validEvent({ ...event, version: '2026-09-10-skill-shot' })).toBe(
+    false,
+  );
+  expect(rulesVersionForTable('just-one-more')).toBe('2026-09-10-skill-shot');
 });

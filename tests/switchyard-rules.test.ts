@@ -14,6 +14,7 @@ const hit = (
   type:
     | 'rollover-hit'
     | 'standup-target-hit'
+    | 'drop-target-hit'
     | 'spinner-spin'
     | 'saucer-captured',
   index = 0,
@@ -26,9 +27,13 @@ const hit = (
     0,
   );
 const orbit = (s: GameState, side = 0, id = 0) =>
-  [side, 1, 2 - side].forEach((i) => hit(s, 'rollover-hit', i, id));
-const banks = (s: GameState) =>
-  [0, 1, 2, 3].forEach((i) => hit(s, 'standup-target-hit', i));
+  (side === 0 ? [0, 1, 2] : [5, 6, 7]).forEach((i) =>
+    hit(s, 'rollover-hit', i, id),
+  );
+const banks = (s: GameState) => {
+  [0, 1, 2].forEach((i) => hit(s, 'drop-target-hit', i));
+  [0, 1].forEach((i) => hit(s, 'standup-target-hit', i));
+};
 const qualify = (s: GameState) => {
   orbit(s);
   orbit(s, 2);
@@ -86,7 +91,7 @@ describe('Switchyard network rules', () => {
     hit(s, 'rollover-hit', 2);
     expect(s.rules.ballValues.network).toBe(16);
   });
-  it('needs both distinct switches per bank and a subsequent Dispatch shot to lock', () => {
+  it('needs all distinct switches in each bank and a subsequent Dispatch shot to lock', () => {
     const s = start();
     for (let i = 0; i < 6; i++) hit(s, 'standup-target-hit', 0);
     expect(s.rules.ballValues.network).toBe(0);
@@ -137,7 +142,7 @@ describe('Switchyard network rules', () => {
     expect(s.score - repeat).toBe(2000);
     orbit(s, 2);
     hit(s, 'standup-target-hit', 0);
-    hit(s, 'standup-target-hit', 2);
+    hit(s, 'drop-target-hit', 0);
     expect(s.rules.ballValues.jackpots).toBe(15);
     const superScore = s.score;
     hit(s, 'saucer-captured');
@@ -180,5 +185,48 @@ describe('Switchyard network rules', () => {
     for (let i = 0; i < 3; i++)
       applyRulesFrame(s, board, [{ type: 'ball-drained', tick: s.tick }], 0);
     expect(s.status).toBe('game-over');
+  });
+});
+
+describe('asymmetric route and Cargo progress', () => {
+  it('accepts either complete East loop direction, but not switches from West or other balls', () => {
+    const s = start();
+    [5, 1, 7].forEach((i) => hit(s, 'rollover-hit', i));
+    expect(s.rules.ballValues.network).toBe(0);
+    hit(s, 'rollover-hit', 7, 1);
+    hit(s, 'rollover-hit', 6, 2);
+    hit(s, 'rollover-hit', 5, 1);
+    expect(s.rules.ballValues.network).toBe(0);
+    [7, 6, 5].forEach((i) => hit(s, 'rollover-hit', i, 3));
+    expect(s.rules.ballValues.network).toBe(8);
+  });
+  it('keeps partial Cargo drops down and resets the bank only when all three are hit', () => {
+    const s = start();
+    for (const i of [0, 1]) {
+      s.dropTargets[i].isDown = true;
+      hit(s, 'drop-target-hit', i);
+    }
+    expect(s.rules.ballValues.network).toBe(0);
+    expect(s.dropTargets.map((t) => t.isDown)).toEqual([true, true, false]);
+    expect(s.rules.ballValues['skill-shot']).toBe('missed');
+    s.dropTargets[2].isDown = true;
+    hit(s, 'drop-target-hit', 2);
+    expect(s.rules.ballValues.network).toBe(2);
+    expect(s.dropTargets.every((t) => !t.isDown)).toBe(true);
+    expect(s.rules.ballValues.cargo).toBe(0);
+  });
+  it('raises Cargo drops for a fresh multiball jackpot and each Super relight', () => {
+    let s = capture(qualify(start()));
+    s.dropTargets[0].isDown = true;
+    s = launch(s);
+    expect(s.dropTargets.every((t) => !t.isDown)).toBe(true);
+    s.dropTargets[0].isDown = true;
+    hit(s, 'drop-target-hit', 0);
+    orbit(s);
+    orbit(s, 2);
+    hit(s, 'standup-target-hit', 0);
+    hit(s, 'saucer-captured');
+    expect(s.rules.ballValues.jackpots).toBe(0);
+    expect(s.dropTargets.every((t) => !t.isDown)).toBe(true);
   });
 });
