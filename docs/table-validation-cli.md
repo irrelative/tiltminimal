@@ -100,10 +100,16 @@ browser. Deep mode adds passive-drop sampling, not exhaustive player inputs.
 - it does not load browser-local custom tables
 - it does not yet validate arbitrary module paths
 
-
 ## Assembly routes
 
 Normal and deep validation both execute any `board.routes` contracts. Failures
 appear as `playability:route-failed`, identifying the route, sample, and unmet
 goal. They count as errors, so a broken feed or return fails the command even
 without `--fail-on-warnings`. See [board-assemblies.md](board-assemblies.md).
+
+## Regression test timing
+
+The CLI regression suite validates each built-in table in a separately named
+test with a 15-second timeout. All tables retain the same validation assertions;
+adding a table does not consume the time budget of existing tables. Run the
+suite with `make test`.

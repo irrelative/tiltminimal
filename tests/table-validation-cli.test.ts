@@ -98,14 +98,17 @@ describe('table validation cli resolution and reports', () => {
     expect(shouldFailValidation([report], { failOnWarnings: true })).toBe(true);
   });
 
-  it('keeps every built-in table free of validation errors', () => {
-    const reports = BUILT_IN_TABLES.map((table) => validateTableRecord(table));
-    expect(shouldFailValidation(reports, { failOnWarnings: false })).toBe(
-      false,
-    );
-    expect(reports.every((report) => report.layoutErrors === 0)).toBe(true);
-    expect(reports.every((report) => report.playabilityErrors === 0)).toBe(
-      true,
-    );
-  }, 15000);
+  // Give each table its own budget as the built-in library grows.
+  it.each(BUILT_IN_TABLES)(
+    '$id stays free of validation errors',
+    (table) => {
+      const report = validateTableRecord(table);
+      expect(shouldFailValidation([report], { failOnWarnings: false })).toBe(
+        false,
+      );
+      expect(report.layoutErrors).toBe(0);
+      expect(report.playabilityErrors).toBe(0);
+    },
+    15000,
+  );
 });
