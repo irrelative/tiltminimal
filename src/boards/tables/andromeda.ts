@@ -26,7 +26,7 @@ lower.flippers.forEach((flipper) => {
 });
 // The original has no conventional left inlane/outlane pair. Its cabinet
 // curves directly toward the left heel below the fourth power bumper.
-lower.guides = lower.guides!.slice(4);
+lower.guides = lower.guides!.slice(lower.guides!.length / 2);
 lower.posts = lower.posts!.slice(2);
 lower.slingshots = lower.slingshots!.slice(1);
 // Smaller post rubber suits the shorter 120-unit bats.

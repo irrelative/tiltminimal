@@ -36,7 +36,7 @@ export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
   requireClearance(o.laneWidth, ballRadius * 2 + 24, 'Inlane width');
   requireClearance(o.returnRadius, o.laneWidth, 'Return radius');
   // Leave room above the heel for the ball to meet the held flipper's top face.
-  const bendRise = o.bendRise ?? o.returnRadius + 20;
+  const bendRise = o.bendRise ?? o.returnRadius + 26;
   requireClearance(o.entryRise, bendRise, 'Lane entry rise');
   const flippers = createFlipperPair({
     leftX: o.center.x - o.pivotSpacing / 2,
@@ -77,6 +77,20 @@ export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
         radius: 12,
         material: 'rubberPost',
       });
+      if (radius === radii[0]) {
+        // Continue the return into the fixed heel. An exposed arc endpoint
+        // leaves a ball-sized valley against the heel that traps slow feeds.
+        part.guides!.push(
+          rail(
+            {
+              x: center.x + sign * radius * Math.sin(0.005),
+              y: center.y + radius * Math.cos(0.005),
+            },
+            pivot,
+            4,
+          ),
+        );
+      }
       if (radius === radii[1] && o.lowerPostOffset) {
         part.guides!.push(
           rail(

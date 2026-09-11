@@ -1,4 +1,4 @@
-import { getDistanceToFlipperSurface } from '../game/flipper-geometry';
+import { getDistanceToFlipperSurface, isFlipperHeelGuide } from '../game/flipper-geometry';
 import {
   getArcGuidePoint,
   getArcGuideSweep,
@@ -293,7 +293,7 @@ const validateFlipperKeepouts = (
         continue;
       }
 
-      if (guide.material === 'rubberPost') {
+      if (guide.material === 'rubberPost' || isFlipperHeelGuide(guide, flipper)) {
         continue;
       }
 

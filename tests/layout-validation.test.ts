@@ -214,3 +214,29 @@ describe('validateCompiledBoardLayout', () => {
     );
   });
 });
+
+describe('stationary heel connections', () => {
+  it('allows an outward heel join but rejects guides extending into the moving bat', () => {
+    const board = createBlankTable('Heel joins');
+    const f = board.flippers[0];
+    const outside = f.side === 'left' ? -1 : 1;
+    board.guides = [
+      {
+        kind: 'line',
+        start: { x: f.x + outside * 33, y: f.y - 26 },
+        end: { x: f.x, y: f.y },
+        thickness: 4,
+        material: 'metalGuide',
+      },
+    ];
+    const keepouts = () =>
+      validateCompiledBoardLayout(board).filter(
+        (d) => d.code === 'flipper-keepout',
+      );
+    expect(keepouts()).toEqual([]);
+    const guide = board.guides[0];
+    if (guide.kind === 'arc') throw new Error('Expected heel segment');
+    guide.end.x -= outside * 20;
+    expect(keepouts()).not.toEqual([]);
+  });
+});

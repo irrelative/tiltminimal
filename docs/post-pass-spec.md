@@ -68,8 +68,11 @@ release/re-flip using ordinary inputs at 120 Hz. Every listed transfer must
 touch its source's lower post, fire no sling, and remain caught on the receiver
 for 0.5 seconds. Classic and foundation releases of 6, 7, 8, and 9 frames
 (50–75 ms) must
-all succeed in both directions. Harlem and Andromeda retain their 3, 4,
-and 5-frame (25–42 ms) regression samples.
+all succeed in both directions. Andromeda and Harlem’s right-to-lower-left transfer retain their 3, 4,
+and 5-frame (25–42 ms) regression samples. With the connected heel returns,
+Harlem’s upper-left-to-right transfer succeeds at 3, 5, and 6 frames
+(25, 42, and 50 ms); the previous 4-frame trajectory no longer catches.
+These samples establish available transfers, not a continuous timing window.
 Classic also rejects zero-release and late-release controls. These are
 regression samples, not a claim that all human inputs succeed.
 

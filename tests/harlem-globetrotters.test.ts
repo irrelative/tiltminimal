@@ -93,8 +93,8 @@ describe('harlemGlobetrottersTable', () => {
     // All nine velocities must catch/release at each destination, including the
     // longer right lane; equal mouth heights alone do not prove a working feed.
     expect(validateBallRoutes({ ...b, routes })).toEqual([]);
-    for (const guide of b.guides.slice(0, 8)) {
-      if (guide.kind !== 'line') continue;
+    for (const guide of b.guides.slice(0, 10)) {
+      if (guide.kind !== 'line' || guide.start.x !== guide.end.x) continue;
       expect(guide.start.y).toBe(1480);
       expect(
         b.posts.some((p) => p.x === guide.start.x && p.y === guide.start.y),

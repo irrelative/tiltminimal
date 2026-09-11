@@ -79,3 +79,11 @@ and all-five-table deep validation with zero errors or warnings. Browser review
 covered the full Game playfield, live label placement, the Physics overlay and
 a center-drain drop. Physical layout was preserved; automated route, held-feed,
 post-pass and bump-pass regressions remain green.
+
+## Inlane heel correction
+
+The shared outer returns now join each stationary flipper heel with a short,
+narrow descending metal guide. Slow balls no longer settle between the return
+endpoint and flipper base. Browser Physics review confirmed both slow heel
+drops clear without nudging, both inlanes catch and release, and the center
+drain remains open. See [shared feed contracts](flipper-feed-spec.md).

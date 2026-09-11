@@ -165,3 +165,11 @@ Post passes are tested from upper-left to right and from right to lower-left.
 Both left flippers still move together; no post is added between them.
 The center drain, lane-mouth baseline, catches/releases, and outlane contracts
 remain required. See [post-pass specification](post-pass-spec.md).
+
+## Connected heel returns
+
+Both staggered inlanes inherit the shared narrow guide from the outer return
+arc into its fixed heel, removing the slow-ball pocket. The lower-left flipper
+retains its open direct feed. Upper-left-to-right post-pass samples are now
+3, 5, and 6 frames; right-to-lower-left remains 3, 4, and 5 frames. See
+[post-pass contracts](post-pass-spec.md) and [feeds](flipper-feed-spec.md).

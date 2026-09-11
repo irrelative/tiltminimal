@@ -6,6 +6,7 @@ import {
 } from '../game/slingshot-geometry';
 import {
   getDistanceToFlipperSurface,
+  isFlipperHeelGuide,
   getFlipperRadiusAt,
   getFlipperTipPosition,
 } from '../game/flipper-geometry';
@@ -262,6 +263,11 @@ const analyzeFlipperKeepouts = (
 
   board.flippers.forEach((flipper) => {
     for (const element of keepoutElements) {
+      if (
+        element.ref.kind === 'guide' &&
+        isFlipperHeelGuide(board.guides[element.ref.index]!, flipper)
+      )
+        continue;
       const intrudes = element.samples.some(
         (sample) =>
           getMinFlipperSweepDistance(sample, flipper) <
@@ -891,9 +897,29 @@ const isIntentionalAttachment = (
   left: TableAnalysisElementRef,
   right: TableAnalysisElementRef,
 ): boolean =>
+  isHeelGuideJoin(board, left, right) ||
   isSlingMountPost(board, left, right) ||
   isGuidePostJoin(board, left, right) ||
   isGuideSlingshotJoin(board, left, right);
+
+const isHeelGuideJoin = (
+  board: BoardDefinition,
+  left: TableAnalysisElementRef,
+  right: TableAnalysisElementRef,
+): boolean => {
+  const guide =
+    left.kind === 'guide' ? left : right.kind === 'guide' ? right : null;
+  const flipper =
+    left.kind === 'flipper' ? left : right.kind === 'flipper' ? right : null;
+  return (
+    !!guide &&
+    !!flipper &&
+    isFlipperHeelGuide(
+      board.guides[guide.index]!,
+      board.flippers[flipper.index]!,
+    )
+  );
+};
 
 const isSlingMountPost = (
   board: BoardDefinition,

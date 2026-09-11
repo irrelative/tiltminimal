@@ -73,7 +73,10 @@ const left = createLowerPlayfieldAssembly({
 });
 // Use each assembly's outer half: Harlem's left and right returns are staggered.
 const lower: BoardAssembly = {
-  guides: [...left.guides!.slice(0, 4), ...right.guides!.slice(4)],
+  guides: [
+    ...left.guides!.slice(0, left.guides!.length / 2),
+    ...right.guides!.slice(right.guides!.length / 2),
+  ],
   posts: [...left.posts!.slice(0, 2), ...right.posts!.slice(2)],
   flippers: [
     left.flippers[0],

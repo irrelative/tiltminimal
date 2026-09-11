@@ -185,3 +185,43 @@ it.each(BUILT_IN_TABLES)(
     }
   },
 );
+
+it.each(BUILT_IN_TABLES)(
+  '$id clears slow balls from both sides of every inlane heel without nudging',
+  ({ board }) => {
+    for (const route of board.routes!.filter(
+      (r) => r.cradle && r.id.includes('/inlane-'),
+    )) {
+      const f = board.flippers.find(
+        (f) => f.x === route.cradle!.pivot.x && f.y === route.cradle!.pivot.y,
+      )!;
+      const outward = f.side === 'left' ? -1 : 1;
+      for (const offset of [12, 20, 28]) {
+        for (const speed of [0, 80]) {
+          let state = createInitialGameState(board);
+          state.status = 'playing';
+          state.launcherExited = true;
+          state.ball.position = { x: f.x + outward * offset, y: f.y - 65 };
+          state.ball.linearVelocity = { x: 0, y: speed };
+          // Slow feeds exposed a persistent wedge that ordinary fast lane
+          // entry samples missed. Require departure from the heel region.
+          let escaped = false;
+          for (let frame = 0; frame < 360; frame++) {
+            state = stepGameFrame(state, board, idle, 1 / 120).state;
+            if (
+              state.status !== 'playing' ||
+              state.ball.position.y > f.y + 40 ||
+              -outward * (state.ball.position.x - f.x) > 80
+            ) {
+              escaped = true;
+              break;
+            }
+          }
+          expect(escaped, `${route.id}, offset ${offset}, speed ${speed}`).toBe(
+            true,
+          );
+        }
+      }
+    }
+  },
+);

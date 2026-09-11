@@ -1,4 +1,8 @@
-import type { FlipperDefinition, Point } from '../types/board-definition';
+import type {
+  FlipperDefinition,
+  GuideDefinition,
+  Point,
+} from '../types/board-definition';
 
 const FLIPPER_TIP_WIDTH_RATIO = 0.72;
 
@@ -50,7 +54,8 @@ export const sampleFlipperProfile = (
   const t =
     segmentLengthSquared > 0
       ? clamp(
-          ((point.x - flipper.x) * segmentX + (point.y - flipper.y) * segmentY) /
+          ((point.x - flipper.x) * segmentX +
+            (point.y - flipper.y) * segmentY) /
             segmentLengthSquared,
           0,
           1,
@@ -92,3 +97,21 @@ const interpolate = (start: number, end: number, ratio: number): number =>
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(Math.max(value, min), max);
+
+/** A narrow return may join the stationary heel from outside the moving bat. */
+export const isFlipperHeelGuide = (
+  guide: GuideDefinition,
+  flipper: FlipperDefinition,
+): boolean => {
+  if (guide.kind === 'arc' || guide.thickness > 4) return false;
+  const outside = flipper.side === 'left' ? -1 : 1;
+  const heelX = flipper.x;
+  const heelY = flipper.y;
+  const atHeel = (p: Point) => Math.hypot(p.x - heelX, p.y - heelY) < 0.01;
+  const end = atHeel(guide.start)
+    ? guide.end
+    : atHeel(guide.end)
+      ? guide.start
+      : null;
+  return end !== null && outside * (end.x - heelX) > 0 && end.y < heelY;
+};

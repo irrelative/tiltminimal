@@ -23,7 +23,7 @@ post closer while preserving the outer return and lane entry coordinates.
 
 The shared 148-unit returns preserve outlane clearance beside the cabinet
 and shooter walls. The shared assembly defaults `bendRise` to `returnRadius +
-20`; authors can override it, but must validate the complete table afterward.
+26`; authors can override it, but must validate the complete table afterward.
 Harlem uses equal 110-unit bats, with the upper-left at (270, 1680),
 lower-left at (370, 1800), and right at (630, 1800). Its left return
 follows the upper pivot, and direct feeds follow both left pivots. Lane mouths
@@ -31,6 +31,23 @@ share y=1480; each sling follows its staggered return exit. Harlem's left return
 passive release, and its right return permits lower-playfield entry followed by
 a center drain. Both returns still require a catch on their specified held
 flipper and a successful release.
+
+## Heel connection
+
+Each shared outer return continues from its arc endpoint to the flipper pivot
+with a 4-unit metal guide. The short descending segment closes the pocket where
+a slow ball could wedge between the open arc cap and stationary heel. It stays
+on the outer side of the pivot and ends inside the fixed heel; it does not
+extend onto the moving bat. The narrow guide preserves drop-catch clearance.
+The default bend rise is radius + 26, leaving a downhill transition into the
+heel; the older radius + 20 default can stall some passive feeds with this join.
+
+Layout and analysis validators recognize only narrow, descending, outward
+segments attached exactly to the fixed pivot as intentional heel joins.
+Other guides still receive the full flipper keepout checks. Slow-feed regressions
+start 12, 20, and 28 units outside every inlane pivot, 65 units above it, at
+0 and 80 units/second, and require escape without input within three seconds.
+Existing passive/held routes, releases, outlanes and advanced moves remain tested.
 
 ## Held contact behavior
 
@@ -89,3 +106,9 @@ not a guarantee that every possible incoming ball can be caught.
 
 The slings now join these exits with rounded passive posts. See
 [post passes](post-pass-spec.md) for supported transfers and timing regressions.
+
+The heel-connection revision passes 488 tests and all-seven-table deep validation
+with zero errors or warnings. Starlight browser checks cover slow drops at both
+heels, held inlane catches/releases, and the center drain. Classic's 76-run
+playtest recorded a longest unexplained near-rest of 0.02 seconds; its 15
+remaining diagnostic flags concern speeds above 4,000 units/second, not stalls.
