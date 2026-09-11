@@ -137,6 +137,10 @@
                 ><input id="setting-ball-trail" type="checkbox" checked /> Ball
                 motion trail</label
               >
+              <label class="debug-toggle"
+                ><input id="setting-performance" type="checkbox" /> Performance
+                meter</label
+              >
               <p class="meta-text">Saved on this browser for all tables.</p>
               <label class="debug-toggle"
                 ><input id="debug-overlay" type="checkbox" /> Physics
@@ -216,6 +220,13 @@
               aria-label="Pinball table"
             ></canvas>
           </section>
+          <output
+            id="performance-meter"
+            aria-live="off"
+            class="performance-meter"
+            hidden
+            title="Actual animation-frame cadence over the last 2 seconds. Update and draw measure JavaScript time, not GPU presentation. Frames above 50 ms indicate long gaps."
+          ></output>
         </section>
       </section>
     </main>

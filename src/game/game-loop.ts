@@ -1,3 +1,4 @@
+import { FramePerformance } from './frame-performance';
 import { PhysicsDebug, recordDebugEvents } from './physics-debug';
 import type { InputSource, InputState } from '../input/keyboard-input';
 import type { BoardDefinition } from '../types/board-definition';
@@ -17,6 +18,7 @@ import { clampFrameDeltaSeconds } from './physics-engine-types';
 export class GameLoop {
   suspended = false;
   readonly debug = new PhysicsDebug();
+  readonly performance = new FramePerformance();
   private animationFrameId = 0;
   private lastFrameTime = 0;
   private running = false;
@@ -41,6 +43,7 @@ export class GameLoop {
 
     this.running = true;
     this.lastFrameTime = 0;
+    this.performance.reset();
     this.lastInputState = this.input.getState();
     this.input.connect();
     this.audio?.connect(this.board);
@@ -76,6 +79,7 @@ export class GameLoop {
       return;
     }
 
+    this.performance.begin(frameTime, document.hidden);
     const deltaSeconds = this.suspended
       ? 0
       : this.debug.delta(
@@ -88,7 +92,9 @@ export class GameLoop {
     this.lastFrameTime = frameTime;
     const input = this.input.getState();
     if (deltaSeconds === 0) {
+      this.performance.rendering();
       this.renderer.renderGame(this.board, this.state, input, this.debug);
+      this.performance.end();
       this.emitStateChange();
       this.animationFrameId = window.requestAnimationFrame(this.onFrame);
       return;
@@ -137,7 +143,9 @@ export class GameLoop {
       ),
     );
     this.lastInputState = input;
+    this.performance.rendering();
     this.renderer.renderGame(this.board, this.state, input, this.debug);
+    this.performance.end();
     this.emitStateChange();
     this.animationFrameId = window.requestAnimationFrame(this.onFrame);
   };

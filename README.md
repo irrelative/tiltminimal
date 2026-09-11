@@ -183,3 +183,12 @@ base path, and publishes `dist/` with a `404.html` fallback for direct routes.
 
 For another static host, build with `VITE_BASE_PATH` set to the deployment subpath
 when needed, serve `dist/`, and configure an index-page fallback for `/physics`.
+
+### Measuring frame rate
+
+Enable **Settings → Performance meter** on any table or in the Physics sandbox.
+The meter shows actual animation-frame FPS, average/P95/worst frame intervals,
+frames longer than 50 ms, and average update/draw CPU time over the last two
+seconds. It is independent of the Physics overlay and stays visible when
+Settings is collapsed. See [performance measurements](docs/performance-meter.md)
+for interpretation and comparison steps.

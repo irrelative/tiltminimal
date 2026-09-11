@@ -945,3 +945,24 @@ body[data-session-route='physics'] .reset-ball-action {
 .privacy-link a {
   color: #91a6af;
 }
+
+.performance-meter {
+  grid-column: 1;
+  grid-row: 2;
+  padding: 8px 10px;
+  background: #081119e8;
+  color: #d7f3e9;
+  font:
+    12px/1.5 ui-monospace,
+    monospace;
+  font-variant-numeric: tabular-nums;
+  white-space: pre;
+  pointer-events: none;
+}
+.performance-meter[hidden] {
+  display: none;
+}
+
+.stage-shell:has(> .performance-meter:not([hidden])) {
+  grid-template-rows: minmax(0, 1fr) auto;
+}

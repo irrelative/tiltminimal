@@ -3,6 +3,7 @@ export interface UserSettings {
   soundVolume: number;
   showSpinMarker: boolean;
   showBallTrail: boolean;
+  showPerformance: boolean;
 }
 
 export const DEFAULT_USER_SETTINGS: Readonly<UserSettings> = {
@@ -10,6 +11,7 @@ export const DEFAULT_USER_SETTINGS: Readonly<UserSettings> = {
   soundVolume: 1,
   showSpinMarker: true,
   showBallTrail: true,
+  showPerformance: false,
 };
 const storageKey = 'pinball.settings.v1';
 type SettingsStorage = Pick<Storage, 'getItem' | 'setItem'>;
@@ -31,6 +33,7 @@ export class UserSettingsStore {
         'soundEnabled',
         'showSpinMarker',
         'showBallTrail',
+        'showPerformance',
       ] as const) {
         if (key in saved && typeof values[key] === 'boolean')
           settings[key] = values[key];

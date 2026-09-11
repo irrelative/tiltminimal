@@ -34,6 +34,10 @@ const soundToggle = required<HTMLInputElement>('#setting-sound');
 const volumeSlider = required<HTMLInputElement>('#setting-volume');
 const spinToggle = required<HTMLInputElement>('#setting-spin-marker');
 const trailToggle = required<HTMLInputElement>('#setting-ball-trail');
+const performanceToggle = required<HTMLInputElement>('#setting-performance');
+const performanceMeter = required<HTMLOutputElement>('#performance-meter');
+let syncPerformance = (): void => {};
+performanceToggle.checked = settings.showPerformance;
 soundToggle.checked = settings.soundEnabled;
 volumeSlider.value = String(settings.soundVolume * 100);
 spinToggle.checked = settings.showSpinMarker;
@@ -41,17 +45,26 @@ trailToggle.checked = settings.showBallTrail;
 const applySettings = (): void => {
   audio.setSettings(settings.soundEnabled, settings.soundVolume);
   renderer.setBallAppearance(settings);
+  performanceMeter.hidden = !settings.showPerformance;
+  syncPerformance();
   volumeSlider.disabled = !settings.soundEnabled;
   required<HTMLOutputElement>('#setting-volume-value').value =
     `${Math.round(settings.soundVolume * 100)}%`;
 };
 applySettings();
-for (const control of [soundToggle, volumeSlider, spinToggle, trailToggle]) {
+for (const control of [
+  soundToggle,
+  volumeSlider,
+  spinToggle,
+  trailToggle,
+  performanceToggle,
+]) {
   control.addEventListener('input', () => {
     settings.soundEnabled = soundToggle.checked;
     settings.soundVolume = Number(volumeSlider.value) / 100;
     settings.showSpinMarker = spinToggle.checked;
     settings.showBallTrail = trailToggle.checked;
+    settings.showPerformance = performanceToggle.checked;
     applySettings();
     settingsStore.save(settings);
   });
@@ -79,6 +92,21 @@ const state: {
   loop: null,
   sandbox: null,
 };
+syncPerformance = (): void => {
+  const meter = (state.loop ?? state.sandbox)?.performance;
+  if (!meter) return;
+  if (meter.enabled !== settings.showPerformance) meter.reset();
+  meter.enabled = settings.showPerformance;
+  if (meter.enabled) performanceMeter.textContent = 'Measuring frame rate…';
+  meter.onReport = (s) => {
+    performanceMeter.textContent = `${s.fps.toFixed(1)} FPS · ${s.frameMs.toFixed(1)} ms/frame
+P95 ${s.p95Ms.toFixed(1)} ms · Max ${s.maxMs.toFixed(1)} ms · >50 ms: ${s.slowFrames}
+Update ${s.updateMs.toFixed(1)} ms · Draw ${s.renderMs.toFixed(1)} ms`;
+  };
+};
+document.addEventListener('visibilitychange', () => {
+  (state.loop ?? state.sandbox)?.performance.reset();
+});
 const table = (): BuiltInTable =>
   BUILT_IN_TABLES.find((item) => item.id === state.tableId) ??
   BUILT_IN_TABLES[0]!;
@@ -129,6 +157,7 @@ const restart = (): void => {
   const debug = (state.loop ?? state.sandbox)!.debug;
   debug.enabled = required<HTMLInputElement>('#debug-overlay').checked;
   debug.speed = Number(required<HTMLSelectElement>('#debug-speed').value);
+  syncPerformance();
 };
 if (route === 'physics') {
   modeCopy.textContent =

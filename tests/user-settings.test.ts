@@ -25,6 +25,7 @@ describe('user settings', () => {
       soundVolume: 0.35,
       showSpinMarker: false,
       showBallTrail: true,
+      showPerformance: true,
     };
     new UserSettingsStore(() => storage).save(settings);
     expect(new UserSettingsStore(() => storage).load()).toEqual(settings);

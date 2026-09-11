@@ -1,3 +1,4 @@
+import { FramePerformance } from './frame-performance';
 import { PhysicsDebug } from './physics-debug';
 import type { InputSource } from '../input/keyboard-input';
 import type { CanvasRenderer } from '../render/canvas-renderer';
@@ -21,6 +22,7 @@ import { clampFrameDeltaSeconds } from './physics-engine-types';
 export class PhysicsSandboxLoop {
   suspended = false;
   readonly debug = new PhysicsDebug();
+  readonly performance = new FramePerformance();
   private animationFrameId = 0;
   private lastFrameTime = 0;
   private running = false;
@@ -42,6 +44,7 @@ export class PhysicsSandboxLoop {
 
     this.running = true;
     this.lastFrameTime = 0;
+    this.performance.reset();
     this.input.connect();
     this.render();
     this.emitStateChange();
@@ -119,6 +122,7 @@ export class PhysicsSandboxLoop {
       return;
     }
 
+    this.performance.begin(frameTime, document.hidden);
     const deltaSeconds = this.suspended
       ? 0
       : this.debug.delta(
@@ -139,7 +143,9 @@ export class PhysicsSandboxLoop {
         ),
       );
     this.state = { ...this.state, paused: this.debug.paused };
+    this.performance.rendering();
     this.render();
+    this.performance.end();
     this.emitStateChange();
     this.animationFrameId = window.requestAnimationFrame(this.onFrame);
   };
