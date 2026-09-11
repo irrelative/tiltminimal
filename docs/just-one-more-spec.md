@@ -78,3 +78,14 @@ velocity (301,1184 and 599,1184), then released both into moving play.
 Qualification is stored in player-scoped values and mirrored into ball-scoped
 values for the inserts. Ball start restores these lights. Multiball end clears
 both scopes for a fresh cycle; ordinary drains do not clear qualification.
+
+## Plunge-gate relief opening
+
+The shared fan layout's 410-unit inner shooter arch stops 0.14 radians before
+its closed gate (end angle 2π − 0.94; gate angle −0.8). This leaves about
+57 units between centerline endpoints, about 45 after guide thickness, for the
+32-unit ball to roll into the upper orbit. Previously the continuous rail and
+gate formed a pocket that held slow returning balls. The gate remains one-way,
+and the existing plunge and ordered orbit scoring routes remain required.
+Slow-return tests sample four positions across every built-in gate at zero
+and 80 units/second, requiring clearance without a nudge within three seconds.

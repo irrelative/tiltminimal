@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { BUILT_IN_TABLES } from '../src/boards/table-library';
 import { classicTable as board } from '../src/boards/tables/classic-table';
 import { createInitialGameState } from '../src/game/game-state';
 import { getPlungerReturnGate } from '../src/game/plunger-geometry';
@@ -96,3 +97,36 @@ describe('shooter return gate', () => {
     );
   });
 });
+
+it.each(BUILT_IN_TABLES)(
+  '$id releases slow returning balls from the closed plunge gate without nudging',
+  ({ board }) => {
+    const gate = getPlungerReturnGate(board)!;
+    const dx = gate.end.x - gate.start.x;
+    const dy = gate.end.y - gate.start.y;
+    const length = Math.hypot(dx, dy);
+    for (const t of [0, 0.25, 0.5, 0.75]) {
+      for (const speed of [0, 80]) {
+        let state = createInitialGameState(board);
+        state.status = 'playing';
+        state.launcherExited = true;
+        state.ball.position = {
+          x: gate.start.x + t * dx + (dy / length) * 30,
+          y: gate.start.y + t * dy - (dx / length) * 30,
+        };
+        state.ball.linearVelocity = { x: 0, y: speed };
+        let cleared = false;
+        for (let frame = 0; frame < 360; frame++) {
+          state = stepGame(state, board, idleInput, 1 / 120);
+          if (state.ball.position.y > gate.start.y + 100) {
+            cleared = true;
+            break;
+          }
+        }
+        expect(cleared, `gate fraction ${t}, downward speed ${speed}`).toBe(
+          true,
+        );
+      }
+    }
+  },
+);

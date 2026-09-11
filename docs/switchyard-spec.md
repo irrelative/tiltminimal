@@ -24,9 +24,10 @@ The Express entrances open into one continuous upper U-shaped orbit. Its inner
 arc has center (450,506), radius 260; the outer boundary follows the shooter's
 410-unit inner arch. Flares end at (280,740) and (620,740). The launch ball travels
 outside the orbit's outer boundary before joining its left return. A short
-connected divider keeps orbit shots inside that boundary, so they cannot enter
-the shooter channel and bounce off the closed one-way gate. Deflectors on both
-sides turn downward returns back toward the open playfield. No wall crossing or
+connected divider guides orbit shots inside that boundary. A ball-sized relief
+beside the gate lets slow shooter-channel returns fall into the orbit. The
+one-way gate prevents return to the plunger. Deflectors on both sides turn
+downward returns back toward the open playfield. No wall crossing or
 raised-guide exemption supplies these connections.
 
 Surface switches at (140,550), (450,170), and (800,550) detect ordered orbit travel.
@@ -128,3 +129,14 @@ review covered the six-table gallery, direct Switchyard selection, rule-card
 content, desktop artwork, the 390 × 844 mobile breakpoint, and a stepped center
 drain with the physics overlay. Feed/held-release and advanced-skill verification
 uses the shared simulation regression suites described above.
+
+## Plunge-gate relief opening
+
+The shared fan layout's 410-unit inner shooter arch stops 0.14 radians before
+its closed gate (end angle 2π − 0.94; gate angle −0.8). This leaves about
+57 units between centerline endpoints, about 45 after guide thickness, for the
+32-unit ball to roll into the upper orbit. Previously the continuous rail and
+gate formed a pocket that held slow returning balls. The gate remains one-way,
+and the existing plunge and ordered orbit scoring routes remain required.
+Slow-return tests sample four positions across every built-in gate at zero
+and 80 units/second, requiring clearance without a nudge within three seconds.

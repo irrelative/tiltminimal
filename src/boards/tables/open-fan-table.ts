@@ -51,7 +51,10 @@ export function createOpenFanTable(
     dispatch,
   );
   parts.guides!.push(
-    arc({ x: 478, y: 506 }, 410, Math.PI, Math.PI * 2 - 0.8),
+    // End the inner arch before the gate: the 57-unit opening lets a slow
+    // returning ball roll off the gate into the orbit instead of wedging
+    // against a continuous inner rail. The one-way gate still closes the lane.
+    arc({ x: 478, y: 506 }, 410, Math.PI, Math.PI * 2 - 0.94),
     rail({ x: 12, y: 506 }, { x: 12, y: 1380 }),
     rail({ x: 12, y: 670 }, { x: 120, y: 800 }),
     rail({ x: 888, y: 670 }, { x: 780, y: 800 }),
