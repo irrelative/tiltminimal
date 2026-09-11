@@ -1,7 +1,7 @@
 # Table selection
 
 The root URL without a valid `?table=` parameter opens a “Select a table” landing
-page. Six native links show static canvas previews, table names, ball counts,
+page. Four native links show static canvas previews, table names, ball counts,
 and short descriptions. The responsive gallery uses three, two, or one column.
 No game loop, keyboard gameplay input or audio is started on this page.
 
@@ -19,3 +19,8 @@ configured deployment base path.
 `main.ts` selects the view and loads `app/game-app.ts` only for a valid game URL.
 `app/table-selection.ts` builds the gallery, using the existing board renderer
 for static previews. No playfield geometry, artwork or rules change.
+
+Andromeda and Harlem Globetrotters are retained in the table library but marked
+`hiddenFromSelection`. Neither gallery shows links to them. Their direct game
+and physics URLs still work, and their rules, saved scores and validation remain
+available. The visible choices are Classic, Double Crossed, Starlight and Switchyard.

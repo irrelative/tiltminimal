@@ -14,6 +14,7 @@ export interface BuiltInTable {
   id: string;
   board: BoardDefinition;
   description?: string;
+  hiddenFromSelection?: boolean;
 }
 
 export const BUILT_IN_TABLES: BuiltInTable[] = [
@@ -25,6 +26,7 @@ export const BUILT_IN_TABLES: BuiltInTable[] = [
   },
   {
     id: 'andromeda',
+    hiddenFromSelection: true,
     board: andromedaTable,
     description:
       'Clear the guard, lock a ball and launch into two-ball multiball. Drop banks and a rising spinner award reward accurate shooting.',
@@ -37,6 +39,7 @@ export const BUILT_IN_TABLES: BuiltInTable[] = [
   },
   {
     id: 'harlem-globetrotters',
+    hiddenFromSelection: true,
     board: harlemGlobetrottersTable,
     description:
       'Three flippers, sweeping lanes and big saucer shots on a basketball classic.',

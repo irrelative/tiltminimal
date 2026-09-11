@@ -14,12 +14,26 @@ it.each([
     const host = document.createElement('div');
     renderTableSelection(host, `https://example.com${path}`, '/arcade/');
     const links = [...host.querySelectorAll('a')];
-    expect(links).toHaveLength(BUILT_IN_TABLES.length);
+    const visibleIds = [
+      'classic-table',
+      'double-crossed',
+      'starlight-em',
+      'switchyard',
+    ];
+    expect(links).toHaveLength(visibleIds.length);
+    expect(BUILT_IN_TABLES.some((table) => table.id === 'andromeda')).toBe(
+      true,
+    );
+    expect(
+      BUILT_IN_TABLES.some((table) => table.id === 'harlem-globetrotters'),
+    ).toBe(true);
     for (const [i, link] of links.entries()) {
       const url = new URL(link.href);
       expect(url.pathname).toBe(expectedPath);
-      expect(url.searchParams.get('table')).toBe(BUILT_IN_TABLES[i].id);
-      expect(link.textContent).toContain(BUILT_IN_TABLES[i].board.name);
+      expect(url.searchParams.get('table')).toBe(visibleIds[i]);
+      expect(link.textContent).toContain(
+        BUILT_IN_TABLES.find((table) => table.id === visibleIds[i])!.board.name,
+      );
       expect(link.querySelector('canvas')?.getAttribute('aria-hidden')).toBe(
         'true',
       );

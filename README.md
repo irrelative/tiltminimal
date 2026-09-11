@@ -18,6 +18,10 @@ including ball locks and two-ball multiball.
 | Starlight            | 5     | Spell STAR, light COMET and NOVA, and collect rising observatory awards.                           |
 | Switchyard           | 3     | Connect five fan shots, lock at Dispatch, and collect multiball jackpots.                          |
 
+The gallery shows Classic, Double Crossed, Starlight and Switchyard. Andromeda
+and Harlem are hidden from selection but remain playable through direct
+`?table=andromeda` and `?table=harlem-globetrotters` URLs.
+
 Andromeda and Harlem are reference-based adaptations. Harlem currently uses
 simplified direct scoring, and its synthesized early Bally-style sound is an
 approximation rather than ROM emulation. Each table's **Rule card** describes
