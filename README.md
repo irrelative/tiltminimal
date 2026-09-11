@@ -1,6 +1,6 @@
 # Pinball Browser
 
-A TypeScript browser pinball game with six built-in tables, a 2D canvas
+A TypeScript browser pinball game with seven built-in tables, a 2D canvas
 playfield, keyboard and touch controls, and synthesized audio. Shared physics,
 rendering, and reusable board assemblies support table-specific layouts and rules,
 including ball locks and two-ball multiball.
@@ -11,6 +11,7 @@ including ball locks and two-ball multiball.
 
 | Table                | Balls | What to shoot for                                                                                  |
 | -------------------- | ----- | -------------------------------------------------------------------------------------------------- |
+| Just One More        | 3     | Play both spinners, fix four targets, and collect a pin for two-ball multiball.                    |
 | Classic              | 3     | Complete the top lanes, build bonus, and shoot the saucer.                                         |
 | Andromeda            | 3     | Clear the guard, lock a ball, then hit RELEASE for two-ball multiball.                             |
 | Double Crossed       | 3     | Complete both CROSS banks, lock a ball, and plunge for multiball. Both spinners light the jackpot. |
@@ -18,7 +19,7 @@ including ball locks and two-ball multiball.
 | Starlight            | 5     | Spell STAR, light COMET and NOVA, and collect rising observatory awards.                           |
 | Switchyard           | 3     | Connect five fan shots, lock at Dispatch, and collect multiball jackpots.                          |
 
-The gallery shows Classic, Double Crossed, Starlight and Switchyard. Andromeda
+The gallery shows Just One More, Classic, Double Crossed, Starlight and Switchyard. Andromeda
 and Harlem are hidden from selection but remain playable through direct
 `?table=andromeda` and `?table=harlem-globetrotters` URLs.
 
@@ -69,7 +70,11 @@ storage. Partial games and sandbox sessions do not submit scores. Scores and
 preferences are local to the browser, with no account or cross-device sync; if
 storage is unavailable, changes last only for the current page session.
 
-A pointer or keyboard interaction unlocks audio. Tables share mechanical sounds;
+Just One More is a silent r/pinball tribute in this first version. Its simple
+PLAY / FIX / COLLECT progression uses the same tested open fan geometry as Switchyard.
+See [Just One More rules and layout](docs/just-one-more-spec.md).
+
+A pointer or keyboard interaction unlocks audio. Other tables share mechanical sounds;
 Harlem adds electronic scoring cues and a synthesized Sweet Georgia Brown opening
 phrase. See [audio behavior and fidelity limits](docs/table-audio-spec.md) and
 [user settings](docs/user-settings.md).

@@ -1,3 +1,4 @@
+import { justOneMoreTable } from './tables/just-one-more';
 import { switchyardTable } from './tables/switchyard';
 import { andromedaTable } from './tables/andromeda';
 import { classicTable } from './tables/classic-table';
@@ -18,6 +19,12 @@ export interface BuiltInTable {
 }
 
 export const BUILT_IN_TABLES: BuiltInTable[] = [
+  {
+    id: 'just-one-more',
+    board: justOneMoreTable,
+    description:
+      'An r/pinball tribute. Play, fix, and make room for Just One More multiball.',
+  },
   {
     id: 'classic-table',
     board: classicTable,

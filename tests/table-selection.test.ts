@@ -15,6 +15,7 @@ it.each([
     renderTableSelection(host, `https://example.com${path}`, '/arcade/');
     const links = [...host.querySelectorAll('a')];
     const visibleIds = [
+      'just-one-more',
       'classic-table',
       'double-crossed',
       'starlight-em',

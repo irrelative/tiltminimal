@@ -1,3 +1,4 @@
+import { justOneMoreTable } from '../src/boards/tables/just-one-more';
 import { afterEach, expect, it, vi } from 'vitest';
 import { GameLoop } from '../src/game/game-loop';
 import { createInitialGameState } from '../src/game/game-state';
@@ -93,4 +94,38 @@ it('forwards actual scoring events once and starts the tune only on a game resta
   frame(216);
   expect(audio.startGame).toHaveBeenCalledOnce();
   restart.stop();
+});
+
+it('keeps Just One More silent even when an audio service is supplied', () => {
+  let frame!: FrameRequestCallback;
+  vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+    frame = callback;
+    return 1;
+  });
+  vi.stubGlobal('cancelAnimationFrame', vi.fn());
+  const audio = {
+    connect: vi.fn(),
+    disconnect: vi.fn(),
+    playEvents: vi.fn(),
+    playGameEvents: vi.fn(),
+    startGame: vi.fn(),
+  };
+  const loop = new GameLoop(
+    createInitialGameState(justOneMoreTable),
+    justOneMoreTable,
+    {
+      connect: vi.fn(),
+      disconnect: vi.fn(),
+      getState: () => ({ ...idleInput, leftPressed: true }),
+    },
+    { renderGame: vi.fn() } as unknown as CanvasRenderer,
+    audio as unknown as GameAudio,
+  );
+  loop.start();
+  frame(100);
+  frame(116);
+  loop.stop();
+  Object.values(audio).forEach((method) =>
+    expect(method).not.toHaveBeenCalled(),
+  );
 });

@@ -67,7 +67,12 @@ export const DEFAULT_BOARD_THEME_ID: BoardThemeId = 'classic';
 const BASE_THEMES: Record<
   Exclude<
     BoardThemeId,
-    'harlem' | 'andromeda' | 'starlight' | 'double-crossed' | 'switchyard'
+    | 'harlem'
+    | 'andromeda'
+    | 'starlight'
+    | 'double-crossed'
+    | 'switchyard'
+    | 'just-one-more'
   >,
   BoardTheme
 > = {
@@ -319,6 +324,21 @@ const BASE_THEMES: Record<
 
 export const BOARD_THEMES: Record<BoardThemeId, BoardTheme> = {
   ...BASE_THEMES,
+  'just-one-more': {
+    ...BASE_THEMES.midnight,
+    id: 'just-one-more',
+    label: 'Just One More',
+    guideMetalPrimary: '#758d9a',
+    guideMetalSecondary: '#334956',
+    guideRubberPrimary: '#ff713e',
+    guideRubberSecondary: '#b84729',
+    flipperFill: '#fff1d8',
+    flipperCore: '#ff632e',
+    standupFill: '#ff713e',
+    targetStroke: '#ffbd88',
+    hudText: '#fff1d8',
+    hudMuted: '#c7bca9',
+  },
   switchyard: {
     ...BASE_THEMES.midnight,
     id: 'switchyard',

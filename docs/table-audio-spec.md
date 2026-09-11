@@ -94,3 +94,9 @@ nodes disconnect after completion. Existing collision detection and the 45 ms
 bounce limiter remain unchanged. These are designed textures, not sampled machine
 recordings. Signal tests cover common sample rates, finite bounded output, decay,
 and variation.
+
+## Silent table
+
+Just One More intentionally runs without an audio service in its first version,
+including mechanical effects. Global sound preferences remain unchanged and
+continue to apply to other tables.

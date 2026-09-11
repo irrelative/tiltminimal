@@ -30,6 +30,8 @@ export class GameLoop {
     private readonly renderer: CanvasRenderer,
     private readonly audio?: GameAudio,
   ) {
+    // This first version is intentionally silent, including mechanical effects.
+    if (board.themeId === 'just-one-more') this.audio = undefined;
     this.state = initializeRulesState(this.state, this.board);
     this.lastInputState = this.input.getState();
   }
@@ -159,7 +161,8 @@ export const getStatusLabel = (
   if (state.additionalBalls.length)
     return `${1 + state.additionalBalls.length}-ball multiball — keep both balls in play.`;
   if (state.lockedBalls.length && state.status === 'waiting-launch')
-    return state.rules.ballValues['cross-phase'] === 'locked'
+    return state.rules.ballValues['cross-phase'] === 'locked' ||
+      state.rules.ballValues.phase === 'locked'
       ? 'Ball locked. Plunge for two-ball multiball.'
       : 'Ball locked. Plunge the replacement ball, then shoot the lit release target.';
 

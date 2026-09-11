@@ -1,4 +1,8 @@
 import {
+  drawJustOneMorePlayfield,
+  drawJustOneMoreInserts,
+} from './just-one-more-playfield-art';
+import {
   drawSwitchyardPlayfield,
   drawSwitchyardInserts,
 } from './switchyard-playfield-art';
@@ -77,6 +81,8 @@ export const drawDynamicBoard = (
   board: BoardDefinition,
   state?: GameState,
 ): void => {
+  if (board.themeId === 'just-one-more')
+    drawJustOneMoreInserts(context, board, state);
   if (board.themeId === 'switchyard')
     drawSwitchyardInserts(context, board, state);
   if (board.themeId === 'starlight')
@@ -108,7 +114,8 @@ export const drawDynamicBoard = (
   drawSlingshots(context, board, state);
   drawSaucers(context, board, state);
   drawSpinners(context, board, state);
-  if (board.themeId !== 'switchyard') drawRollovers(context, board, state);
+  if (board.themeId !== 'switchyard' && board.themeId !== 'just-one-more')
+    drawRollovers(context, board, state);
 
   for (const [index, flipper] of board.flippers.entries()) {
     drawFlipper(
@@ -323,6 +330,10 @@ const drawBackground = (
   board: BoardDefinition,
 ): void => {
   const theme = getBoardTheme(board.themeId);
+  if (board.themeId === 'just-one-more') {
+    drawJustOneMorePlayfield(context, board);
+    return;
+  }
   if (board.themeId === 'switchyard') {
     drawSwitchyardPlayfield(context, board);
     return;

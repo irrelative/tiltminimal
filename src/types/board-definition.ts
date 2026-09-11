@@ -11,6 +11,7 @@ export type BoardThemeId =
   | 'midnight'
   | 'sunburst'
   | 'switchyard'
+  | 'just-one-more'
   | 'starlight'
   | 'double-crossed'
   | 'grayscale'
