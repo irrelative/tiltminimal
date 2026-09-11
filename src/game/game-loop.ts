@@ -172,10 +172,10 @@ export const getStatusLabel = (
     }
 
     if (state.plunger.pullback > 0) {
-      return 'Release Arrow Up and the plunger will strike the ball.';
+      return 'Release the plunger to launch.';
     }
 
-    return 'Hold Arrow Up or swipe down on the right side to pull back the plunger. Release to launch.';
+    return '';
   }
 
   return '';

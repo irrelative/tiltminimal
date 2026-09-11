@@ -45,6 +45,10 @@ describe('table rule cards', () => {
     ui.setTable(BUILT_IN_TABLES.find((t) => t.id === 'starlight-em')!);
     expect(card.hidden).toBe(true);
     expect(card.textContent).toContain('5 balls');
+    expect(card.textContent).toContain('Keyboard controls');
+    expect(card.textContent).toContain('Left Shift, Left Arrow, or A');
+    expect(card.textContent).toContain('hold Up Arrow to pull back');
+    expect(card.textContent).toContain('Space for forward');
     expect(pause).toHaveBeenLastCalledWith(false);
   });
 });

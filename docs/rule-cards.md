@@ -58,3 +58,10 @@ This audit does not prove every possible event ordering or physical shot.
 Switchyard adds the sixth card. It describes directed orbits, five-route lock
 qualification, different-shot combos and four jackpots leading to a Super.
 See [Switchyard](switchyard-spec.md) and its rules/layout regression tests.
+
+## Keyboard controls
+
+Every rule card includes the same keyboard controls below its table rules:
+left/right flipper alternatives, hold/release Up Arrow to plunge (or start a
+new game), and Z / slash / Space nudges. The canvas no longer shows keyboard
+instructions; plunger strength and game-status feedback remain on the canvas.

@@ -50,10 +50,30 @@ export class RuleCard {
       item.textContent = rule;
       list.append(item);
     }
+    const controlsTitle = document.createElement('h3');
+    controlsTitle.textContent = 'Keyboard controls';
+    const controls = document.createElement('ul');
+    for (const instruction of [
+      'Left flipper: Left Shift, Left Arrow, or A.',
+      'Right flipper: Right Shift, Right Arrow, or D.',
+      'Plunger: hold Up Arrow to pull back, then release to launch. After game over, press Up Arrow to start again.',
+      'Nudge: Z for left, / for right, Space for forward.',
+    ]) {
+      const item = document.createElement('li');
+      item.textContent = instruction;
+      controls.append(item);
+    }
     const footer = document.createElement('p');
     footer.className = 'rule-card-footer';
     footer.textContent = 'Play paused while this card is open.';
-    this.card.replaceChildren(title, subtitle, list, footer);
+    this.card.replaceChildren(
+      title,
+      subtitle,
+      list,
+      controlsTitle,
+      controls,
+      footer,
+    );
   }
 
   private setOpen(open: boolean): void {

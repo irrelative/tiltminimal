@@ -39,7 +39,8 @@ game.
 The canvas shows score and current ball number. The sidebar contains the table
 name, its top-five high scores, a compact **Reset ball** action, **Rule card**,
 and **Settings**. Opening the rule card pauses play; closing it resumes play.
-Keyboard hints appear on the playfield only before the ball is plunged.
+Keyboard instructions appear in every table’s rule card, keeping the canvas
+clear of control hints.
 
 | Action             | Keyboard                       | Touch                                             |
 | ------------------ | ------------------------------ | ------------------------------------------------- |
