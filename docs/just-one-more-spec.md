@@ -42,7 +42,8 @@ but do not score or qualify anything here: a spinner pulse is sufficient.
 - PLAY: register at least one pulse from each different spinner, 100 per pulse.
 - FIX: hit all four different standups, 500 per hit. Completing the four adds
   2,000 once per qualification. Repeat hits do not advance progress. PLAY and
-  FIX can be completed in any order within the same ball.
+  FIX can be completed in any order across balls. Partial spinner/target progress
+  and the lit COLLECT lock persist through ordinary drains.
 - COLLECT: when PLAY and FIX are complete, NEW PIN DAY locks one ball and scores
   5,000 total. Unqualified captures score 1,000 and eject normally.
 - Plunging the replacement releases the lock for two-ball multiball, retaining
@@ -53,7 +54,8 @@ but do not score or qualify anything here: a spinner pulse is sufficient.
 - Losing one ball ends multiball and clears all qualification/jackpot flags.
   The remaining ball continues and may qualify another multiball.
 - Final drain advances the turn once, including simultaneous drains. Three
-  completed turns end the game. No drain bonus. Reset clears all progress/locks.
+  completed turns end the game. No drain bonus. Reset ball clears physical locks
+  and multiball state but preserves qualification; a new game clears everything.
 - Slings score their authored values. The shared local top-five scoreboard and
   settings apply, including sound on/off and volume for mechanical effects.
 
@@ -61,7 +63,7 @@ but do not score or qualify anything here: a spinner pulse is sufficient.
 
 Focused rules tests cover distinct switches, one-time repair awards, actual
 physical lock/replacement launch, repeated jackpots, single/simultaneous drains,
-reset and game over. The open fan geometry regression suite runs for both
+cross-ball qualification, reset and game over. The open fan geometry regression suite runs for both
 Switchyard and Just One More, including actual cradle-to-shot timing samples.
 All-table suites exercise feeds, center drains, post/bump passes and catches.
 A game-loop test verifies shared mechanical audio forwarding and the absence of
@@ -72,3 +74,7 @@ passed deep CLI validation with zero warnings/errors. Browser review covered the
 rule card, gallery link, desktop artwork and 390×844 mobile viewport. Stepped
 physics checks drained the center ball, settled both held inlane feeds at zero
 velocity (301,1184 and 599,1184), then released both into moving play.
+
+Qualification is stored in player-scoped values and mirrored into ball-scoped
+values for the inserts. Ball start restores these lights. Multiball end clears
+both scopes for a fresh cycle; ordinary drains do not clear qualification.

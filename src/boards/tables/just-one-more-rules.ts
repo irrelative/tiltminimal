@@ -1,12 +1,18 @@
 /** A small collecting loop: play both spinners, repair four targets, collect a pin. */
 export const justOneMoreRulesScript = `
 function reset(ctx) {
+  ctx.setPlayer('play', 0); ctx.setPlayer('fix', 0);
   ctx.setBall('phase', 'qualify');
   ctx.setBall('play', 0); ctx.setBall('fix', 0); ctx.setBall('jackpots', 0);
 }
 return {
-  onGameStart(ctx) { ctx.setBallsPerGame(3); ctx.setBallsRemaining(3); ctx.setCurrentBall(1); },
-  onBallStart(ctx) { reset(ctx); ctx.setBonus(0); ctx.setBonusMultiplier(1); },
+  onGameStart(ctx) { reset(ctx); ctx.setBallsPerGame(3); ctx.setBallsRemaining(3); ctx.setCurrentBall(1); },
+  onBallStart(ctx) {
+    ctx.setBall('phase', 'qualify'); ctx.setBall('jackpots', 0);
+    ctx.setBall('play', Number(ctx.getPlayer('play') || 0));
+    ctx.setBall('fix', Number(ctx.getPlayer('fix') || 0));
+    ctx.setBonus(0); ctx.setBonusMultiplier(1);
+  },
   onEvent(event, ctx) {
     // Orbit sensors support physical route validation; only spinners qualify PLAY.
     if (event.type === 'rollover-hit') return;
@@ -14,11 +20,12 @@ return {
       ctx.addScore(100);
       const key = ctx.getBall('phase') === 'multiball' ? 'jackpots' : 'play';
       ctx.setBall(key, Number(ctx.getBall(key) || 0) | (1 << event.index));
+      if (key === 'play') ctx.setPlayer('play', ctx.getBall('play'));
     } else if (event.type === 'standup-target-hit') {
       ctx.addScore(500);
       if (ctx.getBall('phase') === 'qualify') {
         const before = Number(ctx.getBall('fix') || 0), after = before | (1 << event.index);
-        ctx.setBall('fix', after);
+        ctx.setBall('fix', after); ctx.setPlayer('fix', after);
         if (before !== 15 && after === 15) ctx.addScore(2000);
       }
     } else if (event.type === 'saucer-captured') {
@@ -38,7 +45,6 @@ return {
     } else if (event.type === 'multiball-ended') {
       reset(ctx);
     } else if (event.type === 'ball-drained') {
-      reset(ctx);
       if (ctx.getBallsRemaining() > 1) ctx.startNextBall(); else ctx.endGame();
     }
   },

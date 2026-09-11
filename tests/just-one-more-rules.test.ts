@@ -74,6 +74,33 @@ describe('Just One More rules', () => {
     expect(s.rules.ballValues.play).toBe(3);
     expect(s.rules.ballValues.fix).toBe(15);
   });
+  it('carries partial progress and a lit collect lock across physical drains', () => {
+    let s = start();
+    const drain = () => {
+      s.status = 'playing';
+      s.launcherExited = true;
+      s.ball.position.y = board.drainY + 100;
+      const r = stepGameFrame(s, board, idleInput, 1 / 120);
+      s = applyRulesFrame(r.state, board, r.events, 1 / 120);
+    };
+    hit(s, 'spinner-spin', 0);
+    hit(s, 'standup-target-hit', 0);
+    drain();
+    expect(s.rules.currentBall).toBe(2);
+    expect(s.rules.ballValues).toMatchObject({ play: 1, fix: 1 });
+    hit(s, 'spinner-spin', 1);
+    [1, 2, 3].forEach((i) => hit(s, 'standup-target-hit', i));
+    drain();
+    expect(s.rules.currentBall).toBe(3);
+    expect(s.rules.ballValues).toMatchObject({ play: 3, fix: 15 });
+    const before = s.score;
+    hit(s, 'standup-target-hit', 0);
+    expect(s.score - before).toBe(500);
+    s = capture(s);
+    expect(s.lockedBalls).toHaveLength(1);
+    s = initializeRulesState(s, board);
+    expect(s.rules.ballValues).toMatchObject({ play: 0, fix: 0 });
+  });
   it('physically locks for 5,000 and releases two balls on the same turn', () => {
     const initial = qualify(start()),
       before = initial.score;
@@ -133,7 +160,7 @@ describe('Just One More rules', () => {
     expect(s.rules.currentBall).toBe(2);
     s = restartCurrentBall(capture(qualify(start())), board);
     expect(s.lockedBalls).toHaveLength(0);
-    expect(s.rules.ballValues.fix).toBe(0);
+    expect(s.rules.ballValues.fix).toBe(15);
     for (let i = 0; i < 3; i++)
       applyRulesFrame(s, board, [{ type: 'ball-drained', tick: s.tick }], 0);
     expect(s.status).toBe('game-over');
