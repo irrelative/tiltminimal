@@ -137,6 +137,10 @@ under `playtest-results/`. This is developer tooling; recording and replaying a
 live game is not currently a player-facing feature. See
 [Classic playtests](docs/classic-playtest.md).
 
+The [Just One More and Switchyard playtest review](docs/just-one-more-switchyard-playtest.md)
+records desktop and phone-sized browser checks, seeded games, a reproducible
+Switchyard return trap, and the remaining physical-phone testing needs.
+
 ## Code organization and table authoring
 
 | Path                 | Responsibility                                                           |

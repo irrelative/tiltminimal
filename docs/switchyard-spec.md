@@ -136,6 +136,14 @@ Run the complete suite, build, lint, and all-table deep validation. Browser revi
 must include desktop/mobile, rule cards, and the physics overlay; simulation
 sampling is not a complete proof of every shot or a difficulty assessment.
 
+The [October 2026 playtest review](just-one-more-switchyard-playtest.md) found a
+return trap outside the existing sampled route coverage. A zero-velocity drop
+at approximately (785,590), between West's diagonal return and East's outer
+vertical leg, settles near (782,632). A seeded full game also reached this
+pocket. The guides converge into a ball-sized wedge; ordinary nudges did not
+clear it in the review. This remains a known layout issue despite the current
+validation suite passing. See the review for evidence and reproduction steps.
+
 ## Plunge-gate relief opening
 
 Switchyard retains the fan layout's 410-unit inner shooter arch stops 0.14 radians before
