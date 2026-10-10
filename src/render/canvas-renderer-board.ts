@@ -1,4 +1,8 @@
 import {
+  drawAlienStarPlayfield,
+  drawAlienStarInserts,
+} from './alien-star-playfield-art';
+import {
   drawJustOneMorePlayfield,
   drawJustOneMoreInserts,
 } from './just-one-more-playfield-art';
@@ -81,6 +85,8 @@ export const drawDynamicBoard = (
   board: BoardDefinition,
   state?: GameState,
 ): void => {
+  if (board.themeId === 'alien-star')
+    drawAlienStarInserts(context, board, state);
   if (board.themeId === 'just-one-more')
     drawJustOneMoreInserts(context, board, state);
   if (board.themeId === 'switchyard')
@@ -114,7 +120,11 @@ export const drawDynamicBoard = (
   drawSlingshots(context, board, state);
   drawSaucers(context, board, state);
   drawSpinners(context, board, state);
-  if (board.themeId !== 'switchyard' && board.themeId !== 'just-one-more')
+  if (
+    board.themeId !== 'switchyard' &&
+    board.themeId !== 'just-one-more' &&
+    board.themeId !== 'alien-star'
+  )
     drawRollovers(context, board, state);
 
   for (const [index, flipper] of board.flippers.entries()) {
@@ -330,6 +340,10 @@ const drawBackground = (
   board: BoardDefinition,
 ): void => {
   const theme = getBoardTheme(board.themeId);
+  if (board.themeId === 'alien-star') {
+    drawAlienStarPlayfield(context, board);
+    return;
+  }
   if (board.themeId === 'just-one-more') {
     drawJustOneMorePlayfield(context, board);
     return;

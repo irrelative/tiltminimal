@@ -67,9 +67,11 @@ describe('bump passes using a single forward nudge', () => {
             ? [4, 6]
             : id === 'andromeda'
               ? [13, 14]
-              : id === 'double-crossed'
-                ? [12]
-                : [12, 13];
+              : id === 'alien-star'
+                ? [14]
+                : id === 'double-crossed'
+                  ? [12]
+                  : [12, 13];
         for (const delay of timings) {
           expect(run(delay), `nudge at frame ${delay}`).toEqual({
             caught: true,

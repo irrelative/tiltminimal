@@ -7,12 +7,13 @@ import {
 } from '../src/render/board-themes';
 
 describe('board themes', () => {
-  it('includes ten built-in themes', () => {
+  it('includes eleven built-in themes', () => {
     expect(Object.keys(BOARD_THEMES)).toEqual([
       'classic',
       'midnight',
       'sunburst',
       'grayscale',
+      'alien-star',
       'just-one-more',
       'switchyard',
       'double-crossed',

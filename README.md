@@ -212,3 +212,6 @@ frames longer than 50 ms, and average update/draw CPU time over the last two
 seconds. It is independent of the Physics overlay and stays visible when
 Settings is collapsed. See [performance measurements](docs/performance-meter.md)
 for interpretation and comparison steps.
+
+Alien Star recreates Gottlieb’s 1984 layout and spinner-centered multiball rules.
+Select **Alien Star** from the gallery. See [rules, sources and fidelity limits](docs/alien-star-spec.md); timers and dimensions are estimates, and Special awards points in place of credits.

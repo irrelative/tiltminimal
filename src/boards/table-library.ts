@@ -1,3 +1,4 @@
+import { alienStarTable } from './tables/alien-star';
 import { justOneMoreTable } from './tables/just-one-more';
 import { switchyardTable } from './tables/switchyard';
 import { andromedaTable } from './tables/andromeda';
@@ -19,6 +20,12 @@ export interface BuiltInTable {
 }
 
 export const BUILT_IN_TABLES: BuiltInTable[] = [
+  {
+    id: 'alien-star',
+    board: alienStarTable,
+    description:
+      'The 1984 Gottlieb space battle. Spell ALIEN, choose 5X multiball, and rip the lit spinner.',
+  },
   {
     id: 'just-one-more',
     board: justOneMoreTable,

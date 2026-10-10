@@ -19,6 +19,7 @@ export interface Env {
   };
 }
 export const TABLE_IDS = [
+  'alien-star',
   'classic-table',
   'andromeda',
   'double-crossed',

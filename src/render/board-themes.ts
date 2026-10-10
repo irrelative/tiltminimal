@@ -67,6 +67,7 @@ export const DEFAULT_BOARD_THEME_ID: BoardThemeId = 'classic';
 const BASE_THEMES: Record<
   Exclude<
     BoardThemeId,
+    | 'alien-star'
     | 'harlem'
     | 'andromeda'
     | 'starlight'
@@ -324,6 +325,23 @@ const BASE_THEMES: Record<
 
 export const BOARD_THEMES: Record<BoardThemeId, BoardTheme> = {
   ...BASE_THEMES,
+  'alien-star': {
+    ...BASE_THEMES.midnight,
+    id: 'alien-star',
+    label: 'Alien Star',
+    guideMetalPrimary: '#ffa732',
+    guideMetalSecondary: '#653523',
+    guideRubberPrimary: '#fff4d6',
+    guideRubberSecondary: '#d75128',
+    bumperColors: ['#f9faf1', '#f9faf1', '#f9faf1'],
+    bumperCap: '#e0e7df',
+    bumperText: '#1c4148',
+    flipperFill: '#fff4dc',
+    flipperCore: '#e0a354',
+    standupFill: '#ef8b28',
+    targetStroke: '#ffe88a',
+    hudText: '#fff3ce',
+  },
   'just-one-more': {
     ...BASE_THEMES.midnight,
     id: 'just-one-more',

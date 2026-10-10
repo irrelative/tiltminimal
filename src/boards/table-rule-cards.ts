@@ -6,6 +6,18 @@ export interface TableRuleCard {
 
 /** Summaries of this game's rule scripts, including simplified recreations. */
 export const TABLE_RULE_CARDS: Record<string, TableRuleCard> = {
+  'alien-star': {
+    balls: 3,
+    objective: 'Spell ALIEN, lock at 5X, and rip the lit spinner.',
+    rules: [
+      'Hit all five ALIEN standups to light the left lock and one rotating STAR award. ALIEN progress and a lit lock carry between balls.',
+      'The left spinner cycles 2X / 3X / 5X. Capture at the lit saucer freezes that value; plunge the replacement for two-ball multiball. Losing one ball restores ordinary scoring.',
+      'Right inlane lights the spinner for five seconds: 1,000 per revolution becomes 10,000, or 50,000 in 5X multiball. Left inlane lights a five-second shot to the upper-right Advance Bonus target.',
+      'STAR letters and awards are separate lights. Revisit an already-lit letter with its award lit: S collects bonus, T advances bonus X, A holds bonus, R awards an extra ball. Pop hits rotate awards.',
+      'Build 1,000–29,000 bonus, multiplied up to 5X. Complete STAR and ALIEN to light outlane specials; this browser version scores 50,000 instead of awarding a credit.',
+      'Reference recreation with estimated 2D geometry and five-second timers; see the Alien Star spec for fidelity limits.',
+    ],
+  },
   'just-one-more': {
     balls: 3,
     objective:

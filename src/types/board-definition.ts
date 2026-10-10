@@ -7,6 +7,7 @@ export interface Point {
 export type GuidePlane = 'playfield' | 'raised';
 
 export type BoardThemeId =
+  | 'alien-star'
   | 'classic'
   | 'midnight'
   | 'sunburst'
