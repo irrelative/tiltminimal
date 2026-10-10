@@ -67,6 +67,11 @@ These moves depend on ball position, speed, and timing; transfer directions vary
 with table geometry. See [advanced flipper skills](docs/advanced-flipper-skills-spec.md)
 for techniques and verified scenarios.
 
+Spinners carry momentum and score once per full revolution, with a mechanical
+click per turn. Shoot ARCADE / ROAD TRIP hard on Just One More for sustained
+100-point spins; both distinct spinners are still required for PLAY.
+See [spinner physics and tuning](docs/spinner-physics-spec.md).
+
 ### Settings, scores, and sound
 
 **Settings** provides sound on/off, volume, the ball's spin marker, and motion

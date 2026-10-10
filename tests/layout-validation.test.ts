@@ -4,6 +4,39 @@ import { createBlankTable } from './helpers/board-fixture';
 import { validateCompiledBoardLayout } from '../src/boards/layout-validation';
 
 describe('validateCompiledBoardLayout', () => {
+  it('rejects invalid spinner tuning while accepting zero drag', () => {
+    const board = createBlankTable('Spinner tuning');
+    board.spinners = [
+      {
+        x: 450,
+        y: 400,
+        length: 60,
+        thickness: 10,
+        angle: 0,
+        score: 100,
+        material: 'metalGuide',
+        impulseGain: NaN,
+        damping: -1,
+        maxAngularSpeed: Infinity,
+      },
+    ];
+    expect(
+      validateCompiledBoardLayout(board).filter(
+        (d) => d.code === 'invalid-spinner-tuning',
+      ),
+    ).toHaveLength(3);
+    Object.assign(board.spinners[0], {
+      impulseGain: 0.16,
+      damping: 0,
+      maxAngularSpeed: 180,
+    });
+    expect(
+      validateCompiledBoardLayout(board).filter(
+        (d) => d.code === 'invalid-spinner-tuning',
+      ),
+    ).toHaveLength(0);
+  });
+
   it('reports errors when the launcher is placed on the wrong side', () => {
     const board = createBlankTable('Validation Test');
     board.plunger.x = 320;

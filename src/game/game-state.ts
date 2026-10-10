@@ -19,6 +19,7 @@ export interface BallState {
   launcherExited?: boolean;
   bumperContacts?: boolean[];
   rolloverContacts?: boolean[];
+  spinnerContacts?: boolean[];
   position: Vector2;
   linearVelocity: Vector2;
   angularVelocity: Vector2;
@@ -55,7 +56,9 @@ export interface SaucerState {
 export interface SpinnerState {
   angle: number;
   angularVelocity: number;
-  cooldownSeconds: number;
+  /** Signed travel toward the next completed revolution. */
+  rotationProgress: number;
+  drivingBallId?: number;
 }
 
 export interface SlingshotState {
@@ -231,12 +234,10 @@ const createSaucerState = (): SaucerState => ({
   holdSecondsRemaining: 0,
 });
 
-const createSpinnerState = (
-  spinner: BoardDefinition['spinners'][number],
-): SpinnerState => ({
-  angle: spinner.angle,
+const createSpinnerState = (): SpinnerState => ({
+  angle: 0,
   angularVelocity: 0,
-  cooldownSeconds: 0,
+  rotationProgress: 0,
 });
 
 const createSlingshotState = (): SlingshotState => ({
@@ -257,4 +258,5 @@ export const cloneBallState = (ball: BallState): BallState => ({
   angularPosition: { ...ball.angularPosition },
   bumperContacts: ball.bumperContacts?.slice(),
   rolloverContacts: ball.rolloverContacts?.slice(),
+  spinnerContacts: ball.spinnerContacts?.slice(),
 });

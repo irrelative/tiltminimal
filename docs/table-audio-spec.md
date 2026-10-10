@@ -1,6 +1,6 @@
 # Table audio
 
-Game audio has two layers: shared mechanical contacts/flipper triggers and a
+Game audio has two layers: shared mechanical contacts/flipper triggers/spinner clicks and a
 table-specific electronic voice. `getTableAudioProfile` resolves the built-in
 board's `themeId`; Harlem opts in, while unregistered themes keep the existing
 mechanical sounds. Add another profile to this resolver to give another game
@@ -97,5 +97,16 @@ and variation.
 
 ## Just One More
 
-Just One More uses the shared ball-impact and flipper sounds. It has no table
+Just One More uses the shared ball-impact, flipper, and spinner sounds. It has no table
 tone profile, music or callouts. Global sound on/off and volume settings apply.
+
+## Spinner clicks
+
+Each real `spinner-spin` event represents a completed revolution and produces a
+short stereo mechanical click, even for tables without an electronic profile.
+Clicks last 25 ms and disconnect their nodes after completion. A maximum of six
+clicks per frame, separated by 8 ms in a burst, bounds audio work; scoring still
+processes every revolution. Harlem retains its electronic cue arbitration in
+addition to the shared click. Mute, volume, and browser audio unlock apply.
+Audio tests verify turn-based clicks without a profile, mute, burst limits, and
+node cleanup. These are synthesized effects, not recordings of a physical spinner.

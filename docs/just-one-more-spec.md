@@ -2,7 +2,7 @@
 
 An original, unofficial r/pinball tribute at `?table=just-one-more`, visible in
 the gallery. Three balls, two flippers, a single-ball lock and two-ball multiball.
-This version uses shared mechanical audio, with no music or callouts.
+This version uses shared mechanical audio, including spinner clicks, with no music or callouts.
 No timed modes, extra balls, bonus ladder or callouts.
 
 ## Theme and layout
@@ -108,3 +108,19 @@ The insert is lit while ready or armed, dims when missed, and shows “5,000 MAD
 after collection. No music or callout is added. Shared rules live in
 `soft-plunge-rules.ts`; rule tests include actual 68–70-frame soft plunges,
 71-frame overshoots, weak-plunge retries, and duplicate prevention at 120 Hz.
+
+## Ripping the spinners
+
+ARCADE and ROAD TRIP use the shared [momentum/revolution model](spinner-physics-spec.md)
+with freer bearings: impulse gain 0.16, damping 1.4 per second, and a total cap
+of 180 radians/second. Clean fast shots produce a rapid train of 100-point
+revolution pulses after the ball has left. Repeated overlap does not add energy
+or points. Each spinner still qualifies its own PLAY bit; many turns on ARCADE
+cannot substitute for ROAD TRIP. Continued rotation can supply pulses after
+qualification flags reset, just as new rotations can.
+
+Physical geometry and shot routes are unchanged. Switchyard retains shared
+spinner defaults and its separate directed-orbit qualification. A controlled
+900-unit/second passage followed by four seconds of coast produces 16 turns
+and 1,600 points, with only one PLAY bit set. This is a deterministic isolated
+physics/rules test, not a guaranteed award for every player shot.

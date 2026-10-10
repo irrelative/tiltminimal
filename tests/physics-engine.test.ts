@@ -730,7 +730,7 @@ describe('stepGame', () => {
     expect(ejected.ball.linearVelocity.y).toBeLessThan(0);
   });
 
-  it('spins and scores when the ball crosses a spinner', () => {
+  it('adds spinner momentum on passage and scores only completed revolutions', () => {
     const board = createBlankTable('Spinner Board');
     board.spinners = [
       {
@@ -751,15 +751,9 @@ describe('stepGame', () => {
 
     const next = stepGameFrame(state, board, idleInput, 1 / 60);
 
-    expect(next.events).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          type: 'spinner-spin',
-          index: 0,
-          score: 10,
-        }),
-      ]),
-    );
+    expect(
+      next.events.filter((event) => event.type === 'spinner-spin'),
+    ).toHaveLength(0);
     expect(
       Math.abs(next.state.spinners[0]?.angularVelocity ?? 0),
     ).toBeGreaterThan(0);

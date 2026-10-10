@@ -1,3 +1,4 @@
+import { resolveSpinnerInteractions, advanceSpinners } from './spinner-physics';
 import type { InputState } from '../input/keyboard-input';
 import type { BoardDefinition } from '../types/board-definition';
 import type { GameState } from './game-state';
@@ -22,7 +23,6 @@ import {
   resolveRolloverTriggers,
   resolveSaucerCaptures,
   resolveSlingshotCollisions,
-  resolveSpinnerInteractions,
   resolveStandupTargetCollisions,
 } from './physics-engine-devices';
 import { resolveFlipperCollisions } from './physics-engine-flippers';
@@ -166,7 +166,8 @@ export const stepPlayingState = (
     next.plunger = plungerFrame.next;
     next.flippers = flipperFrame.map((motion) => motion.next);
 
-    advanceElementStates(next, board, stepSeconds);
+    advanceElementStates(next, stepSeconds);
+    advanceSpinners(next, board, stepSeconds, events);
 
     const survivors = [];
     for (const ball of balls) {
@@ -212,7 +213,7 @@ export const stepPlayingState = (
         board.physics.solver,
       );
       resolveSaucerCaptures(next, board, events);
-      resolveSpinnerInteractions(next, board, board.physics.solver, events);
+      resolveSpinnerInteractions(next, board, board.physics.solver);
       resolveRolloverTriggers(next, board, events);
       for (let i = eventStart; i < events.length; i++)
         events[i].ballId = ball.id;

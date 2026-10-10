@@ -36,6 +36,19 @@ describe('compileBoardLayout', () => {
           point: anchorPoint('playfield-center', { x: 0, y: -120 }),
         },
       ],
+      spinners: [
+        {
+          position: absolutePoint(450, 400),
+          length: 60,
+          thickness: 10,
+          angle: 0,
+          score: 100,
+          material: 'metalGuide',
+          impulseGain: 0.16,
+          damping: 1.4,
+          maxAngularSpeed: 180,
+        },
+      ],
       standupTargets: [
         {
           position: anchorPoint('mid-bank', { x: -80, y: 0 }),
@@ -79,6 +92,11 @@ describe('compileBoardLayout', () => {
     );
     expect(result.context.anchors['right-orbit-entry']?.y).toBeCloseTo(896, 5);
     expect(result.context.anchors['mid-bank']).toEqual({ x: 450, y: 580 });
+    expect(result.board.spinners[0]).toMatchObject({
+      impulseGain: 0.16,
+      damping: 1.4,
+      maxAngularSpeed: 180,
+    });
     expect(result.board.launchPosition.x).toBeCloseTo(770, 5);
     expect(result.board.standupTargets[0]).toMatchObject({
       x: 370,

@@ -260,7 +260,9 @@ Several table elements animate as a byproduct of gameplay state:
   rolling orientation so spin is visible during cradles, catches, and slower
   rolling motion
 - flippers rotate from live physics state
-- spinner reels accumulate `angle` and `angularVelocity`
+- spinners retain angular momentum, use exponential drag, and emit one scoring
+  pulse per completed revolution; fixed ball-passage triggers add momentum once
+  per ball entry. See [spinner physics](spinner-physics-spec.md).
 - drop targets render with a lowered offset when `isDown`
 - saucers render occupied vs empty state
 - rollovers render lit vs unlit state

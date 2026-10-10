@@ -1,3 +1,4 @@
+import { resolveSpinnerInteractions, advanceSpinners } from './spinner-physics';
 import { recordDebugEvents } from './physics-debug';
 import { getSlingshotCollision } from './slingshot-geometry';
 import type { InputState } from '../input/keyboard-input';
@@ -24,7 +25,6 @@ import {
   resolveRolloverTriggers,
   resolveSaucerCaptures,
   resolveSlingshotCollisions,
-  resolveSpinnerInteractions,
   resolveStandupTargetCollisions,
 } from './physics-engine-devices';
 import { resolveFlipperCollisions } from './physics-engine-flippers';
@@ -221,6 +221,7 @@ export const stepPhysicsSandbox = (
     input,
     deltaSeconds,
   );
+  recordDebugEvents(stepDisplay.events);
   let displayState = stepDisplay.state;
   const balls: PhysicsSandboxBall[] = [];
 
@@ -526,6 +527,7 @@ const stepSandboxDisplayState = (
   deltaSeconds: number,
 ): PhysicsStepResult => {
   const next = clonePlayingGameState(state, board);
+  const events: GameEvent[] = [];
   const stepCount = Math.max(
     1,
     Math.ceil(deltaSeconds / MAX_SIMULATION_STEP_SECONDS),
@@ -544,7 +546,8 @@ const stepSandboxDisplayState = (
 
     next.plunger = plungerFrame.next;
     next.flippers = flipperFrame.map((motion) => motion.next);
-    advanceElementStates(next, board, stepSeconds);
+    advanceElementStates(next, stepSeconds);
+    advanceSpinners(next, board, stepSeconds, events);
   }
 
   next.ball.position = { ...board.launchPosition };
@@ -554,7 +557,7 @@ const stepSandboxDisplayState = (
 
   return {
     state: next,
-    events: [],
+    events,
   };
 };
 
@@ -588,7 +591,7 @@ const stepSandboxBallState = (
 
     next.plunger = plungerFrame.next;
     next.flippers = flipperFrame.map((motion) => motion.next);
-    advanceElementStates(next, board, stepSeconds);
+    advanceElementStates(next, stepSeconds);
 
     if (resolveOccupiedSaucer(next, board, stepSeconds)) {
       continue;
@@ -618,7 +621,7 @@ const stepSandboxBallState = (
       board.physics.solver,
     );
     resolveSaucerCaptures(next, board, events);
-    resolveSpinnerInteractions(next, board, board.physics.solver, events);
+    resolveSpinnerInteractions(next, board, board.physics.solver);
     resolveRolloverTriggers(next, board, events);
     recordDebugEvents(events);
     events.length = 0;

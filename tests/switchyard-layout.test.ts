@@ -199,9 +199,19 @@ describe.each([switchyardTable, justOneMoreTable])(
   },
 );
 
-it('preserves the entire Just One More definition while giving Switchyard distinct shots', () => {
+it('preserves Just One More geometry and rules apart from spinner tuning while giving Switchyard distinct shots', () => {
+  const original = {
+    ...justOneMoreTable,
+    spinners: justOneMoreTable.spinners.map((spinner) => {
+      const geometry = { ...spinner };
+      delete geometry.impulseGain;
+      delete geometry.damping;
+      delete geometry.maxAngularSpeed;
+      return geometry;
+    }),
+  };
   expect(
-    createHash('sha256').update(JSON.stringify(justOneMoreTable)).digest('hex'),
+    createHash('sha256').update(JSON.stringify(original)).digest('hex'),
   ).toBe('4fd44a55bf54ea0a65e5add5819188c26cd7252a347cf6228dd69c0400d497ae');
   expect(switchyardTable.spinners).toHaveLength(1);
   expect(switchyardTable.standupTargets).toHaveLength(2);

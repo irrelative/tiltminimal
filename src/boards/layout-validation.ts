@@ -21,6 +21,22 @@ export const validateCompiledBoardLayout = (
   board: BoardDefinition,
 ): LayoutDiagnostic[] => {
   const diagnostics: LayoutDiagnostic[] = [];
+  board.spinners.forEach((spinner, index) => {
+    for (const key of ['impulseGain', 'damping', 'maxAngularSpeed'] as const) {
+      const value = spinner[key];
+      if (
+        value !== undefined &&
+        (!Number.isFinite(value) ||
+          (key === 'damping' ? value < 0 : value <= 0))
+      ) {
+        diagnostics.push({
+          severity: 'error',
+          code: 'invalid-spinner-tuning',
+          message: `Spinner ${index + 1} ${key} must be finite and ${key === 'damping' ? 'nonnegative' : 'positive'}.`,
+        });
+      }
+    }
+  });
 
   if (!isPointInsideBoard(board.launchPosition.x, board.launchPosition.y, board)) {
     diagnostics.push({

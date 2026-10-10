@@ -77,6 +77,7 @@ it('preserves live ball motion, score, and rules while paused', () => {
   f.state().ball.linearVelocity = { x: 80, y: 200 };
   f.state().score = 789;
   f.state().rules.bonus = 42;
+  f.state().spinners[0].angularVelocity = 90;
   f.frame(100);
   const before = structuredClone(f.state());
   f.loop.suspended = true;

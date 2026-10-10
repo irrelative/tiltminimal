@@ -164,8 +164,8 @@ export const drawPhysicsDebug = (
   board.saucers.forEach((p) =>
     circle(p, Math.max(0, p.radius - board.ball.radius * 0.15)),
   );
-  board.spinners.forEach((p, i) =>
-    capsule(p.x, p.y, p.length, p.thickness, p.angle + state.spinners[i].angle),
+  board.spinners.forEach((p) =>
+    capsule(p.x, p.y, p.length, p.thickness, p.angle),
   );
   c.restore();
   c.save();

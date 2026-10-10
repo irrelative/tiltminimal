@@ -94,7 +94,16 @@ The same shape semantics as standup targets apply.
 - `x`, `y`: spinner center
 - `length`: blade span from tip to tip
 - `thickness`: blade width across the narrow axis
-- `angle`: resting blade angle around the center
+- `angle`: fixed axle angle in the playfield
+- `score`: points per completed revolution
+- `impulseGain`: angular impulse per unit of normal shot speed (default 0.1)
+- `damping`: exponential angular drag per second (default 2; zero means no drag)
+- `maxAngularSpeed`: total speed cap in radians/second (default 120)
+
+Tuning survives layout compilation and board cloning. Gain and speed limit must
+be finite and positive; damping must be finite and nonnegative. The ball-passage
+trigger stays aligned to the axle while the blade flips about it; the rendered
+blade narrows edge-on and alternates front/back colors. See [spinner physics](spinner-physics-spec.md).
 
 For clearance purposes, the spinner's rotation envelope is approximately:
 

@@ -112,6 +112,7 @@ export class GameAudio {
   private lastBounceTime = -Infinity;
 
   private profile: TableAudioProfile | null = null;
+  private spinnerPans: number[] = [];
   private readonly tableTone = new TableTonePlayer();
   private pendingStart = false;
   private session = 0;
@@ -119,6 +120,9 @@ export class GameAudio {
   connect(board?: BoardDefinition): void {
     this.tableTone.stop();
     this.profile = board ? getTableAudioProfile(board) : null;
+    this.spinnerPans =
+      board?.spinners.map((spinner) => getStereoPan(spinner.x, board.width)) ??
+      [];
     this.pendingStart = this.enabled && this.profile !== null;
     this.session += 1;
     this.lastBounceTime = -Infinity;
@@ -153,10 +157,47 @@ export class GameAudio {
 
   playGameEvents(events: readonly GameEvent[]): void {
     const context = this.getContext();
-    if (!context || context.state !== 'running' || !this.profile) return;
+    if (!context || context.state !== 'running') return;
+    const spins = events
+      .filter((event) => event.type === 'spinner-spin')
+      .slice(0, 6);
+    spins.forEach((event, index) => {
+      this.playSpinnerClick(
+        context,
+        context.currentTime + index * 0.008,
+        this.spinnerPans[event.index] ?? 0,
+      );
+    });
+    if (!this.profile) return;
     this.playPendingStart();
     const cue = this.profile.cueForEvents(events);
     if (cue) this.tableTone.play(context, cue, this.masterGain!);
+  }
+
+  private playSpinnerClick(
+    context: AudioContext,
+    startTime: number,
+    pan: number,
+  ): void {
+    const oscillator = context.createOscillator();
+    oscillator.type = 'square';
+    oscillator.frequency.setValueAtTime(1200, startTime);
+    oscillator.frequency.linearRampToValueAtTime(350, startTime + 0.018);
+    const gain = context.createGain();
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(0.025, startTime + 0.001);
+    gain.gain.linearRampToValueAtTime(0, startTime + 0.024);
+    const panner = createStereoPanner(context, pan);
+    oscillator.connect(gain);
+    gain.connect(panner);
+    panner.connect(this.masterGain!);
+    oscillator.onended = () => {
+      oscillator.disconnect();
+      gain.disconnect();
+      panner.disconnect();
+    };
+    oscillator.start(startTime);
+    oscillator.stop(startTime + 0.025);
   }
 
   private playPendingStart(): void {

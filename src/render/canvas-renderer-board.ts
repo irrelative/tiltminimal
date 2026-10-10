@@ -739,15 +739,16 @@ const drawSpinners = (
 ): void => {
   const theme = getBoardTheme(board.themeId);
   board.spinners.forEach((spinner, index) => {
-    const angle = spinner.angle + (state?.spinners[index]?.angle ?? 0);
+    const phase = state?.spinners[index]?.angle ?? 0;
+    const face = Math.cos(phase);
 
     drawOrientedPlate(
       context,
       spinner,
       spinner.length,
-      spinner.thickness,
-      angle,
-      theme.spinnerFill,
+      Math.max(2, spinner.thickness * Math.abs(face)),
+      spinner.angle,
+      face >= 0 ? theme.spinnerFill : theme.spinnerStroke,
       theme.spinnerStroke,
     );
 

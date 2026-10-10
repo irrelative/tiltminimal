@@ -148,6 +148,12 @@ export interface SaucerDefinition extends Point {
 }
 
 export interface SpinnerDefinition extends Point {
+  /** Angular impulse per unit of normal ball speed (default 0.1). */
+  impulseGain?: number;
+  /** Exponential angular drag per second (default 2). */
+  damping?: number;
+  /** Total angular speed limit in radians/second (default 120). */
+  maxAngularSpeed?: number;
   // Tip-to-tip blade span.
   length: number;
   // Blade width / hub thickness across the narrow axis.

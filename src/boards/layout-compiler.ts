@@ -86,6 +86,9 @@ export const compileBoardLayout = (
     })),
     spinners: (layout.spinners ?? []).map((spinner) => ({
       ...resolvePositionedElement(spinner, context),
+      impulseGain: spinner.impulseGain,
+      damping: spinner.damping,
+      maxAngularSpeed: spinner.maxAngularSpeed,
       length: spinner.length,
       thickness: spinner.thickness,
       angle: spinner.angle,

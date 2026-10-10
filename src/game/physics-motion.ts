@@ -152,7 +152,6 @@ export const advanceFlipperFrame = (
 
 export const advanceElementStates = (
   state: GameState,
-  board: BoardDefinition,
   deltaSeconds: number,
 ): void => {
   state.ball.angularPosition.x = wrapAngle(
@@ -170,29 +169,6 @@ export const advanceElementStates = (
       0,
       targetState.cooldownSeconds - deltaSeconds,
     );
-  });
-
-  state.spinners.forEach((spinnerState, index) => {
-    spinnerState.cooldownSeconds = Math.max(
-      0,
-      spinnerState.cooldownSeconds - deltaSeconds,
-    );
-    spinnerState.angle += spinnerState.angularVelocity * deltaSeconds;
-    spinnerState.angularVelocity *= Math.max(0, 1 - deltaSeconds * 7);
-
-    if (Math.abs(spinnerState.angle) > Math.PI * 2) {
-      spinnerState.angle %= Math.PI * 2;
-    }
-
-    if (Math.abs(spinnerState.angularVelocity) < 0.01) {
-      spinnerState.angularVelocity = 0;
-    }
-
-    if (!board.spinners[index]) {
-      spinnerState.angle = 0;
-      spinnerState.angularVelocity = 0;
-      spinnerState.cooldownSeconds = 0;
-    }
   });
 
   state.slingshots.forEach((slingshotState) => {

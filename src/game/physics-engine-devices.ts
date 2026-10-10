@@ -369,54 +369,6 @@ export const resolveSaucerCaptures = (
   });
 };
 
-export const resolveSpinnerInteractions = (
-  state: GameState,
-  board: BoardDefinition,
-  solver: SolverPhysicsDefinition,
-  events: GameEvent[],
-): void => {
-  board.spinners.forEach((spinner, index) => {
-    const spinnerState = state.spinners[index];
-
-    if (!spinnerState || spinnerState.cooldownSeconds > 0) {
-      return;
-    }
-
-    const collision = getOrientedElementCollision(
-      state,
-      offsetPoint(spinner, state.tableNudge.offset),
-      spinner.length,
-      spinner.thickness,
-      spinner.angle + spinnerState.angle,
-      solver,
-    );
-
-    if (!collision) {
-      return;
-    }
-
-    const crossingSpeed =
-      (state.ball.linearVelocity.x - state.tableNudge.velocity.x) *
-        collision.normal.x +
-      (state.ball.linearVelocity.y - state.tableNudge.velocity.y) *
-        collision.normal.y;
-
-    if (Math.abs(crossingSpeed) < 60) {
-      return;
-    }
-
-    spinnerState.angularVelocity +=
-      Math.sign(-crossingSpeed) * Math.min(Math.abs(crossingSpeed) / 36, 18);
-    spinnerState.cooldownSeconds = 0.08;
-    events.push({
-      type: 'spinner-spin',
-      index,
-      score: spinner.score,
-      tick: state.tick,
-    });
-  });
-};
-
 export const resolveRolloverTriggers = (
   state: GameState,
   board: BoardDefinition,

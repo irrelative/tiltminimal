@@ -6,6 +6,7 @@ import {
 } from '../src/audio/table-audio-profiles';
 import { TableTonePlayer } from '../src/audio/table-tone-player';
 import { harlemGlobetrottersTable } from '../src/boards/tables/harlem-globetrotters';
+import { justOneMoreTable } from '../src/boards/tables/just-one-more';
 import { classicTable } from '../src/boards/tables/classic-table';
 
 const param = () => ({
@@ -132,6 +133,38 @@ describe('single electronic voice', () => {
 });
 
 describe('audio session lifecycle', () => {
+  it('clicks for completed spinner turns without requiring a music profile, respecting mute and bounded bursts', () => {
+    const { context, oscillators } = mockContext();
+    vi.stubGlobal(
+      'AudioContext',
+      class {
+        constructor() {
+          return context;
+        }
+      },
+    );
+    const audio = new GameAudio();
+    audio.connect(justOneMoreTable);
+    const spin = {
+      type: 'spinner-spin',
+      index: 0,
+      score: 100,
+      tick: 1,
+    } as const;
+    audio.playGameEvents([spin, spin]);
+    expect(oscillators).toHaveLength(2);
+    expect(oscillators[0].start).toHaveBeenCalledWith(0);
+    expect(oscillators[1].start).toHaveBeenCalledWith(0.008);
+    oscillators[0].onended!();
+    expect(oscillators[0].disconnect).toHaveBeenCalledOnce();
+    audio.setSettings(false, 1);
+    audio.playGameEvents([spin]);
+    expect(oscillators).toHaveLength(2);
+    audio.setSettings(true, 0.5);
+    audio.playGameEvents(Array(100).fill(spin));
+    expect(oscillators).toHaveLength(8);
+    audio.disconnect();
+  });
   it('plays startup once after unlock, restarts on a new game, and clears it on table change', async () => {
     const { context, oscillators } = mockContext();
     context.state = 'suspended';
