@@ -1,3 +1,4 @@
+import { PlayControls } from './play-controls';
 import { RuleCard } from './rule-card';
 import { UserSettingsStore } from './user-settings';
 import { HighScores, renderHighScores } from './high-scores';
@@ -110,10 +111,16 @@ document.addEventListener('visibilitychange', () => {
 const table = (): BuiltInTable =>
   BUILT_IN_TABLES.find((item) => item.id === state.tableId) ??
   BUILT_IN_TABLES[0]!;
+let playControls: PlayControls | undefined;
 const ruleCard = new RuleCard(required<HTMLElement>('#table-rules'), (open) => {
-  const loop = state.loop ?? state.sandbox;
-  if (loop) loop.suspended = open;
+  playControls?.setRuleCardOpen(open);
+  if (state.sandbox) state.sandbox.suspended = open;
 });
+const playControlsHost = required<HTMLElement>('#play-controls');
+playControlsHost.hidden = route === 'physics';
+if (route !== 'physics') {
+  playControls = new PlayControls(playControlsHost, () => ruleCard.close());
+}
 const restart = (): void => {
   ruleCard.setTable(table());
   showHighScores();
@@ -140,6 +147,8 @@ const restart = (): void => {
       canvas,
       renderer,
       gameAudio: audio,
+      onStateChange: (nextState, loop) =>
+        playControls?.observe(nextState, loop),
       onGameOver: (score) => {
         highScores.record(state.tableId, score);
         showHighScores();

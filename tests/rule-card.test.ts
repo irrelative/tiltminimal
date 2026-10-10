@@ -49,6 +49,9 @@ describe('table rule cards', () => {
     expect(card.textContent).toContain('Left Shift, Left Arrow, or A');
     expect(card.textContent).toContain('hold Up Arrow to pull back');
     expect(card.textContent).toContain('Space for forward');
+    expect(card.textContent).toContain('Touch controls');
+    expect(card.textContent).toContain('swipe down on the right');
+    expect(card.textContent).toContain('tap Play again');
     expect(pause).toHaveBeenLastCalledWith(false);
   });
 });

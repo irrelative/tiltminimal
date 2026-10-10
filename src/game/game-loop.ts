@@ -6,7 +6,7 @@ import type { CanvasRenderer } from '../render/canvas-renderer';
 import type { GameAudio } from '../audio/game-audio';
 import { getFrameAudioEvents } from '../audio/game-audio';
 import type { GameState } from './game-state';
-import { resetBall } from './game-state';
+import { createInitialGameState } from './game-state';
 import {
   applyRulesFrame,
   initializeRulesState,
@@ -16,7 +16,22 @@ import { getPlungerPullRatio, stepGameFrame } from './physics-engine';
 import { clampFrameDeltaSeconds } from './physics-engine-types';
 
 export class GameLoop {
-  suspended = false;
+  private isSuspended = false;
+
+  get suspended(): boolean {
+    return this.isSuspended;
+  }
+
+  set suspended(value: boolean) {
+    if (value === this.isSuspended) return;
+    this.isSuspended = value;
+    this.input.reset?.();
+    this.lastInputState = this.input.getState();
+    // A paused pull must not launch when the player releases their controls.
+    if (value && this.state.status === 'waiting-launch') {
+      this.state.plunger = { pullback: 0, releaseSpeed: 0 };
+    }
+  }
   readonly debug = new PhysicsDebug();
   readonly performance = new FramePerformance();
   private animationFrameId = 0;
@@ -70,6 +85,24 @@ export class GameLoop {
     this.emitStateChange();
   }
 
+  restartGame(): void {
+    if (this.state.status !== 'game-over') return;
+    this.input.reset?.();
+    this.lastInputState = this.input.getState();
+    this.beginNewGame();
+    this.renderer.renderGame(this.board, this.state, this.lastInputState);
+    this.emitStateChange();
+  }
+
+  private beginNewGame(): void {
+    this.debug.clear();
+    this.state = initializeRulesState(
+      createInitialGameState(this.board),
+      this.board,
+    );
+    this.audio?.startGame();
+  }
+
   setOnStateChange(listener: (state: GameState) => void): void {
     this.onStateChange = listener;
   }
@@ -106,12 +139,8 @@ export class GameLoop {
       input.launchPressed &&
       !this.lastInputState.launchPressed
     ) {
-      this.state = initializeRulesState(
-        resetBall(previousState, this.board),
-        this.board,
-      );
+      this.beginNewGame();
       previousState = this.state;
-      this.audio?.startGame();
     } else {
       const frame = this.debug.capture(deltaSeconds, () => {
         const result = stepGameFrame(

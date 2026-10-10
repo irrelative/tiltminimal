@@ -63,6 +63,19 @@ export class RuleCard {
       item.textContent = instruction;
       controls.append(item);
     }
+    const touchTitle = document.createElement('h3');
+    touchTitle.textContent = 'Touch controls';
+    const touchControls = document.createElement('ul');
+    for (const instruction of [
+      'Plunger: swipe down on the right side of the table, hold, then lift to launch.',
+      'Flippers: hold the lower left or right corner of the table. Use both fingers together.',
+      'Nudge: swipe left, right, or up above the flipper zones.',
+      'Use Pause / Resume on the playfield. After game over, tap Play again.',
+    ]) {
+      const item = document.createElement('li');
+      item.textContent = instruction;
+      touchControls.append(item);
+    }
     const footer = document.createElement('p');
     footer.className = 'rule-card-footer';
     footer.textContent = 'Play paused while this card is open.';
@@ -72,8 +85,14 @@ export class RuleCard {
       list,
       controlsTitle,
       controls,
+      touchTitle,
+      touchControls,
       footer,
     );
+  }
+
+  close(): void {
+    this.setOpen(false);
   }
 
   private setOpen(open: boolean): void {

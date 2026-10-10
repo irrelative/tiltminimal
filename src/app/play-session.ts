@@ -3,7 +3,7 @@ import { createGameScoreRecorder } from './high-scores';
 import type { BuiltInTable } from '../boards/table-library';
 import { cloneBoardDefinition } from '../boards/board-codec';
 import type { GameAudio } from '../audio/game-audio';
-import { createInitialGameState } from '../game/game-state';
+import { createInitialGameState, type GameState } from '../game/game-state';
 import { GameLoop } from '../game/game-loop';
 import { PlayInput, type InputSource } from '../input/keyboard-input';
 import type { CanvasRenderer } from '../render/canvas-renderer';
@@ -15,6 +15,7 @@ interface StartStandalonePlaySessionOptions {
   gameAudio: GameAudio;
   modeTitle: HTMLElement;
   onGameOver?: (score: number) => void;
+  onStateChange?: (state: GameState, loop: GameLoop) => void;
   playDebugStatus: HTMLElement;
   playDebugPosition: HTMLElement;
   playDebugVelocity: HTMLElement;
@@ -28,6 +29,7 @@ export const startStandalonePlaySession = ({
   gameAudio,
   modeTitle,
   onGameOver,
+  onStateChange,
   playDebugStatus,
   playDebugPosition,
   playDebugVelocity,
@@ -57,6 +59,7 @@ export const startStandalonePlaySession = ({
       loop.debug.enabled,
     );
     recordScore(nextState);
+    onStateChange?.(nextState, loop);
     playDebugStatus.textContent = `${nextState.status} · Ball ${nextState.rules.currentBall}/${nextState.rules.ballsPerGame} · Score ${nextState.score}${nextState.additionalBalls.length || nextState.lockedBalls.length ? ` · ${nextState.status === 'playing' ? 1 + nextState.additionalBalls.length : 0} live / ${nextState.lockedBalls.length} locked` : ''}`;
     playDebugPosition.textContent = formatVector2(
       nextState.ball.position.x,

@@ -11,13 +11,14 @@ export interface InputSource {
   connect(): void;
   disconnect(): void;
   getState(): InputState;
+  reset?(): void;
 }
 
 const LEFT_KEYS = new Set(['ArrowLeft', 'a', 'A']);
 const RIGHT_KEYS = new Set(['ArrowRight', 'd', 'D']);
 const LAUNCH_KEYS = new Set(['ArrowUp']);
 const NUDGE_LEFT_KEYS = new Set(['z', 'Z']);
-const NUDGE_RIGHT_KEYS = new Set(['/','?']);
+const NUDGE_RIGHT_KEYS = new Set(['/', '?']);
 const NUDGE_UP_KEYS = new Set([' ']);
 const LEFT_CODES = new Set(['ShiftLeft']);
 const RIGHT_CODES = new Set(['ShiftRight']);
@@ -33,6 +34,8 @@ export class KeyboardInput implements InputSource {
   };
 
   private connected = false;
+  private readonly heldKeys = new Set<string>();
+  private readonly blockedKeys = new Set<string>();
 
   connect(): void {
     if (this.connected) {
@@ -52,6 +55,14 @@ export class KeyboardInput implements InputSource {
     window.removeEventListener('keydown', this.onKeyDown);
     window.removeEventListener('keyup', this.onKeyUp);
     this.connected = false;
+    this.reset();
+  }
+
+  reset(): void {
+    for (const key of this.heldKeys) this.blockedKeys.add(key);
+    for (const key of Object.keys(this.state) as (keyof InputState)[]) {
+      this.state[key] = false;
+    }
   }
 
   getState(): InputState {
@@ -59,10 +70,20 @@ export class KeyboardInput implements InputSource {
   }
 
   private readonly onKeyDown = (event: KeyboardEvent): void => {
+    const identity = event.code || event.key;
+    this.heldKeys.add(identity);
+    if (this.blockedKeys.has(identity) && event.repeat) {
+      this.setKeyState(event, false);
+      return;
+    }
+    this.blockedKeys.delete(identity);
     this.setKeyState(event, true);
   };
 
   private readonly onKeyUp = (event: KeyboardEvent): void => {
+    const identity = event.code || event.key;
+    this.heldKeys.delete(identity);
+    this.blockedKeys.delete(identity);
     this.setKeyState(event, false);
   };
 
@@ -149,7 +170,7 @@ export class PlayInput implements InputSource {
     this.element.addEventListener('pointermove', this.onPointerMove);
     this.element.addEventListener('pointerup', this.onPointerUp);
     this.element.addEventListener('pointercancel', this.onPointerUp);
-    window.addEventListener('blur', this.resetTouchState);
+    window.addEventListener('blur', this.reset);
     document.addEventListener('visibilitychange', this.onVisibilityChange);
     this.connected = true;
   }
@@ -166,9 +187,9 @@ export class PlayInput implements InputSource {
     this.element.removeEventListener('pointermove', this.onPointerMove);
     this.element.removeEventListener('pointerup', this.onPointerUp);
     this.element.removeEventListener('pointercancel', this.onPointerUp);
-    window.removeEventListener('blur', this.resetTouchState);
+    window.removeEventListener('blur', this.reset);
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
-    this.resetTouchState();
+    this.reset();
     this.connected = false;
   }
 
@@ -287,11 +308,17 @@ export class PlayInput implements InputSource {
 
   private readonly onVisibilityChange = (): void => {
     if (document.visibilityState === 'hidden') {
-      this.resetTouchState();
+      this.reset();
     }
   };
 
-  private readonly resetTouchState = (): void => {
+  readonly reset = (): void => {
+    this.keyboard.reset();
+    for (const pointerId of this.touchPointers.keys()) {
+      if (this.element.hasPointerCapture?.(pointerId)) {
+        this.element.releasePointerCapture?.(pointerId);
+      }
+    }
     this.touchPointers.clear();
     this.touchLeftCount = 0;
     this.touchRightCount = 0;

@@ -22,7 +22,8 @@ ball or trigger the canvas touch controls.
 Opening the card suspends simulation through the loop's `suspended` flag. Frames
 continue rendering and updating their timestamps, so closing does not fast-forward.
 This suspension is separate from debug pause, speed and pending single steps;
-closing the card preserves those settings. Rule-card keydown events do not reach
+closing the card preserves those settings and any explicit Pause from the playfield.
+The playfield Resume action closes an open rule card and resumes play. Rule-card keydown events do not reach
 game controls; keyup events remain available to clear already-held controls.
 
 Validation: content/toggle tests, full test suite, build and lint; browser review
@@ -63,5 +64,8 @@ See [Switchyard](switchyard-spec.md) and its rules/layout regression tests.
 
 Every rule card includes the same keyboard controls below its table rules:
 left/right flipper alternatives, hold/release Up Arrow to plunge (or start a
-new game), and Z / slash / Space nudges. The canvas no longer shows keyboard
-instructions; plunger strength and game-status feedback remain on the canvas.
+new game), and Z / slash / Space nudges. Touch instructions explain plunge,
+simultaneous flipper holds, nudges, Pause / Resume, and Play again. Brief launch
+guidance appears in a screen-space playfield panel while waiting to plunge;
+plunger strength and gameplay status remain on the canvas.
+See [first-game experience](first-game-experience-spec.md).

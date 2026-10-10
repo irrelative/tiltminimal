@@ -38,9 +38,17 @@ game.
 
 The canvas shows score and current ball number. The sidebar contains the table
 name, its top-five high scores, a compact **Reset ball** action, **Rule card**,
-and **Settings**. Opening the rule card pauses play; closing it resumes play.
-Keyboard instructions appear in every table’s rule card, keeping the canvas
-clear of control hints.
+and **Settings**. Brief keyboard and touch guidance appears over the playfield
+when a ball is ready to launch, then disappears as you pull the plunger.
+**Pause / Resume** stays visible on the playfield. Opening the rule card also
+pauses play; closing it preserves an explicit pause. Resume closes an open card.
+Every rule card includes full keyboard and touch instructions.
+
+After **Game over**, the playfield shows your final score and **Play again**.
+You can also hold Up Arrow to start another game. Replay resets the score,
+balls, and table progress. Pause clears held controls and cancels a partial
+plunger pull; release and press again after resuming.
+See [first-game experience](docs/first-game-experience-spec.md).
 
 | Action             | Keyboard                       | Touch                                             |
 | ------------------ | ------------------------------ | ------------------------------------------------- |

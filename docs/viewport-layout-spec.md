@@ -9,7 +9,9 @@ Above 1080 CSS pixels wide, the workspace is a two-column grid with a 320-pixel 
 `100dvh` minus an 8-pixel outer inset on each side. The sidebar scrolls
 independently; expanding debugging controls must not shrink the playfield or
 make the entire page taller. Physics is available directly at `/physics`; no mode navigation is shown.
-Do not add a toolbar row above the canvas.
+Do not add a toolbar row above the canvas. Play uses absolute-positioned
+Pause / Resume and launch/game-over panels over the frame; these do not resize
+the canvas. See [first-game experience](first-game-experience-spec.md).
 
 The stage and playfield frame have no internal padding and occupy the full
 workspace height. The outer inset leaves approximately 8 pixels between each
@@ -52,7 +54,6 @@ After changing the shell or canvas sizing:
 The September 2026 sizing change removed nested
 stage padding, and verified full-height Classic and Harlem in the browser,
 including the Physics route. Table geometry and physics are unaffected.
-
 
 ## HTML shell styling
 

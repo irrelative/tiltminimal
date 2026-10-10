@@ -53,6 +53,19 @@ describe('KeyboardInput', () => {
     });
   });
 
+  it('requires a fresh press after clearing held controls, ignoring held key repeats', () => {
+    const key = { key: 'ArrowUp', code: 'ArrowUp' };
+    window.dispatchEvent(new KeyboardEvent('keydown', key));
+    input.reset();
+    window.dispatchEvent(
+      new KeyboardEvent('keydown', { ...key, repeat: true }),
+    );
+    expect(input.getState().launchPressed).toBe(false);
+    window.dispatchEvent(new KeyboardEvent('keyup', key));
+    window.dispatchEvent(new KeyboardEvent('keydown', key));
+    expect(input.getState().launchPressed).toBe(true);
+  });
+
   it('maps z, slash, and space to left, right, and up nudges', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'z' }));
     window.dispatchEvent(new KeyboardEvent('keydown', { key: '/' }));
@@ -151,9 +164,12 @@ describe('PlayInput', () => {
       clientY: 1200,
     });
 
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp' }));
     expect(input.getState().leftPressed).toBe(true);
+    expect(input.getState().launchPressed).toBe(true);
     window.dispatchEvent(new Event('blur'));
     expect(input.getState().leftPressed).toBe(false);
+    expect(input.getState().launchPressed).toBe(false);
   });
 
   it('maps touch swipes to nudge pulses', () => {

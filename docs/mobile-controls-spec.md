@@ -5,7 +5,8 @@ on phones and tablets.
 
 ## Goals
 
-- make the game playable without any on-screen button chrome
+- keep flipper and plunge controls on the playfield, with visible Pause / Resume
+  and Play again actions
 - keep the flipper controls in the natural lower corners of the table
 - map gestures to nudging and plunging without conflicting with flipper holds
 - preserve keyboard support alongside touch support
@@ -54,6 +55,18 @@ Touch and keyboard controls are merged into one runtime input state.
 - active touch pointers are captured by the canvas and reset on blur or when
   the document becomes hidden, so a flipper or plunger cannot remain held after
   the pointer leaves the playfield
+
+## Launch guidance and session controls
+
+Brief keyboard and touch guidance appears over the playfield between balls,
+including the initial launch. It passes pointer events through to the canvas and
+disappears once the plunger starts pulling. Pause / Resume remains reachable on
+the playfield; the game-over panel offers a touch-sized Play again button.
+
+Pausing and resuming clear held keyboard/touch input and queued nudges. Pausing
+cancels a partial plunger pull, avoiding an accidental launch on resume. Release
+and press again to operate controls. Blur and hiding the document clear both
+keyboard and touch input. See [first-game experience](first-game-experience-spec.md).
 
 ## Non-Goals
 

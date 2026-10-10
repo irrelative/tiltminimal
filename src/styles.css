@@ -966,3 +966,68 @@ body[data-session-route='physics'] .reset-ball-action {
 .stage-shell:has(> .performance-meter:not([hidden])) {
   grid-template-rows: minmax(0, 1fr) auto;
 }
+
+/* Controls occupy screen space without changing the fitted canvas size. */
+.play-controls {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.play-pause {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  pointer-events: auto;
+  min-width: 88px;
+  min-height: 44px;
+  background: #162536;
+}
+.play-status {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(360px, calc(100% - 32px));
+  box-sizing: border-box;
+  padding: 20px;
+  border: 1px solid #526579;
+  background: rgb(8 15 23 / 96%);
+  color: #eef5fb;
+}
+.play-status h2 {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+}
+.play-status p {
+  margin: 0;
+  line-height: 1.5;
+}
+.launch-guidance {
+  margin-top: 16px;
+  font-size: 0.9rem;
+}
+.launch-guidance p + p {
+  margin-top: 10px;
+}
+.play-status.interactive {
+  pointer-events: auto;
+}
+.play-status button {
+  margin-top: 16px;
+  min-height: 44px;
+  width: 100%;
+}
+@media (max-height: 500px) {
+  .play-status {
+    padding: 12px;
+  }
+  .launch-guidance {
+    margin-top: 8px;
+  }
+}
+
+.play-status .replay-hint {
+  margin-top: 12px;
+  font-size: 0.9rem;
+}
