@@ -29,6 +29,9 @@ pop bumpers sit beneath those lanes.
 Classic opts into `plunger.returnGate`, a segment across the arch exit.
 The segment normal `(dy, -dx)` points into live play. The gate remains open
 until the whole ball passes onto that side, then closes behind the ball.
+The closed gate blocks incoming playfield traffic while permitting another
+outgoing plunge if a live ball re-enters the shooter. The historical exited
+flag and ball rules stay intact.
 Shooter walls remain solid throughout play. The renderer shows the gate leaf
 open or closed using the same endpoints as collision handling.
 

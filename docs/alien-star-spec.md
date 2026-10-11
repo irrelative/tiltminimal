@@ -48,7 +48,7 @@ artwork is newly drawn in Canvas, with the reference's black/cyan/orange palette
 
 Coordinates and mechanical dimensions are estimated from photographs, with
 ball clearance and catch/release taking precedence over pixel matching. The
-shooter has a one-way exit; the saucer uses the shared downward eject and no
+shooter has a one-way exit; the saucer ejects down/right through its angled mouth with no
 machine-specific kick exception. The browser spinner uses sustained momentum
 and full-revolution scoring.
 
@@ -93,3 +93,36 @@ Acceptance: focused Alien Star rules tests, the full Vitest suite, all-table
 validation with `--deep-playability --fail-on-warnings`, production build and
 ESLint. Deep validation reports no geometry or playability issues on Alien Star;
 these sampled trajectories do not prove every shot or factory timing accurate.
+
+## Lock, left return and repeat-plunge corrections
+
+The lock assembly now rotates its pocket, both mouth walls, approach samples
+and eject direction together by −0.62 radians. The resulting mouth points
+about 54.5° down/right toward the right flipper; its world-space return region
+covers the connected eject path. Diagonal ballistic feeds from the right
+flipper area at (490, 1320) capture across 0.35/0.45/0.6-second flight samples.
+This is an estimated entrance angle, preserving the shared saucer capture rules.
+
+Below the lock's left side, the cabinet wall curves from (12, 850) around a
+91-unit radius centered at (103, 850), then joins the left return at (103, 1080).
+Upper feeds beside the lock enter the lower playfield rather than having an
+uninterrupted drop into the outlane. Sampled drops at (45, 620) with downward
+speeds 0 and 400 settle on a held left flipper and release when it is lowered.
+This creates a save opportunity; it does not guarantee every feed survives.
+The genuine left outlane retains its independent drain contract.
+
+Shooter gates now use shared directional collision handling: an armed gate
+blocks an incoming ball on the playfield side, but an outgoing ball can push
+through it from the shooter side. Historical per-ball `launcherExited` remains
+set; returning and plunging again does not reset score, qualification or turn.
+Regression tests cover outbound crossing with either history state and repeat
+plunges after falling back onto the plunger on all eight tables.
+
+Chrome review inspected the changed collision surfaces in `/physics` and used
+a temporary production-physics replay fixture. The diagonal right-side shot
+captured; the upper-left drop settled for 60 frames on its movable bat; both
+inlanes released about 172 units in one second; the center feed drained; a ball
+returned down the shooter lane and plunged past the already-armed gate.
+The fixture was removed after review. All 595 tests and eight-table deep
+validation pass. The Classic runner completed 76 sampled runs with no sustained
+near-rest trap; its 14 diagnostic flags were speeds above 4,000 units/second.

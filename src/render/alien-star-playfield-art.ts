@@ -110,7 +110,7 @@ export const drawAlienStarPlayfield = (
   text(c, '10,000 WHEN LIT', 150, 520, 14);
   text(c, 'BONUS X SHOT', 760, 560, 15);
   text(c, 'CAPTURE WHEN LIT', 140, 680, 14);
-  text(c, 'MULTIBALL X', 145, 1040, 15);
+  text(c, 'MULTIBALL X', 240, 1100, 13);
   for (const [i, target] of board.standupTargets.slice(0, 5).entries())
     text(c, 'ALIEN'[i], target.x - 60, target.y + 6, 25);
   text(c, 'HOLD BONUS', 450, 1390, 14);
@@ -152,17 +152,17 @@ export const drawAlienStarInserts = (
         10,
       ),
     );
-  lamp(c, 140, 835, Boolean(p['lock-lit']), '#fff265', 14);
+  lamp(c, 184, 821, Boolean(p['lock-lit']), '#fff265', 14);
   [2, 3, 5].forEach((x, i) => {
     const chosen =
       v.phase === 'single' || !v.phase
         ? [2, 3, 5][Number(p.selector || 0)]
         : v['locked-x'];
-    lamp(c, 145, 990 - i * 50, chosen === x);
-    text(c, `${x}X`, 145, 996 - i * 50, 18);
+    lamp(c, 215, 1050 - i * 50, chosen === x);
+    text(c, `${x}X`, 215, 1056 - i * 50, 18);
     if (chosen === x) {
       c.fillStyle = '#10242b';
-      c.fillText(`${x}X`, 145, 996 - i * 50);
+      c.fillText(`${x}X`, 215, 1056 - i * 50);
     }
   });
   lamp(c, 136, 465, Boolean(state?.rules.modes['spinner-lit']), '#ffd953', 12);

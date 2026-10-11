@@ -140,13 +140,30 @@ export const resolvePlungerGuideCollisions = (
   const guides = getPlungerGuideSegments(board);
   const gate = getPlungerReturnGate(board);
   if (gate && state.launcherExited) {
-    resolveGuideCollision(
-      state,
-      board,
-      offsetGuide(gate, tableOffset),
-      solver,
-      state.tableNudge.velocity,
-    );
+    const dx = gate.end.x - gate.start.x;
+    const dy = gate.end.y - gate.start.y;
+    const exitX = dy,
+      exitY = -dx;
+    const offset = state.tableNudge.offset;
+    const onPlayfieldSide =
+      (state.ball.position.x - gate.start.x - offset.x) * exitX +
+        (state.ball.position.y - gate.start.y - offset.y) * exitY >=
+      0;
+    const movingIntoShooter =
+      (state.ball.linearVelocity.x - state.tableNudge.velocity.x) * exitX +
+        (state.ball.linearVelocity.y - state.tableNudge.velocity.y) * exitY <
+      0;
+    // A spring gate blocks return traffic, but opens for an outgoing plunge
+    // even after this ball has already visited the playfield.
+    if (onPlayfieldSide && movingIntoShooter) {
+      resolveGuideCollision(
+        state,
+        board,
+        offsetGuide(gate, tableOffset),
+        solver,
+        state.tableNudge.velocity,
+      );
+    }
   }
 
   for (const guide of guides) {

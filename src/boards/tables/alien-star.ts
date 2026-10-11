@@ -2,7 +2,6 @@ import { compileBuiltInBoardLayout } from '../layout-compiler';
 import {
   createFoundation,
   createBank,
-  createPocket,
   composeAssemblies,
 } from './table-foundation';
 import {
@@ -10,6 +9,7 @@ import {
   createShotLaneAssembly,
 } from '../assemblies';
 import { arc, rail, type BoardAssembly } from '../assemblies/shared';
+import { createAlienStarLock } from './alien-star-lock';
 import { alienStarRulesScript } from './alien-star-rules';
 
 const { lower, shooter, ...foundation } = createFoundation(
@@ -44,7 +44,7 @@ const spinner = createShotLaneAssembly({
   id: 'alien-star-spinner',
   outerPath: [
     { x: 12, y: 506 },
-    { x: 12, y: 1580 },
+    { x: 12, y: 850 },
   ],
   innerPath: [
     { x: 260, y: 310 },
@@ -112,8 +112,27 @@ const parts = composeAssemblies(
   spinner,
   bank,
   advance,
-  createPocket('alien-star-lock', { x: 140, y: 760 }, 10000),
+  createAlienStarLock(),
 );
+// Bend upper-left feeds into the left return instead of opening a straight
+// corridor all the way from the top orbit to the outlane.
+parts.guides!.push(
+  arc({ x: 103, y: 850 }, 91, Math.PI / 2, Math.PI),
+  rail({ x: 103, y: 941 }, { x: 103, y: 1080 }),
+  rail({ x: 12, y: 1080 }, { x: 12, y: 1580 }),
+);
+parts.routes!.push({
+  id: 'alien-star-left-lock-bypass',
+  start: {
+    type: 'feed',
+    position: { x: 45, y: 620 },
+    velocities: [0, 200, 400].map((y) => ({ x: 0, y })),
+  },
+  goals: [
+    { type: 'region', min: { x: 110, y: 980 }, max: { x: 720, y: 1200 } },
+  ],
+  timeoutSeconds: 5,
+});
 parts.bumpers = [
   { x: 450, y: 400 },
   { x: 350, y: 550 },

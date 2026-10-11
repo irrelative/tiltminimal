@@ -21,21 +21,25 @@ const signedDistance = (point: { x: number; y: number }) =>
   (point.x - midpoint.x) * normal.x + (point.y - midpoint.y) * normal.y;
 
 describe('shooter return gate', () => {
-  it('lets an outbound ball cross before closing behind it', () => {
-    let state = createInitialGameState(board);
-    state.status = 'playing';
-    state.ball.position = {
-      x: midpoint.x - normal.x * 65,
-      y: midpoint.y - normal.y * 65,
-    };
-    state.ball.linearVelocity = { x: normal.x * 1500, y: normal.y * 1500 };
-    for (let frame = 0; frame < 18; frame += 1)
-      state = stepGame(state, board, idleInput, 1 / 120);
-    expect(state.launcherExited).toBe(true);
-    expect(signedDistance(state.ball.position)).toBeGreaterThan(
-      board.ball.radius,
-    );
-  });
+  it.each([false, true])(
+    'lets an outbound ball cross with historical launcherExited=%s',
+    (launcherExited) => {
+      let state = createInitialGameState(board);
+      state.status = 'playing';
+      state.launcherExited = launcherExited;
+      state.ball.position = {
+        x: midpoint.x - normal.x * 65,
+        y: midpoint.y - normal.y * 65,
+      };
+      state.ball.linearVelocity = { x: normal.x * 1500, y: normal.y * 1500 };
+      for (let frame = 0; frame < 18; frame += 1)
+        state = stepGame(state, board, idleInput, 1 / 120);
+      expect(state.launcherExited).toBe(true);
+      expect(signedDistance(state.ball.position)).toBeGreaterThan(
+        board.ball.radius,
+      );
+    },
+  );
 
   it('reflects a returning live ball back into the playfield', () => {
     let state = createInitialGameState(board);
@@ -128,5 +132,53 @@ it.each(BUILT_IN_TABLES)(
         );
       }
     }
+  },
+);
+
+it.each(BUILT_IN_TABLES)(
+  '$id allows a live ball re-seated in the shooter to plunge past the closed gate',
+  ({ board }) => {
+    let state = createInitialGameState(board);
+    state.status = 'playing';
+    state.launcherExited = true;
+    state.ball.position = {
+      x: board.launchPosition.x,
+      y: board.launchPosition.y - 300,
+    };
+    state.ball.linearVelocity = { x: 0, y: 180 };
+    for (let frame = 0; frame < 720; frame++)
+      state = stepGame(state, board, idleInput, 1 / 120);
+    expect(state.status).toBe('playing');
+    expect(state.launcherExited).toBe(true);
+    expect(
+      Math.abs(state.ball.position.y - board.launchPosition.y),
+    ).toBeLessThan(board.ball.radius);
+    // Keep the historical exited flag: a return must not reset ball rules.
+    for (let frame = 0; frame < 168; frame++)
+      state = stepGame(
+        state,
+        board,
+        { ...idleInput, launchPressed: true },
+        1 / 120,
+      );
+    let crossed = false;
+    const gate = getPlungerReturnGate(board)!;
+    const dx = gate.end.x - gate.start.x,
+      dy = gate.end.y - gate.start.y;
+    const length = Math.hypot(dx, dy);
+    for (let frame = 0; frame < 480; frame++) {
+      state = stepGame(state, board, idleInput, 1 / 120);
+      const distance =
+        ((state.ball.position.x - gate.start.x) * dy -
+          (state.ball.position.y - gate.start.y) * dx) /
+        length;
+      if (distance > board.ball.radius + gate.thickness / 2) {
+        crossed = true;
+        break;
+      }
+    }
+    expect(crossed).toBe(true);
+    expect(state.rules.currentBall).toBe(1);
+    expect(state.launcherExited).toBe(true);
   },
 );

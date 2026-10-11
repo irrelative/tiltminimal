@@ -40,6 +40,8 @@ center point. The main exceptions are:
 - `returnGate` (optional): `{ start, end }` points defining the shooter exit
   gate; the segment normal `(dy, -dx)` points into live play. It closes after
   the ball clears that side and keeps the shooter walls solid after launch.
+  An armed gate blocks incoming playfield traffic but still permits outgoing
+  plunges, including a ball that re-entered the shooter.
   Omission preserves the existing launcher behavior.
 
 The plunger is currently constrained to the right side of the table.

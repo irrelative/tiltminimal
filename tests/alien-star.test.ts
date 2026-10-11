@@ -1,3 +1,4 @@
+import { isSettledOn } from './helpers/post-pass';
 import { describe, expect, it } from 'vitest';
 import { alienStarTable as board } from '../src/boards/tables/alien-star';
 import { createInitialGameState, type GameState } from '../src/game/game-state';
@@ -53,6 +54,60 @@ describe('Alien Star reference recreation', () => {
       ),
     ).toHaveLength(3);
   });
+  it.each([0.35, 0.45, 0.6])(
+    'accepts a diagonal shot from the right flipper area over %ss',
+    (flightTime) => {
+      let s = createInitialGameState(board);
+      s.status = 'playing';
+      s.launcherExited = true;
+      s.ball.position = { x: 490, y: 1320 };
+      s.ball.linearVelocity = {
+        x: (board.saucers[0].x - s.ball.position.x) / flightTime,
+        y:
+          (board.saucers[0].y -
+            s.ball.position.y -
+            0.5 * board.gravity * flightTime ** 2) /
+          flightTime,
+      };
+      let captured = false;
+      for (let n = 0; n < 240 && !captured; n++) {
+        const r = stepGameFrame(s, board, idleInput, 1 / 120);
+        s = r.state;
+        captured = r.events.some((e) => e.type === 'saucer-captured');
+      }
+      expect(captured).toBe(true);
+    },
+  );
+  it.each([0, 400])(
+    'can save an upper-left feed beside the lock at speed %s',
+    (speed) => {
+      let s = createInitialGameState(board);
+      s.status = 'playing';
+      s.launcherExited = true;
+      s.ball.position = { x: 45, y: 620 };
+      s.ball.linearVelocity = { x: 0, y: speed };
+      s.flippers[0].angle = board.flippers[0].activeAngle;
+      s.flippers[0].engaged = true;
+      let settled = 0;
+      for (let n = 0; n < 720 && settled < 60; n++) {
+        s = stepGameFrame(
+          s,
+          board,
+          { ...idleInput, leftPressed: true },
+          1 / 120,
+        ).state;
+        settled = isSettledOn(s, board, 0) ? settled + 1 : 0;
+        if (s.status !== 'playing') break;
+      }
+      expect(settled).toBe(60);
+      const before = { ...s.ball.position };
+      for (let n = 0; n < 120; n++)
+        s = stepGameFrame(s, board, idleInput, 1 / 120).state;
+      expect(
+        Math.hypot(s.ball.position.x - before.x, s.ball.position.y - before.y),
+      ).toBeGreaterThan(board.ball.radius);
+    },
+  );
   it('scores fresh ALIEN letters differently from repeats and preserves qualification', () => {
     const s = start();
     hit(s, 'standup-target-hit');
@@ -89,8 +144,16 @@ describe('Alien Star reference recreation', () => {
     hit(s, 'spinner-spin');
     s.status = 'playing';
     s.launcherExited = true;
-    s.ball.position = { x: board.saucers[0].x, y: board.saucers[0].y + 140 };
-    s.ball.linearVelocity = { x: 0, y: -1050 };
+    const cup = board.saucers[0];
+    const direction = {
+      x: Math.cos(cup.ejectAngle),
+      y: Math.sin(cup.ejectAngle),
+    };
+    s.ball.position = {
+      x: cup.x + direction.x * 140,
+      y: cup.y + direction.y * 140,
+    };
+    s.ball.linearVelocity = { x: -direction.x * 1050, y: -direction.y * 1050 };
     for (let n = 0; n < 240 && !s.lockedBalls.length; n++) {
       const r = stepGameFrame(s, board, idleInput, 1 / 120);
       s = applyRulesFrame(r.state, board, r.events, 1 / 120);
