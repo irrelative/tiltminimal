@@ -11,7 +11,8 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "validate-table": "vite-node src/cli/validate-table.ts",
-    "playtest:classic": "vite-node src/cli/playtest-classic.ts"
+    "playtest:classic": "vite-node src/cli/playtest-classic.ts",
+    "profile-performance": "vite-node src/cli/profile-performance.ts"
   },
   "devDependencies": {
     "@eslint/js": "^9.23.0",

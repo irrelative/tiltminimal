@@ -1,6 +1,7 @@
-.PHONY: deploy preview-cloudflare help install dev build lint test cloc fmt clean validate-table playtest-classic
+.PHONY: deploy preview-cloudflare help install dev build lint test cloc fmt clean validate-table playtest-classic profile-performance
 
 help:
+	@printf "  make profile-performance  Benchmark physics on all built-in tables\n"
 	@printf "Available targets:\n"
 	@printf "  make install  Install npm dependencies\n"
 	@printf "  make dev      Start the Vite dev server\n"
@@ -53,3 +54,6 @@ preview-cloudflare:
 	$(MAKE) build
 	npx wrangler d1 migrations apply pinball-stats --local
 	npx wrangler dev
+
+profile-performance:
+	npm run profile-performance

@@ -11,7 +11,6 @@ import {
   clamp,
   createStaticContact,
   getOrientedElementCollision,
-  offsetGuide,
 } from './physics-helpers';
 import type { PlungerMotionFrame } from './physics-motion';
 import {
@@ -109,8 +108,6 @@ export const resolveGuideCollisions = (
   board: BoardDefinition,
   solver: SolverPhysicsDefinition,
 ): void => {
-  const tableOffset = state.tableNudge.offset;
-
   for (const guide of board.guides) {
     if ((guide.plane ?? 'playfield') === 'raised') {
       continue;
@@ -119,7 +116,7 @@ export const resolveGuideCollisions = (
     resolveGuideCollision(
       state,
       board,
-      offsetGuide(guide, tableOffset),
+      guide,
       solver,
       state.tableNudge.velocity,
     );
@@ -134,8 +131,6 @@ export const resolvePlungerGuideCollisions = (
   if (state.launcherExited && !board.plunger.returnGate) {
     return;
   }
-
-  const tableOffset = state.tableNudge.offset;
 
   const guides = getPlungerGuideSegments(board);
   const gate = getPlungerReturnGate(board);
@@ -159,7 +154,7 @@ export const resolvePlungerGuideCollisions = (
       resolveGuideCollision(
         state,
         board,
-        offsetGuide(gate, tableOffset),
+        gate,
         solver,
         state.tableNudge.velocity,
       );
@@ -170,7 +165,7 @@ export const resolvePlungerGuideCollisions = (
     resolveGuideCollision(
       state,
       board,
-      offsetGuide(guide, tableOffset),
+      guide,
       solver,
       state.tableNudge.velocity,
     );
@@ -184,7 +179,36 @@ const resolveGuideCollision = (
   solver: SolverPhysicsDefinition,
   surfaceVelocity: ContactData['surfaceVelocity'] = { x: 0, y: 0 },
 ): void => {
-  const projection = projectPointToGuide(state.ball.position, guide);
+  const offset = state.tableNudge.offset;
+  const x = state.ball.position.x - offset.x;
+  const y = state.ball.position.y - offset.y;
+  const reach = state.ball.radius + guide.thickness / 2;
+  // Conservative bounds: a full circle contains every partial arc. Read the
+  // definition directly so editor changes never leave a stale geometry cache.
+  const minX =
+    guide.kind === 'arc'
+      ? guide.center.x - guide.radius
+      : Math.min(guide.start.x, guide.end.x);
+  const maxX =
+    guide.kind === 'arc'
+      ? guide.center.x + guide.radius
+      : Math.max(guide.start.x, guide.end.x);
+  const minY =
+    guide.kind === 'arc'
+      ? guide.center.y - guide.radius
+      : Math.min(guide.start.y, guide.end.y);
+  const maxY =
+    guide.kind === 'arc'
+      ? guide.center.y + guide.radius
+      : Math.max(guide.start.y, guide.end.y);
+  if (
+    x < minX - reach ||
+    x > maxX + reach ||
+    y < minY - reach ||
+    y > maxY + reach
+  )
+    return;
+  const projection = projectPointToGuide({ x, y }, guide);
   const overlap = state.ball.radius + guide.thickness / 2 - projection.distance;
 
   if (overlap <= 0) {
@@ -200,7 +224,7 @@ const resolveGuideCollision = (
     (state.ball.linearVelocity.y - surfaceVelocity.y) * projection.normal.y;
   const contact = createStaticContact(
     guideMaterial,
-    projection.point,
+    { x: projection.point.x + offset.x, y: projection.point.y + offset.y },
     projection.normal,
     overlap,
     surfaceVelocity,

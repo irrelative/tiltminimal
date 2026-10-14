@@ -1,0 +1,36 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Pinball performance profile</title>
+  </head>
+  <body>
+    <pre id="results">Profiling…</pre>
+    <div style="width: 600px; height: 900px"><canvas></canvas></div>
+    <script type="module">
+      import {
+        profilePhysics,
+        performanceWorkloads,
+      } from '/src/playtest/performance-profile.ts';
+      import { CanvasRenderer } from '/src/render/canvas-renderer.ts';
+      import { idle } from '/src/playtest/simulation.ts';
+      const renderer = new CanvasRenderer(document.querySelector('canvas'));
+      const physics = profilePhysics(10);
+      const rendering = performanceWorkloads.map(({ id, board, states }) => {
+        const run = () => {
+          const start = performance.now();
+          for (let i = 0; i < 96; i++)
+            renderer.renderGame(board, states[i % states.length], idle);
+          return (performance.now() - start) / 96;
+        };
+        run();
+        const samples = Array.from({ length: 7 }, run).sort((a, b) => a - b);
+        return { table: id, medianMs: samples[3] };
+      });
+      document.querySelector('#results').textContent = JSON.stringify(
+        { physics, rendering },
+        null,
+        2,
+      );
+    </script>
+  </body>
+</html>
