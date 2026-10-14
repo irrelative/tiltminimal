@@ -87,3 +87,19 @@ resolver against the former exact resolver at guide endpoints, line midpoints,
 arc samples and nearby positions with a moving/nudged table. The full suite
 passed 603 tests. These figures describe this local synthetic workload, not a
 claim of equivalent FPS improvement or mobile performance.
+
+### Slingshot bounds
+
+The next CPU sample identified full polygon/slingshot checks as a remaining hot
+path. A conservative bound now includes every rotation of the live outline and
+its rubber radius; distant balls return before angle, vertex and edge work.
+Mutable outlines are read on every call. Node medians fell another 15–20% from
+the guide-only version (0.0138–0.0181 ms final). Chrome confirmed another 14–22%
+reduction (0.0081–0.0127 ms). Both checksum totals remained unchanged. Additional
+tests cover all tables at five rotations and an edited outline extending beyond
+its original bounds.
+
+A renderer experiment cached flipper paths with Path2D. Browser draw medians
+remained within the existing noise range and several tables were slower, so the
+experiment was removed. Static playfield caching remains the measured rendering
+strategy; no animation/rendering speedup is claimed from that experiment.

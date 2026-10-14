@@ -7,6 +7,7 @@ import {
   getSlingshotAngle,
   getSlingshotCollision,
   getSlingshotRubberRadius,
+  getSlingshotVertices,
 } from '../src/game/slingshot-geometry';
 import { getArcGuidePoint } from '../src/game/guide-geometry';
 import {
@@ -200,5 +201,70 @@ describe('connected sling rubber', () => {
           w.elements?.some((e) => e.kind === 'slingshot'),
       ),
     ).toBe(true);
+  });
+});
+
+describe('slingshot broad phase', () => {
+  it.each(BUILT_IN_TABLES)(
+    '$id keeps rotated outline contacts within conservative bounds',
+    ({ board }) => {
+      for (const definition of board.slingshots) {
+        for (const rotation of [
+          0,
+          Math.PI / 4,
+          Math.PI / 2,
+          Math.PI,
+          -Math.PI / 3,
+        ]) {
+          const sling = { ...definition, angle: rotation };
+          const angle = getSlingshotAngle(board, sling);
+          const vertices = getSlingshotVertices(
+            sling.width,
+            sling.height,
+            sling.backOutline,
+          );
+          for (const vertex of vertices) {
+            const point = {
+              x:
+                sling.x +
+                Math.cos(angle) * vertex.x -
+                Math.sin(angle) * vertex.y,
+              y:
+                sling.y +
+                Math.sin(angle) * vertex.x +
+                Math.cos(angle) * vertex.y,
+            };
+            expect(
+              getSlingshotCollision(point, board.ball.radius, board, sling),
+            ).not.toBeNull();
+          }
+          expect(
+            getSlingshotCollision(
+              { x: sling.x + 10000, y: sling.y },
+              board.ball.radius,
+              board,
+              sling,
+            ),
+          ).toBeNull();
+        }
+      }
+    },
+  );
+
+  it('reads edited outlines without stale bounds', () => {
+    const board = createBlankTable();
+    const sling = {
+      ...classicTable.slingshots[0],
+      rubberEdges: [],
+      angle: 0,
+      backOutline: [
+        { x: 20, y: 20 },
+        { x: -20, y: 20 },
+      ],
+    };
+    const point = { x: sling.x, y: sling.y + 1000 };
+    expect(getSlingshotCollision(point, 1, board, sling)).toBeNull();
+    sling.backOutline[0] = { x: 0, y: 1000 };
+    expect(getSlingshotCollision(point, 1, board, sling)).not.toBeNull();
   });
 });

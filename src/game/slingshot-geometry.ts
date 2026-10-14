@@ -78,6 +78,25 @@ export const getSlingshotCollision = (
   board: BoardDefinition,
   sling: SlingshotDefinition,
 ) => {
+  // Every rotation of the outline fits within its maximum local L1 radius.
+  // Include the rounded rubber face even when the outline has solid infill.
+  let extent = Math.max(
+    Math.abs(sling.width / 2),
+    Math.abs(sling.height),
+    Math.abs(sling.width * 0.34) + Math.abs(sling.height * 0.58),
+  );
+  if (sling.backOutline) {
+    extent = Math.abs(sling.width / 2);
+    for (const vertex of sling.backOutline)
+      extent = Math.max(extent, Math.abs(vertex.x) + Math.abs(vertex.y));
+  }
+  const reach = extent + radius + getSlingshotRubberRadius(sling);
+  if (
+    Math.abs(point.x - sling.x) > reach ||
+    Math.abs(point.y - sling.y) > reach
+  )
+    return null;
+
   const angle = getSlingshotAngle(board, sling),
     cos = Math.cos(angle),
     sin = Math.sin(angle);
