@@ -147,7 +147,7 @@ describe('advanced flipper skills on complete built-in tables', () => {
             source,
             speed,
             delay: 10,
-            impactPosition: 0.2,
+            impactPosition: id === 'classic-table' ? 0.22 : 0.2,
           };
           const start = createFallingSkill(board, setup);
           expect(

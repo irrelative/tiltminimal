@@ -111,6 +111,7 @@ return {
 
 const lower = createLowerPlayfieldAssembly({
   id: 'classic-lower',
+  heelJoin: 'upper',
   center: { x: 404, y: 1220 },
   pivotSpacing: 320,
   flipperLength: 136,

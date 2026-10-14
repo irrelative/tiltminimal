@@ -108,3 +108,39 @@ Existing feeds, drains, and scoring routes remain required; see
 Flippers and return connections follow the validated
 [fuller profile specification](flipper-profiles-spec.md). Shot and pass timing
 samples were remeasured with unchanged scoring/catch requirements.
+
+## Headless heel-trap repair
+
+The first all-table headless investigation reproduced 17 Classic lip failures.
+A slow incoming ball could settle on the held face just outside either pivot;
+releasing it left it wedged against the low return rail and round heel. The
+same trace freed with a nudge. Shorter existing feed/release samples did not
+exercise this fully settled arrival.
+
+Classic now selects `heelJoin: 'upper'`. The return retains its original slope
+until 32 units outside the pivot, then a short, shallower four-unit rail joins
+12 units above the pivot. Its whole endpoint cap remains inside the flipper
+rubber through every angle. This bridges the low rail/cap pocket without changing
+shared collision response or moving a resting ball to a prescribed coordinate.
+The option is explicit: other tables keep their existing inset or pivot joins
+until their individual route contracts support a repair.
+
+Both original mirrored feeds are permanent regressions: hold six seconds,
+release without nudging, and require escape. Existing nine-speed passive and
+held feeds, outlanes, center drains, shots, and post passes remain required.
+Classic drop-catch samples now aim at 22% of bat length instead of 20%, clearing
+the revised rail; the same three incoming speeds, 10-frame release timing,
+contact-speed bounds and comparison against early release remain unchanged.
+
+The 3,328-case smoke campaign now has zero Classic failures, reducing all-table
+confirmed failures from 116 to 99 and clusters from 15 to 13. All 657 tests,
+all-table deep validation with zero warnings, build, and lint pass. Chrome
+reviewed the original feeds and release on both sides with production rendering.
+The separate 76-run Classic playtest has 21 diagnostic flags; high-speed flags
+remain diagnostics rather than suppressed results. See the
+[headless harness spec](headless-playtest-spec.md) for remaining sampled issues.
+
+A further deep campaign tested 1,600 Classic cases (64 seeded games plus four
+jittered lip bands) in 6.45 seconds, with zero confirmed failures or warnings.
+Its 767 invalid seeds and 232 time-limited episodes remain explicit in the
+report; they are not counted as successful route completions.

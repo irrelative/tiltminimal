@@ -107,12 +107,18 @@ export const isFlipperHeelGuide = (
   const outside = flipper.side === 'left' ? -1 : 1;
   const heelX = flipper.x;
   const heelY = flipper.y;
-  // This inner core remains covered through every angle of the tapered bat.
-  // The larger base envelope alone can also include its moving shoulder.
-  const atHeel = (p: Point) =>
-    Math.hypot(p.x - heelX, p.y - heelY) <=
-    Math.min(getFlipperBaseRadius(flipper), getFlipperTipRadius(flipper)) +
-      0.01;
+  // For any angle the nearest axis point is at most d from the pivot,
+  // hence its tapered radius is at least base - taper*d/length and its
+  // distance to this endpoint is at most d. Include the entire rail cap.
+  // This certifies invariant rubber coverage without exempting moving faces.
+  const base = getFlipperBaseRadius(flipper);
+  const taper = Math.max(0, base - getFlipperTipRadius(flipper));
+  const atHeel = (p: Point) => {
+    const d = Math.hypot(p.x - heelX, p.y - heelY);
+    return (
+      d + guide.thickness / 2 <= base - (taper * d) / flipper.length + 0.01
+    );
+  };
   const end = atHeel(guide.start)
     ? guide.end
     : atHeel(guide.end)

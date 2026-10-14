@@ -141,3 +141,9 @@ guide to a lower post `x` units outward and `y` units above the flipper pivot.
 The connected sling back follows that extension. Classic and foundation tables
 use `{ x: 30, y: 80 }` with 60° active faces. Validate feeds, flipper clearance,
 and passive post-pass transfers after changing either dimension.
+
+The lower assembly's `heelJoin` selects the original `inset` (default), a
+reference `pivot`, or an explicit two-segment `upper` approach. Classic uses
+`upper` to remove a long-held heel release trap. New dimensions must still pass
+passive feeds, held catches/releases, drains and skill regressions; see
+[feed geometry](flipper-feed-spec.md).

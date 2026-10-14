@@ -17,7 +17,7 @@ export interface LowerPlayfieldOptions {
   returnExitAngle?: number;
   /** Disable only when a reference layout supplies its own drain contracts. */
   centerDrainRoutes?: boolean;
-  heelJoin?: 'inset' | 'pivot';
+  heelJoin?: 'inset' | 'pivot' | 'upper';
   /** Legacy midpoint placement; omit for a connected return-mounted sling. */
   slingOffset?: Point;
   /** Mount the lower rubber post at the inner return exit (default without slingOffset). */
@@ -44,10 +44,10 @@ export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
   // Leave room above the heel for the ball to meet the held flipper's top face.
   const bendRise = o.bendRise ?? o.returnRadius + 29;
   requireClearance(o.entryRise, bendRise, 'Lane entry rise');
-  // End inside the stationary heel disc so the rail cannot shield the bat or
-  // form a valley against its enlarged round cap. Reference returns can keep
-  // their existing pivot join.
-  const heelRadius = ((o.flipperThickness ?? 32) / 2) * 0.375;
+  // Keep the original feed slope until the final heel approach; then bridge
+  // the rail/cap pocket with a shallower, rubber-covered upper join.
+  const baseRadius = (o.flipperThickness ?? 32) / 2;
+  const heelRadius = baseRadius * 0.375;
   const outerExitAngle = o.returnExitAngle ?? 0.3;
   const flippers = createFlipperPair({
     leftX: o.center.x - o.pivotSpacing / 2,
@@ -94,21 +94,28 @@ export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
       if (radius === radii[0]) {
         // Continue the return into the fixed heel. An exposed arc endpoint
         // leaves a ball-sized valley against the heel that traps slow feeds.
-        part.guides!.push(
-          rail(
-            {
-              x: center.x + sign * radius * Math.sin(outerExitAngle),
-              y: center.y + radius * Math.cos(outerExitAngle),
-            },
-            o.heelJoin === 'pivot'
-              ? pivot
-              : {
-                  x: pivot.x - sign * Math.sin(outerExitAngle) * heelRadius,
-                  y: pivot.y - Math.cos(outerExitAngle) * heelRadius,
-                },
-            4,
-          ),
-        );
+        const start = {
+          x: center.x + sign * radius * Math.sin(outerExitAngle),
+          y: center.y + radius * Math.cos(outerExitAngle),
+        };
+        const originalEnd =
+          o.heelJoin === 'pivot'
+            ? pivot
+            : {
+                x: pivot.x - sign * Math.sin(outerExitAngle) * heelRadius,
+                y: pivot.y - Math.cos(outerExitAngle) * heelRadius,
+              };
+        if (o.heelJoin !== 'upper') {
+          part.guides!.push(rail(start, originalEnd, 4));
+        } else {
+          const x = pivot.x + sign * baseRadius * 2;
+          const t = (x - start.x) / (originalEnd.x - start.x);
+          const join = { x, y: start.y + t * (originalEnd.y - start.y) };
+          part.guides!.push(
+            rail(start, join, 4),
+            rail(join, { x: pivot.x, y: pivot.y - baseRadius * 0.75 }, 4),
+          );
+        }
       }
       if (radius === radii[1] && o.lowerPostOffset) {
         part.guides!.push(

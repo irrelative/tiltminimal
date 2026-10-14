@@ -104,3 +104,8 @@ seconds in 15.54 seconds (609× real time). Five warmed paired all-table game
 batches measured 0.01400 ms/frame without recording and 0.01523 ms/frame with
 recording, a 0.00123 ms/frame overhead. The largest recent-window JSON export
 was 74,250 bytes. These are local timings, not performance guarantees.
+
+The first repair is scoped to Classic's explicit upper heel approach. The smoke
+campaign drops from 116 failures/15 clusters to 99/13, with no Classic failures.
+Remaining table-specific heel traps and Alien Star field stalls remain in the
+report; passing the older route validator does not override these findings.

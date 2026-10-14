@@ -115,3 +115,19 @@ with zero errors or warnings. Starlight browser checks cover slow drops at both
 heels, held inlane catches/releases, and the center drain. Classic's 76-run
 playtest recorded a longest unexplained near-rest of 0.02 seconds; its 15
 remaining diagnostic flags concern speeds above 4,000 units/second, not stalls.
+
+## Explicit upper heel approach
+
+Classic uses `heelJoin: 'upper'` after headless long-hold testing exposed a
+release trap in its previous inset join. Keep the original feed slope to two
+base radii outside the pivot, then connect a short rail to 75% of a base radius
+above the pivot. This is a tested Classic configuration, not a universal feed
+recipe. Other tables retain their existing joins and require their own route
+checks before adopting it. See [Classic's repair](classic-table-spec.md).
+
+Heel-guide recognition includes the rail cap and certifies rubber coverage at
+all angles: for endpoint distance `d`, axis projection cannot exceed `d`, so the
+sampled rubber radius is at least `base - taper * d / length`, while distance to
+the axis cannot exceed `d`. Require `d + railRadius` within that lower bound.
+The thin descending/outward approach requirement remains. This permits an
+upper fixed join while continuing to reject rails on the moving face.
