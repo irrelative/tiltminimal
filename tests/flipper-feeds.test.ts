@@ -10,7 +10,10 @@ import {
   sampleFlipperProfile,
 } from '../src/game/flipper-geometry';
 import { idle } from '../src/playtest/simulation';
-import { resolveFlipperCollisions } from '../src/game/physics-engine-flippers';
+import {
+  resolveFlipperCollisions,
+  resolveRestingFlipperSupport,
+} from '../src/game/physics-engine-flippers';
 
 it.each(BUILT_IN_TABLES)(
   '$id resolves heel support without snapping separate balls to one pose',
@@ -55,6 +58,38 @@ it.each(BUILT_IN_TABLES)(
             state.ball.position.y - before.y,
           ),
         ).toBeLessThan(0.6);
+        expect(
+          sampleFlipperProfile(
+            state.ball.position,
+            flipper,
+            flipper.activeAngle,
+          ).t,
+        ).toBeCloseTo(t, 8);
+        for (let frame = 0; frame < 120; frame++) {
+          state.ball.linearVelocity.y += board.gravity / 120;
+          resolveRestingFlipperSupport(
+            state,
+            board,
+            frames,
+            board.physics.solver,
+          );
+          state.ball.position.x += state.ball.linearVelocity.x / 120;
+          state.ball.position.y += state.ball.linearVelocity.y / 120;
+          resolveFlipperCollisions(
+            state,
+            board,
+            frames,
+            1 / 120,
+            board.physics.solver,
+          );
+          expect(
+            sampleFlipperProfile(
+              state.ball.position,
+              flipper,
+              flipper.activeAngle,
+            ).t,
+          ).toBeLessThanOrEqual(t + 1e-6);
+        }
         positions.push(state.ball.position);
       }
       expect(
@@ -188,7 +223,7 @@ describe('held-flipper capture limits', () => {
         ).toBeGreaterThan(5);
         expect(
           sampleFlipperProfile(state.ball.position, f, angle).t,
-        ).toBeCloseTo((state.ball.radius + f.thickness / 2) / f.length, 2);
+        ).toBeLessThan(0.2);
         expect(
           Math.hypot(state.ball.linearVelocity.x, state.ball.linearVelocity.y),
         ).toBeLessThan(1);
@@ -232,13 +267,21 @@ it.each(BUILT_IN_TABLES)(
       for (let frame = 0; frame < 600; frame++)
         state = stepGameFrame(state, board, held, 1 / 120).state;
       expect(state.status).toBe('playing');
-      expect(sampleFlipperProfile(state.ball.position, f, angle).t).toBeCloseTo(
-        (state.ball.radius + f.thickness / 2) / f.length,
-        2,
-      );
+      const settledT = sampleFlipperProfile(state.ball.position, f, angle).t;
+      expect(settledT).toBeGreaterThanOrEqual(0.08);
+      expect(settledT).toBeLessThan(0.21);
       expect(
         Math.hypot(state.ball.linearVelocity.x, state.ball.linearVelocity.y),
       ).toBeLessThan(1);
+      const settledPosition = { ...state.ball.position };
+      for (let frame = 0; frame < 120; frame++)
+        state = stepGameFrame(state, board, idle, 1 / 120).state;
+      expect(
+        Math.hypot(
+          state.ball.position.x - settledPosition.x,
+          state.ball.position.y - settledPosition.y,
+        ),
+      ).toBeGreaterThan(state.ball.radius);
     }
   },
 );

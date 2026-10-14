@@ -25,7 +25,10 @@ import {
   resolveSlingshotCollisions,
   resolveStandupTargetCollisions,
 } from './physics-engine-devices';
-import { resolveFlipperCollisions } from './physics-engine-flippers';
+import {
+  resolveFlipperCollisions,
+  resolveRestingFlipperSupport,
+} from './physics-engine-flippers';
 import {
   getBallStepSeconds,
   type PhysicsStepResult,
@@ -186,6 +189,14 @@ export const stepPlayingState = (
 
       next.ball.linearVelocity.y += board.gravity * stepSeconds;
       applyPlayfieldRollingResistance(next, board, stepSeconds);
+      if (next.ball.restingFlipper !== undefined) {
+        resolveRestingFlipperSupport(
+          next,
+          board,
+          flipperFrame,
+          board.physics.solver,
+        );
+      }
       next.ball.position.x += next.ball.linearVelocity.x * stepSeconds;
       next.ball.position.y += next.ball.linearVelocity.y * stepSeconds;
 

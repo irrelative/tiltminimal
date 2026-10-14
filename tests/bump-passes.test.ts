@@ -64,14 +64,18 @@ describe('bump passes using a single forward nudge', () => {
         };
         const timings =
           id === 'harlem-globetrotters'
-            ? [4, 6]
+            ? source === 0
+              ? [5, 7]
+              : source === 1
+                ? [22, 24]
+                : [6, 9]
             : id === 'andromeda'
-              ? [13, 14]
+              ? [28, 30]
               : id === 'alien-star'
-                ? [14]
+                ? [28, 30]
                 : id === 'double-crossed'
-                  ? [12, 14]
-                  : [12, 13];
+                  ? [27, 29]
+                  : [27, 29];
         for (const delay of timings) {
           expect(run(delay), `nudge at frame ${delay}`).toEqual({
             caught: true,

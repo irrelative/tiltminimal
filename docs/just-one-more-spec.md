@@ -127,6 +127,7 @@ physics/rules test, not a guaranteed award for every player shot.
 
 The [resting-contact revision](flipper-resting-contact-spec.md) remeasured the
 240 Hz cradle-shot map without changing scoring geometry or first-objective
-requirements. Left samples: center standup 130/131, upper standup 163/164,
-saucer 146/147, left orbit 175/176. Right samples: upper standup 167/168,
-center standup 119/120, saucer 144/145, right orbit 175/176.
+requirements. After lowering the support and removing uphill correction, left
+samples are center standup 130/131, upper standup 191/192, saucer 168/169 and
+left orbit 203/204. Right samples are upper standup 195/196, center standup
+147/148, saucer 168/169 and right orbit 203/204.

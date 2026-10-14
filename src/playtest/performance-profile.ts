@@ -36,8 +36,8 @@ export const heldFlipperPerformanceWorkloads = BUILT_IN_TABLES.map(
     id,
     board,
     input: { ...idle, leftPressed: true, rightPressed: true },
-    states: board.flippers.flatMap((flipper) =>
-      [0.12, 0.25, 0.5].map((t) => {
+    states: board.flippers.flatMap((flipper) => {
+      const states = [0.12, 0.25, 0.5].map((t) => {
         const state = createInitialGameState(board);
         state.status = 'playing';
         state.launcherExited = true;
@@ -59,8 +59,18 @@ export const heldFlipperPerformanceWorkloads = BUILT_IN_TABLES.map(
             normal.y * radius,
         };
         return state;
-      }),
-    ),
+      });
+      let settled = states[2];
+      for (let frame = 0; frame < 240; frame++) {
+        settled = stepGameFrame(
+          settled,
+          board,
+          { ...idle, leftPressed: true, rightPressed: true },
+          1 / 120,
+        ).state;
+      }
+      return [...states, settled];
+    }),
   }),
 );
 

@@ -10,8 +10,9 @@ Balls approaching from below bounce below the flipper. Held-flipper cradling
 and passive top-surface carry apply only to the upper face. A caught ball rolls
 along a held bat toward a heel pocket instead of freezing at its impact point;
 see [held contact behavior](flipper-feed-spec.md#held-contact-behavior).
-The face and heel support use ordinary contact impulses, with bounded heel
-penetration correction rather than reconstructing a fixed ball pose; see
+The face and heel support use ordinary contact impulses. Resting support is
+solved before position integration; the heel never corrects position uphill.
+The face still resolves actual rubber overlap. See
 [resting contacts](flipper-resting-contact-spec.md).
 
 Timed end-of-upstroke live catches absorb a suitable descending impact and

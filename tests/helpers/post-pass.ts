@@ -42,6 +42,7 @@ export const isSettledOn = (
 export const createPostPassCradle = (
   board: BoardDefinition,
   source: number,
+  initialPosition = 0.3,
 ): GameState => {
   let state = createInitialGameState(board);
   state.status = 'playing';
@@ -54,8 +55,8 @@ export const createPostPassCradle = (
     angle = flipper.activeAngle;
   const normal = getFlipperFaceNormal(flipper, angle);
   const center = {
-    x: flipper.x + Math.cos(angle) * flipper.length * 0.3,
-    y: flipper.y + Math.sin(angle) * flipper.length * 0.3,
+    x: flipper.x + Math.cos(angle) * flipper.length * initialPosition,
+    y: flipper.y + Math.sin(angle) * flipper.length * initialPosition,
   };
   const radius =
     sampleFlipperProfile(center, flipper, angle).radius +

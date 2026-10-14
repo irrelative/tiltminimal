@@ -64,9 +64,16 @@ The marker does not steer a free ball: release, separation by more than four
 units beyond contact, leaving the supported face, an underside contact, or
 excessive speed clears it. It is independent for each multiball ball and is
 preserved by normal state cloning. It does not lock the flipper or the ball.
-Resting face/heel support now uses the shared impulse/friction solver and bounded
-penetration correction; it does not assign a resting position or rolling spin.
+Resting face/heel support uses the shared impulse/friction solver before
+position integration. Only actual rubber overlap receives position correction;
+the heel never pushes a ball uphill or assigns resting position/rolling spin.
 See [flipper resting contacts](flipper-resting-contact-spec.md).
+
+After lowering the support pocket, the 120 Hz cradle-release shot samples use
+frames 33/35, except Andromeda's left bat (35/36) and Harlem's lower-left bat
+(43/45). Bump passes use 27/29 on conventional tables, 28/30 on Alien Star and
+Andromeda; Harlem uses 5/7, 22/24 and 6/9 for its three bats respectively. Each
+retains the existing clean-transfer and unnudged-control requirements.
 
 This is a bounded 2D approximation of rubber/end-stop absorption. Ordinary
 shots, passive restitution, nudge strength, and table geometry are unchanged.

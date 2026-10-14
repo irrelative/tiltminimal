@@ -67,11 +67,14 @@ units/second into the face retain 10% of their post-contact tangential speed.
 Spin follows contact torque rather than a prescribed rolling velocity.
 It must not freeze at the initial catch position or snap to a resting pose.
 
-The heel pocket uses a unilateral support contact one base radius along the bat
-from its pivot (with a ball-sized clearance and at least 8% of length). This
-bounded 2D approximation keeps it clear of the stationary cap so lowering the
-flipper releases it. Support impulses and small penetration corrections settle
-the ball; see [resting contact behavior](flipper-resting-contact-spec.md).
+The heel pocket supports centers within a base radius plus half a ball radius
+of the pivot (at least 8% of length). This smaller clearance lets the ball sit
+at the feed/heel rather than climbing farther along the bat. The 2D support
+only cancels inward velocity; it never corrects position uphill. Previous held
+contacts are solved after gravity changes velocity but before position is
+integrated, preventing sink-through without pushing the ball up the slope.
+Lowering the flipper removes support; see
+[resting contact behavior](flipper-resting-contact-spec.md).
 Regression tests cover gradual rolling and settling on every built-in flipper,
 long holds, all declared catch/release feeds, and rejection of fast impacts.
 

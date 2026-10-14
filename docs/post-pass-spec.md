@@ -67,10 +67,10 @@ centered between the new return walls.
 The post-passes tests settle a ball with the shared held-flipper solver, then
 release/re-flip using ordinary inputs at 120 Hz. Every listed transfer must
 touch its source's lower post, fire no sling, and remain caught on the receiver
-for 0.5 seconds. Classic and foundation releases of 7 and 9 frames must succeed in both
-directions. Alien Star checks 7/8/9; Andromeda checks 1/2/3; Harlem's
-upper-left→right checks 2/5/7 and right→lower-left checks 8/9. These timings were
-remeasured after the [fuller profiles](flipper-profiles-spec.md); unchanged
+for 0.5 seconds. Classic and foundation releases of 20 and 22 frames must succeed in both
+directions. Alien Star checks 20/22/24; Andromeda checks 20/21/22; Harlem's
+upper-left→right checks 15/18/20 and right→lower-left checks 13/14. These timings were
+remeasured after the [lower resting-contact revision](flipper-resting-contact-spec.md); unchanged
 assertions require post contact, no active sling and a stable receiver catch.
 These samples establish available transfers, not a continuous timing window.
 Classic also rejects zero-release and late-release controls. These are

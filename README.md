@@ -62,8 +62,8 @@ See [first-game experience](docs/first-game-experience-spec.md).
 Touch supports simultaneous flipper holds. Long presses on the playfield suppress
 browser text selection and touch callouts. See [mobile controls](docs/mobile-controls-spec.md).
 
-Held balls settle through friction and support impulses, with bounded overlap
-correction instead of snapping to a prescribed pose; see
+Held balls settle through friction and support impulses without snapping to a
+prescribed pose or being pushed uphill by the heel support; see
 [flipper resting contacts](docs/flipper-resting-contact-spec.md).
 
 All tables have regression coverage for cradles, controlled release shots, dead

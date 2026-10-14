@@ -46,8 +46,10 @@ batches follow a warmup. Results give median and minimum milliseconds per call,
 plus an aggregate position/event checksum. This isolates engine costs; it does
 not represent a full game, rules, audio, or browser presentation.
 
-The `heldFlippers` result adds three touching-ball positions on each of the 17
-raised flippers (51 states total), including overlapping heel supports. Both
+The `heldFlippers` result adds three touching-ball positions and one physically
+settled state on each of the 17 raised flippers (68 states total), including
+overlapping heel supports and persistent resting contacts. Settled states are
+prepared with 240 held frames outside the timed batches. Both
 inputs stay held. This exercises cradle contacts that the fast-ball workload
 usually misses; the browser benchmark reports it too. It uses 200 rounds per
 batch and the same warmup/seven-batch procedure.

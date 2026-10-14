@@ -193,4 +193,5 @@ record the preceding narrow-profile revision.
 
 After the [resting-contact revision](flipper-resting-contact-spec.md), both post
 passes retain post contact, no sling kick and a stable receiver cradle at release
-frames 6, 7 and 9 (120 Hz). The former frame-8 sample no longer settles reliably.
+frames 20, 22 and 24 (120 Hz), following the lower support/no-uphill correction.
+Earlier timing samples above describe the preceding support position.

@@ -57,7 +57,8 @@ capture/return contract checks three approach velocities and exit through the
 region x=410–520, y=700–840. The first proposed lower/larger pocket trapped drops
 beside the bank; the compact upper placement clears the deep sweep. The central
 rebound post stays in place. Normal cradle release/flip sequences on both sides
-reach the cup at neighboring timings (71/72 frames at 120 Hz); these are sampled
+reach the cup at neighboring timings (84/85 frames at 120 Hz after the lower
+resting-contact revision); these are sampled
 opportunities, not guaranteed shots from arbitrary feeds.
 
 Playfield inserts show bank completion, spinner qualification, current saucer

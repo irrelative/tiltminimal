@@ -28,13 +28,13 @@ describe('post passes using ordinary flipper inputs', () => {
         const releases =
           id === 'harlem-globetrotters'
             ? transfer.source === 0
-              ? [2, 5, 7]
-              : [8, 9]
+              ? [15, 18, 20]
+              : [13, 14]
             : id === 'alien-star'
-              ? [6, 7, 9]
+              ? [20, 22, 24]
               : id === 'andromeda'
-                ? [1, 2, 3]
-                : [7, 9];
+                ? [20, 21, 22]
+                : [20, 22];
         for (const release of releases) {
           expect(
             simulatePostPass(

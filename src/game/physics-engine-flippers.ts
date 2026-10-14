@@ -16,6 +16,34 @@ import { interpolate, offsetFlipper } from './physics-helpers';
 import type { FlipperMotionFrame } from './physics-motion';
 import { getContactTangent, resolveBallContact } from './spin-solver';
 
+export const resolveRestingFlipperSupport = (
+  state: GameState,
+  board: BoardDefinition,
+  flipperFrame: FlipperMotionFrame[],
+  solver: SolverPhysicsDefinition,
+): void => {
+  const index = state.ball.restingFlipper;
+  if (index === undefined) return;
+  const motion = flipperFrame[index];
+  const flipper = board.flippers[index];
+  if (
+    !flipper ||
+    !motion?.next.engaged ||
+    motion.next.angle !== motion.previousAngle
+  )
+    return;
+  resolveFlipperCollision(
+    state,
+    board,
+    flipper,
+    motion,
+    0,
+    solver,
+    index,
+    true,
+  );
+};
+
 export const resolveFlipperCollisions = (
   state: GameState,
   board: BoardDefinition,
@@ -23,6 +51,8 @@ export const resolveFlipperCollisions = (
   deltaSeconds: number,
   solver: SolverPhysicsDefinition,
 ): void => {
+  if (state.ball.restingFlipper !== undefined)
+    state.ball.restingFlipper = undefined;
   const caughtIndex = state.ball.liveCatchFlipper;
   if (caughtIndex !== undefined) {
     const flipper = board.flippers[caughtIndex];
@@ -76,6 +106,7 @@ const resolveFlipperCollision = (
   deltaSeconds: number,
   solver: SolverPhysicsDefinition,
   index: number,
+  supportOnly = false,
 ): void => {
   const shiftedFlipper = offsetFlipper(flipper, state.tableNudge.offset);
   const carryingLiveCatch = state.ball.liveCatchFlipper === index;
@@ -99,6 +130,7 @@ const resolveFlipperCollision = (
           engaged: motion.next.engaged,
           index,
           carryingLiveCatch,
+          supportOnly,
           endingStroke:
             motion.next.engaged &&
             motion.previousAngle !== shiftedFlipper.activeAngle &&
@@ -135,6 +167,7 @@ const applyFlipperCollisionAtAngle = (
     engaged: boolean;
     index: number;
     carryingLiveCatch: boolean;
+    supportOnly: boolean;
     endingStroke: boolean;
     bodyMass: number;
     restitutionScale: number;
@@ -218,10 +251,11 @@ const applyFlipperCollisionAtAngle = (
       MAX_CRADLE_CAPTURE_SPEED
   ) {
     if (liveCatch) state.ball.liveCatchFlipper = motion.index;
+    state.ball.restingFlipper = motion.index;
     const axis = { x: Math.cos(collisionAngle), y: Math.sin(collisionAngle) };
     const heelDistance = Math.max(
       MIN_CRADLE_POSITION * flipper.length,
-      state.ball.radius + flipper.thickness / 2,
+      flipper.thickness / 2 + state.ball.radius * 0.5,
     );
     const surfaceVelocity = {
       x:
@@ -237,7 +271,7 @@ const applyFlipperCollisionAtAngle = (
       point: contactPoint,
       normal,
       tangent: getContactTangent(normal),
-      overlap,
+      overlap: motion.supportOnly ? 0 : overlap,
       surfaceVelocity,
       material: flipperMaterial,
       restitutionScale: 0,
@@ -269,8 +303,9 @@ const applyFlipperCollisionAtAngle = (
           point: heelPoint,
           normal: axis,
           tangent: getContactTangent(axis),
-          // Deep initial overlap must not teleport a ball to the pocket edge.
-          overlap: Math.min(heelOverlap, 0.5),
+          // Support cancels inward velocity; it must never lift an arriving
+          // ball uphill to a prescribed support boundary.
+          overlap: 0,
           surfaceVelocity: {
             x:
               motion.tableVelocity.x -
@@ -287,6 +322,8 @@ const applyFlipperCollisionAtAngle = (
     }
     return true;
   }
+
+  if (motion.supportOnly) return false;
 
   const contact: ContactData = {
     point: contactPoint,

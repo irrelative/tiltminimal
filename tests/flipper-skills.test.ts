@@ -17,10 +17,10 @@ describe('advanced flipper skills on complete built-in tables', () => {
       it(`${id} flipper ${source + 1} shoots from a cradle with timing-dependent aim`, () => {
         const timings =
           id === 'andromeda' && source === 0
-            ? [33, 34]
+            ? [35, 36]
             : id === 'harlem-globetrotters' && source === 2
-              ? [26, 27]
-              : [18, 21];
+              ? [43, 45]
+              : [33, 35];
         const crossings: number[] = [];
         for (const delay of timings) {
           let state = createPostPassCradle(board, source);

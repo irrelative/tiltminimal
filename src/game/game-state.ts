@@ -15,6 +15,8 @@ export interface BallState {
   id?: number;
   /** Continuous top-face contact following a timed end-of-stroke catch. */
   liveCatchFlipper?: number;
+  /** Previous held-face contact, used to solve support before integrating position. */
+  restingFlipper?: number;
   capturedSaucer?: number;
   launcherExited?: boolean;
   bumperContacts?: boolean[];

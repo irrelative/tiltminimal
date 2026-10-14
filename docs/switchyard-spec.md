@@ -108,16 +108,16 @@ collision or scoring, and a blocking guide across the sample still fails validat
 `tests/switchyard-layout.test.ts` uses actual held cradles and release/re-flip
 inputs. At a fixed 240 Hz step, release/re-flip samples demonstrate:
 
-| Objective            | Source flipper | Release frames    |
-| -------------------- | -------------- | ----------------- |
-| Cargo lower drop     | Left           | 128, 129          |
-| Cargo middle drop    | Right          | 167, 168          |
-| Cargo upper drop     | Right / left   | 170 / 145         |
-| Signal upper standup | Left           | 157, 179          |
-| Signal lower standup | Left           | 150, 151          |
-| Dispatch             | Left / right   | 154, 175 / 83, 84 |
-| West Express         | Right          | 175, 176          |
-| East Express         | Left           | 162, 163          |
+| Objective            | Source flipper | Release frames      |
+| -------------------- | -------------- | ------------------- |
+| Cargo lower drop     | Left           | 128, 129            |
+| Cargo middle drop    | Right          | 195, 196            |
+| Cargo upper drop     | Right / left   | 177 / 171           |
+| Signal upper standup | Left           | 171, 172            |
+| Signal lower standup | Left           | 178, 179            |
+| Dispatch             | Left / right   | 202, 203 / 178, 179 |
+| West Express         | Right          | 203, 204            |
+| East Express         | Left           | 188, 189            |
 
 The expected shot must be the first major scoring objective reached. These are
 reproducible opportunities, not auto-aim or promises for every frame rate/feed.
@@ -195,3 +195,9 @@ sides. The shared lower assembly supplies the three center-drain contracts.
 The [resting-contact revision](flipper-resting-contact-spec.md) remeasured these
 240 Hz samples. The same first-objective checks, catch/release contracts and
 center-drain routes remain required.
+
+After lowering the heel support and removing its uphill correction, the upper
+Cargo left-flipper sample starts its physically settled cradle from an initial
+contact at 40% along the bat; other samples use 30%. Arrival-dependent settling
+changes the precise shot timing. The objective must still be the first major
+scoring contact, and the right-flipper upper-Cargo sample remains required.

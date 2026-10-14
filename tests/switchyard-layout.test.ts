@@ -49,34 +49,44 @@ describe.each([switchyardTable, justOneMoreTable])(
       expect(clearance).toBeGreaterThan(board.ball.radius * 2 + 10);
     });
 
-    const shotCases: readonly (readonly [number, string, readonly number[]])[] =
+    const shotCases: readonly (readonly [
+      number,
+      string,
+      readonly number[],
+      number?,
+    ])[] =
       board === switchyardTable
         ? ([
             [0, 'drop-target-hit:2', [128, 129]],
-            [1, 'drop-target-hit:1', [167, 168]],
-            [1, 'drop-target-hit:0', [170]],
-            [0, 'drop-target-hit:0', [145]],
-            [0, 'standup-target-hit:0', [157, 179]],
-            [0, 'standup-target-hit:1', [150, 151]],
-            [0, 'saucer-captured:0', [154, 175]],
-            [1, 'saucer-captured:0', [83, 84]],
-            [1, 'orbit:0', [175, 176]],
-            [0, 'orbit:5', [162, 163]],
+            [1, 'drop-target-hit:1', [195, 196]],
+            [1, 'drop-target-hit:0', [177]],
+            [0, 'drop-target-hit:0', [171], 0.4],
+            [0, 'standup-target-hit:0', [171, 172]],
+            [0, 'standup-target-hit:1', [178, 179]],
+            [0, 'saucer-captured:0', [202, 203]],
+            [1, 'saucer-captured:0', [178, 179]],
+            [1, 'orbit:0', [203, 204]],
+            [0, 'orbit:5', [188, 189]],
           ] as const)
         : ([
             [0, 'standup-target-hit:1', [130, 131]],
-            [1, 'standup-target-hit:0', [167, 168]],
-            [0, 'standup-target-hit:3', [163, 164]],
-            [1, 'standup-target-hit:2', [119, 120]],
-            [0, 'saucer-captured:0', [146, 147]],
-            [1, 'saucer-captured:0', [144, 145]],
-            [0, 'orbit:2', [175, 176]],
-            [1, 'orbit:0', [175, 176]],
+            [1, 'standup-target-hit:0', [195, 196]],
+            [0, 'standup-target-hit:3', [191, 192]],
+            [1, 'standup-target-hit:2', [147, 148]],
+            [0, 'saucer-captured:0', [168, 169]],
+            [1, 'saucer-captured:0', [168, 169]],
+            [0, 'orbit:2', [203, 204]],
+            [1, 'orbit:0', [203, 204]],
           ] as const);
-    it.each(shotCases)(
+    it.each(
+      shotCases.map(
+        ([source, expected, delays, initialPosition = 0.3]) =>
+          [source, expected, delays, initialPosition] as const,
+      ),
+    )(
       'flipper %s reaches %s from the tested release timings',
-      (source, expected, delays) => {
-        const cradle = createPostPassCradle(board, source);
+      (source, expected, delays, initialPosition) => {
+        const cradle = createPostPassCradle(board, source, initialPosition);
         for (const delay of delays) {
           let s = structuredClone(cradle),
             outcome = '',

@@ -26,8 +26,10 @@ describe('live-catch contact continuity', () => {
     state.additionalBalls = [other];
     const next = stepGameFrame(state, board, held, skillStep).state;
     expect(next.ball.liveCatchFlipper).toBe(0);
+    expect(next.ball.restingFlipper).toBe(0);
     expect(next.additionalBalls).toHaveLength(1);
     expect(next.additionalBalls[0].liveCatchFlipper).toBeUndefined();
+    expect(next.additionalBalls[0].restingFlipper).toBeUndefined();
     expect(state.additionalBalls[0].position).toEqual({ x: 450, y: 700 });
   });
 
@@ -45,6 +47,7 @@ describe('live-catch contact continuity', () => {
         skillStep,
       ).state;
       expect(next.ball.liveCatchFlipper).toBeUndefined();
+      expect(next.ball.restingFlipper).toBeUndefined();
     },
   );
 
