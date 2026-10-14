@@ -14,6 +14,8 @@ export class PlayControls {
   private state?: GameState;
   private userPaused = false;
   private ruleCardOpen = false;
+  private launchDismissed = false;
+  private launchBall?: GameState['ball'];
 
   constructor(
     host: HTMLElement,
@@ -49,6 +51,21 @@ export class PlayControls {
       this.replay,
     );
     host.replaceChildren(this.pause, this.panel);
+    const dismissLaunch = () => {
+      if (this.panel.getAttribute('role') !== 'button') return;
+      this.launchDismissed = true;
+      this.render();
+    };
+    this.panel.addEventListener('click', dismissLaunch);
+    this.panel.addEventListener('keydown', (event) => {
+      if (
+        this.panel.getAttribute('role') === 'button' &&
+        (event.key === 'Enter' || event.key === ' ')
+      ) {
+        event.preventDefault();
+        dismissLaunch();
+      }
+    });
     this.pause.addEventListener('click', () => {
       if (!this.loop) return;
       if (this.loop.suspended || this.loop.debug.paused) {
@@ -77,6 +94,10 @@ export class PlayControls {
   }
 
   observe(state: GameState, loop: GameLoop): void {
+    if (state.status !== 'waiting-launch' || state.ball !== this.launchBall) {
+      this.launchDismissed = false;
+    }
+    this.launchBall = state.ball;
     this.state = state;
     this.loop = loop;
     this.syncSuspension();
@@ -93,14 +114,33 @@ export class PlayControls {
     const over = this.state.status === 'game-over';
     const waiting = this.state.status === 'waiting-launch';
     const showGuidance =
-      waiting && this.state.plunger.pullback === 0 && !paused;
+      waiting &&
+      this.state.plunger.pullback === 0 &&
+      !paused &&
+      !this.launchDismissed;
     const pauseLabel = paused ? 'Resume' : 'Pause';
     if (this.pause.textContent !== pauseLabel) {
       this.pause.textContent = pauseLabel;
       this.pause.setAttribute('aria-pressed', String(paused));
     }
     this.panel.hidden = !paused && !over && !showGuidance;
-    this.panel.classList.toggle('interactive', over && !paused);
+    this.panel.classList.toggle(
+      'interactive',
+      (over && !paused) || showGuidance,
+    );
+    this.panel.classList.toggle('dismissable', showGuidance);
+    if (showGuidance) {
+      this.panel.setAttribute('role', 'button');
+      this.panel.setAttribute(
+        'aria-label',
+        'Ready to launch. Dismiss launch guidance',
+      );
+      this.panel.tabIndex = 0;
+    } else {
+      this.panel.removeAttribute('role');
+      this.panel.removeAttribute('aria-label');
+      this.panel.removeAttribute('tabindex');
+    }
     this.guidance.hidden = !showGuidance;
     this.replay.hidden = !over || paused;
     this.replayHint.hidden = !over || paused;

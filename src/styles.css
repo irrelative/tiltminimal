@@ -1013,6 +1013,13 @@ body[data-session-route='physics'] .reset-ball-action {
 .play-status.interactive {
   pointer-events: auto;
 }
+.play-status.dismissable {
+  cursor: pointer;
+}
+.play-status.dismissable:focus-visible {
+  outline: 2px solid #eef5fb;
+  outline-offset: 3px;
+}
 .play-status button {
   margin-top: 16px;
   min-height: 44px;

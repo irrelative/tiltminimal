@@ -39,7 +39,8 @@ game.
 The canvas shows score and current ball number. The sidebar contains the table
 name, its top-five high scores, a compact **Reset ball** action, **Rule card**,
 and **Settings**. Brief keyboard and touch guidance appears over the playfield
-when a ball is ready to launch, then disappears as you pull the plunger.
+when a ball is ready to launch. Click the card to dismiss it for that ball,
+or pull the plunger to hide it. Guidance returns for the next ball.
 **Pause / Resume** stays visible on the playfield. Opening the rule card also
 pauses play; closing it preserves an explicit pause. Resume closes an open card.
 Every rule card includes full keyboard and touch instructions.

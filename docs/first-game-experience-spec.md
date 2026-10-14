@@ -11,8 +11,10 @@ hold/release Up Arrow with left/right flipper keys; swipe down on the right,
 hold/lift with lower-corner flipper holds. A locked ball gets a replacement-ball
 message. Full controls, including nudges, remain in the rule card.
 
-The panel passes pointer events through to the canvas. Hide it during a plunger
-pull and live play. Show it again when the next ball needs launching. It is
+Clicking the launch panel dismisses it for the current ball; it also supports
+Enter or Space when focused. Dismissal persists through pause/resume and plunger
+charging. Hide it during a plunger pull and live play. Show it again when the
+next ball needs launching, including a locked-ball replacement or reset. It is
 positioned over the fitted table frame without changing canvas measurements,
 aspect ratio, or the existing desktop/phone shell layout.
 

@@ -73,6 +73,33 @@ it('preserves an explicit pause when the rule card closes and resumes from eithe
   expect(f.loop.debug.paused).toBe(false);
 });
 
+it('dismisses launch guidance until another ball needs launching', () => {
+  const f = fixture();
+  const panel = f.host.querySelector<HTMLElement>('.play-status')!;
+  panel.querySelector('h2')!.click();
+  f.controls.observe(f.state, f.loop as unknown as GameLoop);
+  expect(panel.hidden).toBe(true);
+  f.pause.click();
+  expect(panel.hidden).toBe(false);
+  panel.click();
+  expect(panel.hidden).toBe(false);
+  f.pause.click();
+  expect(panel.hidden).toBe(true);
+  f.state.ball = { ...f.state.ball };
+  f.controls.observe(f.state, f.loop as unknown as GameLoop);
+  expect(panel.hidden).toBe(false);
+  expect(panel.getAttribute('role')).toBe('button');
+  panel.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+  expect(panel.hidden).toBe(true);
+  f.state.status = 'playing';
+  f.controls.observe(f.state, f.loop as unknown as GameLoop);
+  f.state.status = 'waiting-launch';
+  f.controls.observe(f.state, f.loop as unknown as GameLoop);
+  expect(panel.hidden).toBe(false);
+  panel.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+  expect(panel.hidden).toBe(true);
+});
+
 it('offers final score and replay only after game over, with usable focus after replay', () => {
   const f = fixture();
   const replay = f.host.querySelector<HTMLButtonElement>(
