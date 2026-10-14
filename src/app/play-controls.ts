@@ -15,7 +15,8 @@ export class PlayControls {
   private userPaused = false;
   private ruleCardOpen = false;
   private launchDismissed = false;
-  private launchBall?: GameState['ball'];
+  private launchKey?: string;
+  private observedTick = -1;
 
   constructor(
     host: HTMLElement,
@@ -94,10 +95,17 @@ export class PlayControls {
   }
 
   observe(state: GameState, loop: GameLoop): void {
-    if (state.status !== 'waiting-launch' || state.ball !== this.launchBall) {
+    const launchKey = `${state.rules.currentBall}:${state.ball.id}:${state.lockedBalls.length}`;
+    const reset = state !== this.state && state.tick <= this.observedTick;
+    if (
+      state.status !== 'waiting-launch' ||
+      launchKey !== this.launchKey ||
+      reset
+    ) {
       this.launchDismissed = false;
     }
-    this.launchBall = state.ball;
+    this.launchKey = launchKey;
+    this.observedTick = state.tick;
     this.state = state;
     this.loop = loop;
     this.syncSuspension();

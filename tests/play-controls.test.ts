@@ -85,7 +85,7 @@ it('dismisses launch guidance until another ball needs launching', () => {
   expect(panel.hidden).toBe(false);
   f.pause.click();
   expect(panel.hidden).toBe(true);
-  f.state.ball = { ...f.state.ball };
+  f.state.rules.currentBall = 2;
   f.controls.observe(f.state, f.loop as unknown as GameLoop);
   expect(panel.hidden).toBe(false);
   expect(panel.getAttribute('role')).toBe('button');
@@ -98,6 +98,24 @@ it('dismisses launch guidance until another ball needs launching', () => {
   expect(panel.hidden).toBe(false);
   panel.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
   expect(panel.hidden).toBe(true);
+});
+
+it('keeps dismissal across cloned physics frames and restores guidance on reset', () => {
+  const f = fixture();
+  const panel = f.host.querySelector<HTMLElement>('.play-status')!;
+  panel.click();
+  const nextFrame = {
+    ...f.state,
+    ball: { ...f.state.ball },
+    tick: f.state.tick + 1,
+  };
+  f.controls.observe(nextFrame, f.loop as unknown as GameLoop);
+  expect(panel.hidden).toBe(true);
+  f.controls.observe(
+    { ...nextFrame, ball: { ...nextFrame.ball } },
+    f.loop as unknown as GameLoop,
+  );
+  expect(panel.hidden).toBe(false);
 });
 
 it('offers final score and replay only after game over, with usable focus after replay', () => {

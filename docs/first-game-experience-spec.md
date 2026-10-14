@@ -58,6 +58,11 @@ regressions run with the full suite. Review launch/pause/replay on desktop and
 phone-sized Chrome viewports, including short windows and the Physics route.
 Responsive browser review is not a physical iOS/Android device test.
 
+Launch dismissal survives the engine's per-frame ball clones; only a new launch
+or an explicit reset restores it. Regression coverage includes cloned frames.
+Browser review on October 13, 2026 verified that clicking Alien Star's launch
+card keeps it hidden during simulation and Reset ball restores it.
+
 Browser review on October 10, 2026 covered the actual Just One More launch/pause
 view on desktop and at 390 × 844. A temporary fixture using production controls,
 input, rendering, and the game loop covered Switchyard touch plunge, game over,
