@@ -147,6 +147,7 @@ wedge's overall bounding dimensions.
 - `x`, `y`: flipper pivot point
 - `length`: pivot-to-tip body length along the flipper axis
 - `thickness`: base body width at the pivot end
+- `tipThickness` (optional): independently authored tip width
 - `restingAngle`: at-rest angle around the pivot
 - `activeAngle`: energized angle around the pivot
 
@@ -154,7 +155,12 @@ The flipper is not modeled as a pure capsule or rounded rectangle. It tapers
 toward the tip, so:
 
 - `thickness` defines the base width
-- the tip width is derived from the base width in flipper geometry code
+- `tipThickness` defines the tip width; omission preserves the legacy 72% ratio
+- authored tips must be finite, positive and no wider than the base
+
+Built-in profiles and their resting angles are defined in
+[flipper profiles](flipper-profiles-spec.md). Geometry, rendering and validation
+share the same radius helpers.
 
 ## Guides
 

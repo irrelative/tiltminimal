@@ -48,9 +48,9 @@ Add center-drain feed routes at several positions across the usable corridor
 and at more than one downward speed. Use a `drain` goal with
 `avoidFlippers: true`, starting above the opening. Harlem tests three positions
 and two speeds. Keep a dimensional regression assertion as well as these route
-checks. Center-drain contracts are an authoring requirement; the lower assembly
-does not currently generate them automatically, and the generic validator does
-not guarantee their presence.
+checks. The lower assembly generates three center-drain feeds by default. Reference
+layouts that disable them must supply their own drain routes; the generic
+validator does not guarantee their presence.
 
 ## Return lanes and cradling
 

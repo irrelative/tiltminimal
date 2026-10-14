@@ -123,6 +123,9 @@ export const compileBoardLayout = (
       side: flipper.side,
       length: flipper.length,
       thickness: flipper.thickness,
+      ...(flipper.tipThickness !== undefined
+        ? { tipThickness: flipper.tipThickness }
+        : {}),
       restingAngle: flipper.restingAngle,
       activeAngle: flipper.activeAngle,
       material: flipper.material,

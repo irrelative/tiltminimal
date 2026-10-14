@@ -18,7 +18,7 @@ export const getFlipperBaseRadius = (flipper: FlipperDefinition): number =>
   flipper.thickness / 2;
 
 export const getFlipperTipRadius = (flipper: FlipperDefinition): number =>
-  getFlipperBaseRadius(flipper) * FLIPPER_TIP_WIDTH_RATIO;
+  (flipper.tipThickness ?? flipper.thickness * FLIPPER_TIP_WIDTH_RATIO) / 2;
 
 export const getFlipperRadiusAt = (
   flipper: FlipperDefinition,
@@ -107,11 +107,20 @@ export const isFlipperHeelGuide = (
   const outside = flipper.side === 'left' ? -1 : 1;
   const heelX = flipper.x;
   const heelY = flipper.y;
-  const atHeel = (p: Point) => Math.hypot(p.x - heelX, p.y - heelY) < 0.01;
+  // This inner core remains covered through every angle of the tapered bat.
+  // The larger base envelope alone can also include its moving shoulder.
+  const atHeel = (p: Point) =>
+    Math.hypot(p.x - heelX, p.y - heelY) <=
+    Math.min(getFlipperBaseRadius(flipper), getFlipperTipRadius(flipper)) +
+      0.01;
   const end = atHeel(guide.start)
     ? guide.end
     : atHeel(guide.end)
       ? guide.start
       : null;
-  return end !== null && outside * (end.x - heelX) > 0 && end.y < heelY;
+  return (
+    end !== null &&
+    outside * (end.x - heelX) > getFlipperBaseRadius(flipper) &&
+    end.y < heelY
+  );
 };

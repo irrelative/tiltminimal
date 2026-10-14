@@ -89,8 +89,8 @@ const seedBall = (x: number, y: number, vx = 0, vy = 0) => {
 describe('classic ball routes', () => {
   it.each([
     { shot: 'standup-target-hit', offset: 130, vx: 0, vy: 200, delay: 0 },
-    { shot: 'drop-target-hit', offset: 90, vx: 0, vy: 200, delay: 40 },
-    { shot: 'saucer-captured', offset: 120, vx: 100, vy: 100, delay: 26 },
+    { shot: 'drop-target-hit', offset: 90, vx: 0, vy: 200, delay: 38 },
+    { shot: 'saucer-captured', offset: 120, vx: 100, vy: 100, delay: 27 },
   ])(
     'can aim a flipper shot directly at $shot',
     ({ shot, offset, vx, vy, delay }) => {

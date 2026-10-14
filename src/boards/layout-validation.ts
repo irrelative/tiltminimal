@@ -1,4 +1,7 @@
-import { getDistanceToFlipperSurface, isFlipperHeelGuide } from '../game/flipper-geometry';
+import {
+  getDistanceToFlipperSurface,
+  isFlipperHeelGuide,
+} from '../game/flipper-geometry';
 import {
   getArcGuidePoint,
   getArcGuideSweep,
@@ -38,7 +41,9 @@ export const validateCompiledBoardLayout = (
     }
   });
 
-  if (!isPointInsideBoard(board.launchPosition.x, board.launchPosition.y, board)) {
+  if (
+    !isPointInsideBoard(board.launchPosition.x, board.launchPosition.y, board)
+  ) {
     diagnostics.push({
       severity: 'error',
       code: 'launch-out-of-bounds',
@@ -55,6 +60,18 @@ export const validateCompiledBoardLayout = (
   }
 
   board.flippers.forEach((flipper, index) => {
+    if (
+      flipper.tipThickness !== undefined &&
+      (!Number.isFinite(flipper.tipThickness) ||
+        flipper.tipThickness <= 0 ||
+        flipper.tipThickness > flipper.thickness)
+    ) {
+      diagnostics.push({
+        severity: 'error',
+        code: 'invalid-flipper-tip',
+        message: `Flipper ${index + 1} tip thickness must be finite, positive, and no wider than its base.`,
+      });
+    }
     if (!isPointInsideBoard(flipper.x, flipper.y, board)) {
       diagnostics.push({
         severity: 'error',
@@ -215,11 +232,15 @@ const validateLaunchCorridor = (
   const innerGuideX = board.plunger.x - laneHalfWidth;
   const outerGuideX = board.plunger.x + laneHalfWidth;
 
-  if (board.launchPosition.x <= innerGuideX || board.launchPosition.x >= outerGuideX) {
+  if (
+    board.launchPosition.x <= innerGuideX ||
+    board.launchPosition.x >= outerGuideX
+  ) {
     diagnostics.push({
       severity: 'error',
       code: 'launcher-misaligned',
-      message: 'The launch position must stay centered inside the shooter lane.',
+      message:
+        'The launch position must stay centered inside the shooter lane.',
     });
   }
 };
@@ -302,8 +323,7 @@ const pathBlockedByGuide = (
     };
     const blockingGuide = board.guides.some(
       (guide) =>
-        getGuideDistance(point, guide) <
-        guide.thickness / 2 + extraClearance,
+        getGuideDistance(point, guide) < guide.thickness / 2 + extraClearance,
     );
 
     if (blockingGuide) {
@@ -324,13 +344,16 @@ const validateFlipperKeepouts = (
         continue;
       }
 
-      if (guide.material === 'rubberPost' || isFlipperHeelGuide(guide, flipper)) {
+      if (
+        guide.material === 'rubberPost' ||
+        isFlipperHeelGuide(guide, flipper)
+      ) {
         continue;
       }
 
       const threshold = guide.thickness / 2 + 18;
-      const penetratesKeepout = sampleGuidePoints(guide, 14).some((point) =>
-        getMinFlipperSweepDistance(point, flipper) < threshold,
+      const penetratesKeepout = sampleGuidePoints(guide, 14).some(
+        (point) => getMinFlipperSweepDistance(point, flipper) < threshold,
       );
 
       if (!penetratesKeepout) {
@@ -354,9 +377,10 @@ const validateSpinnerClearance = (
     const sweepRadius = spinner.length / 2 + spinner.thickness / 2 + 4;
 
     for (const [guideIndex, guide] of board.guides.entries()) {
-      const obstructsSpinner = sampleGuidePoints(guide, 14).some((point) =>
-        Math.hypot(point.x - spinner.x, point.y - spinner.y) <
-        sweepRadius + guide.thickness / 2,
+      const obstructsSpinner = sampleGuidePoints(guide, 14).some(
+        (point) =>
+          Math.hypot(point.x - spinner.x, point.y - spinner.y) <
+          sweepRadius + guide.thickness / 2,
       );
 
       if (!obstructsSpinner) {
@@ -405,7 +429,8 @@ const getMinFlipperSweepDistance = (
   for (let index = 0; index <= sampleCount; index += 1) {
     const ratio = index / sampleCount;
     const angle =
-      flipper.restingAngle + (flipper.activeAngle - flipper.restingAngle) * ratio;
+      flipper.restingAngle +
+      (flipper.activeAngle - flipper.restingAngle) * ratio;
     minDistance = Math.min(
       minDistance,
       getDistanceToFlipperSurface(point, flipper, angle),

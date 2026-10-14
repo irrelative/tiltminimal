@@ -5,7 +5,10 @@ import { cloneBoardDefinition } from '../src/boards/board-codec';
 import { simulateCradleFeed } from '../src/validation/ball-routes';
 import { createInitialGameState } from '../src/game/game-state';
 import { stepGameFrame } from '../src/game/physics-engine';
-import { sampleFlipperProfile } from '../src/game/flipper-geometry';
+import {
+  getFlipperRadiusAt,
+  sampleFlipperProfile,
+} from '../src/game/flipper-geometry';
 import { idle } from '../src/playtest/simulation';
 
 describe('return lanes and held flippers', () => {
@@ -94,8 +97,7 @@ describe('held-flipper capture limits', () => {
       state.status = 'playing';
       state.launcherExited = true;
       state.flippers[0] = { engaged: true, angle, angularVelocity: 0 };
-      const radius =
-        (f.thickness / 2) * (1 - 0.28 * 0.35) + state.ball.radius - 1;
+      const radius = getFlipperRadiusAt(f, 0.35) + state.ball.radius - 1;
       state.ball.position = {
         x: f.x + Math.cos(angle) * f.length * 0.35 + Math.sin(angle) * radius,
         y: f.y + Math.sin(angle) * f.length * 0.35 - Math.cos(angle) * radius,
@@ -153,8 +155,7 @@ it.each(BUILT_IN_TABLES)(
       state.status = 'playing';
       state.launcherExited = true;
       state.flippers[index] = { engaged: true, angle, angularVelocity: 0 };
-      const radius =
-        (f.thickness / 2) * (1 - 0.28 * 0.5) + state.ball.radius - 0.01;
+      const radius = getFlipperRadiusAt(f, 0.5) + state.ball.radius - 0.01;
       state.ball.position = {
         x: f.x + axis.x * f.length * 0.5 + normal.x * radius,
         y: f.y + axis.y * f.length * 0.5 + normal.y * radius,

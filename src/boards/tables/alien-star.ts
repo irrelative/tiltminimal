@@ -30,17 +30,20 @@ Object.assign(
     center: { x: 450, y: 1420 },
     pivotSpacing: 334,
     flipperLength: 136,
+    flipperThickness: 30,
+    flipperTipThickness: 18,
     laneWidth: 72,
     returnRadius: 148,
-    bendRise: 177,
+    bendRise: 182,
+    returnExitAngle: 0.3,
     entryRise: 340,
     heelOffset: 32,
     slingWidth: 144,
     slingHeight: 50,
     slingAngle: Math.PI / 3,
-    lowerPostOffset: { x: 30, y: 80 },
+    lowerPostOffset: { x: 30, y: 84 },
     slingAtReturn: true,
-    restingAngle: 0.28,
+    restingAngle: (24 * Math.PI) / 180,
   }),
 );
 // The photographed spinner sits inboard of the lock. Its inner rail ends
@@ -176,18 +179,6 @@ parts.rollovers!.push(
     score: 1000,
   })),
 );
-for (const x of [440, 450, 460])
-  parts.routes!.push({
-    id: `alien-star-center-drain-${x}`,
-    start: {
-      type: 'feed',
-      position: { x, y: 1460 },
-      velocities: [300, 650].map((y) => ({ x: 0, y })),
-    },
-    goals: [{ type: 'drain' }],
-    avoidFlippers: true,
-    timeoutSeconds: 3,
-  });
 export const alienStarTable = compileBuiltInBoardLayout(
   {
     ...foundation,

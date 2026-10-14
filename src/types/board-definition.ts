@@ -197,6 +197,8 @@ export interface FlipperDefinition extends Point {
   length: number;
   // Base body width at the pivot end.
   thickness: number;
+  // Independently authored tip width; omission preserves the legacy 72% taper.
+  tipThickness?: number;
   // Resting angle in radians around the pivot point.
   restingAngle: number;
   // Fully energized angle in radians around the pivot point.

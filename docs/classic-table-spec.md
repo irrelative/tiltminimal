@@ -98,9 +98,13 @@ frame-dependent plunger contact calculation and is no longer used.
 
 Lower sling posts now meet the inner return exits. Rounded passive rubber and
 connected solid bodies support left-to-right and right-to-left post passes.
-Returns use 148-unit outer radius, 72-unit lane width, and 174-unit bend rise.
+Returns use 148-unit outer radius, 72-unit lane width, and 177-unit bend rise.
 A connected inner-guide extension places each lower post 30 units outside
 and 80 above its flipper pivot. The active faces are 60° from horizontal;
 both directions support 50–75 ms release/re-flip regression samples.
 Existing feeds, drains, and scoring routes remain required; see
 [post-pass geometry and regression contracts](post-pass-spec.md).
+
+Flippers and return connections follow the validated
+[fuller profile specification](flipper-profiles-spec.md). Shot and pass timing
+samples were remeasured with unchanged scoring/catch requirements.

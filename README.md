@@ -66,6 +66,8 @@ bounces, post passes, bump passes, live catches, drop catches, and timed slap sa
 These moves depend on ball position, speed, and timing; transfer directions vary
 with table geometry. See [advanced flipper skills](docs/advanced-flipper-skills-spec.md)
 for techniques and verified scenarios.
+Flippers use fuller, independently authored heel/tip profiles and table-specific
+resting angles; see [flipper profiles](docs/flipper-profiles-spec.md).
 
 Spinners carry momentum and score once per full revolution, with a mechanical
 click per turn. Shoot ARCADE / ROAD TRIP hard on Just One More for sustained

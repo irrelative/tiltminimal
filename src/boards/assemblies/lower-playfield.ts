@@ -13,6 +13,11 @@ export interface LowerPlayfieldOptions {
   entryRise: number;
   bendRise?: number;
   heelOffset: number;
+  /** Outer bend exit slope, joined to the stationary heel. */
+  returnExitAngle?: number;
+  /** Disable only when a reference layout supplies its own drain contracts. */
+  centerDrainRoutes?: boolean;
+  heelJoin?: 'inset' | 'pivot';
   /** Legacy midpoint placement; omit for a connected return-mounted sling. */
   slingOffset?: Point;
   /** Mount the lower rubber post at the inner return exit (default without slingOffset). */
@@ -23,6 +28,7 @@ export interface LowerPlayfieldOptions {
   slingHeight: number;
   slingAngle: number;
   flipperThickness?: number;
+  flipperTipThickness?: number;
   restingAngle?: number;
   activeAngle?: number;
   slingStrength?: number;
@@ -36,15 +42,21 @@ export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
   requireClearance(o.laneWidth, ballRadius * 2 + 24, 'Inlane width');
   requireClearance(o.returnRadius, o.laneWidth, 'Return radius');
   // Leave room above the heel for the ball to meet the held flipper's top face.
-  const bendRise = o.bendRise ?? o.returnRadius + 26;
+  const bendRise = o.bendRise ?? o.returnRadius + 29;
   requireClearance(o.entryRise, bendRise, 'Lane entry rise');
+  // End inside the stationary heel disc so the rail cannot shield the bat or
+  // form a valley against its enlarged round cap. Reference returns can keep
+  // their existing pivot join.
+  const heelRadius = ((o.flipperThickness ?? 32) / 2) * 0.375;
+  const outerExitAngle = o.returnExitAngle ?? 0.3;
   const flippers = createFlipperPair({
     leftX: o.center.x - o.pivotSpacing / 2,
     rightX: o.center.x + o.pivotSpacing / 2,
     y: o.center.y,
     length: o.flipperLength,
-    thickness: o.flipperThickness ?? 22,
-    restingAngleOffset: o.restingAngle ?? 0.28,
+    thickness: o.flipperThickness ?? 32,
+    tipThickness: o.flipperTipThickness ?? 18,
+    restingAngleOffset: o.restingAngle ?? (24 * Math.PI) / 180,
     activeAngleOffset: o.activeAngle ?? -0.5,
   });
   const part: BoardAssembly = { guides: [], posts: [], routes: [] };
@@ -66,10 +78,12 @@ export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
         arc(
           center,
           radius,
-          sign < 0 ? Math.PI / 2 + (radius === radii[1] ? 0.15 : 0.005) : 0,
+          sign < 0
+            ? Math.PI / 2 + (radius === radii[1] ? 0.15 : outerExitAngle)
+            : 0,
           sign < 0
             ? Math.PI
-            : Math.PI / 2 - (radius === radii[1] ? 0.15 : 0.005),
+            : Math.PI / 2 - (radius === radii[1] ? 0.15 : outerExitAngle),
         ),
       );
       part.posts!.push({
@@ -83,10 +97,15 @@ export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
         part.guides!.push(
           rail(
             {
-              x: center.x + sign * radius * Math.sin(0.005),
-              y: center.y + radius * Math.cos(0.005),
+              x: center.x + sign * radius * Math.sin(outerExitAngle),
+              y: center.y + radius * Math.cos(outerExitAngle),
             },
-            pivot,
+            o.heelJoin === 'pivot'
+              ? pivot
+              : {
+                  x: pivot.x - sign * Math.sin(outerExitAngle) * heelRadius,
+                  y: pivot.y - Math.cos(outerExitAngle) * heelRadius,
+                },
             4,
           ),
         );
@@ -202,6 +221,20 @@ export const createLowerPlayfieldAssembly = (o: LowerPlayfieldOptions) => {
         y: -(p.x - position.x) * sin + (p.y - position.y) * cos,
       }));
     });
+  }
+  if (o.centerDrainRoutes !== false) {
+    for (const [index, dx] of [-10, 0, 10].entries())
+      part.routes.push({
+        id: `${o.id}/center-drain-${index}`,
+        start: {
+          type: 'feed',
+          position: { x: o.center.x + dx, y: o.center.y + 40 },
+          velocities: [300, 650].map((y) => ({ x: 0, y })),
+        },
+        goals: [{ type: 'drain' }],
+        avoidFlippers: true,
+        timeoutSeconds: 3,
+      });
   }
   return { ...part, flippers, slingshots };
 };

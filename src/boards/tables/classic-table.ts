@@ -116,7 +116,7 @@ const lower = createLowerPlayfieldAssembly({
   flipperLength: 136,
   laneWidth: 72,
   returnRadius: 148,
-  bendRise: 174,
+  bendRise: 177,
   entryRise: 320,
   heelOffset: 32,
   slingWidth: 144,

@@ -9,21 +9,22 @@ workflow, follow [the shared layout requirements](conventional-layout-guidelines
 
 ## Geometry
 
-All built-in lower returns use flipper-relative anchors. Each return curve's
-center sits 32 units outside its flipper pivot. The inner rail ends 0.15 radians
-before a full quarter turn; the outer rail ends 0.005 radians before it. These
-small downward slopes prevent balls balancing on horizontal endpoint caps.
-Classic and foundation tables continue the inner arc with a solid guide to
-30 units outside and 80 above the flipper pivot, bringing the lower sling
-post closer while preserving the outer return and lane entry coordinates.
+Built-in lower returns use flipper-relative anchors. Their centers sit 32 units
+outside the pivot. Inner arcs exit at 0.15 radians before a quarter turn;
+conventional outer arcs now exit at 0.3 radians, then join the fixed heel with
+a sloped inset rail. Andromeda/Harlem retain 0.005-radian outer exits and pivot
+joins. See [flipper profiles](flipper-profiles-spec.md) for body dimensions and
+authoring settings.
 
-| Tables                                     | Outer radius | Lane width | Bend center above pivot |
-| ------------------------------------------ | -----------: | ---------: | ----------------------: |
-| All conventional returns                         |          148 |         72 |                     174 |
+| Tables                              | Outer radius | Lane width | Bend center above pivot |
+| ----------------------------------- | -----------: | ---------: | ----------------------: |
+| Conventional foundation and Classic |          148 |         72 |                     177 |
+| Alien Star                          |          148 |         72 |                     182 |
+| Andromeda and Harlem                |          148 |         72 |                     174 |
 
-The shared 148-unit returns preserve outlane clearance beside the cabinet
-and shooter walls. The shared assembly defaults `bendRise` to `returnRadius +
-26`; authors can override it, but must validate the complete table afterward.
+The shared assembly defaults bend rise to radius +29. Each different return
+configuration still requires complete feed validation; the 160-radius/64-wide
+regression assembly uses a 0.25-radian exit.
 Harlem uses equal 110-unit bats, with the upper-left at (270, 1680),
 lower-left at (370, 1800), and right at (630, 1800). Its left return
 follows the upper pivot, and direct feeds follow both left pivots. Lane mouths
@@ -34,17 +35,14 @@ flipper and a successful release.
 
 ## Heel connection
 
-Each shared outer return continues from its arc endpoint to the flipper pivot
-with a 4-unit metal guide. The short descending segment closes the pocket where
-a slow ball could wedge between the open arc cap and stationary heel. It stays
-on the outer side of the pivot and ends inside the fixed heel; it does not
-extend onto the moving bat. The narrow guide preserves drop-catch clearance.
-The default bend rise is radius + 26, leaving a downhill transition into the
-heel; the older radius + 20 default can stall some passive feeds with this join.
-
-Layout and analysis validators recognize only narrow, descending, outward
-segments attached exactly to the fixed pivot as intentional heel joins.
-Other guides still receive the full flipper keepout checks. Slow-feed regressions
+A four-unit metal rail connects each outer arc to the stationary heel. The
+conventional endpoint lies inside the fixed circular disc at 37.5% of its base
+radius, along the exit normal. This prevents the wider heel from forming a slow
+ball groove while keeping the rail off the playable moving face. Reference
+returns can select the original pivot endpoint. Layout validators recognize
+only thin descending/outward joins terminating within the invariant inner heel core;
+rails ending on the moving bat still receive keepout checks.
+Slow-feed regressions
 start 12, 20, and 28 units outside every inlane pivot, 65 units above it, at
 0 and 80 units/second, and require escape without input within three seconds.
 Existing passive/held routes, releases, outlanes and advanced moves remain tested.

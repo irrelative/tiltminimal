@@ -105,18 +105,6 @@ export function createOpenFanTable(
       timeoutSeconds: 6,
     });
   }
-  for (const x of [445, 450, 455])
-    parts.routes!.push({
-      id: `${id}-center-drain-${x}`,
-      start: {
-        type: 'feed',
-        position: { x, y: 1270 },
-        velocities: [300, 650].map((y) => ({ x: 0, y })),
-      },
-      goals: [{ type: 'drain' }],
-      avoidFlippers: true,
-      timeoutSeconds: 3,
-    });
   return compileBuiltInBoardLayout(
     {
       ...foundation,

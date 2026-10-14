@@ -143,3 +143,6 @@ Andromeda explicitly retains the unextended return and 1.25-radian sling angle
 when composing the shared foundation. Its short bats and open opposite side
 use their own post-pass regression timings; Classic's closer-post defaults do
 not apply to this reference layout.
+
+The [fuller profile revision](flipper-profiles-spec.md) gives Andromeda 30/16-unit heel/tip widths, 120-unit length and a 24° resting angle. Its 174-unit return bend and pivot heel joins remain. All feeds,
+held releases, drains and advanced-skill contracts stay validated.

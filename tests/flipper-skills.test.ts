@@ -19,7 +19,7 @@ describe('advanced flipper skills on complete built-in tables', () => {
           id === 'andromeda' && source === 0
             ? [33, 34]
             : id === 'harlem-globetrotters' && source === 2
-              ? [25, 26]
+              ? [26, 27]
               : [18, 21];
         const crossings: number[] = [];
         for (const delay of timings) {
@@ -173,16 +173,17 @@ describe('advanced flipper skills on complete built-in tables', () => {
 
     it(`${id} permits a timed slap save near the lower flipper tip`, () => {
       const source = id === 'harlem-globetrotters' ? 2 : 0;
-      const flipFrame = id === 'harlem-globetrotters' ? 10 : 12;
-      expect(runSlapSave(board, source, -1, 999)).toEqual({
+      const flipFrame = id === 'harlem-globetrotters' ? 9 : 12;
+      const extra = id === 'harlem-globetrotters' ? 23 : 20;
+      expect(runSlapSave(board, source, -1, 999, extra)).toEqual({
         saved: false,
         drained: true,
       });
-      expect(runSlapSave(board, source, -1, flipFrame)).toEqual({
+      expect(runSlapSave(board, source, -1, flipFrame, extra)).toEqual({
         saved: false,
         drained: true,
       });
-      expect(runSlapSave(board, source, 6, flipFrame)).toEqual({
+      expect(runSlapSave(board, source, 6, flipFrame, extra)).toEqual({
         saved: true,
         drained: false,
       });

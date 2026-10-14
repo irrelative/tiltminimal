@@ -7,16 +7,16 @@ every feed works. The same contact solver runs in Game and the Physics sandbox.
 
 ## Required skills
 
-| Skill | Player action and expected outcome | Coverage |
-| --- | --- | --- |
-| Cradle / hold catch | Hold the flipper; a suitable return loses normal speed, rolls to the heel, and stays controllable. | Every flipper; all declared held feeds and release checks. |
-| Controlled release shot | Lower a cradled flipper, let the ball advance, then flip. Release timing changes the outgoing shot. | Two different shot timings on every flipper reach 220 units upfield without an active sling kick. |
-| Dead bounce / dead flip / bounce pass | Leave the source flipper down and let its rubber rebound send the ball toward an opposite flipper. | Every flipper, two incoming speeds, no flipper or nudge input and no powered sling. |
-| Bump pass | Release a cradle and give one forward nudge as the ball rolls down the lowered flipper; hold the opposite flipper to catch the transfer. No source re-flip. | All 13 flippers across six tables; stable receiver catch, no post/sling contact, and an unnudged control. |
-| Post pass | Briefly release and re-flip a cradle into the passive lower sling post, transferring to a held receiver. | At least one transfer on every table; existing multi-timing post-contact and stable-catch tests. |
-| Live catch | Raise the flipper so a descending ball meets the end of the upstroke; absorb the impact and roll into a cradle. | Every flipper, three incoming speeds, early/late controls, stable catch and release. |
-| Drop catch | Release a raised flipper as the descending ball arrives; the retreating surface reduces the rebound and leaves a slower ball to play. | Every flipper, three incoming speeds; compare with releasing too early. A drop catch is not an automatic held cradle. |
-| Slap save | Time a lateral nudge and flip near a lower tip to return a marginal center-drain ball upfield. | Every table: the same feed drains without input and with the selected flip alone, but is saved by the timed nudge/flip. |
+| Skill                                 | Player action and expected outcome                                                                                                                          | Coverage                                                                                                                |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Cradle / hold catch                   | Hold the flipper; a suitable return loses normal speed, rolls to the heel, and stays controllable.                                                          | Every flipper; all declared held feeds and release checks.                                                              |
+| Controlled release shot               | Lower a cradled flipper, let the ball advance, then flip. Release timing changes the outgoing shot.                                                         | Two different shot timings on every flipper reach 220 units upfield without an active sling kick.                       |
+| Dead bounce / dead flip / bounce pass | Leave the source flipper down and let its rubber rebound send the ball toward an opposite flipper.                                                          | Every flipper, two incoming speeds, no flipper or nudge input and no powered sling.                                     |
+| Bump pass                             | Release a cradle and give one forward nudge as the ball rolls down the lowered flipper; hold the opposite flipper to catch the transfer. No source re-flip. | All 17 flippers across eight tables; stable receiver catch, no post/sling contact, and an unnudged control.             |
+| Post pass                             | Briefly release and re-flip a cradle into the passive lower sling post, transferring to a held receiver.                                                    | At least one transfer on every table; existing multi-timing post-contact and stable-catch tests.                        |
+| Live catch                            | Raise the flipper so a descending ball meets the end of the upstroke; absorb the impact and roll into a cradle.                                             | Every flipper, three incoming speeds, early/late controls, stable catch and release.                                    |
+| Drop catch                            | Release a raised flipper as the descending ball arrives; the retreating surface reduces the rebound and leaves a slower ball to play.                       | Every flipper, three incoming speeds; compare with releasing too early. A drop catch is not an automatic held cradle.   |
+| Slap save                             | Time a lateral nudge and flip near a lower tip to return a marginal center-drain ball upfield.                                                              | Every table: the same feed drains without input and with the selected flip alone, but is saved by the timed nudge/flip. |
 
 The distinction between a held catch and a live catch matters. An early raised
 flipper may eventually cradle a ball, but that does not establish that its
@@ -26,14 +26,14 @@ controls have substantially more residual speed.
 
 ## Table coverage and geometry
 
-| Table | Cradles, shots, dead bounces, live and drop catches | Post-pass routes | Slap-save sample |
-| --- | --- | --- | --- |
-| Switchyard | Both flippers | Left ↔ right | Left lower tip |
-| Classic | Both flippers | Left ↔ right | Left lower tip |
-| Double Crossed | Both flippers | Left ↔ right | Left lower tip |
-| Starlight EM | Both flippers | Left ↔ right | Left lower tip |
-| Harlem Globetrotters | All three flippers | Upper-left → right; right → lower-left | Lower-left tip |
-| Andromeda | Both flippers | Right → left | Left lower tip |
+| Table                | Cradles, shots, dead bounces, live and drop catches | Post-pass routes                       | Slap-save sample |
+| -------------------- | --------------------------------------------------- | -------------------------------------- | ---------------- |
+| Switchyard           | Both flippers                                       | Left ↔ right                           | Left lower tip   |
+| Classic              | Both flippers                                       | Left ↔ right                           | Left lower tip   |
+| Double Crossed       | Both flippers                                       | Left ↔ right                           | Left lower tip   |
+| Starlight EM         | Both flippers                                       | Left ↔ right                           | Left lower tip   |
+| Harlem Globetrotters | All three flippers                                  | Upper-left → right; right → lower-left | Lower-left tip   |
+| Andromeda            | Both flippers                                       | Right → left                           | Left lower tip   |
 
 Harlem's two left flippers share the left input. Dead bounces can reach a
 different opposite-side receiver as incoming speed changes. Andromeda has no
@@ -81,18 +81,18 @@ on the table; a late bump may miss the receiver or run into a post.
 board geometry at 120 Hz. It checks these release-to-nudge delays (zero-based
 frames), without changing velocity, geometry, or physics parameters:
 
-| Table | Verified delays | Transfers |
-| --- | --- | --- |
-| Classic and Starlight EM | 12, 13 frames (100–108 ms) | Left ↔ right |
-| Double Crossed | 12 frames (100 ms) | Left ↔ right |
-| Andromeda | 13, 14 frames (108–117 ms) | Left ↔ right |
-| Harlem Globetrotters | 4, 6 frames (33–50 ms) | Upper-left → right; right → lower-left; lower-left → right |
+| Table                    | Verified delays            | Transfers                                                  |
+| ------------------------ | -------------------------- | ---------------------------------------------------------- |
+| Classic and Starlight EM | 12, 13 frames (100–108 ms) | Left ↔ right                                               |
+| Double Crossed           | 12, 14 frames (100–117 ms) | Left ↔ right                                               |
+| Andromeda                | 13, 14 frames (108–117 ms) | Left ↔ right                                               |
+| Harlem Globetrotters     | 4, 6 frames (33–50 ms)     | Upper-left → right; right → lower-left; lower-left → right |
 
 Each transfer must settle on the receiver for 60 consecutive frames (0.5 seconds)
 within three seconds. The trajectory must avoid scoring events, posts and sling
 rubber, distinguishing it from a post pass or powered sling rebound. Releasing
 without the bump must fail to produce that stable catch. Double Crossed also
-checks a one-frame-late bump that fails. These are verified opportunities, not
+checks a frame-16 late bump that fails. These are verified opportunities, not
 a guarantee for every incoming ball or input timing. Both Harlem left flippers
 continue sharing the left input.
 
@@ -164,3 +164,8 @@ see [the playtest report](classic-playtest.md) for the remaining tuning limits.
 Switchyard uses the same connected lower assembly and is included in the shared
 all-table regression suites. Its dedicated fan-shot timing samples are in
 [switchyard-spec.md](switchyard-spec.md).
+
+The [flipper profile revision](flipper-profiles-spec.md) preserves all skill
+contracts while remeasuring changed input windows. Harlem lower-left controlled
+shots use 26/27 frames, and its slap-save sample starts 23 units past the tip
+with a frame-9 flip. No catch limits, nudge tuning or shot assistance changed.

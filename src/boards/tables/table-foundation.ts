@@ -15,7 +15,15 @@ export function createFoundation(
   laneCount: number,
   height = 1400,
   lowerOverrides: Partial<
-    Pick<LowerPlayfieldOptions, 'slingAngle' | 'lowerPostOffset'>
+    Pick<
+      LowerPlayfieldOptions,
+      | 'slingAngle'
+      | 'lowerPostOffset'
+      | 'bendRise'
+      | 'returnExitAngle'
+      | 'centerDrainRoutes'
+      | 'heelJoin'
+    >
   > = {},
 ) {
   const lower = createLowerPlayfieldAssembly({
@@ -25,7 +33,7 @@ export function createFoundation(
     flipperLength: 136,
     laneWidth: 72,
     returnRadius: 148,
-    bendRise: 174,
+    bendRise: 177,
     entryRise: 320,
     heelOffset: 32,
     slingWidth: 144,

@@ -12,13 +12,14 @@ Each lower sling post mounts at its inner return exit. Moving the
 flipper or return therefore moves the sling with it. Classic and the three
 foundation tables extend the inner arc with a physical guide to a post
 30 units outward and 80 units above the pivot (85.44 units center-to-center,
-down from 107.94). The 14-unit post rubber and 11-unit flipper heel leave
-60.44 units of surface clearance for the 32-unit ball. Conventional returns use
-148 outer radius, 72 lane width, 174 bend rise, and 32 heel offset. The inner
+down from 107.94). The 14-unit post rubber and 16-unit flipper heel leave
+55.44 units of surface clearance for the 32-unit ball. Conventional returns use
+148 outer radius, 72 lane width, 177 bend rise, and 32 heel offset. The inner
 radius is 76 and its exit angle offset is 0.15 radians: the unextended arc
 exit sits
-43.36 units outward and 98.85 units above its flipper pivot. Reference tables
-retain that exit; conventional tables use the connected extension above.
+43.36 units outward and 101.85 units above its flipper pivot. Reference returns
+retain their separately authored bends; conventional tables use the connected
+extension above.
 
 From its lower post, the active face extends upward and outward, so its
 contact normal points inward and upfield. Classic and foundation faces are
@@ -48,11 +49,11 @@ crossing an active face.
 
 ## Supported transfers
 
-| Table | Transfers |
-| --- | --- |
-| Classic, Double Crossed, Starlight EM | Left ↔ right |
-| Harlem Globetrotters | Upper-left → right; right → lower-left |
-| Andromeda | Right → left |
+| Table                                 | Transfers                              |
+| ------------------------------------- | -------------------------------------- |
+| Classic, Double Crossed, Starlight EM | Left ↔ right                           |
+| Harlem Globetrotters                  | Upper-left → right; right → lower-left |
+| Andromeda                             | Right → left                           |
 
 Harlem retains both left flippers on the same input, its centered drain, and
 level lane mouths. Slings now follow the staggered return flippers rather than
@@ -66,12 +67,11 @@ centered between the new return walls.
 The post-passes tests settle a ball with the shared held-flipper solver, then
 release/re-flip using ordinary inputs at 120 Hz. Every listed transfer must
 touch its source's lower post, fire no sling, and remain caught on the receiver
-for 0.5 seconds. Classic and foundation releases of 6, 7, 8, and 9 frames
-(50–75 ms) must
-all succeed in both directions. Andromeda and Harlem’s right-to-lower-left transfer retain their 3, 4,
-and 5-frame (25–42 ms) regression samples. With the connected heel returns,
-Harlem’s upper-left-to-right transfer succeeds at 3, 5, and 6 frames
-(25, 42, and 50 ms); the previous 4-frame trajectory no longer catches.
+for 0.5 seconds. Classic and foundation releases of 7 and 9 frames must succeed in both
+directions. Alien Star checks 7/8/9; Andromeda checks 1/2/3; Harlem's
+upper-left→right checks 2/5/7 and right→lower-left checks 8/9. These timings were
+remeasured after the [fuller profiles](flipper-profiles-spec.md); unchanged
+assertions require post contact, no active sling and a stable receiver catch.
 These samples establish available transfers, not a continuous timing window.
 Classic also rejects zero-release and late-release controls. These are
 regression samples, not a claim that all human inputs succeed.

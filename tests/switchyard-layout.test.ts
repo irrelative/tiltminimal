@@ -53,24 +53,25 @@ describe.each([switchyardTable, justOneMoreTable])(
       board === switchyardTable
         ? ([
             [0, 'drop-target-hit:2', [128, 129]],
-            [0, 'drop-target-hit:1', [130, 131]],
-            [1, 'drop-target-hit:0', [104, 105]],
-            [0, 'standup-target-hit:0', [192, 193]],
-            [0, 'standup-target-hit:1', [196, 197]],
-            [0, 'saucer-captured:0', [189, 190]],
-            [1, 'saucer-captured:0', [195, 196]],
-            [1, 'orbit:0', [217, 218]],
-            [0, 'orbit:5', [214, 218]],
+            [1, 'drop-target-hit:1', [157, 158]],
+            [1, 'drop-target-hit:0', [139]],
+            [0, 'drop-target-hit:0', [146]],
+            [0, 'standup-target-hit:0', [145, 149]],
+            [0, 'standup-target-hit:1', [150, 151]],
+            [0, 'saucer-captured:0', [154, 157]],
+            [1, 'saucer-captured:0', [83, 84]],
+            [1, 'orbit:0', [174, 175]],
+            [0, 'orbit:5', [162, 163]],
           ] as const)
         : ([
-            [0, 'standup-target-hit:1', [129, 130]],
-            [1, 'standup-target-hit:0', [172, 173]],
-            [0, 'standup-target-hit:3', [121, 122]],
-            [1, 'standup-target-hit:2', [155, 156]],
-            [0, 'saucer-captured:0', [192, 193]],
-            [1, 'saucer-captured:0', [183, 184]],
-            [0, 'orbit:2', [217, 218]],
-            [1, 'orbit:0', [217, 218]],
+            [0, 'standup-target-hit:1', [130, 131]],
+            [1, 'standup-target-hit:0', [166, 167]],
+            [0, 'standup-target-hit:3', [162, 163]],
+            [1, 'standup-target-hit:2', [119, 120]],
+            [0, 'saucer-captured:0', [144, 145]],
+            [1, 'saucer-captured:0', [144, 145]],
+            [0, 'orbit:2', [173, 174]],
+            [1, 'orbit:0', [174, 175]],
           ] as const);
     it.each(shotCases)(
       'flipper %s reaches %s from the tested release timings',
@@ -199,7 +200,7 @@ describe.each([switchyardTable, justOneMoreTable])(
   },
 );
 
-it('preserves Just One More geometry and rules apart from spinner tuning while giving Switchyard distinct shots', () => {
+it('preserves the validated Just One More snapshot apart from spinner tuning while giving Switchyard distinct shots', () => {
   const original = {
     ...justOneMoreTable,
     spinners: justOneMoreTable.spinners.map((spinner) => {
@@ -212,7 +213,7 @@ it('preserves Just One More geometry and rules apart from spinner tuning while g
   };
   expect(
     createHash('sha256').update(JSON.stringify(original)).digest('hex'),
-  ).toBe('4fd44a55bf54ea0a65e5add5819188c26cd7252a347cf6228dd69c0400d497ae');
+  ).toBe('d2d7f92b0a50c50e4e641fa420742df0e86add2ccc59185280e455a39e01ddf3');
   expect(switchyardTable.spinners).toHaveLength(1);
   expect(switchyardTable.standupTargets).toHaveLength(2);
   expect(switchyardTable.dropTargets).toHaveLength(3);

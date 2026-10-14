@@ -74,7 +74,7 @@ describe('Alien Star reference recreation', () => {
       const r = stepGameFrame(
         s,
         board,
-        { ...idleInput, rightPressed: n >= 15 },
+        { ...idleInput, rightPressed: n >= 10 },
         1 / 120,
       );
       s = r.state;

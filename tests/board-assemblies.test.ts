@@ -20,6 +20,7 @@ const lowerOptions = {
   flipperLength: 136,
   laneWidth: 64,
   returnRadius: 160,
+  returnExitAngle: 0.25,
   entryRise: 320,
   heelOffset: 32,
   slingOffset: { x: 144, y: 190 },
@@ -49,7 +50,8 @@ describe('reusable board assemblies', () => {
       ...lowerOptions,
       laneWidth: 72,
       returnRadius: 148,
-      bendRise: 174,
+      bendRise: 177,
+      returnExitAngle: 0.3,
     });
     const layout = compileBoardLayout({
       ...composeAssemblies(assembly),
@@ -109,7 +111,7 @@ describe('assembly route validation', () => {
     ).toBe(true);
   });
   it('checks all declared Classic assembly routes', () => {
-    expect(classicTable.routes).toHaveLength(11);
+    expect(classicTable.routes).toHaveLength(14);
     expect(validateBallRoutes(classicTable)).toEqual([]);
   });
   it('detects missing return rails even though the ball can still drain', () => {

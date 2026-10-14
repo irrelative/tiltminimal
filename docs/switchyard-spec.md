@@ -108,16 +108,16 @@ collision or scoring, and a blocking guide across the sample still fails validat
 `tests/switchyard-layout.test.ts` uses actual held cradles and release/re-flip
 inputs. At a fixed 240 Hz step, release/re-flip samples demonstrate:
 
-| Objective            | Source flipper | Release frames               |
-| -------------------- | -------------- | ---------------------------- |
-| Cargo lower drop     | Left           | 128, 129                     |
-| Cargo middle drop    | Left           | 130, 131                     |
-| Cargo upper drop     | Right          | 104, 105                     |
-| Signal upper standup | Left           | 192, 193                     |
-| Signal lower standup | Left           | 196, 197                     |
-| Dispatch             | Left / right   | 189, 190 / 195, 196          |
-| West Express         | Right          | 217, 218                     |
-| East Express         | Left           | 214 (reverse), 218 (forward) |
+| Objective            | Source flipper | Release frames    |
+| -------------------- | -------------- | ----------------- |
+| Cargo lower drop     | Left           | 128, 129          |
+| Cargo middle drop    | Right          | 157, 158          |
+| Cargo upper drop     | Right / left   | 139 / 146         |
+| Signal upper standup | Left           | 145, 149          |
+| Signal lower standup | Left           | 150, 151          |
+| Dispatch             | Left / right   | 154, 157 / 83, 84 |
+| West Express         | Right          | 174, 175          |
+| East Express         | Left           | 162, 163          |
 
 The expected shot must be the first major scoring objective reached. These are
 reproducible opportunities, not auto-aim or promises for every frame rate/feed.
@@ -185,3 +185,9 @@ In the physics sandbox, a center drop drained; the left and right inlane drops
 settled at approximately (301,1184) and (599,1184), with zero velocity while
 held, and moved off their flippers when released. These samples establish
 working opportunities, not a guarantee against every possible pinball trap.
+
+The table uses [32/18 flipper profiles and 24° rest angles](flipper-profiles-spec.md).
+The 240 Hz input map above was remeasured after that revision. All named
+objectives retain physical shot coverage; the middle Cargo target now has
+right-flipper samples, and the upper target has independent samples from both
+sides. The shared lower assembly supplies the three center-drain contracts.

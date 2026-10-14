@@ -11,6 +11,10 @@ import { andromedaRulesScript } from './andromeda-rules';
 // Relative arrangement estimated from Game Plan's flyer and playfield photos.
 const foundation = createFoundation('andromeda', 3, 1800, {
   slingAngle: 1.25,
+  bendRise: 174,
+  returnExitAngle: 0.005,
+  heelJoin: 'pivot' as const,
+  centerDrainRoutes: false,
   lowerPostOffset: undefined,
 });
 const { lower, shooter } = foundation;
@@ -23,6 +27,8 @@ shooter.routes[0].goals = [
 ];
 lower.flippers.forEach((flipper) => {
   flipper.length = 120;
+  flipper.thickness = 30;
+  flipper.tipThickness = 16;
 });
 // The original has no conventional left inlane/outlane pair. Its cabinet
 // curves directly toward the left heel below the fourth power bumper.

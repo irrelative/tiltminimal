@@ -217,6 +217,7 @@ export const createFlipperPair = (options: {
   thickness: number;
   restingAngleOffset: number;
   activeAngleOffset: number;
+  tipThickness?: number;
   material?: SurfaceMaterialName;
 }): FlipperLayoutDefinition[] => [
   createFlipperLayout('left', options.leftX, options.y, options),
@@ -818,6 +819,7 @@ const createFlipperLayout = (
     thickness: number;
     restingAngleOffset: number;
     activeAngleOffset: number;
+    tipThickness?: number;
     material?: SurfaceMaterialName;
   },
 ): FlipperLayoutDefinition => ({
@@ -825,6 +827,9 @@ const createFlipperLayout = (
   position: absolutePoint(x, y),
   length: options.length,
   thickness: options.thickness,
+  ...(options.tipThickness !== undefined
+    ? { tipThickness: options.tipThickness }
+    : {}),
   restingAngle:
     side === 'left'
       ? options.restingAngleOffset

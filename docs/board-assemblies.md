@@ -2,22 +2,24 @@
 
 Use `src/boards/assemblies/index.ts` to author connected pinball mechanisms.
 Assemblies generate both collision geometry and behavioral route definitions.
-All six built-in tables use these assemblies alongside table-specific geometry. Classic Table is the smallest
+All eight built-in tables use these assemblies alongside table-specific geometry. Classic Table is the smallest
 complete working example.
 
 Follow [the shared layout requirements](conventional-layout-guidelines.md) when
-composing mechanisms. In particular, add center-drain routes explicitly: the
-lower assembly generates inlane and outlane contracts, but no center-drain test.
+composing mechanisms. The lower assembly generates center-drain contracts along with its inlane and
+outlane checks. Reference layouts can disable these only when they supply their
+own drain routes. See [flipper profiles](flipper-profiles-spec.md) for width,
+angle and return-join defaults.
 
 ## Available assemblies
 
-| Factory                        | Geometry and configuration                                                                                                                                                                                                 | Behavioral checks                                                                                                      |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `createLowerPlayfieldAssembly` | Two flippers, slings, entry posts, paired inlanes/outlanes, and concentric curved returns. Configure center/pivot spacing, flipper length, lane width, return radius, entry/bend heights, and sling dimensions.            | Both inlanes have nine passive feed and held catch/release samples each. Outlane samples drain without crossing a flipper. |
-| `createShooterArchAssembly`    | Shooter position and plunger, tangent extensions, concentric arch, gate, open rollover lanes, and an arch-connected lane stop. Configure arch center/radius, shooter width, gate angle, launch height, lane count/spacing. | Selected charge levels cross a rollover and enter the upper playfield.                                                 |
-| `createShotLaneAssembly`       | Continuous inner/outer polylines and a spinner. Configure entrance and approach velocities plus the intended exit region.                                                                                                  | Spinner contact precedes arrival in the exit region.                                                                   |
-| `createTargetBankAssembly`     | Spaced, angled standups and/or drop targets with a parallel backing rail. Configure first target, spacing vector, dimensions, backing offset, and return region.                                                           | Each target is approachable from its scoring face and the ball returns downstream.                                     |
-| `createSaucerPocketAssembly`   | Cup, rounded pocket, throat, and flared mouth. Configure wall radius, throat/mouth dimensions, capture timing, ejection, and return region.                                                                                | Three approach velocities capture the ball and reach the return region after release.                                  |
+| Factory                        | Geometry and configuration                                                                                                                                                                                                                 | Behavioral checks                                                                                                                           |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `createLowerPlayfieldAssembly` | Two flippers, slings, entry posts, paired inlanes/outlanes, and concentric curved returns. Configure center/pivot spacing, flipper length/base/tip widths and angles, lane width, return radius, entry/bend heights, and sling dimensions. | Both inlanes have nine passive feed and held catch/release samples each. Outlane and three center samples drain without crossing a flipper. |
+| `createShooterArchAssembly`    | Shooter position and plunger, tangent extensions, concentric arch, gate, open rollover lanes, and an arch-connected lane stop. Configure arch center/radius, shooter width, gate angle, launch height, lane count/spacing.                 | Selected charge levels cross a rollover and enter the upper playfield.                                                                      |
+| `createShotLaneAssembly`       | Continuous inner/outer polylines and a spinner. Configure entrance and approach velocities plus the intended exit region.                                                                                                                  | Spinner contact precedes arrival in the exit region.                                                                                        |
+| `createTargetBankAssembly`     | Spaced, angled standups and/or drop targets with a parallel backing rail. Configure first target, spacing vector, dimensions, backing offset, and return region.                                                                           | Each target is approachable from its scoring face and the ball returns downstream.                                                          |
+| `createSaucerPocketAssembly`   | Cup, rounded pocket, throat, and flared mouth. Configure wall radius, throat/mouth dimensions, capture timing, ejection, and return region.                                                                                                | Three approach velocities capture the ball and reach the return region after release.                                                       |
 
 Constructors reject basic impossible dimensions such as inlanes too narrow
 for the ball/posts, return radii smaller than lane widths, target backing in

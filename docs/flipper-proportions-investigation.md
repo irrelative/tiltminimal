@@ -1,11 +1,12 @@
 # Flipper proportions investigation
 
-October 13, 2026. Investigation and candidate comparison only; production
-flipper geometry and angles have not changed.
+October 13, 2026. This document records the pre-change investigation and archived
+candidate comparison. The recommendation is now implemented; see
+[flipper profiles](flipper-profiles-spec.md) for the validated production values.
 
-## Findings from the implementation
+## Findings from the original implementation
 
-All eight tables use 22-unit base width and 15.84-unit tip width, while all balls
+Before the change, all eight tables used 22-unit base width and 15.84-unit tip width, while all balls
 are 32 units across. The shared lower assembly defaults to thickness 22; even
 Harlem's separately authored third flipper explicitly uses 22. The tip is always
 72% of the base width, with no per-table tip-width setting.
@@ -49,7 +50,7 @@ That approximately 4.87:1 ratio also contributes to the slender impression.
 Reducing bat length to literal physical scale would require redesigning the
 lower playfield, rather than a cosmetic adjustment.
 
-## Candidate direction
+## Candidate direction investigated
 
 Treat two changes independently:
 
@@ -64,7 +65,7 @@ Treat two changes independently:
 The interactive comparison uses base/tip widths 32/18 and either the existing
 16.04° rest angle or a 24° candidate. It uses the game's existing outline
 construction at the same scale, includes a 32-unit ball, and is not a physics
-simulation or a production change.
+simulation or a live view of the production implementation.
 
 ## Clearance and behavioral implications
 

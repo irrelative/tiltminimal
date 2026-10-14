@@ -26,13 +26,15 @@ describe('post passes using ordinary flipper inputs', () => {
         const cradle = createPostPassCradle(board, transfer.source);
         expect(isSettledOn(cradle, board, transfer.source)).toBe(true);
         const releases =
-          id === 'harlem-globetrotters' && transfer.source === 0
-            ? [3, 5, 6]
+          id === 'harlem-globetrotters'
+            ? transfer.source === 0
+              ? [2, 5, 7]
+              : [8, 9]
             : id === 'alien-star'
-              ? [6, 7]
-              : ['andromeda', 'harlem-globetrotters'].includes(id)
-                ? [3, 4, 5]
-                : [6, 7, 8, 9];
+              ? [7, 8, 9]
+              : id === 'andromeda'
+                ? [1, 2, 3]
+                : [7, 9];
         for (const release of releases) {
           expect(
             simulatePostPass(

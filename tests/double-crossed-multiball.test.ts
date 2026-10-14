@@ -62,7 +62,7 @@ describe('Double Crossed physical Cross Lock', () => {
   it.each([0, 1])(
     'reaches the lock from flipper %i with ordinary release/flip inputs',
     (source) => {
-      for (const delay of [92, 93]) {
+      for (const delay of [71, 72]) {
         let s = createPostPassCradle(board, source);
         // Preserve the physical cradle while initializing only the rule state.
         s.rules = start().rules;

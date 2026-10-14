@@ -70,7 +70,7 @@ describe('bump passes using a single forward nudge', () => {
               : id === 'alien-star'
                 ? [14]
                 : id === 'double-crossed'
-                  ? [12]
+                  ? [12, 14]
                   : [12, 13];
         for (const delay of timings) {
           expect(run(delay), `nudge at frame ${delay}`).toEqual({
@@ -80,7 +80,7 @@ describe('bump passes using a single forward nudge', () => {
             slingContact: false,
           });
         }
-        if (id === 'double-crossed') expect(run(13).caught).toBe(false);
+        if (id === 'double-crossed') expect(run(16).caught).toBe(false);
         expect(
           run(-1).caught,
           'release alone must not produce the same catch',

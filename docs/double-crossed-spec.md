@@ -57,7 +57,7 @@ capture/return contract checks three approach velocities and exit through the
 region x=410–520, y=700–840. The first proposed lower/larger pocket trapped drops
 beside the bank; the compact upper placement clears the deep sweep. The central
 rebound post stays in place. Normal cradle release/flip sequences on both sides
-reach the cup at neighboring timings (92/93 frames at 120 Hz); these are sampled
+reach the cup at neighboring timings (71/72 frames at 120 Hz); these are sampled
 opportunities, not guaranteed shots from arbitrary feeds.
 
 Playfield inserts show bank completion, spinner qualification, current saucer
@@ -77,13 +77,12 @@ multiple plunge powers, target approach speeds, and inlane feed velocities.
 
 Lower sling posts now meet the inner return exits. Rounded passive rubber and
 connected solid bodies support left-to-right and right-to-left post passes.
-Returns use 148-unit outer radius, 72-unit lane width, and 174-unit bend rise.
+Returns use 148-unit outer radius, 72-unit lane width, and 177-unit bend rise.
 A connected inner-guide extension places each lower post 30 units outside
 and 80 above its flipper pivot. The active faces are 60° from horizontal;
 both directions support 50–75 ms release/re-flip regression samples.
 Existing feeds, drains, and scoring routes remain required; see
 [post-pass geometry and regression contracts](post-pass-spec.md).
-
 
 The shared solver only re-seats a weak plunge into waiting-launch when one ball
 remains. With two balls it keeps simulating both and allows the shooter ball to
@@ -97,3 +96,7 @@ replay harness: physical cup capture, visible locked ball/replacement serve,
 plunge-triggered two-ball release on ball 1, lit jackpot inserts and physical
 10,000-point jackpot collection. The harness seeded qualification switches and
 was removed after review; it is not part of the game.
+
+Flippers and return connections follow the validated
+[fuller profile specification](flipper-profiles-spec.md). Shot and pass timing
+samples were remeasured with unchanged scoring/catch requirements.

@@ -69,10 +69,10 @@ speeds and require draining without touching a resting flipper. The shooter,
 spinner, each standup and saucer have approach/continuation route contracts.
 
 The lower pivots are (283, 1420) and (617, 1420), with 136-unit bats,
-0.28-radian rest angle, 177-unit bend rise and 340-unit return entry rise.
+24° rest angle, 182-unit bend rise and 340-unit return entry rise.
 Resting tip clearance exceeds the 32-unit ball diameter plus 20 units.
 The slightly wider pivot spacing changes transfer timing: the regression suite
-verifies post passes after 6/7 release frames and bump passes at frame 14.
+verifies post passes after 7/8/9 release frames and bump passes at frame 14.
 The curved right bonus shot ends beside the top pop rather than traversing the
 full width above the pops. This deliberate 2D adaptation avoids crossing the
 STAR feeds; its outer guide replaces the inner shooter arc so returning balls
@@ -179,3 +179,14 @@ The temporary browser review canvas/state and local tuning scripts were removed.
 Acceptance passed: all 614 tests, all eight tables with
 `--deep-playability --fail-on-warnings` (zero errors/warnings), production build
 and ESLint.
+
+## Fuller flipper profile revision
+
+The [profile revision](flipper-profiles-spec.md) authors Alien Star bats as
+30-unit heels/18-unit tips, retains 136-unit length, and increases rest to 24°.
+Its taller feeds use a 182-unit return bend with a sloped inset heel join;
+connected lower posts sit 30 outward/84 above each pivot. The reference lock,
+spinner corridor and upper-left save remain verified. The direct spinner input
+now flips at frame 10: Chrome blade contact occurs at frame 43, first scoring
+at 48, with 12 revolutions within one second. Earlier replay timings above
+record the preceding narrow-profile revision.

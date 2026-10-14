@@ -25,7 +25,7 @@ describe('connected sling rubber', () => {
     ),
   )(
     '$id keeps its post close to the heel with a diagonal active face',
-    ({ board }) => {
+    ({ id, board }) => {
       board.slingshots.forEach((sling, i) => {
         const angle = getSlingshotAngle(board, sling);
         const sign = i === 0 ? 1 : -1;
@@ -35,8 +35,10 @@ describe('connected sling rubber', () => {
         };
         const pivot = board.flippers[i];
         expect(Math.abs(post.x - pivot.x)).toBeCloseTo(30);
-        expect(pivot.y - post.y).toBeCloseTo(80);
-        expect(Math.hypot(post.x - pivot.x, post.y - pivot.y)).toBeLessThan(86);
+        expect(pivot.y - post.y).toBeCloseTo(id === 'alien-star' ? 84 : 80);
+        expect(Math.hypot(post.x - pivot.x, post.y - pivot.y)).toBeLessThan(
+          id === 'alien-star' ? 90 : 86,
+        );
         expect(
           Math.abs(Math.atan2(Math.sin(angle), Math.cos(angle))),
         ).toBeCloseTo(Math.PI / 3);
