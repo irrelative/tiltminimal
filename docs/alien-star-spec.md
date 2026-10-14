@@ -190,3 +190,7 @@ spinner corridor and upper-left save remain verified. The direct spinner input
 now flips at frame 10: Chrome blade contact occurs at frame 43, first scoring
 at 48, with 12 revolutions within one second. Earlier replay timings above
 record the preceding narrow-profile revision.
+
+After the [resting-contact revision](flipper-resting-contact-spec.md), both post
+passes retain post contact, no sling kick and a stable receiver cradle at release
+frames 6, 7 and 9 (120 Hz). The former frame-8 sample no longer settles reliably.

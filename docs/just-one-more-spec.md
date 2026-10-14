@@ -124,3 +124,9 @@ spinner defaults and its separate directed-orbit qualification. A controlled
 900-unit/second passage followed by four seconds of coast produces 16 turns
 and 1,600 points, with only one PLAY bit set. This is a deterministic isolated
 physics/rules test, not a guaranteed award for every player shot.
+
+The [resting-contact revision](flipper-resting-contact-spec.md) remeasured the
+240 Hz cradle-shot map without changing scoring geometry or first-objective
+requirements. Left samples: center standup 130/131, upper standup 163/164,
+saucer 146/147, left orbit 175/176. Right samples: upper standup 167/168,
+center standup 119/120, saucer 144/145, right orbit 175/176.

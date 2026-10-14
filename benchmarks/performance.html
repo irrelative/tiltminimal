@@ -10,6 +10,7 @@
       import {
         profilePhysics,
         performanceWorkloads,
+        heldFlipperPerformanceWorkloads,
       } from '/src/playtest/performance-profile.ts';
       import { CanvasRenderer } from '/src/render/canvas-renderer.ts';
       import { idle } from '/src/playtest/simulation.ts';
@@ -27,7 +28,11 @@
         return { table: id, medianMs: samples[3] };
       });
       document.querySelector('#results').textContent = JSON.stringify(
-        { physics, rendering },
+        {
+          physics,
+          heldFlippers: profilePhysics(200, heldFlipperPerformanceWorkloads),
+          rendering,
+        },
         null,
         2,
       );

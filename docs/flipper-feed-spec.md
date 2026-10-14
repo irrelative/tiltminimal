@@ -61,15 +61,17 @@ the catch through the remaining motion and clears when contact is lost or the
 flipper is released. Ordinary held-feed capture remains 8–58%; see
 [advanced flipper skills](advanced-flipper-skills-spec.md) for exact conditions.
 
-Once caught, the ball retains tangential motion and rolls downhill toward the
-base. Normal impact is absorbed; catches arriving faster than 40 units/second
-into the face retain 10% of their tangential speed. Sustained contact uses 5/7
-of the gravity projection along the bat, with matching visible rolling spin.
-It must not freeze at the initial catch position.
+Once caught, gravity and ordinary friction/spin contact impulses roll the ball
+toward the base. Normal impact is absorbed; catches arriving faster than 40
+units/second into the face retain 10% of their post-contact tangential speed.
+Spin follows contact torque rather than a prescribed rolling velocity.
+It must not freeze at the initial catch position or snap to a resting pose.
 
-The heel pocket settles the center one ball radius plus one base radius along
-the bat from its pivot (at least 8% of length). This bounded 2D approximation
-keeps it clear of the stationary cap so lowering the flipper releases it.
+The heel pocket uses a unilateral support contact one base radius along the bat
+from its pivot (with a ball-sized clearance and at least 8% of length). This
+bounded 2D approximation keeps it clear of the stationary cap so lowering the
+flipper releases it. Support impulses and small penetration corrections settle
+the ball; see [resting contact behavior](flipper-resting-contact-spec.md).
 Regression tests cover gradual rolling and settling on every built-in flipper,
 long holds, all declared catch/release feeds, and rejection of fast impacts.
 

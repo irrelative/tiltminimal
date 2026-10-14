@@ -31,7 +31,7 @@ describe('post passes using ordinary flipper inputs', () => {
               ? [2, 5, 7]
               : [8, 9]
             : id === 'alien-star'
-              ? [7, 8, 9]
+              ? [6, 7, 9]
               : id === 'andromeda'
                 ? [1, 2, 3]
                 : [7, 9];

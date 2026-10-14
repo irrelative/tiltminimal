@@ -64,6 +64,9 @@ The marker does not steer a free ball: release, separation by more than four
 units beyond contact, leaving the supported face, an underside contact, or
 excessive speed clears it. It is independent for each multiball ball and is
 preserved by normal state cloning. It does not lock the flipper or the ball.
+Resting face/heel support now uses the shared impulse/friction solver and bounded
+penetration correction; it does not assign a resting position or rolling spin.
+See [flipper resting contacts](flipper-resting-contact-spec.md).
 
 This is a bounded 2D approximation of rubber/end-stop absorption. Ordinary
 shots, passive restitution, nudge strength, and table geometry are unchanged.

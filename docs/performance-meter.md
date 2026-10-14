@@ -46,6 +46,12 @@ batches follow a warmup. Results give median and minimum milliseconds per call,
 plus an aggregate position/event checksum. This isolates engine costs; it does
 not represent a full game, rules, audio, or browser presentation.
 
+The `heldFlippers` result adds three touching-ball positions on each of the 17
+raised flippers (51 states total), including overlapping heel supports. Both
+inputs stay held. This exercises cradle contacts that the fast-ball workload
+usually misses; the browser benchmark reports it too. It uses 200 rounds per
+batch and the same warmup/seven-batch procedure.
+
 For CPU sampling, run
 `node --cpu-prof --cpu-prof-dir=/tmp node_modules/vite-node/vite-node.mjs src/cli/profile-performance.ts`
 and inspect the resulting profile in Chrome DevTools. Collect timings separately

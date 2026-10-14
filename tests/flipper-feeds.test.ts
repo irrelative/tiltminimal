@@ -10,6 +10,62 @@ import {
   sampleFlipperProfile,
 } from '../src/game/flipper-geometry';
 import { idle } from '../src/playtest/simulation';
+import { resolveFlipperCollisions } from '../src/game/physics-engine-flippers';
+
+it.each(BUILT_IN_TABLES)(
+  '$id resolves heel support without snapping separate balls to one pose',
+  ({ board }) => {
+    for (const [index, flipper] of board.flippers.entries()) {
+      const axis = {
+        x: Math.cos(flipper.activeAngle),
+        y: Math.sin(flipper.activeAngle),
+      };
+      const normal =
+        flipper.side === 'left'
+          ? { x: axis.y, y: -axis.x }
+          : { x: -axis.y, y: axis.x };
+      const positions = [];
+      for (const t of [0.1, 0.15]) {
+        const state = createInitialGameState(board);
+        const radius =
+          getFlipperRadiusAt(flipper, t) + state.ball.radius - 0.01;
+        state.ball.position = {
+          x: flipper.x + axis.x * flipper.length * t + normal.x * radius,
+          y: flipper.y + axis.y * flipper.length * t + normal.y * radius,
+        };
+        const before = { ...state.ball.position };
+        const frames = board.flippers.map((f, i) => ({
+          previousAngle: f.activeAngle,
+          next: {
+            engaged: i === index,
+            angle: f.activeAngle,
+            angularVelocity: 0,
+          },
+        }));
+        resolveFlipperCollisions(
+          state,
+          board,
+          frames,
+          1 / 120,
+          board.physics.solver,
+        );
+        expect(
+          Math.hypot(
+            state.ball.position.x - before.x,
+            state.ball.position.y - before.y,
+          ),
+        ).toBeLessThan(0.6);
+        positions.push(state.ball.position);
+      }
+      expect(
+        Math.hypot(
+          positions[0].x - positions[1].x,
+          positions[0].y - positions[1].y,
+        ),
+      ).toBeGreaterThan(flipper.length * 0.04);
+    }
+  },
+);
 
 describe('return lanes and held flippers', () => {
   for (const { id, board } of BUILT_IN_TABLES) {

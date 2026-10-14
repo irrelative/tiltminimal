@@ -111,12 +111,12 @@ inputs. At a fixed 240 Hz step, release/re-flip samples demonstrate:
 | Objective            | Source flipper | Release frames    |
 | -------------------- | -------------- | ----------------- |
 | Cargo lower drop     | Left           | 128, 129          |
-| Cargo middle drop    | Right          | 157, 158          |
-| Cargo upper drop     | Right / left   | 139 / 146         |
-| Signal upper standup | Left           | 145, 149          |
+| Cargo middle drop    | Right          | 167, 168          |
+| Cargo upper drop     | Right / left   | 170 / 145         |
+| Signal upper standup | Left           | 157, 179          |
 | Signal lower standup | Left           | 150, 151          |
-| Dispatch             | Left / right   | 154, 157 / 83, 84 |
-| West Express         | Right          | 174, 175          |
+| Dispatch             | Left / right   | 154, 175 / 83, 84 |
+| West Express         | Right          | 175, 176          |
 | East Express         | Left           | 162, 163          |
 
 The expected shot must be the first major scoring objective reached. These are
@@ -191,3 +191,7 @@ The 240 Hz input map above was remeasured after that revision. All named
 objectives retain physical shot coverage; the middle Cargo target now has
 right-flipper samples, and the upper target has independent samples from both
 sides. The shared lower assembly supplies the three center-drain contracts.
+
+The [resting-contact revision](flipper-resting-contact-spec.md) remeasured these
+240 Hz samples. The same first-objective checks, catch/release contracts and
+center-drain routes remain required.

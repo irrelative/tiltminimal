@@ -218,45 +218,73 @@ const applyFlipperCollisionAtAngle = (
       MAX_CRADLE_CAPTURE_SPEED
   ) {
     if (liveCatch) state.ball.liveCatchFlipper = motion.index;
-    // Absorb the normal impact, but retain motion along the bat. Gravity has
-    // already been integrated; use the solid-sphere rolling fraction (5/7)
-    // of its tangential acceleration instead of freezing the caught ball.
     const axis = { x: Math.cos(collisionAngle), y: Math.sin(collisionAngle) };
-    let rollingSpeed =
-      (state.ball.linearVelocity.x - motion.tableVelocity.x) * axis.x +
-      (state.ball.linearVelocity.y - motion.tableVelocity.y) * axis.y -
-      (2 / 7) * board.gravity * axis.y * deltaSeconds;
-    // Rubber dissipates the incoming catch; sustained gravity contacts keep
-    // their tangential velocity so the ball can accelerate down the slope.
-    if (incomingNormalSpeed < -40) rollingSpeed *= 0.1;
-    // A bounded 2D heel pocket keeps a settled ball on the moving bat rather
-    // than letting it balance on the stationary pivot cap. Release bypasses
-    // this branch entirely.
-    const heelPosition = Math.max(
-      MIN_CRADLE_POSITION,
-      (state.ball.radius + flipper.thickness / 2) / flipper.length,
+    const heelDistance = Math.max(
+      MIN_CRADLE_POSITION * flipper.length,
+      state.ball.radius + flipper.thickness / 2,
     );
-    const t = Math.max(heelPosition, collision.t);
-    if (collision.t <= heelPosition && rollingSpeed < 0) rollingSpeed = 0;
-    const radius =
-      sampleFlipperProfile(
+    const surfaceVelocity = {
+      x:
+        motion.tableVelocity.x +
+        (liveCatch || motion.carryingLiveCatch ? 0 : surfaceVelocityX),
+      y:
+        motion.tableVelocity.y +
+        (liveCatch || motion.carryingLiveCatch ? 0 : surfaceVelocityY),
+    };
+    // The 2D heel pocket is a unilateral support contact, rather than a
+    // prescribed ball pose. A ball may leave either surface freely.
+    const faceContact: ContactData = {
+      point: contactPoint,
+      normal,
+      tangent: getContactTangent(normal),
+      overlap,
+      surfaceVelocity,
+      material: flipperMaterial,
+      restitutionScale: 0,
+    };
+    resolveBallContact(state.ball, faceContact, solver);
+    if (incomingNormalSpeed < -40) {
+      // Impact absorption belongs to the catch, not to every resting frame.
+      const tangentSpeed =
+        (state.ball.linearVelocity.x - surfaceVelocity.x) * axis.x +
+        (state.ball.linearVelocity.y - surfaceVelocity.y) * axis.y;
+      state.ball.linearVelocity.x -= axis.x * tangentSpeed * 0.9;
+      state.ball.linearVelocity.y -= axis.y * tangentSpeed * 0.9;
+    }
+    const heelOverlap = heelDistance - collision.t * flipper.length;
+    if (heelOverlap > 0) {
+      const heelPoint = {
+        x:
+          contactPoint.x +
+          axis.x *
+            (heelDistance - state.ball.radius - collision.t * flipper.length),
+        y:
+          contactPoint.y +
+          axis.y *
+            (heelDistance - state.ball.radius - collision.t * flipper.length),
+      };
+      resolveBallContact(
+        state.ball,
         {
-          x: flipper.x + axis.x * flipper.length * t,
-          y: flipper.y + axis.y * flipper.length * t,
+          point: heelPoint,
+          normal: axis,
+          tangent: getContactTangent(axis),
+          // Deep initial overlap must not teleport a ball to the pocket edge.
+          overlap: Math.min(heelOverlap, 0.5),
+          surfaceVelocity: {
+            x:
+              motion.tableVelocity.x -
+              motion.angularVelocity * (heelPoint.y - flipper.y),
+            y:
+              motion.tableVelocity.y +
+              motion.angularVelocity * (heelPoint.x - flipper.x),
+          },
+          material: flipperMaterial,
+          restitutionScale: 0,
         },
-        flipper,
-        collisionAngle,
-      ).radius + state.ball.radius;
-    state.ball.position.x =
-      flipper.x + axis.x * flipper.length * t + fallbackNormal.x * radius;
-    state.ball.position.y =
-      flipper.y + axis.y * flipper.length * t + fallbackNormal.y * radius;
-    state.ball.linearVelocity.x =
-      motion.tableVelocity.x + axis.x * rollingSpeed;
-    state.ball.linearVelocity.y =
-      motion.tableVelocity.y + axis.y * rollingSpeed;
-    state.ball.angularVelocity.x = (-axis.y * rollingSpeed) / state.ball.radius;
-    state.ball.angularVelocity.y = (axis.x * rollingSpeed) / state.ball.radius;
+        solver,
+      );
+    }
     return true;
   }
 

@@ -53,25 +53,25 @@ describe.each([switchyardTable, justOneMoreTable])(
       board === switchyardTable
         ? ([
             [0, 'drop-target-hit:2', [128, 129]],
-            [1, 'drop-target-hit:1', [157, 158]],
-            [1, 'drop-target-hit:0', [139]],
-            [0, 'drop-target-hit:0', [146]],
-            [0, 'standup-target-hit:0', [145, 149]],
+            [1, 'drop-target-hit:1', [167, 168]],
+            [1, 'drop-target-hit:0', [170]],
+            [0, 'drop-target-hit:0', [145]],
+            [0, 'standup-target-hit:0', [157, 179]],
             [0, 'standup-target-hit:1', [150, 151]],
-            [0, 'saucer-captured:0', [154, 157]],
+            [0, 'saucer-captured:0', [154, 175]],
             [1, 'saucer-captured:0', [83, 84]],
-            [1, 'orbit:0', [174, 175]],
+            [1, 'orbit:0', [175, 176]],
             [0, 'orbit:5', [162, 163]],
           ] as const)
         : ([
             [0, 'standup-target-hit:1', [130, 131]],
-            [1, 'standup-target-hit:0', [166, 167]],
-            [0, 'standup-target-hit:3', [162, 163]],
+            [1, 'standup-target-hit:0', [167, 168]],
+            [0, 'standup-target-hit:3', [163, 164]],
             [1, 'standup-target-hit:2', [119, 120]],
-            [0, 'saucer-captured:0', [144, 145]],
+            [0, 'saucer-captured:0', [146, 147]],
             [1, 'saucer-captured:0', [144, 145]],
-            [0, 'orbit:2', [173, 174]],
-            [1, 'orbit:0', [174, 175]],
+            [0, 'orbit:2', [175, 176]],
+            [1, 'orbit:0', [175, 176]],
           ] as const);
     it.each(shotCases)(
       'flipper %s reaches %s from the tested release timings',
