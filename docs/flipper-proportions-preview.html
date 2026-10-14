@@ -1,0 +1,128 @@
+<div id="flipper-proportions">
+  <h3>Flipper proportions</h3>
+  <div class="viz-controls">
+    <label class="form-label"
+      >Compare with
+      <select class="form-select" id="flipper-proposal">
+        <option value="shape">Fuller tapered bat</option>
+        <option value="both" selected>Fuller bat + steeper resting V</option>
+      </select>
+    </label>
+  </div>
+  <svg
+    class="flipper-comparison"
+    role="img"
+    aria-label="Current flippers compared with an estimated fuller profile; circles show ball size"
+    style="display: block; width: 100%; height: 300px"
+  ></svg>
+  <div class="text-small" aria-live="polite" id="flipper-detail"></div>
+</div>
+<style>
+  #flipper-proportions .flipper-comparison text {
+    fill: var(--foreground);
+    font-size: 14px;
+  }
+  #flipper-proportions .flipper-old {
+    fill: var(--viz-series-2);
+  }
+  #flipper-proportions .flipper-new {
+    fill: var(--viz-series-1);
+  }
+  #flipper-proportions .flipper-ball {
+    fill: none;
+    stroke: var(--foreground);
+    stroke-width: 1.5;
+  }
+</style>
+<script>
+  (() => {
+    const root = document.getElementById('flipper-proportions');
+    const svg = root.querySelector('.flipper-comparison');
+    const select = root.querySelector('#flipper-proposal');
+    const ns = 'http://www.w3.org/2000/svg';
+    const add = (tag, attrs, parent = svg, text = '') => {
+      const node = document.createElementNS(ns, tag);
+      for (const [key, value] of Object.entries(attrs))
+        node.setAttribute(key, value);
+      node.textContent = text;
+      parent.appendChild(node);
+      return node;
+    };
+    const bat = (base, tip) =>
+      `M 0 ${-base} L 136 ${-tip} A ${tip} ${tip} 0 0 1 136 ${tip} L 0 ${base} A ${base} ${base} 0 0 1 0 ${-base} Z`;
+    function draw() {
+      const width = root.clientWidth;
+      if (!width) return;
+
+      svg.replaceChildren();
+      add(
+        'title',
+        {},
+        svg,
+        'Current and proposed flipper shapes at the same scale',
+      );
+      const scale = Math.min(1.5, (width - 48) / 378);
+      const angle = select.value === 'both' ? 24 : (0.28 * 180) / Math.PI;
+      const row = (y, base, tip, degrees, label, className) => {
+        add('text', { x: 12, y: y - 35 }, svg, label);
+        const g = add('g', {
+          transform: `translate(${width / 2 - 160 * scale} ${y}) scale(${scale})`,
+        });
+        add(
+          'path',
+          {
+            d: bat(base / 2, tip / 2),
+            class: className,
+            transform: `rotate(${degrees})`,
+          },
+          g,
+        );
+        add(
+          'path',
+          {
+            d: bat(base / 2, tip / 2),
+            class: className,
+            transform: `translate(320 0) rotate(${180 - degrees})`,
+          },
+          g,
+        );
+        add('circle', { cx: 160, cy: 0, r: 16, class: 'flipper-ball' }, g);
+        const infoY =
+          y +
+          scale * (136 * Math.sin((degrees * Math.PI) / 180) + tip / 2) +
+          25;
+        add(
+          'text',
+          { x: 12, y: infoY },
+          svg,
+          `Base ${base} · tip ${tip} · rest ${degrees.toFixed(1)}°`,
+        );
+        return infoY;
+      };
+      const firstBottom = row(
+        62,
+        22,
+        15.84,
+        (0.28 * 180) / Math.PI,
+        'Current',
+        'flipper-old',
+      );
+      const bottom = row(
+        firstBottom + 76,
+        32,
+        18,
+        angle,
+        'Estimated candidate',
+        'flipper-new',
+      );
+      svg.setAttribute('viewBox', `0 0 ${width} ${bottom + 20}`);
+      svg.style.height = `${bottom + 20}px`;
+      const gap = 320 - 272 * Math.cos((angle * Math.PI) / 180) - 18;
+      root.querySelector('#flipper-detail').textContent =
+        `32-unit ball · 136-unit pivot-to-tip length · 320-unit pivot spacing · candidate tip gap ${gap.toFixed(1)} units`;
+    }
+    select.addEventListener('change', draw);
+    new ResizeObserver(draw).observe(root);
+    draw();
+  })();
+</script>
