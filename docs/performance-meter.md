@@ -103,3 +103,40 @@ A renderer experiment cached flipper paths with Path2D. Browser draw medians
 remained within the existing noise range and several tables were slower, so the
 experiment was removed. Static playfield caching remains the measured rendering
 strategy; no animation/rendering speedup is claimed from that experiment.
+
+### Coordinate copies and stopping point
+
+A follow-up CPU profile still spent substantial time spreading entire target,
+post, bumper, saucer and rollover definitions into temporary translated objects.
+`offsetPoint` now returns only a fresh x/y point; all its callers consume only
+coordinates. Definition cloning still uses its own explicit clones. The change
+preserves translated coordinate arithmetic and ball/device behavior. Node saw
+another 22–36% reduction against the slingshot version; Chrome saw smaller gains
+of roughly 0–10%, including noise, so the larger gain is runtime-specific.
+
+Final untraced Node results, compared with the original untraced baseline:
+
+| Table                | Before (ms) | Final (ms) | Reduction |
+| -------------------- | ----------: | ---------: | --------: |
+| alien-star           |      0.0443 |     0.0127 |       71% |
+| just-one-more        |      0.0347 |     0.0116 |       66% |
+| classic-table        |      0.0324 |     0.0107 |       67% |
+| andromeda            |      0.0306 |     0.0111 |       64% |
+| double-crossed       |      0.0369 |     0.0118 |       68% |
+| harlem-globetrotters |      0.0348 |     0.0116 |       67% |
+| starlight-em         |      0.0366 |     0.0112 |       70% |
+| switchyard           |      0.0477 |     0.0121 |       75% |
+
+Final Chrome physics medians were 0.0079–0.0129 ms, a 48–64% reduction against
+the first browser baseline. Node and Chrome checksums remained identical to
+their baselines. All 612 tests, production build and lint passed.
+
+The final CPU sample no longer shows translated point copying among leading
+costs. Remaining costs span simulation orchestration, guide bounds, polygon
+checks and flipper response. Drawing medians remain around 0.02–0.05 ms with no
+repeatable gain from the Path2D experiment. Work stops here because this workload
+has no meaningful remaining frame-budget bottleneck, and more aggressive caches,
+spatial indexing or solver/substep changes would add complexity or behavior risk
+without an observed need. A representative slow-device RAF/rasterization profile
+would be the useful next input, rather than further tuning these sub-millisecond
+synthetic timings. No GPU, FPS or mobile speedup is inferred.

@@ -4,6 +4,7 @@ import { getContactTangent } from './spin-solver';
 import type {
   FlipperDefinition,
   GuideDefinition,
+  Point,
   SolverPhysicsDefinition,
   StandupTargetDefinition,
 } from '../types/board-definition';
@@ -32,11 +33,8 @@ export const createStaticContact = (
   material,
 });
 
-export const offsetPoint = <TPoint extends { x: number; y: number }>(
-  point: TPoint,
-  offset: { x: number; y: number },
-): TPoint => ({
-  ...point,
+/** Collision callers need coordinates, not a copy of the entire device. */
+export const offsetPoint = (point: Point, offset: Point): Point => ({
   x: point.x + offset.x,
   y: point.y + offset.y,
 });
