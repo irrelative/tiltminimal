@@ -11,6 +11,9 @@ import {
 import { arc, rail, type BoardAssembly } from '../assemblies/shared';
 import { createAlienStarLock } from './alien-star-lock';
 import { alienStarRulesScript } from './alien-star-rules';
+import { physicsDefaults } from '../../game/physics-defaults';
+
+const gravity = physicsDefaults.gravity;
 
 const { lower, shooter, ...foundation } = createFoundation(
   'alien-star',
@@ -40,6 +43,8 @@ Object.assign(
     restingAngle: 0.28,
   }),
 );
+// The photographed spinner sits inboard of the lock. Its inner rail ends
+// beside the lower pop, leaving the diagonal right-flipper approach open.
 const spinner = createShotLaneAssembly({
   id: 'alien-star-spinner',
   outerPath: [
@@ -47,14 +52,32 @@ const spinner = createShotLaneAssembly({
     { x: 12, y: 850 },
   ],
   innerPath: [
-    { x: 260, y: 310 },
-    { x: 260, y: 500 },
-    { x: 260, y: 620 },
+    { x: 280, y: 310 },
+    { x: 280, y: 500 },
+    { x: 280, y: 540 },
   ],
-  spinner: { position: { x: 136, y: 420 }, length: 90, angle: 0, score: 1000 },
-  entry: { x: 136, y: 550 },
+  spinner: { position: { x: 200, y: 420 }, length: 90, angle: 0, score: 1000 },
+  entry: { x: 200, y: 550 },
   entryVelocities: [{ x: 0, y: -1900 }],
   exit: { type: 'region', min: { x: 20, y: 80 }, max: { x: 850, y: 300 } },
+});
+// Exercise the full approach from the right bat, rather than only a vertical
+// feed already inside the orbit. Preserve all three flight-speed samples.
+spinner.routes.push({
+  id: 'alien-star-right-flipper-spinner',
+  start: {
+    type: 'feed',
+    position: { x: 490, y: 1320 },
+    velocities: [0.35, 0.45, 0.6].map((flight) => ({
+      x: (200 - 490) / flight,
+      y: (420 - 1320 - 0.5 * gravity * flight ** 2) / flight,
+    })),
+  },
+  goals: [
+    { type: 'event', event: 'spinner-spin', position: { x: 200, y: 420 } },
+    { type: 'region', min: { x: 20, y: 80 }, max: { x: 850, y: 300 } },
+  ],
+  timeoutSeconds: 5,
 });
 const bank = createBank(
   'alien-star-alien',
@@ -168,6 +191,7 @@ for (const x of [440, 450, 460])
 export const alienStarTable = compileBuiltInBoardLayout(
   {
     ...foundation,
+    gravity,
     ...parts,
     name: 'Alien Star',
     themeId: 'alien-star',

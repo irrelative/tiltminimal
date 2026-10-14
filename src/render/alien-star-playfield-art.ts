@@ -106,8 +106,9 @@ export const drawAlienStarPlayfield = (
   }
   text(c, 'ALIEN STAR', 450, 1550, 42);
   text(c, '1984 · GOTTLIEB', 450, 1580, 14);
-  text(c, 'SPINNER', 136, 490, 16);
-  text(c, '10,000 WHEN LIT', 150, 520, 14);
+  const spinner = board.spinners[0];
+  text(c, 'SPINNER', spinner.x, spinner.y + 70, 16);
+  text(c, '10,000 WHEN LIT', spinner.x, spinner.y + 100, 14);
   text(c, 'BONUS X SHOT', 760, 560, 15);
   text(c, 'CAPTURE WHEN LIT', 140, 680, 14);
   text(c, 'MULTIBALL X', 240, 1100, 13);
@@ -165,7 +166,14 @@ export const drawAlienStarInserts = (
       c.fillText(`${x}X`, 215, 1056 - i * 50);
     }
   });
-  lamp(c, 136, 465, Boolean(state?.rules.modes['spinner-lit']), '#ffd953', 12);
+  lamp(
+    c,
+    board.spinners[0].x,
+    board.spinners[0].y + 45,
+    Boolean(state?.rules.modes['spinner-lit']),
+    '#ffd953',
+    12,
+  );
   lamp(
     c,
     765,

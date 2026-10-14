@@ -54,6 +54,53 @@ describe('Alien Star reference recreation', () => {
       ),
     ).toHaveLength(3);
   });
+  it('keeps the spinner inboard of the lock with an open right-flipper route', () => {
+    expect(board.spinners[0].x).toBeGreaterThan(
+      board.saucers[0].x + board.ball.radius * 2,
+    );
+    expect(
+      board.routes!.some((r) => r.id === 'alien-star-right-flipper-spinner'),
+    ).toBe(true);
+  });
+  it('shoots the spinner directly with the right flipper', () => {
+    let s = createInitialGameState(board);
+    s.status = 'playing';
+    s.launcherExited = true;
+    s.ball.position = { x: 490, y: 1360 };
+    s.ball.linearVelocity = { x: 0, y: 800 };
+    let touched = false,
+      spun = false;
+    for (let n = 0; n < 120 && !spun; n++) {
+      const r = stepGameFrame(
+        s,
+        board,
+        { ...idleInput, rightPressed: n >= 15 },
+        1 / 120,
+      );
+      s = r.state;
+      expect(
+        r.events.some((e) =>
+          [
+            'bumper-hit',
+            'slingshot-hit',
+            'standup-target-hit',
+            'saucer-captured',
+            'ball-drained',
+          ].includes(e.type),
+        ),
+      ).toBe(false);
+      if (s.ball.position.y < 1300 && !touched) {
+        // The old inner-rail endpoint reverses this flight. A rebound into
+        // the spinner does not satisfy the direct shot regression.
+        expect(s.ball.linearVelocity.x).toBeLessThan(0);
+        expect(s.ball.linearVelocity.y).toBeLessThan(0);
+      }
+      touched ||= s.ball.spinnerContacts?.[0] ?? false;
+      spun = r.events.some((e) => e.type === 'spinner-spin' && e.index === 0);
+    }
+    expect(touched).toBe(true);
+    expect(spun).toBe(true);
+  });
   it.each([0.35, 0.45, 0.6])(
     'accepts a diagonal shot from the right flipper area over %ss',
     (flightTime) => {

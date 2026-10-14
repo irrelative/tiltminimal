@@ -126,3 +126,56 @@ returned down the shooter lane and plunged past the already-armed gate.
 The fixture was removed after review. All 595 tests and eight-table deep
 validation pass. The Classic runner completed 76 sampled runs with no sustained
 near-rest trap; its 14 diagnostic flags were speeds above 4,000 units/second.
+
+## Right-flipper spinner approach correction (October 13, 2026)
+
+Re-inspected [Kevin Orme's full playfield photograph in Daina's archive](https://user.xmission.com/~daina/images/ko/alien_star_pf.jpg).
+The [Pinside photo gallery](https://pinside.com/pinball/machine/alien-star/gallery)
+provides additional reference photographs.
+The full photograph shows the left-orbit spinner inboard (to the right) of the
+lock pocket, with an approach from the right lower flipper. The corresponding
+[owner description](https://pinballer.info/buy-sell-trade/the-pinballer-collection/alien-star-gottlieb-1984/)
+identifies the left orbit as the spinner shot and the right inlane as its timed
+scoring setup. The photographed shot relationship, rather than perspective-
+distorted pixel distances, guides this correction.
+
+Previously the spinner at (136, 420) was almost directly above the lock at
+(140, 760). Its straight inner rail at x=260 extended to y=620. A production
+physics replay starting at (490, 1360), falling at 800 units/second and pressing
+the right flipper after 15 frames at 120 Hz struck that rail's lower endpoint.
+At frame 45 the ball was near (264, 658), moving downward at about 1,998
+units/second, instead of continuing up to the spinner. Some broader timing
+samples reached the spinner after rebounds, so the old layout was not literally
+incapable of any spinner hit; it lacked this usable direct approach.
+
+The spinner is now (200, 420). Its connected inner rail is at x=280 and ends at
+y=540, beside the left pop bumper; the outer orbit remains connected to the
+existing cabinet/left return. Shortening the straight inner rail is an explicit
+2D adaptation of the photographed approach, not a claim of exact factory rail
+measurements. The lock, bumpers, lower flippers, returns and center drain retain
+their existing positions. Spinner labels and the lit-shot insert now follow
+its definition rather than their old fixed coordinates.
+
+The same falling-ball/right-flipper input now reaches the blade on frame 52,
+starts scoring full revolutions on frame 57 and produces 11 revolutions within
+the one-second Chrome replay. The focused regression requires an upward,
+leftward flight until blade contact and excludes intervening bumper, sling,
+target, saucer and drain events. It fails on the previous layout. This proves
+one physical shot/input combination; it does not claim a factory timing window
+or that every right-flipper feed can make the shot.
+
+A new `alien-star-right-flipper-spinner` route samples the full diagonal
+approach from (490, 1320) at three ballistic flight settings (0.35/0.45/0.6 s),
+then requires actual spinner scoring and continuation into the upper field.
+The existing vertical orbit feed remains as a separate continuation check.
+Both use the production solver, with no table-specific collision exception.
+
+Chrome review in `/physics?table=alien-star` inspected the full collision overlay
+and a temporary production-physics replay with the shot trajectory drawn over
+it. A lower-third view showed both inlane balls on their movable upper flipper
+faces after 60 settled frames; lowering each moved its ball about 172 units in
+one second. A center drop drained, and a full plunge hit an upper STAR lane.
+The temporary browser review canvas/state and local tuning scripts were removed.
+Acceptance passed: all 614 tests, all eight tables with
+`--deep-playability --fail-on-warnings` (zero errors/warnings), production build
+and ESLint.
