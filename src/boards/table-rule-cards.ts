@@ -6,6 +6,16 @@ export interface TableRuleCard {
 
 /** Summaries of this game's rule scripts, including simplified recreations. */
 export const TABLE_RULE_CARDS: Record<string, TableRuleCard> = {
+  'tactics-lab': {
+    balls: 3,
+    objective: 'Practice flipper control on an open playfield.',
+    rules: [
+      'No scoring targets, bumpers, spinners, saucers or powered slings. Passive rubber posts remain for post passes.',
+      'Hold a return to cradle, or leave a flipper down to dead-bounce toward the opposite flipper. Time an upstroke for a live catch or lower a raised bat for a drop catch.',
+      'Briefly release and re-flip a cradle into its nearby post for a post pass. A Shatz is a controlled shot up the opposite inlane followed by a return catch.',
+      'Use the Physics Sandbox to inject repeatable feeds. Headless tactic checks and local replays are described in the Tactics Lab spec.',
+    ],
+  },
   'alien-star': {
     balls: 3,
     objective: 'Spell ALIEN, lock at 5X, and rip the lit spinner.',

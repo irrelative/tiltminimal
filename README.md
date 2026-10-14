@@ -229,3 +229,11 @@ findings and exact replay cases. Use `/benchmarks/playtest-review.html` to inspe
 local cases, or export a recent human game from Settings. See
 [headless investigation and replay](docs/headless-playtest-spec.md) for commands,
 detection limits, artifact details, and profiling.
+
+**Tactics Lab** is an open practice table with two flippers, return lanes and
+passive posts. Run `make playtest ARGS='--suite tactics'` to assert dead bounces,
+held/live/drop catches, post passes, bump passes and short Shatz lobs, with timing
+controls and replay files. See [the tactic contracts](docs/tactics-lab-spec.md).
+
+The current tactic run passes 56/60 cases; four Shatz samples fail the direct
+inlane-entry assertion and save diagnostic replays. They remain visible failures.

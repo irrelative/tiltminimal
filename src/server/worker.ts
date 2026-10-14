@@ -19,6 +19,7 @@ export interface Env {
   };
 }
 export const TABLE_IDS = [
+  'tactics-lab',
   'alien-star',
   'classic-table',
   'andromeda',

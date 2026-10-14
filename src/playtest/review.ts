@@ -122,13 +122,17 @@ const seek = (frame: number) => {
     300,
   );
   status.textContent = `${artifact.id} · frame ${currentFrame}/${artifact.frameDurations.length} · ${(metrics[currentFrame]?.time ?? 0).toFixed(3)}s · ball speed ${Math.hypot(ball.linearVelocity.x, ball.linearVelocity.y).toFixed(2)} · recorded ${artifact.revision} · final hash ${replayHash === artifact.finalHash ? 'matches' : 'differs'}. Replay uses the current engine${element<HTMLInputElement>('current').checked ? ' and current table' : ' with the recorded board'}.`;
-  element('contacts').textContent = debug.contacts
-    .slice(-16)
-    .map(
-      (c) =>
-        `${c.collider?.kind ?? 'surface'} ${c.collider?.index ?? ''} ${c.collider?.feature ?? ''} · overlap ${c.overlap?.toFixed(3)} · impulse ${c.impulse?.normalImpulse.toFixed(2)} / ${c.impulse?.tangentImpulse.toFixed(2)} · normal (${c.normal.x.toFixed(2)}, ${c.normal.y.toFixed(2)})`,
-    )
-    .join('\n');
+  element('contacts').textContent =
+    (artifact.tactic
+      ? `${artifact.tactic.passed ? 'PASS' : 'FAIL'} ${artifact.tactic.name} · ${artifact.tactic.control ? `expected miss: ${artifact.tactic.control}` : 'target move'}\n${JSON.stringify(artifact.tactic.metrics, null, 2)}\n${artifact.tactic.errors.join('\n')}\n\n`
+      : '') +
+    debug.contacts
+      .slice(-16)
+      .map(
+        (c) =>
+          `${c.collider?.kind ?? 'surface'} ${c.collider?.index ?? ''} ${c.collider?.feature ?? ''} · overlap ${c.overlap?.toFixed(3)} · impulse ${c.impulse?.normalImpulse.toFixed(2)} / ${c.impulse?.tangentImpulse.toFixed(2)} · normal (${c.normal.x.toFixed(2)}, ${c.normal.y.toFixed(2)})`,
+      )
+      .join('\n');
   const g = graph.getContext('2d')!;
   g.clearRect(0, 0, graph.width, graph.height);
   const speeds = metrics.map(

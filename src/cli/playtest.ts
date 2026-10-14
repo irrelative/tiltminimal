@@ -1,3 +1,4 @@
+import { tacticCases, runTacticCase } from '../playtest/tactics';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { BUILT_IN_TABLES } from '../boards/table-library';
@@ -16,7 +17,7 @@ import { PhysicsDebug } from '../game/physics-debug';
 import { refineArtifact } from '../playtest/refinement';
 
 const usage =
-  'make playtest ARGS="[--table all|<id>] [--preset smoke|deep] [--seed 1979] [--games 8] [--suite both|game|lip] [--output playtest-results/investigation] [--max-artifacts 32] [--strict]"; replay: --replay <case.json> [--current-table]';
+  'make playtest ARGS="[--table all|<id>] [--preset smoke|deep] [--seed 1979] [--games 8] [--suite all|both|game|lip|tactics] [--output playtest-results/investigation] [--max-artifacts 32] [--strict]"; replay: --replay <case.json> [--current-table]';
 try {
   const args = process.argv.slice(2),
     options: Record<string, string> = {};
@@ -98,10 +99,10 @@ try {
     }
   } else {
     const preset = options['--preset'] ?? 'smoke',
-      suite = options['--suite'] ?? 'both';
+      suite = options['--suite'] ?? 'all';
     if (
       !['smoke', 'deep'].includes(preset) ||
-      !['both', 'game', 'lip'].includes(suite)
+      !['all', 'both', 'game', 'lip', 'tactics'].includes(suite)
     )
       throw new Error(usage);
     const seed = Number(options['--seed'] ?? 1979),
@@ -119,15 +120,30 @@ try {
       maxArtifacts > 1000
     )
       throw new Error('Invalid seed, games or artifact limit');
-    const tables =
+    let tables =
       options['--table'] && options['--table'] !== 'all'
         ? BUILT_IN_TABLES.filter((t) => t.id === options['--table'])
         : BUILT_IN_TABLES;
     if (!tables.length) throw new Error('Unknown table');
+    if (suite === 'tactics') {
+      tables = tables.filter((t) => t.id === 'tactics-lab');
+      if (!tables.length)
+        throw new Error(
+          'Tactic contracts are currently defined for tactics-lab only',
+        );
+    }
     const output = options['--output'] ?? 'playtest-results/investigation';
     mkdirSync(join(output, 'cases'), { recursive: true });
     const started = performance.now(),
       summaries: RunSummary[] = [],
+      tactics: {
+        id: string;
+        passed: boolean;
+        control?: string;
+        metrics: ReturnType<typeof runTacticCase>['metrics'];
+        errors: string[];
+        path?: string;
+      }[] = [],
       artifacts: { path: string; cluster: string }[] = [],
       clusters = new Set<string>();
     let frames = 0,
@@ -137,7 +153,8 @@ try {
       const tableStart = performance.now();
       let count = 0;
       for (const scenario of scenarios(table, seed, preset === 'deep', games)) {
-        if (suite !== 'both' && scenario.suite !== suite) continue;
+        if (suite !== 'both' && suite !== 'all' && scenario.suite !== suite)
+          continue;
         const { summary, artifact } = investigateScenario(
           table,
           scenario,
@@ -173,6 +190,42 @@ try {
           artifacts.push({ path: file, cluster });
         }
       }
+      if (
+        table.id === 'tactics-lab' &&
+        (suite === 'all' || suite === 'tactics')
+      ) {
+        mkdirSync(join(output, 'tactics'), { recursive: true });
+        for (const recipe of tacticCases()) {
+          const result = runTacticCase(table, recipe, revision);
+          summaries.push(result.summary);
+          count++;
+          frames += result.summary.frames;
+          seconds += result.summary.seconds;
+          const failed = result.errors.length > 0;
+          if (failed) {
+            failures++;
+            clusters.add(
+              `${table.id}:tactic-failed:${recipe.tactic}:${recipe.source}`,
+            );
+          }
+          const file = `tactics/${String(tactics.length).padStart(3, '0')}-${recipe.tactic}-${recipe.source}.json`;
+          // The tactic suite is bounded; keep every success/control/failure for review.
+          if (
+            stateHash(replayArtifact(result.artifact)) !==
+            result.artifact.finalHash
+          )
+            throw new Error('Tactic replay diverged');
+          writeFileSync(join(output, file), JSON.stringify(result.artifact));
+          tactics.push({
+            id: recipe.id,
+            passed: !failed,
+            control: recipe.control,
+            metrics: result.metrics,
+            errors: result.errors,
+            path: file,
+          });
+        }
+      }
       console.log(
         `${table.id}: ${count} cases in ${((performance.now() - tableStart) / 1000).toFixed(2)}s`,
       );
@@ -194,6 +247,7 @@ try {
       uniqueClusters: clusters.size,
       artifacts,
       summaries,
+      tactics,
       coverage: tables.map((t) => ({
         table: t.id,
         flippers: t.board.flippers.length,
@@ -233,7 +287,7 @@ try {
       })),
     };
     writeFileSync(join(output, 'report.json'), JSON.stringify(report));
-    const text = `# Headless investigation\n\n${summaries.length} cases; ${failures} confirmed failures; ${clusters.size} issue clusters.\n\n${seconds.toFixed(1)} simulated seconds in ${wallSeconds.toFixed(2)} wall seconds (${report.speedup.toFixed(1)}× real time).\n\nSkipped invalid seeds: ${summaries.filter((s) => s.skip).length}. Time-limited episodes: ${summaries.filter((s) => s.outcome === 'time-limit').length}.\n\n## Reproductions\n\n${artifacts.map((a) => `- [${a.cluster}](${a.path})`).join('\n')}\n\nNo findings means sampled coverage, not proof of playability.\n`;
+    const text = `# Headless investigation\n\n${summaries.length} cases; ${failures} confirmed failures; ${clusters.size} issue clusters.\n\n${seconds.toFixed(1)} simulated seconds in ${wallSeconds.toFixed(2)} wall seconds (${report.speedup.toFixed(1)}× real time).\n\nSkipped invalid seeds: ${summaries.filter((s) => s.skip).length}. Time-limited episodes: ${summaries.filter((s) => s.outcome === 'time-limit').length}.\n\n## Tactics\n\n${tactics.length ? `${tactics.filter((t) => t.passed).length}/${tactics.length} tactic cases passed.\n\n${tactics.map((t) => `- [${t.passed ? 'PASS' : 'FAIL'} ${t.id}${t.control ? ` (expected miss: ${t.control})` : ''}](${t.path})${t.errors.length ? `: ${t.errors.join('; ')}` : ''}`).join('\n')}` : 'Not run.'}\n\n## Reproductions\n\n${artifacts.map((a) => `- [${a.cluster}](${a.path})`).join('\n')}\n\nNo findings means sampled coverage, not proof of playability.\n`;
     writeFileSync(join(output, 'report.md'), text);
     console.log(text);
     process.exitCode =

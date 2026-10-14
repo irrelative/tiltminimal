@@ -1,3 +1,4 @@
+import { tacticsLabTable } from './tables/tactics-lab';
 import { alienStarTable } from './tables/alien-star';
 import { justOneMoreTable } from './tables/just-one-more';
 import { switchyardTable } from './tables/switchyard';
@@ -69,6 +70,12 @@ export const BUILT_IN_TABLES: BuiltInTable[] = [
     board: switchyardTable,
     description:
       'Five open fan shots. Connect the network, lock at Dispatch, and collect two-ball multiball jackpots.',
+  },
+  {
+    id: 'tactics-lab',
+    board: tacticsLabTable,
+    description:
+      'An open practice table for catches, dead bounces, Shatz transfers and post passes.',
   },
 ];
 

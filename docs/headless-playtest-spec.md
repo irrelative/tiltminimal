@@ -109,3 +109,16 @@ The first repair is scoped to Classic's explicit upper heel approach. The smoke
 campaign drops from 116 failures/15 clusters to 99/13, with no Classic failures.
 Remaining table-specific heel traps and Alien Star field stalls remain in the
 report; passing the older route validator does not override these findings.
+
+## Tactic assertions
+
+The default suite is now `all`, adding the 60 Tactics Lab assertions to seeded
+games and lip sweeps. `--suite tactics` runs only these contracts; `--suite both`
+keeps game/lip coverage alone. Successful moves and expected-miss controls save
+replays under `tactics/`, with explicit metrics and `tactic-failed` findings for
+contract violations. See [Tactics Lab](tactics-lab-spec.md) for geometry, exact
+observations, fixed-step timing and the short-Shatz scope.
+
+The initial strict tactic run reports four Shatz failures: those shots bounce
+off the receiver before entering its inlane. The other six tactic types pass.
+Known failures remain visible in the CLI and replay files.

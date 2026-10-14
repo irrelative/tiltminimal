@@ -10,7 +10,8 @@ export interface Finding {
     | 'held-release-failure'
     | 'bounded-livelock'
     | 'non-finite'
-    | 'escaped-bounds';
+    | 'escaped-bounds'
+    | 'tactic-failed';
   frame: number;
   seconds: number;
   ballId: number;
@@ -33,6 +34,14 @@ export interface PlaytestArtifact {
   inputs: { frame: number; input: InputState }[];
   findings: Finding[];
   finalHash: string;
+  tactic?: {
+    name: string;
+    source: number;
+    control?: string;
+    passed: boolean;
+    errors: string[];
+    metrics: Record<string, number | boolean>;
+  };
   diagnosticContacts?: PhysicsDebug['contacts'];
   cadenceChecks?: { cadence: string; confirmed: boolean; codes: string[] }[];
   neighbors?: { dx: number; dy: number; valid: boolean; confirmed: boolean }[];

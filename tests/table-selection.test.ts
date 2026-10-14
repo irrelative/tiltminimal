@@ -21,6 +21,7 @@ it.each([
       'double-crossed',
       'starlight-em',
       'switchyard',
+      'tactics-lab',
     ];
     expect(links).toHaveLength(visibleIds.length);
     expect(BUILT_IN_TABLES.some((table) => table.id === 'andromeda')).toBe(
