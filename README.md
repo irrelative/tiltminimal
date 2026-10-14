@@ -222,3 +222,10 @@ for interpretation and comparison steps.
 
 Alien Star recreates Gottlieb’s 1984 layout and spinner-centered multiball rules.
 Select **Alien Star** from the gallery. See [rules, sources and fidelity limits](docs/alien-star-spec.md); timers and dimensions are estimates, and Special awards points in place of credits.
+
+Fast all-table investigations are available with `make playtest`. They run seeded
+games and focused flipper/inlane sweeps without drawing, then save clustered
+findings and exact replay cases. Use `/benchmarks/playtest-review.html` to inspect
+local cases, or export a recent human game from Settings. See
+[headless investigation and replay](docs/headless-playtest-spec.md) for commands,
+detection limits, artifact details, and profiling.

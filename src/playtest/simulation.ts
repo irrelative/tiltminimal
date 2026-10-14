@@ -4,6 +4,7 @@ import type { InputState } from '../input/keyboard-input';
 import { stepGameFrame } from '../game/physics-engine';
 import { applyRulesFrame } from '../game/rules-engine';
 import { getDistanceToFlipperSurface } from '../game/flipper-geometry';
+import { advanceGameFrame } from '../game/advance-game';
 
 export const STEP_SECONDS = 1 / 120;
 export const idle: InputState = {
@@ -180,8 +181,7 @@ export const replay = (board: BoardDefinition, run: PlaytestRun): GameState => {
     index = 0;
   for (let frame = 0; frame < run.frames; frame++) {
     if (run.inputs[index]?.frame === frame) input = run.inputs[index++].input;
-    const next = stepGameFrame(state, board, input, STEP_SECONDS);
-    state = applyRulesFrame(next.state, board, next.events, STEP_SECONDS);
+    state = advanceGameFrame(state, board, input, STEP_SECONDS).state;
   }
   return state;
 };

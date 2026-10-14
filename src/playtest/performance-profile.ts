@@ -1,3 +1,6 @@
+import { scenarios } from './scenarios';
+import { ReplayRecorder } from './recorder';
+import { advanceGameFrame } from '../game/advance-game';
 import { BUILT_IN_TABLES } from '../boards/table-library';
 import { cloneBallState, createInitialGameState } from '../game/game-state';
 import { stepGameFrame } from '../game/physics-engine';
@@ -96,4 +99,51 @@ export const profilePhysics = (
     results.push({ table: id, medianMs: samples[3], minMs: samples[0] });
   }
   return { results, checksum };
+};
+
+/** Paired deterministic 60-second games measure the always-on recorder separately. */
+export const profileRecording = (rounds = 5) => {
+  const samples: { plain: number; recorded: number; bytes: number }[] = [];
+  for (let round = -1; round < rounds; round++) {
+    let plain = 0,
+      recorded = 0,
+      bytes = 0;
+    for (const table of BUILT_IN_TABLES) {
+      for (const recording of round % 2 ? [true, false] : [false, true]) {
+        const scenario = scenarios(table, 1979, false, 1).next().value!;
+        let state = scenario.initialState;
+        const recorder = new ReplayRecorder(table.board, state);
+        const started = performance.now();
+        for (let frame = 0; frame < 3600; frame++) {
+          const input = scenario.controller(state, frame);
+          const next = advanceGameFrame(state, table.board, input, 1 / 60);
+          if (recording)
+            recorder.record(state, next.state, input, 1 / 60, next.events);
+          state = next.state;
+        }
+        const elapsed = performance.now() - started;
+        if (recording) {
+          recorded += elapsed;
+          bytes = Math.max(
+            bytes,
+            JSON.stringify(recorder.export(table.id, 'profile')).length,
+          );
+        } else plain += elapsed;
+      }
+    }
+    if (round >= 0) samples.push({ plain, recorded, bytes });
+  }
+  const median = (values: number[]) =>
+    values.sort((a, b) => a - b)[Math.floor(values.length / 2)];
+  const frames = BUILT_IN_TABLES.length * 3600;
+  const plain = median(samples.map((s) => s.plain)) / frames;
+  const recorded = median(samples.map((s) => s.recorded)) / frames;
+  return {
+    rounds,
+    framesPerRound: frames,
+    plainMsPerFrame: plain,
+    recordedMsPerFrame: recorded,
+    overheadMsPerFrame: recorded - plain,
+    maxExportBytes: Math.max(...samples.map((s) => s.bytes)),
+  };
 };

@@ -15,6 +15,7 @@ import { getSurfaceMaterial } from './materials';
 import { interpolate, offsetFlipper } from './physics-helpers';
 import type { FlipperMotionFrame } from './physics-motion';
 import { getContactTangent, resolveBallContact } from './spin-solver';
+import { identifyDebugContact } from './physics-debug';
 
 export const resolveRestingFlipperSupport = (
   state: GameState,
@@ -276,6 +277,7 @@ const applyFlipperCollisionAtAngle = (
       material: flipperMaterial,
       restitutionScale: 0,
     };
+    identifyDebugContact(faceContact, 'flipper', motion.index, 'held-face');
     resolveBallContact(state.ball, faceContact, solver);
     if (incomingNormalSpeed < -40) {
       // Impact absorption belongs to the catch, not to every resting frame.
@@ -297,28 +299,31 @@ const applyFlipperCollisionAtAngle = (
           axis.y *
             (heelDistance - state.ball.radius - collision.t * flipper.length),
       };
-      resolveBallContact(
-        state.ball,
-        {
-          point: heelPoint,
-          normal: axis,
-          tangent: getContactTangent(axis),
-          // Support cancels inward velocity; it must never lift an arriving
-          // ball uphill to a prescribed support boundary.
-          overlap: 0,
-          surfaceVelocity: {
-            x:
-              motion.tableVelocity.x -
-              motion.angularVelocity * (heelPoint.y - flipper.y),
-            y:
-              motion.tableVelocity.y +
-              motion.angularVelocity * (heelPoint.x - flipper.x),
-          },
-          material: flipperMaterial,
-          restitutionScale: 0,
+      const heelContact: ContactData = {
+        point: heelPoint,
+        normal: axis,
+        tangent: getContactTangent(axis),
+        // Support cancels inward velocity; it must never lift an arriving
+        // ball uphill to a prescribed support boundary.
+        overlap: 0,
+        surfaceVelocity: {
+          x:
+            motion.tableVelocity.x -
+            motion.angularVelocity * (heelPoint.y - flipper.y),
+          y:
+            motion.tableVelocity.y +
+            motion.angularVelocity * (heelPoint.x - flipper.x),
         },
-        solver,
+        material: flipperMaterial,
+        restitutionScale: 0,
+      };
+      identifyDebugContact(
+        heelContact,
+        'flipper',
+        motion.index,
+        'heel-support',
       );
+      resolveBallContact(state.ball, heelContact, solver);
     }
     return true;
   }
@@ -345,6 +350,8 @@ const applyFlipperCollisionAtAngle = (
     frictionScale: isPassiveContact ? motion.passiveFrictionScale : 1,
     spinDampingScale: isPassiveContact ? motion.passiveSpinDampingScale : 1,
   };
+
+  identifyDebugContact(contact, 'flipper', motion.index, 'bat');
 
   if (
     isPassiveContact &&

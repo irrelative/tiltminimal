@@ -1,6 +1,7 @@
-.PHONY: deploy preview-cloudflare help install dev build lint test cloc fmt clean validate-table playtest-classic profile-performance
+.PHONY: deploy preview-cloudflare help install dev build lint test cloc fmt clean validate-table playtest-classic playtest profile-performance
 
 help:
+	@printf "  make playtest  Run headless all-table games and lip sweeps\n"
 	@printf "  make profile-performance  Benchmark physics on all built-in tables\n"
 	@printf "Available targets:\n"
 	@printf "  make install  Install npm dependencies\n"
@@ -43,6 +44,9 @@ clean:
 
 playtest-classic:
 	npm run playtest:classic -- $(ARGS)
+
+playtest:
+	npm run playtest -- $(ARGS)
 
 # Cloudflare production (requires wrangler login).
 deploy:

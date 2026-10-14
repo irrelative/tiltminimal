@@ -13,7 +13,6 @@ export const resolveBallContact = (
   contact: ContactData,
   solver: SolverPhysicsDefinition = physicsDefaults.tuning.solver,
 ): ContactImpulseResult => {
-  recordDebugContact(contact);
   const compliance = clamp(contact.material.compliance, 0, 0.95);
   const correctionScale = 1 - compliance;
 
@@ -69,12 +68,14 @@ export const resolveBallContact = (
     ball.angularVelocity.y *= spinDampingFactor;
   }
 
-  return {
+  const result = {
     normalImpulse,
     tangentImpulse,
     relativeNormalSpeed,
     relativeTangentSpeed,
   };
+  recordDebugContact(contact, result, ball.id);
+  return result;
 };
 
 export const getContactTangent = (normal: Vector2): Vector2 => ({

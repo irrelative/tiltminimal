@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Playtest replay review</title>
+  </head>
+  <body>
+    <main>
+      <h1>Playtest replay review</h1>
+      <p>
+        Load case files from a headless report or export a replay from the
+        game's Settings.
+      </p>
+      <input
+        id="files"
+        type="file"
+        accept=".json"
+        multiple
+        aria-label="Load replay files"
+      />
+      <select id="case" aria-label="Case"></select>
+      <select id="finding" aria-label="Finding"></select>
+      <label><input id="current" type="checkbox" /> Use current table</label>
+      <p id="status" role="status">No replay loaded.</p>
+      <div class="controls">
+        <button id="back">Previous frame</button><button id="play">Play</button
+        ><button id="next">Next frame</button
+        ><select id="rate" aria-label="Playback speed">
+          <option value="0.25">¼ speed</option>
+          <option value="1" selected>Normal speed</option>
+          <option value="4">4× speed</option>
+        </select>
+      </div>
+      <input
+        id="frame"
+        type="range"
+        min="0"
+        max="0"
+        value="0"
+        aria-label="Replay frame"
+      />
+      <canvas
+        id="speed"
+        width="800"
+        height="100"
+        aria-label="Selected ball speed over time"
+      ></canvas>
+      <div class="views">
+        <canvas id="board" aria-label="Recorded playfield"></canvas>
+        <div>
+          <h2>Incident area</h2>
+          <canvas
+            id="zoom"
+            width="400"
+            height="300"
+            aria-label="Incident zoom"
+          ></canvas>
+          <h2>Contacts</h2>
+          <pre id="contacts"></pre>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="/src/playtest/review.ts"></script>
+  </body>
+</html>

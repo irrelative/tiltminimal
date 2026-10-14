@@ -16,6 +16,7 @@ export interface ContactData {
   restitutionScale?: number;
   frictionScale?: number;
   spinDampingScale?: number;
+  collider?: { kind: string; index?: number; feature?: string };
 }
 
 export interface ContactImpulseResult {

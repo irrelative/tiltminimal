@@ -7,12 +7,10 @@ import type { GameAudio } from '../audio/game-audio';
 import { getFrameAudioEvents } from '../audio/game-audio';
 import type { GameState } from './game-state';
 import { createInitialGameState } from './game-state';
-import {
-  applyRulesFrame,
-  initializeRulesState,
-  restartCurrentBall,
-} from './rules-engine';
-import { getPlungerPullRatio, stepGameFrame } from './physics-engine';
+import { initializeRulesState, restartCurrentBall } from './rules-engine';
+import { getPlungerPullRatio } from './physics-engine';
+import { advanceGameFrame } from './advance-game';
+import { ReplayRecorder } from '../playtest/recorder';
 import { clampFrameDeltaSeconds } from './physics-engine-types';
 
 export class GameLoop {
@@ -31,9 +29,11 @@ export class GameLoop {
     if (value && this.state.status === 'waiting-launch') {
       this.state.plunger = { pullback: 0, releaseSpeed: 0 };
     }
+    this.recorder?.reset(this.state, true);
   }
   readonly debug = new PhysicsDebug();
   readonly performance = new FramePerformance();
+  readonly recorder: ReplayRecorder;
   private animationFrameId = 0;
   private lastFrameTime = 0;
   private running = false;
@@ -48,6 +48,7 @@ export class GameLoop {
     private readonly audio?: GameAudio,
   ) {
     this.state = initializeRulesState(this.state, this.board);
+    this.recorder = new ReplayRecorder(this.board, this.state);
     this.lastInputState = this.input.getState();
   }
 
@@ -81,6 +82,7 @@ export class GameLoop {
   resetBall(): void {
     this.debug.clear();
     this.state = restartCurrentBall(this.state, this.board);
+    this.recorder.reset(this.state, true);
     this.renderer.renderGame(this.board, this.state, this.input.getState());
     this.emitStateChange();
   }
@@ -100,6 +102,7 @@ export class GameLoop {
       createInitialGameState(this.board),
       this.board,
     );
+    this.recorder.reset(this.state);
     this.audio?.startGame();
   }
 
@@ -143,7 +146,7 @@ export class GameLoop {
       previousState = this.state;
     } else {
       const frame = this.debug.capture(deltaSeconds, () => {
-        const result = stepGameFrame(
+        const result = advanceGameFrame(
           previousState,
           this.board,
           input,
@@ -153,11 +156,13 @@ export class GameLoop {
         return result;
       });
       this.audio?.playGameEvents(frame.events);
-      this.state = applyRulesFrame(
-        frame.state,
-        this.board,
-        frame.events,
+      this.state = frame.state;
+      this.recorder.record(
+        previousState,
+        this.state,
+        input,
         deltaSeconds,
+        frame.events,
       );
     }
 

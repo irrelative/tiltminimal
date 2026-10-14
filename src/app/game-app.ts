@@ -111,6 +111,36 @@ document.addEventListener('visibilitychange', () => {
 const table = (): BuiltInTable =>
   BUILT_IN_TABLES.find((item) => item.id === state.tableId) ??
   BUILT_IN_TABLES[0]!;
+const exportReplay = required<HTMLButtonElement>('#export-playtest');
+const exportIssue = required<HTMLButtonElement>('#export-playtest-issue');
+for (const [button, issue] of [
+  [exportReplay, false],
+  [exportIssue, true],
+] as const) {
+  button.addEventListener('click', async () => {
+    const loop = state.loop;
+    if (!loop) return;
+    let revision = import.meta.env.VITE_ENGINE_REVISION ?? 'development';
+    if (import.meta.env.DEV) {
+      try {
+        revision = (
+          await (await fetch(`${basePath}__playtest-revision`)).json()
+        ).revision;
+      } catch {
+        /* Build revision remains available offline. */
+      }
+    }
+    const artifact = loop.recorder.export(table().id, revision, issue);
+    const url = URL.createObjectURL(
+      new Blob([JSON.stringify(artifact)], { type: 'application/json' }),
+    );
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${table().id}-${issue ? 'issue' : 'recent'}-replay.json`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+}
 let playControls: PlayControls | undefined;
 const ruleCard = new RuleCard(required<HTMLElement>('#table-rules'), (open) => {
   playControls?.setRuleCardOpen(open);
@@ -147,8 +177,11 @@ const restart = (): void => {
       canvas,
       renderer,
       gameAudio: audio,
-      onStateChange: (nextState, loop) =>
-        playControls?.observe(nextState, loop),
+      onStateChange: (nextState, loop) => {
+        playControls?.observe(nextState, loop);
+        exportReplay.disabled = !loop.recorder.hasFrames;
+        exportIssue.disabled = !loop.recorder.hasIssue;
+      },
       onGameOver: (score) => {
         highScores.record(state.tableId, score);
         showHighScores();

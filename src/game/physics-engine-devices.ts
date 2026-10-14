@@ -18,6 +18,7 @@ import {
 } from './physics-helpers';
 import type { GameEvent } from './rules-types';
 import { resolveBallContact } from './spin-solver';
+import { identifyDebugContact } from './physics-debug';
 
 export const resolveStandupTargetCollisions = (
   state: GameState,
@@ -226,7 +227,8 @@ export const resolvePostCollisions = (
   board: BoardDefinition,
   solver: SolverPhysicsDefinition,
 ): void => {
-  for (const post of board.posts) {
+  for (let index = 0; index < board.posts.length; index++) {
+    const post = board.posts[index];
     const postMaterial = getSurfaceMaterial(
       post.material,
       board.surfaceMaterials,
@@ -257,6 +259,7 @@ export const resolvePostCollisions = (
       state.tableNudge.velocity,
     );
 
+    identifyDebugContact(contact, 'post', index);
     if (approachSpeed < 0 || overlap > solver.epsilon) {
       resolveBallContact(state.ball, contact, solver);
     }

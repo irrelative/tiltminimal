@@ -1,20 +1,41 @@
-import type { ContactData } from './contact-types';
+import type { ContactData, ContactImpulseResult } from './contact-types';
 import type { GameEvent } from './rules-types';
 
 export interface DebugContact {
   point: { x: number; y: number };
   normal: { x: number; y: number };
   time: number;
+  collider?: ContactData['collider'];
+  overlap?: number;
+  impulse?: ContactImpulseResult;
+  ballId?: number;
 }
 let activeDebug: PhysicsDebug | undefined;
 
+export const identifyDebugContact = (
+  contact: ContactData,
+  kind: string,
+  index?: number,
+  feature?: string,
+): void => {
+  if (activeDebug) contact.collider = { kind, index, feature };
+};
+
 // Scoped to a synchronous simulation step; no observer remains installed afterward.
-export const recordDebugContact = (contact: ContactData): void => {
+export const recordDebugContact = (
+  contact: ContactData,
+  impulse?: ContactImpulseResult,
+  ballId?: number,
+): void => {
   if (!activeDebug) return;
   activeDebug.contacts.push({
     point: { ...contact.point },
     normal: { ...contact.normal },
     time: activeDebug.time,
+    collider: contact.collider,
+    overlap: contact.overlap,
+    impulse,
+    ballId,
   });
   if (activeDebug.contacts.length > 80) activeDebug.contacts.shift();
 };

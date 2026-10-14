@@ -12,6 +12,7 @@
     "test": "vitest run",
     "validate-table": "vite-node src/cli/validate-table.ts",
     "playtest:classic": "vite-node src/cli/playtest-classic.ts",
+    "playtest": "vite-node src/cli/playtest.ts",
     "profile-performance": "vite-node src/cli/profile-performance.ts"
   },
   "devDependencies": {

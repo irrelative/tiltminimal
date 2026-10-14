@@ -19,6 +19,7 @@ import {
   getPlungerLaneCenterBounds,
 } from './plunger-geometry';
 import { getContactTangent, resolveBallContact } from './spin-solver';
+import { identifyDebugContact } from './physics-debug';
 
 export const resolveWallCollisions = (
   state: GameState,
@@ -108,7 +109,8 @@ export const resolveGuideCollisions = (
   board: BoardDefinition,
   solver: SolverPhysicsDefinition,
 ): void => {
-  for (const guide of board.guides) {
+  for (let index = 0; index < board.guides.length; index++) {
+    const guide = board.guides[index];
     if ((guide.plane ?? 'playfield') === 'raised') {
       continue;
     }
@@ -119,6 +121,7 @@ export const resolveGuideCollisions = (
       guide,
       solver,
       state.tableNudge.velocity,
+      index,
     );
   }
 };
@@ -178,6 +181,7 @@ const resolveGuideCollision = (
   guide: GuideDefinition,
   solver: SolverPhysicsDefinition,
   surfaceVelocity: ContactData['surfaceVelocity'] = { x: 0, y: 0 },
+  index?: number,
 ): void => {
   const offset = state.tableNudge.offset;
   const x = state.ball.position.x - offset.x;
@@ -228,6 +232,11 @@ const resolveGuideCollision = (
     projection.normal,
     overlap,
     surfaceVelocity,
+  );
+  identifyDebugContact(
+    contact,
+    index === undefined ? 'plunger-guide' : 'guide',
+    index,
   );
 
   if (incomingNormalSpeed < 0 || overlap > solver.epsilon) {
