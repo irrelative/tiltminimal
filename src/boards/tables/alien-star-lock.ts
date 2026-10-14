@@ -16,6 +16,18 @@ export const createAlienStarLock = () => {
     return { x: center.x + v.x, y: center.y + v.y };
   };
   const pocket = createPocket('alien-star-lock', center, 10000);
+  // The real lock's inboard wire is a short entrance beside the spinner
+  // approach, not the shared pocket's long, flared receiving funnel. Keep
+  // its arc joint and the outside wall; shorten only these connected legs.
+  const rightThroat = pocket.guides![3];
+  const rightMouth = pocket.guides![4];
+  if (rightThroat.kind === 'arc' || rightMouth.kind === 'arc')
+    throw new Error('Alien Star lock expects a straight inboard entrance.');
+  const join = { x: center.x + 54, y: center.y + 20 };
+  rightThroat.end = join;
+  rightMouth.start = join;
+  rightMouth.end = { x: center.x + 54, y: center.y + 60 };
+
   pocket.guides = pocket.guides!.map((g) =>
     g.kind === 'arc'
       ? {

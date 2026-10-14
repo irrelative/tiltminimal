@@ -195,3 +195,54 @@ After the [resting-contact revision](flipper-resting-contact-spec.md), both post
 passes retain post contact, no sling kick and a stable receiver cradle at release
 frames 20, 22 and 24 (120 Hz), following the lower support/no-uphill correction.
 Earlier timing samples above describe the preceding support position.
+
+## Saucer inboard-guide clearance repair (October 14, 2026)
+
+Re-inspected [the full playfield photograph](https://user.xmission.com/~daina/images/ko/alien_star_pf.jpg).
+The saucer's inboard entrance is compact beside the spinner approach. The shared
+pocket factory had supplied a long receiving funnel on that side: 70-unit throat,
+140-unit mouth depth and an 80-unit flare, rotated toward the right flipper.
+Its last segment projected to approximately (286, 827), crossing usable shots.
+The preceding spinner regression proved one narrow input but did not measure
+saucer-guide contacts across nearby feeds.
+
+A physical feed at (490, 1360), falling at 600 units/s and pressing the right
+flipper at frame 14 (120 Hz), hit the flared saucer guide at frame 34 near
+(306, 838). It then missed the spinner. Removing only the saucer guides in a
+diagnostic board let that same shot reach the blade; the failure was geometry,
+not scoring or a missing flipper impulse.
+
+Only the saucer's **inboard/right entrance** is shortened. Its two connected
+legs retain the arc joint and local 54-unit side offset, with a join 20 units
+below the cup and an endpoint 60 below it. The flare is removed. After the
+existing −0.62-radian rotation, the endpoint is approximately (219, 777).
+The outside wall, cup position/radius, pocket arc, approach orientation, capture
+rules, eject direction, spinner and flipper definitions remain unchanged.
+This is a documented 2D clearance adaptation, not a claim of exact factory
+measurements. Keeping the outside receiving wall preserves existing capture,
+plunge and upper-left save contracts.
+
+Ten new regressions vary feed x=480–510, y=1340–1380, downward speed=600/800 and
+flip timing=8–18 frames. Each requires a right-flipper contact, actual blade
+contact and spinner scoring, with zero saucer-guide impulses before blade
+contact and no intervening bumper, sling, target, saucer or drain event. A
+control restores the former long guide and reproduces the intercepted shot.
+The existing direct spinner and diagonal ballistic routes remain required.
+
+A 336-case incoming-feed/input sweep improves from 18 to 28 direct blade hits.
+Its diagnostic board without saucer guides reaches 31; the remaining three
+shots intersect other parts of the pocket and are not promises of an open
+spinner approach from every feed. The representative feed now scores its first
+spinner revolution at frame 53 without a saucer-wire contact. Before/after
+artifacts in `playtest-results/alien-spinner/` contain exact board snapshots and
+inputs, and both reproduce their recorded hashes through the headless harness.
+
+Verification: 760 Vitest tests pass with four existing expected Shatz failures;
+nine-table deep validation has zero errors/warnings; production build and lint
+pass. Browser review inspects the connected saucer entrance and the old/new
+shot replays using the production renderer and collision overlay.
+
+The eight seeded full games still report three stationary shooter/plunger
+findings, the previously observed field-stall family, with no escape or
+non-finite findings. Those remain separate from the spinner approach repair;
+this change does not claim a clean all-game investigation report.
