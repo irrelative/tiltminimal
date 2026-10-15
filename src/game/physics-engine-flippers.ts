@@ -16,6 +16,7 @@ import { interpolate, offsetFlipper } from './physics-helpers';
 import type { FlipperMotionFrame } from './physics-motion';
 import { getContactTangent, resolveBallContact } from './spin-solver';
 import { identifyDebugContact } from './physics-debug';
+import { isRollingHeelTransfer } from './flipper-feed-contact';
 
 export const resolveRestingFlipperSupport = (
   state: GameState,
@@ -197,7 +198,32 @@ const applyFlipperCollisionAtAngle = (
   }
 
   const fallbackNormal = getFlipperFaceNormal(flipper, collisionAngle);
-  const normal = { ...collision.normal };
+  // The buried wire endpoint and round heel form one rolling surface. Using
+  // the cap's radial impact normal here creates a ghost launch at their seam.
+  // Free falling impacts retain the rounded rubber normal and dead-bounce response.
+  const rollingHeelTransfer =
+    !motion.engaged &&
+    Math.abs(motion.angularVelocity) <=
+      motion.passiveAngularVelocityThreshold &&
+    collision.t < 0.2 &&
+    collision.normal.x * fallbackNormal.x +
+      collision.normal.y * fallbackNormal.y >
+      0 &&
+    isRollingHeelTransfer(
+      board,
+      board.flippers[motion.index],
+      {
+        x: state.ball.position.x - state.tableNudge.offset.x,
+        y: state.ball.position.y - state.tableNudge.offset.y,
+      },
+      {
+        x: state.ball.linearVelocity.x - motion.tableVelocity.x,
+        y: state.ball.linearVelocity.y - motion.tableVelocity.y,
+      },
+    );
+  const normal = {
+    ...(rollingHeelTransfer ? fallbackNormal : collision.normal),
+  };
 
   const isTopFace =
     normal.x * fallbackNormal.x + normal.y * fallbackNormal.y > 0;
@@ -344,14 +370,21 @@ const applyFlipperCollisionAtAngle = (
       contactRadiusSquared > solver.epsilon
         ? flipperMomentOfInertia / contactRadiusSquared
         : Number.POSITIVE_INFINITY,
-    restitutionScale: isPassiveContact
-      ? motion.passiveRestitutionScale
-      : motion.restitutionScale,
+    restitutionScale: rollingHeelTransfer
+      ? 0
+      : isPassiveContact
+        ? motion.passiveRestitutionScale
+        : motion.restitutionScale,
     frictionScale: isPassiveContact ? motion.passiveFrictionScale : 1,
     spinDampingScale: isPassiveContact ? motion.passiveSpinDampingScale : 1,
   };
 
-  identifyDebugContact(contact, 'flipper', motion.index, 'bat');
+  identifyDebugContact(
+    contact,
+    'flipper',
+    motion.index,
+    rollingHeelTransfer ? 'feed-seam' : 'bat',
+  );
 
   if (
     isPassiveContact &&

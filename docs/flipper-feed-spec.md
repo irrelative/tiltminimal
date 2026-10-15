@@ -131,3 +131,51 @@ sampled rubber radius is at least `base - taper * d / length`, while distance to
 the axis cannot exceed `d`. Require `d + railRadius` within that lower bound.
 The thin descending/outward approach requirement remains. This permits an
 upper fixed join while continuing to reject rails on the moving face.
+
+## Fast passive heel-seam contacts
+
+A thin return wire whose endpoint is covered by the heel rubber is a connected
+feed surface. A fast inward feed must not receive a separate upward kick from
+the rounded cap at that seam. Previously Classic's declared 500-unit/s entry
+hit the heel with a radial normal and left at **−465 units/s vertically** even
+with both flippers idle. The connected-feed normal leaves the same arrival at
+**+374 units/s vertically** instead (positive is downward).
+
+Shared physics recognizes this only on the upper heel (first 20% of bat length),
+with a stationary, unpressed flipper and an inward, descending approach within
+32° of a physical, rubber-covered heel wire. The ball must be within four units
+of the wire's ball-contact envelope. Raised wires, vertical falling impacts,
+outward returns, moving flippers and contacts farther along the bat retain their
+ordinary response. Positions and velocities are measured relative to the table
+nudge. The seam uses the upper-face normal and a non-rebounding normal impulse;
+it does not prescribe a ball pose, snap to a cradle or add tangential propulsion.
+Airborne dead bounces and all existing catches/passes remain separate contracts.
+
+The headless `inlane-feed` tactic starts from valid free space immediately above
+the final wire, at 500/1000/1500 units/s on both sides and 60/120/240 Hz. It requires
+own-flipper contact, reaching the source's tip region before the receiver, and
+less than 40 units/s of upward launch. This does not require continuous contact
+along the entire bat: a fast feed can separate naturally under gravity or roll
+past the tip. Missing the source or timing out is a failure. Exact frame durations
+are recorded and replayed. Classic runs the same 18 cases as Vitest regressions;
+the lab's 18 are part of `make playtest ARGS='--suite tactics'` and the default
+suite. The existing long-held outside-pivot release, nine-speed catch/release,
+center drain and genuine dead-bounce tests remain required.
+
+An A/B run with the old contact response failed all 36 cases and generated
+up to 676 units/s of upward launch. The fixed response passed all 36 with zero
+upward launch. Before/after diagnostic artifacts are generated under the ignored
+`playtest-results/feed-seam/` directory; the executable recipes live in source.
+
+Validation: 803 Vitest passes plus four existing expected Shatz failures; all nine
+tables pass deep layout/feed validation without warnings; build and lint pass.
+Browser replay hashes match for the fast feed and both held catch/release probes.
+The 76-run Classic campaign retains 23 high-speed diagnostic flags (all above
+4000 units/s), with no near-rest interval above 0.02 seconds; these diagnostics
+are not suppressed by the new feed assertions.
+
+`make profile-performance` was also run before and after in isolation. Classic's
+median general physics frame measured 0.01095 → 0.01144 ms; its held-flipper frame
+measured 0.01306 → 0.01298 ms. Both workload checksums are unchanged. These are
+local timing samples, not a speed improvement claim; the measured improvement
+here is the eliminated false heel launch.

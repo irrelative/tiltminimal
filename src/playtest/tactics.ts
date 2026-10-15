@@ -1,10 +1,14 @@
 import type { BuiltInTable } from '../boards/table-library';
 import type { InputState } from '../input/keyboard-input';
 import type { GameState } from '../game/game-state';
+import { createInitialGameState } from '../game/game-state';
 import { advanceGameFrame } from '../game/advance-game';
 import { initializeRulesState } from '../game/rules-engine';
 import { PhysicsDebug } from '../game/physics-debug';
-import { sampleFlipperProfile } from '../game/flipper-geometry';
+import {
+  isFlipperHeelGuide,
+  sampleFlipperProfile,
+} from '../game/flipper-geometry';
 import { getPhysicsSandboxSpawnBlockedReason } from '../game/physics-sandbox';
 import { createFallingSkill } from './falling-tactics';
 import { createPostPassCradle, isSettledOn } from './flipper-tactics';
@@ -18,6 +22,7 @@ import { idle } from './simulation';
 import type { RunSummary } from './investigation';
 
 export type Tactic =
+  | 'inlane-feed'
   | 'dead-bounce'
   | 'hold-catch'
   | 'live-catch'
@@ -31,6 +36,7 @@ export interface TacticCase {
   source: number;
   speed: number;
   delay: number;
+  hz?: number;
   pressFrames?: number;
   initialPosition?: number;
   control?: 'early' | 'late' | 'none';
@@ -50,10 +56,15 @@ export interface TacticMetrics {
   upperContactBeforeEntry: boolean;
   releaseDistance: number;
   drained: boolean;
+  feedReachedTip: boolean;
+  feedUpwardSpeed: number;
 }
 export const tacticCases = (): TacticCase[] =>
   [0, 1].flatMap((source) => {
     const cases: Omit<TacticCase, 'id'>[] = [];
+    for (const speed of [500, 1000, 1500])
+      for (const hz of [60, 120, 240])
+        cases.push({ tactic: 'inlane-feed', source, speed, delay: 0, hz });
     for (const speed of [400, 600])
       cases.push({ tactic: 'dead-bounce', source, speed, delay: 0 });
     for (const speed of [575, 600, 625]) {
@@ -111,7 +122,7 @@ export const tacticCases = (): TacticCase[] =>
     });
     return cases.map((c) => ({
       ...c,
-      id: `tactics-lab/tactics/${source}/${c.tactic}/${c.speed}/${c.delay}`,
+      id: `tactics-lab/tactics/${source}/${c.tactic}/${c.speed}/${c.delay}${c.hz ? `/${c.hz}hz` : ''}`,
     }));
   });
 
@@ -121,25 +132,58 @@ export const tacticInitialState = (
 ): GameState => {
   const { board } = table;
   const transfer = ['post-pass', 'shatz', 'bump-pass'].includes(recipe.tactic);
-  const state = transfer
-    ? createPostPassCradle(board, recipe.source, recipe.initialPosition ?? 0.3)
-    : createFallingSkill(board, {
-        source: recipe.source,
-        speed: recipe.speed,
-        delay: recipe.delay,
-        skill:
-          recipe.tactic === 'drop-catch'
-            ? 'drop-catch'
-            : recipe.tactic === 'dead-bounce'
-              ? 'dead-bounce'
-              : 'live-catch',
-        impactPosition:
-          recipe.tactic === 'drop-catch'
-            ? 0.22
-            : recipe.tactic === 'live-catch'
-              ? 0.65
-              : 0.4,
-      });
+  const state =
+    recipe.tactic === 'inlane-feed'
+      ? createInitialGameState(board)
+      : transfer
+        ? createPostPassCradle(
+            board,
+            recipe.source,
+            recipe.initialPosition ?? 0.3,
+          )
+        : createFallingSkill(board, {
+            source: recipe.source,
+            speed: recipe.speed,
+            delay: recipe.delay,
+            skill:
+              recipe.tactic === 'drop-catch'
+                ? 'drop-catch'
+                : recipe.tactic === 'dead-bounce'
+                  ? 'dead-bounce'
+                  : 'live-catch',
+            impactPosition:
+              recipe.tactic === 'drop-catch'
+                ? 0.22
+                : recipe.tactic === 'live-catch'
+                  ? 0.65
+                  : 0.4,
+          });
+  if (recipe.tactic === 'inlane-feed') {
+    const flipper = board.flippers[recipe.source];
+    const guide = board.guides.find((g) => isFlipperHeelGuide(g, flipper));
+    if (!guide || guide.kind === 'arc') throw new Error('Missing heel seam');
+    const start =
+      Math.abs(guide.start.x - flipper.x) > Math.abs(guide.end.x - flipper.x)
+        ? guide.start
+        : guide.end;
+    const end = start === guide.start ? guide.end : guide.start;
+    const length = Math.hypot(end.x - start.x, end.y - start.y);
+    const direction = {
+      x: (end.x - start.x) / length,
+      y: (end.y - start.y) / length,
+    };
+    const inward = flipper.side === 'left' ? 1 : -1;
+    const normal = { x: inward * direction.y, y: -inward * direction.x };
+    const reach = state.ball.radius + guide.thickness / 2 + 0.5;
+    state.ball.position = {
+      x: start.x + normal.x * reach,
+      y: start.y + normal.y * reach,
+    };
+    state.ball.linearVelocity = {
+      x: direction.x * recipe.speed,
+      y: direction.y * recipe.speed,
+    };
+  }
   if (recipe.tactic === 'hold-catch')
     state.flippers.forEach((f, i) => {
       if (board.flippers[i].side === board.flippers[recipe.source].side) {
@@ -188,6 +232,12 @@ export const tacticFailures = (
     if (!condition) failures.push(reason);
   };
   require(m.firstContactFrame >= 0, 'source flipper was never contacted');
+  if (recipe.tactic === 'inlane-feed') {
+    require(m.feedReachedTip, 'feed must touch its own flipper and reach its tip before the receiver');
+    require(m.feedUpwardSpeed <
+      40, 'heel seam must not launch an unpowered feed upward');
+    require(!m.receiverBeforeEntry, 'feed must reach its own tip before the opposite flipper');
+  }
   if (recipe.tactic === 'dead-bounce')
     require(m.receiverContact &&
       !m.postContact, 'unassisted dead bounce must reach the opposite flipper without a post');
@@ -284,6 +334,8 @@ export const runTacticCase = (
     upperContactBeforeEntry: false,
     releaseDistance: 0,
     drained: false,
+    feedReachedTip: false,
+    feedUpwardSpeed: 0,
   };
   const errors: string[] = [];
   const spawn = getPhysicsSandboxSpawnBlockedReason(
@@ -307,11 +359,12 @@ export const runTacticCase = (
       artifact.inputs.push({ frame, input });
       key = nextKey;
     }
-    artifact.frameDurations.push(1 / 120);
+    const dt = 1 / (recipe.hz ?? 120);
+    artifact.frameDurations.push(dt);
     const previousY = state.ball.position.y;
     debug.contacts = [];
-    const result = debug.capture(1 / 120, () =>
-      advanceGameFrame(state, board, input, 1 / 120),
+    const result = debug.capture(dt, () =>
+      advanceGameFrame(state, board, input, dt),
     );
     state = result.state;
     const speed = Math.hypot(
@@ -347,11 +400,23 @@ export const runTacticCase = (
     );
     if (
       m.firstContactFrame < 0 &&
-      profile.distance <= profile.radius + state.ball.radius + 1
+      profile.distance <= profile.radius + state.ball.radius + 1 &&
+      (recipe.tactic !== 'inlane-feed' ||
+        (profile.t < 0.2 && profile.normal.y < 0))
     ) {
       m.firstContactFrame = frame;
       m.firstContactSpeed = speed;
       m.minimumContactSpeed = speed;
+    }
+    if (recipe.tactic === 'inlane-feed' && m.firstContactFrame >= 0) {
+      m.feedUpwardSpeed = Math.max(
+        m.feedUpwardSpeed,
+        -state.ball.linearVelocity.y,
+      );
+      if (profile.t >= 0.9) {
+        m.feedReachedTip = true;
+        break;
+      }
     }
     if (m.firstContactFrame >= 0 && frame - m.firstContactFrame < 12)
       m.minimumContactSpeed = Math.min(speed, m.minimumContactSpeed);
@@ -361,7 +426,7 @@ export const runTacticCase = (
       state.flippers[receiver].angle,
     );
     m.receiverContact ||=
-      m.firstContactFrame >= 0 &&
+      (recipe.tactic === 'inlane-feed' || m.firstContactFrame >= 0) &&
       other.distance <= other.radius + state.ball.radius + 1;
     if (!m.inlaneUp) m.receiverBeforeEntry ||= m.receiverContact;
     m.poweredSourceContact ||= debug.contacts.some(
@@ -443,7 +508,7 @@ export const runTacticCase = (
     artifact.findings.push({
       code: 'tactic-failed',
       frame: Math.max(0, artifact.frameDurations.length - 1),
-      seconds: artifact.frameDurations.length / 120,
+      seconds: artifact.frameDurations.length / (recipe.hz ?? 120),
       ballId: state.ball.id ?? 0,
       point: { ...state.ball.position },
       flipper: recipe.source,
@@ -463,7 +528,7 @@ export const runTacticCase = (
     id: recipe.id,
     suite: 'tactics',
     frames: artifact.frameDurations.length,
-    seconds: artifact.frameDurations.length / 120,
+    seconds: artifact.frameDurations.length / (recipe.hz ?? 120),
     outcome: errors.length ? 'issue' : 'passed',
     maxSpeed,
     hits: [],

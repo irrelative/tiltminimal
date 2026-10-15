@@ -144,3 +144,12 @@ A further deep campaign tested 1,600 Classic cases (64 seeded games plus four
 jittered lip bands) in 6.45 seconds, with zero confirmed failures or warnings.
 Its 767 invalid seeds and 232 time-limited episodes remain explicit in the
 report; they are not counted as successful route completions.
+
+### Fast passive feeds
+
+The upper join's dimensions remain unchanged. Shared contact handling now joins
+the covered wire to the resting upper face rather than treating the round heel
+as a new impact at that seam. This removes the fast unpowered heel launch while
+preserving the long-held catch/release repair above. Eighteen fast-feed regression
+cases cover both sides, three speeds and three step rates; see the
+[fast-feed contact contract](flipper-feed-spec.md#fast-passive-heel-seam-contacts).

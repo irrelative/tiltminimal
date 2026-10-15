@@ -120,5 +120,7 @@ contract violations. See [Tactics Lab](tactics-lab-spec.md) for geometry, exact
 observations, fixed-step timing and the short-Shatz scope.
 
 The initial strict tactic run reports four Shatz failures: those shots bounce
-off the receiver before entering its inlane. The other six tactic types pass.
+off the receiver before entering its inlane. The other tactic types pass, including the fast passive heel-feed sweep at
+500/1000/1500 units/s and 60/120/240 Hz. See the
+[fast-feed contact contract](flipper-feed-spec.md#fast-passive-heel-seam-contacts).
 Known failures remain visible in the CLI and replay files.

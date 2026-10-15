@@ -39,22 +39,24 @@ game-plus-lip behavior. `--suite tactics` runs only the lab; other explicit tabl
 IDs are rejected because these calibrated tactic contracts belong to this
 fixture, not every table. The existing full-table skill regressions remain.
 
-The fixed 120 Hz tactic suite contains 60 cases: 34 intended successful move samples and
-26 expected-miss controls, in both directions. Passing a control means the
+The tactic suite contains 78 cases: 34 intended successful move samples,
+26 expected-miss controls at 120 Hz, and 18 fast passive feeds at 60/120/240 Hz,
+in both directions. Passing a control means the
 selected timing correctly fails to perform the move. These bounded recipes
 establish physical opportunities, not broad timing windows, human ease of play,
 or success from arbitrary incoming balls. Deep presets expand games/lip feeds;
 they do not change the fixed tactic contracts.
 
-| Tactic          | Required observation                                                                                                                                                                                                                                                                                                                                        |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dead bounce     | Two incoming speeds reach the opposite flipper without pressing a flipper or nudging; no lower-post contact.                                                                                                                                                                                                                                                |
-| Held catch      | Three incoming speeds settle on the held upper face for at least 0.5 seconds, then depart without a nudge on release.                                                                                                                                                                                                                                       |
-| Live catch      | Three incoming speeds meet the timed upstroke, set the live-contact marker and drop below 100 units/s at first contact; supported catch and release follow. Early/late timing controls retain fast impacts without a live catch.                                                                                                                            |
-| Drop catch      | Three incoming speeds contact the retreating bat within three 120 Hz frames of release, first contact below 400 units/s and subsequent minimum below 300; no live-contact marker. Early release keeps a fast impact.                                                                                                                                        |
-| Post pass       | Release/re-flip a settled cradle for 12 or 13 frames, make a measured normal impulse on the source's passive post, then hold the receiver for 0.5 seconds and release. Zero- and 20-frame controls do not make the required post-assisted transfer.                                                                                                         |
-| Bump pass       | Release the source and apply one forward nudge after 27 or 29 frames. No source re-flip or lower-post contact; supported receiver catch and release. The unnudged control must miss.                                                                                                                                                                        |
-| Short Shatz lob | From a physically settled cradle, release for 46 or 47 frames and tap for two frames. Require an actual powered source contact, upward and downward crossings of the opposite curved inlane, no lower-post contact, receiving-flipper rebound or upper-wall assistance before entry, and a supported receiver catch/release. The no-flip control must fail. |
+| Tactic           | Required observation                                                                                                                                                                                                                                                                                                                                        |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fast inlane feed | At 500/1000/1500 units/s and 60/120/240 Hz, touch the source, reach its tip region before the receiver, and avoid an upward heel launch. See [feed seam contracts](flipper-feed-spec.md#fast-passive-heel-seam-contacts).                                                                                                                                   |
+| Dead bounce      | Two incoming speeds reach the opposite flipper without pressing a flipper or nudging; no lower-post contact.                                                                                                                                                                                                                                                |
+| Held catch       | Three incoming speeds settle on the held upper face for at least 0.5 seconds, then depart without a nudge on release.                                                                                                                                                                                                                                       |
+| Live catch       | Three incoming speeds meet the timed upstroke, set the live-contact marker and drop below 100 units/s at first contact; supported catch and release follow. Early/late timing controls retain fast impacts without a live catch.                                                                                                                            |
+| Drop catch       | Three incoming speeds contact the retreating bat within three 120 Hz frames of release, first contact below 400 units/s and subsequent minimum below 300; no live-contact marker. Early release keeps a fast impact.                                                                                                                                        |
+| Post pass        | Release/re-flip a settled cradle for 12 or 13 frames, make a measured normal impulse on the source's passive post, then hold the receiver for 0.5 seconds and release. Zero- and 20-frame controls do not make the required post-assisted transfer.                                                                                                         |
+| Bump pass        | Release the source and apply one forward nudge after 27 or 29 frames. No source re-flip or lower-post contact; supported receiver catch and release. The unnudged control must miss.                                                                                                                                                                        |
+| Short Shatz lob  | From a physically settled cradle, release for 46 or 47 frames and tap for two frames. Require an actual powered source contact, upward and downward crossings of the opposite curved inlane, no lower-post contact, receiving-flipper rebound or upper-wall assistance before entry, and a supported receiver catch/release. The no-flip control must fail. |
 
 The Shatz check is explicitly a **short lob into the lower curved return**. It
 crosses a ball-clear corridor 60 units above the receiver pivot, with bounds
@@ -74,7 +76,7 @@ successful departure.
 ## Results and replay
 
 Each case appears in `report.json` and `report.md`, with metrics, assertion
-failures and a local replay path. All 60 success/control/failure artifacts are
+failures and a local replay path. All 78 success/control/failure artifacts are
 saved under `tactics/`; this bounded set is separate from the clustered issue
 artifact limit. A missed positive contract or a successful negative control
 produces a confirmed `tactic-failed` finding and a nonzero command exit.
@@ -102,18 +104,18 @@ transfer. One saved trace contacts the receiver at frame 219 and crosses upward
 into its inlane at frame 234. The same mistake cannot be hidden by changing a
 pass/fail label or by successful no-input controls.
 
-The 60-case suite has **56 passes and four confirmed Shatz failures**; its CLI
-exit status is 1. Other six tactic types and the expected-miss controls pass.
+The 78-case suite has **74 passes and four confirmed Shatz failures**; its CLI
+exit status is 1. The other tactic types and the expected-miss controls pass.
 The four positive Shatz expectations use explicit Vitest `it.fails` annotations,
 so an unexpected success forces removal of the known-failure marker. A separate
 observer regression confirms this specific receiving-flipper rebound. This does
 not suppress the headless findings. Finding or repairing a direct Shatz trajectory needs further work; the lab preserves the production engine parameters.
 
-All 753 Vitest tests (including the four expected failures), nine-table deep
+All 803 Vitest passes (plus the four expected failures), nine-table deep
 layout/feed validation, production build and lint pass. The lab was reviewed in
 the browser and its Shatz, post-pass and live-catch replays were inspected. Older
 route validation passing does not override the failed tactic assertions.
 
-The final isolated run executes 60 cases and 100.9 simulated seconds in 0.29
+The expanded isolated run executes 78 cases and 104.4 simulated seconds in 0.31
 seconds locally, including JSON serialization and exact replay verification.
 Timing is a local measurement, not a performance guarantee.
