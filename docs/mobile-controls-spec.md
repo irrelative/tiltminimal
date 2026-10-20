@@ -84,3 +84,20 @@ This touch scheme does not currently model:
 - Play route wiring: `src/main.ts`
 
 The mobile touch layer is intentionally play-only.
+
+## Interruptions and Safari audio
+
+Lost pointer capture and pointer cancellation release only the affected finger;
+other held flippers remain engaged. Rotating clears all held input. A plunge
+must start on the right side; crossing into it during a central swipe does not
+engage the plunger.
+
+Blur, page hiding (including screen lock/app switching), page navigation into
+the back/forward cache, and orientation changes pause standalone play until
+Resume is tapped. This cancels a partial pull and prevents a ball from moving
+while the player returns to the game. Closing a rule card does not clear this
+pause. The physics sandbox retains its separate diagnostic pause behavior.
+
+Audio unlock is attempted on pointer release as well as pointer press and
+keyboard input, allowing touch browsers to resume audio within their activation
+gesture. Muted settings remain respected.

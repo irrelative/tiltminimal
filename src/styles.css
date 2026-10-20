@@ -86,7 +86,10 @@ textarea {
 
 .workspace {
   min-height: 0;
-  height: calc(100dvh - (var(--stage-padding) * 2));
+  height: calc(
+    100dvh - max(var(--stage-padding), env(safe-area-inset-top)) -
+      max(var(--stage-padding), env(safe-area-inset-bottom))
+  );
   display: grid;
   grid-template-columns: 320px minmax(0, 1fr);
   gap: 12px;
@@ -1037,4 +1040,52 @@ body[data-session-route='physics'] .reset-ball-action {
 .play-status .replay-hint {
   margin-top: 12px;
   font-size: 0.9rem;
+}
+
+/* Keep the complete table above settings on phones and tablet split views. */
+.app-shell {
+  padding: max(var(--stage-padding), env(safe-area-inset-top))
+    max(var(--stage-padding), env(safe-area-inset-right))
+    max(var(--stage-padding), env(safe-area-inset-bottom))
+    max(var(--stage-padding), env(safe-area-inset-left));
+}
+@media (max-width: 1080px) {
+  .workspace {
+    grid-template-rows: auto auto;
+  }
+  .stage-shell {
+    grid-row: 1;
+    height: calc(
+      100svh - max(var(--stage-padding), env(safe-area-inset-top)) -
+        max(var(--stage-padding), env(safe-area-inset-bottom))
+    );
+  }
+  .control-panel {
+    grid-row: 2;
+    height: auto;
+    overflow: visible;
+  }
+}
+@media (pointer: coarse) {
+  .control-panel button,
+  .settings-panel summary,
+  .rule-card-layer summary,
+  .choose-table,
+  .debug-toggle {
+    min-height: 44px;
+  }
+  .settings-panel summary,
+  .rule-card-layer summary {
+    padding-block: 12px;
+  }
+  .control-panel select,
+  .control-panel input[type='number'] {
+    font-size: 16px;
+    min-height: 44px;
+  }
+}
+.play-status {
+  max-height: calc(100% - 112px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }

@@ -45,6 +45,11 @@ or pull the plunger to hide it. Guidance returns for the next ball.
 pauses play; closing it preserves an explicit pause. Resume closes an open card.
 Every rule card includes full keyboard and touch instructions.
 
+On phones and narrow tablet windows, the full table appears first and settings
+are below it. The layout reserves space for display cutouts and the home indicator.
+Switching apps, locking the screen, losing focus, or rotating pauses the game;
+tap **Resume** to continue. Portrait orientation gives the largest table on phones.
+
 After **Game over**, the playfield shows your final score and **Play again**.
 You can also hold Up Arrow to start another game. Replay resets the score,
 balls, and table progress. Pause clears held controls and cancels a partial

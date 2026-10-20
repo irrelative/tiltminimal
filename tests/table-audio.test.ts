@@ -180,7 +180,7 @@ describe('audio session lifecycle', () => {
     audio.connect(harlemGlobetrottersTable);
     audio.playGameEvents([]);
     expect(oscillators).toHaveLength(0);
-    window.dispatchEvent(new Event('pointerdown'));
+    window.dispatchEvent(new Event('pointerup'));
     await Promise.resolve();
     const count = harlemAudioProfile.start.notes.length;
     expect(oscillators).toHaveLength(count);

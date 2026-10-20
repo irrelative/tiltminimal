@@ -135,3 +135,33 @@ it('offers final score and replay only after game over, with usable focus after 
   expect(f.loop.restartGame).toHaveBeenCalledOnce();
   expect(document.activeElement).toBe(f.pause);
 });
+
+it.each(['blur', 'pagehide', 'orientationchange'])(
+  'pauses on %s and requires an explicit Resume after returning',
+  (event) => {
+    const f = fixture();
+    f.state.status = 'playing';
+    window.dispatchEvent(new Event(event));
+    expect(f.loop.suspended).toBe(true);
+    expect(f.pause.textContent).toBe('Resume');
+    window.dispatchEvent(new Event('focus'));
+    f.controls.observe(f.state, f.loop as unknown as GameLoop);
+    expect(f.loop.suspended).toBe(true);
+    f.pause.click();
+    expect(f.loop.suspended).toBe(false);
+  },
+);
+
+it('pauses when the document is hidden and stays paused when visible again', () => {
+  const f = fixture();
+  const hidden = vi.spyOn(document, 'hidden', 'get');
+  hidden.mockReturnValue(true);
+  document.dispatchEvent(new Event('visibilitychange'));
+  expect(f.loop.suspended).toBe(true);
+  hidden.mockReturnValue(false);
+  document.dispatchEvent(new Event('visibilitychange'));
+  expect(f.loop.suspended).toBe(true);
+  f.pause.click();
+  expect(f.loop.suspended).toBe(false);
+  hidden.mockRestore();
+});

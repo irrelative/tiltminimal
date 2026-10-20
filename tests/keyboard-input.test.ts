@@ -172,6 +172,58 @@ describe('PlayInput', () => {
     expect(input.getState().launchPressed).toBe(false);
   });
 
+  it.each(['pointercancel', 'lostpointercapture'])(
+    'releases only the interrupted finger on %s',
+    (type) => {
+      const left = {
+        pointerId: 1,
+        pointerType: 'touch',
+        clientX: 140,
+        clientY: 1200,
+      };
+      const right = { ...left, pointerId: 2, clientX: 760 };
+      dispatchPointer(canvas, 'pointerdown', left);
+      dispatchPointer(canvas, 'pointerdown', right);
+      dispatchPointer(canvas, type, left);
+      expect(input.getState()).toMatchObject({
+        leftPressed: false,
+        rightPressed: true,
+      });
+      dispatchPointer(canvas, 'pointerup', right);
+      expect(input.getState().rightPressed).toBe(false);
+    },
+  );
+
+  it('clears touches and queued nudges on rotation', () => {
+    dispatchPointer(canvas, 'pointerdown', {
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 140,
+      clientY: 1200,
+    });
+    window.dispatchEvent(new Event('orientationchange'));
+    expect(input.getState()).toMatchObject({
+      leftPressed: false,
+      launchPressed: false,
+    });
+  });
+
+  it('does not turn a swipe starting in the center into a right-side plunge', () => {
+    dispatchPointer(canvas, 'pointerdown', {
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 540,
+      clientY: 700,
+    });
+    dispatchPointer(canvas, 'pointermove', {
+      pointerId: 1,
+      pointerType: 'touch',
+      clientX: 570,
+      clientY: 800,
+    });
+    expect(input.getState().launchPressed).toBe(false);
+  });
+
   it('maps touch swipes to nudge pulses', () => {
     dispatchPointer(canvas, 'pointerdown', {
       pointerId: 1,

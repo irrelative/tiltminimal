@@ -131,6 +131,7 @@ export class GameAudio {
     }
 
     window.addEventListener('pointerdown', this.unlockAudio, { passive: true });
+    window.addEventListener('pointerup', this.unlockAudio, { passive: true });
     window.addEventListener('keydown', this.unlockAudio, { passive: true });
     this.unlockBound = true;
   }
@@ -145,6 +146,7 @@ export class GameAudio {
     }
 
     window.removeEventListener('pointerdown', this.unlockAudio);
+    window.removeEventListener('pointerup', this.unlockAudio);
     window.removeEventListener('keydown', this.unlockAudio);
     this.unlockBound = false;
   }

@@ -170,6 +170,8 @@ export class PlayInput implements InputSource {
     this.element.addEventListener('pointermove', this.onPointerMove);
     this.element.addEventListener('pointerup', this.onPointerUp);
     this.element.addEventListener('pointercancel', this.onPointerUp);
+    this.element.addEventListener('lostpointercapture', this.onPointerUp);
+    window.addEventListener('orientationchange', this.reset);
     window.addEventListener('blur', this.reset);
     document.addEventListener('visibilitychange', this.onVisibilityChange);
     this.connected = true;
@@ -187,6 +189,8 @@ export class PlayInput implements InputSource {
     this.element.removeEventListener('pointermove', this.onPointerMove);
     this.element.removeEventListener('pointerup', this.onPointerUp);
     this.element.removeEventListener('pointercancel', this.onPointerUp);
+    this.element.removeEventListener('lostpointercapture', this.onPointerUp);
+    window.removeEventListener('orientationchange', this.reset);
     window.removeEventListener('blur', this.reset);
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
     this.reset();
@@ -225,6 +229,7 @@ export class PlayInput implements InputSource {
       return;
     }
 
+    if (this.touchPointers.has(event.pointerId)) return;
     const point = getPointerPoint(this.element, event);
     const kind = getInitialTouchPointerKind(point);
 
@@ -257,7 +262,9 @@ export class PlayInput implements InputSource {
 
     if (
       (pointer.kind === 'right-flipper' || pointer.kind === 'gesture') &&
-      point.x >= RIGHT_SIDE_GESTURE_RATIO &&
+      pointer.startX /
+        Math.max(this.element.getBoundingClientRect().width, 1) >=
+        RIGHT_SIDE_GESTURE_RATIO &&
       deltaY > SWIPE_TRIGGER_PIXELS &&
       absDeltaY > absDeltaX * SWIPE_DOMINANCE_RATIO
     ) {

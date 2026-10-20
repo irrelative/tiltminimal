@@ -32,9 +32,12 @@ and the shooter must remain visible together.
 
 ## Narrow windows
 
-At 1080 CSS pixels or below, controls and stage stack and the document may
-scroll. The stage has a bounded height of `80svh`; the same renderer fits each
-table within that area. This avoids an intrinsic canvas-size feedback loop in
+At 1080 CSS pixels or below, the stage appears first and controls stack below
+it; the document may scroll to reach settings. The stage has a bounded height
+of `100svh` minus the top and bottom safe-area padding; the same renderer fits
+each table within that area. Stable viewport units keep browser toolbar animation
+from moving the flipper zones during play. Orientation and split-view resizing
+refit the table. Desktop workspace height also subtracts safe-area padding. This avoids an intrinsic canvas-size feedback loop in
 an auto-height container. The Physics route remains available by direct URL.
 Touch input continues to map through the displayed canvas rectangle.
 
@@ -87,3 +90,20 @@ Long presses on the playfield suppress text selection and touch callouts, includ
 WebKit-specific selection behavior. Connected play input also cancels canvas
 selection/context-menu events. Sidebar text and form controls keep normal browser
 behavior; multi-touch flipper input and pointer release/cancellation are unchanged.
+
+## Mobile browser review (October 2026)
+
+The viewport uses `viewport-fit=cover` and outer padding takes the maximum of
+8 pixels and each `env(safe-area-inset-*)`, following
+[WebKit's safe-area guidance](https://webkit.org/blog/7929/designing-websites-for-iphone-x/).
+Page zoom remains available outside the canvas. Coarse-pointer controls have
+44-pixel targets; numeric fields and selects use 16-pixel text to avoid focus zoom.
+The status card scrolls within the frame in short landscape windows.
+
+Review uses Chromium mobile viewport emulation at 320 × 568, 390 × 664,
+844 × 390, 768 × 1024, and 1024 × 768, plus desktop sizing, with Classic and
+Harlem. Verify proportional canvas bounds, no horizontal overflow, complete
+flippers/shooter/drain, and accessible Pause. Repeat on physical iPhone/iPad
+Safari for toolbar expansion, notch/home-indicator insets, multitasking,
+rotation during a pull, two-finger flipper holds and audio activation. Emulation
+does not establish hardware frame rate or reproduce every Safari system gesture.

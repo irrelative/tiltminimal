@@ -22,6 +22,18 @@ export class PlayControls {
     host: HTMLElement,
     private readonly closeRuleCard: () => void,
   ) {
+    const interrupt = () => {
+      if (!this.loop) return;
+      this.userPaused = true;
+      this.syncSuspension();
+      this.render();
+    };
+    window.addEventListener('blur', interrupt);
+    window.addEventListener('pagehide', interrupt);
+    window.addEventListener('orientationchange', interrupt);
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) interrupt();
+    });
     this.pause.type = this.replay.type = 'button';
     this.pause.className = 'play-pause';
     this.pause.textContent = 'Pause';
